@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Generic;
 using System.Text;
 using System.Xml.Linq;
 
@@ -31,6 +30,57 @@ namespace RobloxCS
             var root = CSharpSyntaxTree.ParseText(_source).GetRoot();
             Visit(root);
             return _output.ToString();
+        }
+
+        public override void VisitVariableDeclarator(VariableDeclaratorSyntax node)
+        {
+            Write($"local {node.Identifier.ValueText}");
+            if (node.Initializer != null)
+            {
+                Write(" = ");
+                Visit(node.Initializer);
+            }
+            WriteLine();
+        }
+
+        public override void VisitAssignmentExpression(AssignmentExpressionSyntax node)
+        {
+            Visit(node.Left);
+            Write(" = ");
+            Visit(node.Right);
+            WriteLine();
+        }
+
+        public override void VisitIdentifierName(IdentifierNameSyntax node)
+        {
+            var identifierName = node.Identifier.ValueText;
+            if (identifierName == "var") return;
+
+            var isWithinClass = IsDescendantOf<ClassDeclarationSyntax>(node);
+            var prefix = "";
+            if (isWithinClass)
+            {
+                // Check the fields in classes that this node
+                // is a descendant of for the identifier name
+                var ancestorClasses = GetAncestors<ClassDeclarationSyntax>(node);
+                for (int i = 0; i < ancestorClasses.Length; i++)
+                {
+                    var ancestorClass = ancestorClasses[i];
+                    var fields = ancestorClass.Members.OfType<FieldDeclarationSyntax>();
+                    foreach (var field in fields)
+                    {
+                        var isStatic = HasSyntax(field.Modifiers, SyntaxKind.StaticKeyword);
+                        foreach (var declarator in field.Declaration.Variables)
+                        {
+                            var name = GetName(declarator);
+                            if (name != identifierName) continue;
+                            prefix = (isStatic ? GetName(ancestorClass) : "self") + ".";
+                        }
+                    }
+                }
+            }
+
+            Write(prefix + identifierName);
         }
 
         public override void VisitLiteralExpression(LiteralExpressionSyntax node)
@@ -91,7 +141,12 @@ namespace RobloxCS
 
             WriteLine($" do");
             _indent++;
-            base.VisitNamespaceDeclaration(node);
+
+            foreach (var member in node.Members)
+            {
+                Visit(member);
+            }
+
             _indent--;
             WriteLine("end");
         }
@@ -100,7 +155,7 @@ namespace RobloxCS
         {
             var parentNamespace = FindFirstAncestor<NamespaceDeclarationSyntax>(node);
             var namespaceName = string.Join(".", GetNames(parentNamespace));
-            var className = GetNames(node).First();
+            var className = GetName(node);
             var luaClassName = namespaceName + (namespaceName == "" ? "" : ".") + className;
             Write(luaClassName);
             WriteLine(" = {} do");
@@ -141,7 +196,7 @@ namespace RobloxCS
             Write("(");
             foreach (var parameter in node.Parameters)
             {
-                Write(GetNames(parameter).First());
+                Write(GetName(parameter));
                 if (parameter != node.Parameters.Last())
                 {
                     Write(",");
@@ -154,7 +209,7 @@ namespace RobloxCS
             {
                 if (parameter.Default == null) continue;
 
-                var name = GetNames(parameter).First();
+                var name = GetName(parameter);
                 Write(name);
                 Write(" = ");
                 Write($"if {name} == nil then ");
@@ -169,21 +224,21 @@ namespace RobloxCS
         {
             // TODO: struct support?
             var parentClass = FindFirstAncestor<ClassDeclarationSyntax>(node)!;
-            var parentName = GetNames(parentClass).First();
+            var parentName = GetName(parentClass);
 
             Write($"function {parentName}.new");
             Visit(node.ParameterList);
             _indent++;
 
-            VisitConstructorBody(parentClass);
+            VisitConstructorBody(parentClass, node.Body);
 
             _indent--;
             WriteLine("end");
         }
 
-        private void VisitConstructorBody(ClassDeclarationSyntax parentClass)
+        private void VisitConstructorBody(ClassDeclarationSyntax parentClass, BlockSyntax? block)
         {
-            var parentName = GetNames(parentClass).First();
+            var parentName = GetName(parentClass);
             WriteLine($"local self = setmetatable({{}}, {parentName})");
             if (parentClass != null)
             {
@@ -192,16 +247,21 @@ namespace RobloxCS
 
                 InitializeDefaultFields(nonStaticFields); // TODO: structs
             }
+
+            if (block != null)
+            {
+                Visit(block);
+            }
             WriteLine("return self");
         }
 
         private void CreateDefaultConstructor(ClassDeclarationSyntax node)
         {
-            string parentName = GetNames(node).First();
+            string parentName = GetName(node);
             WriteLine($"function {parentName}.new()");
             _indent++;
 
-            VisitConstructorBody(node);
+            VisitConstructorBody(node, null);
 
             _indent--;
             WriteLine("end");
@@ -212,14 +272,14 @@ namespace RobloxCS
             foreach (var field in fields)
             {
                 var parentClass = FindFirstAncestor<ClassDeclarationSyntax>(field)!;
-                var parentName = GetNames(parentClass).First();
+                var parentName = GetName(parentClass);
                 var isStatic = HasSyntax(field.Modifiers, SyntaxKind.StaticKeyword);
 
                 foreach (var declarator in field.Declaration.Variables)
                 {
                     if (declarator.Initializer == null) continue;
 
-                    var name = GetNames(declarator).First();
+                    var name = GetName(declarator);
                     Write($"{(isStatic ? parentName : "self")}.{name} = ");
                     Visit(declarator.Initializer);
                     WriteLine();
@@ -260,9 +320,24 @@ namespace RobloxCS
             return tokens.Any(token => token.IsKind(syntax));
         }
 
+        private bool IsDescendantOf<T>(SyntaxNode node) where T : SyntaxNode
+        {
+            return FindFirstAncestor<T>(node) != null;
+        }
+
         private T? FindFirstAncestor<T>(SyntaxNode node) where T : SyntaxNode
         {
-            return node.Ancestors().OfType<T>().FirstOrDefault();
+            return GetAncestors<T>(node).FirstOrDefault();
+        }
+
+        private T[] GetAncestors<T>(SyntaxNode node) where T : SyntaxNode
+        {
+            return node.Ancestors().OfType<T>().ToArray();
+        }
+
+        private string GetName(SyntaxNode node)
+        {
+            return GetNames(node).First();
         }
 
         private List<string> GetNames(SyntaxNode? node)

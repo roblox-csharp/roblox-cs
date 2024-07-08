@@ -2,11 +2,11 @@ namespace TestGame.Client
 {
   public class Program
   {
-    private readonly int abc;
+    private readonly int _abc;
 
     public Program()
     {
-      abc = 5;
+      _abc = 5;
     }
   }
 }
