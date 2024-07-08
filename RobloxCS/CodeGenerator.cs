@@ -255,6 +255,11 @@ namespace RobloxCS
                 if (mainMethod == null)
                 {
                     LogError(node.Identifier, $"No main method \"{_mainMethodName}\" found in entry point class");
+                    return;
+                }
+                if (!HasSyntax(mainMethod.Modifiers, SyntaxKind.StaticKeyword))
+                {
+                    LogError(node.Identifier, $"Main method must be static.");
                 }
 
                 WriteLine();

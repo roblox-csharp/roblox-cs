@@ -4,9 +4,7 @@ TestGame.Client = {} do
     local Game = TestGame.Client.Game
 
     function Game.Main()
-      Console.WriteLine("hello brah")
-      local x = 2
-      x = 7
+      Console.WriteLine("hello world")
     end
 
     Game.Main()

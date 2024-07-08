@@ -4,10 +4,7 @@ namespace TestGame.Client
     {
         public static void Main()
         {
-            Console.WriteLine("hello brah");
-
-            var x = 2;
-            x = 7;
+            Console.WriteLine("hello world");
         }
     }
 }
