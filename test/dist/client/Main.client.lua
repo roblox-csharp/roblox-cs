@@ -1,13 +1,14 @@
 local TestGame = {}
 TestGame.Client = {} do
-  TestGame.Client.Program = {} do
-    local Program = TestGame.Client.Program
-    Program.__index = Program
+  TestGame.Client.Game = {} do
+    local Game = TestGame.Client.Game
 
-    function Program.new()
-      local self = setmetatable({}, Program)
-      self._abc = 5
-      return self
+    function Game.Main()
+      Console.WriteLine("hello brah")
+      local x = 2
+      x = 7
     end
+
+    Game.Main()
   end
 end

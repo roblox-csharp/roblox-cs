@@ -2,7 +2,6 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Text;
-using System.Xml.Linq;
 
 namespace RobloxCS
 {
@@ -14,22 +13,46 @@ namespace RobloxCS
             SyntaxKind.StructDeclaration
         ]);
 
-        private readonly StringBuilder _output = new StringBuilder();
-        private readonly string _source;
+        private readonly SyntaxNode _root;
+        private readonly string _entryPointName;
+        private readonly string _mainMethodName;
         private readonly int _indentSize;
+
+        private readonly StringBuilder _output = new StringBuilder();
         private int _indent = 0;
 
-        public CodeGenerator(string source, int indentSize = 2)
+        public CodeGenerator(SyntaxNode root, string entryPointName, string mainMethodName, int indentSize = 2)
         {
-            _source = source;
+            _root = root;
+            _entryPointName = entryPointName;
+            _mainMethodName = mainMethodName;
             _indentSize = indentSize;
         }
 
         public string GenerateLua()
         {
-            var root = CSharpSyntaxTree.ParseText(_source).GetRoot();
-            Visit(root);
+            Visit(_root);
             return _output.ToString().Trim();
+        }
+
+        public override void VisitExpressionStatement(ExpressionStatementSyntax node)
+        {
+            base.VisitExpressionStatement(node);
+            WriteLine();
+        }
+
+        public override void VisitArgumentList(ArgumentListSyntax node)
+        {
+            Write("(");
+            base.VisitArgumentList(node);
+            Write(")");
+        }
+
+        public override void VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
+        {
+            Visit(node.Expression);
+            Write(".");
+            Visit(node.Name);
         }
 
         public override void VisitVariableDeclarator(VariableDeclaratorSyntax node)
@@ -48,7 +71,6 @@ namespace RobloxCS
             Visit(node.Left);
             Write(" = ");
             Visit(node.Right);
-            WriteLine();
         }
 
         public override void VisitIdentifierName(IdentifierNameSyntax node)
@@ -110,12 +132,41 @@ namespace RobloxCS
 
                 case SyntaxKind.DefaultLiteralExpression:
                     {
-                        Logger.Error("\"default\" keyword is not supported!");
+                        LogError(node, "\"default\" keyword is not supported!");
                         break;
                     }
             }
 
             base.VisitLiteralExpression(node);
+        }
+
+        public override void VisitParameterList(ParameterListSyntax node)
+        {
+            Write("(");
+            foreach (var parameter in node.Parameters)
+            {
+                Write(GetName(parameter));
+                if (parameter != node.Parameters.Last())
+                {
+                    Write(",");
+                }
+            }
+            WriteLine(")");
+            _indent++;
+
+            foreach (var parameter in node.Parameters)
+            {
+                if (parameter.Default == null) continue;
+
+                var name = GetName(parameter);
+                Write(name);
+                Write(" = ");
+                Write($"if {name} == nil then ");
+                Visit(parameter.Default);
+                WriteLine($" else {name}");
+            }
+
+            _indent--;
         }
 
         public override void VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
@@ -188,37 +239,46 @@ namespace RobloxCS
                 }
             }
 
+            foreach (var method in node.Members.OfType<MethodDeclarationSyntax>())
+            {
+                Visit(method);
+            }
+
+            var isEntryPointClass = GetName(node) == _entryPointName;
+            if (isEntryPointClass)
+            {
+                var mainMethod = node.Members
+                    .OfType<MethodDeclarationSyntax>()
+                    .Where(method => GetName(method) == _mainMethodName)
+                    .FirstOrDefault();
+
+                if (mainMethod == null)
+                {
+                    LogError(node.Identifier, $"No main method \"{_mainMethodName}\" found in entry point class");
+                }
+
+                WriteLine();
+                WriteLine($"{_entryPointName}.{_mainMethodName}()");
+            }
+
             _indent--;
             WriteLine("end");
         }
 
-        public override void VisitParameterList(ParameterListSyntax node)
+        public override void VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
-            Write("(");
-            foreach (var parameter in node.Parameters)
-            {
-                Write(GetName(parameter));
-                if (parameter != node.Parameters.Last())
-                {
-                    Write(",");
-                }
-            }
-            WriteLine(")");
+            var parentClass = FindFirstAncestor<ClassDeclarationSyntax>(node)!;
+            var parentName = GetName(parentClass);
+            var isStatic = HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
+            var name = GetName(node);
+            Write($"function {parentName}{(isStatic ? "." : ":")}{name}");
+            Visit(node.ParameterList);
             _indent++;
 
-            foreach (var parameter in node.Parameters)
-            {
-                if (parameter.Default == null) continue;
-
-                var name = GetName(parameter);
-                Write(name);
-                Write(" = ");
-                Write($"if {name} == nil then ");
-                Visit(parameter.Default);
-                WriteLine($" else {name}");
-            }
+            Visit(node.Body);
 
             _indent--;
+            WriteLine("end");
         }
 
         public override void VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
@@ -382,6 +442,17 @@ namespace RobloxCS
         {
             if (_output.Length == 0) return false;
             return _output[_output.Length - 1] == character;
+        }
+
+        private void LogError(SyntaxToken token, string message)
+        {
+            var lineSpan = token.GetLocation().GetLineSpan();
+            Logger.Error($"{message}\n\t- {token.SyntaxTree?.FilePath ?? "<anonymous>"}:{lineSpan.StartLinePosition.Line + 1}:{lineSpan.StartLinePosition.Character + 1}");
+        }
+
+        private void LogError(SyntaxNode node, string message)
+        {
+            LogError(node.GetFirstToken(), message);
         }
 
         private void PrintChildNodes(SyntaxNode node)

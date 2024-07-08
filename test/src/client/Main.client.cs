@@ -1,12 +1,13 @@
 namespace TestGame.Client
 {
-  public class Program
-  {
-    private readonly int _abc;
-
-    public Program()
+    public static class Game
     {
-      _abc = 5;
+        public static void Main()
+        {
+            Console.WriteLine("hello brah");
+
+            var x = 2;
+            x = 7;
+        }
     }
-  }
 }
