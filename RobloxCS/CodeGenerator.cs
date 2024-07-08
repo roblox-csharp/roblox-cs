@@ -29,7 +29,7 @@ namespace RobloxCS
         {
             var root = CSharpSyntaxTree.ParseText(_source).GetRoot();
             Visit(root);
-            return _output.ToString();
+            return _output.ToString().Trim();
         }
 
         public override void VisitVariableDeclarator(VariableDeclaratorSyntax node)
@@ -110,7 +110,8 @@ namespace RobloxCS
 
                 case SyntaxKind.DefaultLiteralExpression:
                     {
-                        throw new Exception("\"default\" keyword is not supported!");
+                        Logger.Error("\"default\" keyword is not supported!");
+                        break;
                     }
             }
 

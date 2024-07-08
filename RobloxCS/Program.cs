@@ -4,22 +4,31 @@
     {
         public static void Main(string[] args)
         {
-            string? inputDirectory = args.FirstOrDefault();
-            if (inputDirectory != null && !Directory.Exists(inputDirectory))
+            var inputDirectory = args.FirstOrDefault(".");
+
+            const string sourceFolderName = "src"; // temporary
+            const string outFolderName = "dist"; // temporary
+
+            var sourceDirectory = inputDirectory + "/" + sourceFolderName;
+            var outDirectory = inputDirectory + "/" + outFolderName;
+            if (!Directory.Exists(sourceDirectory))
             {
-                throw new Exception($"Directory \"{inputDirectory}\" does not exist.");
+                Logger.Error($"Source folder \"{sourceFolderName}\" does not exist!");
             }
 
-            bool hasSrcDirectory = Directory.Exists("src");
-            string sourceDirectory = inputDirectory == null ? (hasSrcDirectory ? "src" : ".") : inputDirectory;
-            string[] sourceFiles = FileManager.GetSourceFiles(sourceDirectory);
+            var sourceFiles = FileManager.GetSourceFiles(sourceDirectory);
+            var compiledFiles = new List<CompiledFile>();
             foreach (var sourceFile in sourceFiles)
             {
                 var fileContents = File.ReadAllText(sourceFile);
                 var codeGenerator = new CodeGenerator(fileContents);
-                var luaResult = codeGenerator.GenerateLua();
-                Console.WriteLine(luaResult);
+                var luaSource = codeGenerator.GenerateLua();
+                var targetPath = sourceFile.Replace(sourceFolderName, outFolderName).Replace(".cs", ".lua");
+                var compiledFile = new CompiledFile(targetPath, luaSource);
+                compiledFiles.Add(compiledFile);
             }
+
+            FileManager.WriteCompiledFiles(outDirectory, compiledFiles);
         }
     }
 }
