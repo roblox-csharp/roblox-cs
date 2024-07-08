@@ -71,9 +71,8 @@ namespace RobloxCS
 
         public static void Debug(string message)
         {
-#if DEBUG
+            if (!Util.IsDebug()) return;
             Log(message, ConsoleColor.Magenta, "DEBUG");
-#endif
         }
 
         private static void Log(string message, ConsoleColor color, string level)

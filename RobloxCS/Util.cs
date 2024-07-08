@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using System.Reflection;
-using System.Reflection.Emit;
 
 namespace RobloxCS
 {
@@ -15,6 +14,15 @@ namespace RobloxCS
         public static string? FixPathSep(string? path)
         {
             return path?.Replace('\\', '/');
+        }
+
+        public static bool IsDebug()
+        {
+#if DEBUG
+            return true;
+#else
+            return false;
+#endif
         }
 
         public static List<PortableExecutableReference> GetCoreLibReferences()
