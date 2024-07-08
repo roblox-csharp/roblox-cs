@@ -4,18 +4,21 @@
     {
         public static void Main(string[] args)
         {
-            string? inputtedDirectory = args.FirstOrDefault();
-            if (inputtedDirectory != null && !Directory.Exists(inputtedDirectory))
+            string? inputDirectory = args.FirstOrDefault();
+            if (inputDirectory != null && !Directory.Exists(inputDirectory))
             {
-                throw new Exception($"Directory \"{inputtedDirectory}\" does not exist.");
+                throw new Exception($"Directory \"{inputDirectory}\" does not exist.");
             }
 
             bool hasSrcDirectory = Directory.Exists("src");
-            string sourceDirectory = inputtedDirectory == null ? (hasSrcDirectory ? "src" : ".") : inputtedDirectory;
+            string sourceDirectory = inputDirectory == null ? (hasSrcDirectory ? "src" : ".") : inputDirectory;
             string[] sourceFiles = FileManager.GetSourceFiles(sourceDirectory);
             foreach (var sourceFile in sourceFiles)
             {
                 var fileContents = File.ReadAllText(sourceFile);
+                var codeGenerator = new CodeGenerator(fileContents);
+                var luaResult = codeGenerator.GenerateLua();
+                Console.WriteLine(luaResult);
             }
         }
     }

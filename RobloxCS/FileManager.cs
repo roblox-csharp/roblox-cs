@@ -15,10 +15,5 @@
                 return [];
             }
         }
-
-        public static bool DirectoryExists(string directory)
-        {
-            return 
-        }
     }
 }
