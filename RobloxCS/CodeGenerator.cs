@@ -132,7 +132,7 @@ namespace RobloxCS
 
                 case SyntaxKind.DefaultLiteralExpression:
                     {
-                        LogError(node, "\"default\" keyword is not supported!");
+                        Logger.CodegenError(node, "\"default\" keyword is not supported!");
                         break;
                     }
             }
@@ -254,12 +254,12 @@ namespace RobloxCS
 
                 if (mainMethod == null)
                 {
-                    LogError(node.Identifier, $"No main method \"{_mainMethodName}\" found in entry point class");
+                    Logger.CodegenError(node.Identifier, $"No main method \"{_mainMethodName}\" found in entry point class");
                     return;
                 }
                 if (!HasSyntax(mainMethod.Modifiers, SyntaxKind.StaticKeyword))
                 {
-                    LogError(node.Identifier, $"Main method must be static.");
+                    Logger.CodegenError(node.Identifier, $"Main method must be static.");
                 }
 
                 WriteLine();
@@ -422,7 +422,6 @@ namespace RobloxCS
             var childNodes = node.ChildNodes();
             var qualifiedNameNodes = node.IsKind(SyntaxKind.QualifiedName) ? [(QualifiedNameSyntax)node] : childNodes.OfType<QualifiedNameSyntax>();
             var identifierNameNodes = node.IsKind(SyntaxKind.IdentifierName) ? [(IdentifierNameSyntax)node] : childNodes.OfType<IdentifierNameSyntax>();
-
             foreach (var qualifiedNameNode in qualifiedNameNodes)
             {
                 foreach (var name in GetNames(qualifiedNameNode.Left))
@@ -447,17 +446,6 @@ namespace RobloxCS
         {
             if (_output.Length == 0) return false;
             return _output[_output.Length - 1] == character;
-        }
-
-        private void LogError(SyntaxToken token, string message)
-        {
-            var lineSpan = token.GetLocation().GetLineSpan();
-            Logger.Error($"{message}\n\t- {token.SyntaxTree?.FilePath ?? "<anonymous>"}:{lineSpan.StartLinePosition.Line + 1}:{lineSpan.StartLinePosition.Character + 1}");
-        }
-
-        private void LogError(SyntaxNode node, string message)
-        {
-            LogError(node.GetFirstToken(), message);
         }
 
         private void PrintChildNodes(SyntaxNode node)
