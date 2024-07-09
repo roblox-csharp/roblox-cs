@@ -1,6 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Data.Common;
+using System.Reflection.Metadata;
 using System.Text;
 
 namespace RobloxCS
@@ -57,10 +59,11 @@ namespace RobloxCS
             }
         }
 
-        public override void VisitUsingDirective(UsingDirectiveSyntax node)
+        public override void VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
         {
-            var isStatic = !node.StaticKeyword.IsKind(SyntaxKind.None);
-            var names = GetNames(node);
+            Visit(node.Type);
+            Write(".new");
+            Visit(node.ArgumentList);
         }
 
         public override void VisitExpressionStatement(ExpressionStatementSyntax node)
@@ -72,8 +75,33 @@ namespace RobloxCS
         public override void VisitArgumentList(ArgumentListSyntax node)
         {
             Write("(");
-            base.VisitArgumentList(node);
+            foreach (var argument in node.Arguments)
+            {
+                Visit(argument);
+                if (argument != node.Arguments.Last())
+                {
+                    Write(", ");
+                }
+            }
             Write(")");
+        }
+
+        public override void VisitInvocationExpression(InvocationExpressionSyntax node)
+        {
+            if (node.Expression is MemberAccessExpressionSyntax)
+            {
+                var memberAccess = (MemberAccessExpressionSyntax)node.Expression;
+                if (GetName(memberAccess.Name) == "ToString")
+                {
+                    Write("tostring(");
+                    Visit(memberAccess.Expression);
+                    Write(")");
+                    return;
+                }
+            }
+
+            Visit(node.Expression);
+            Visit(node.ArgumentList);
         }
 
         public override void VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
@@ -130,7 +158,47 @@ namespace RobloxCS
                 }
             }
 
-            Write(prefix + identifierName);
+            if (prefix == "")
+            {
+                var parentNamespace = FindFirstAncestor<NamespaceDeclarationSyntax>(node);
+                var namespaceIncludesIdentifier = parentNamespace != null && parentNamespace.Members
+                    .Where(member => GetNames(member).Contains(identifierName))
+                    .Count() > 0;
+
+                var parentAccessExpression = FindFirstAncestor<MemberAccessExpressionSyntax>(node);
+                var isLeftSide = parentAccessExpression == null ? true : node == parentAccessExpression.Expression;
+                var parentBlocks = GetAncestors<SyntaxNode>(node);
+                var localScopeIncludesIdentifier = parentBlocks
+                    .Any(block =>
+                    {
+                        var descendants = block.DescendantNodes();
+                        var variableDeclarators = descendants.OfType<VariableDeclaratorSyntax>();
+                        var parameters = descendants.OfType<ParameterSyntax>();
+                        var checkNamePredicate = (SyntaxNode node) => GetName(node) == identifierName;
+                        return variableDeclarators.Where(checkNamePredicate).Count() > 0
+                            || parameters.Where(checkNamePredicate).Count() > 0;
+                    });
+
+                if (isLeftSide && !localScopeIncludesIdentifier)
+                {
+                    if (namespaceIncludesIdentifier)
+                    {
+                        Write($"namespace[\"$getMember\"](namespace, \"{identifierName}\")");
+                    }
+                    else
+                    {
+                        Write($"CS.getAssemblyType(\"{identifierName}\")");
+                    }
+                }
+                else
+                {
+                    Write(identifierName);
+                }
+            }
+            else
+            {
+                Write(prefix + identifierName);
+            }
         }
 
         public override void VisitLiteralExpression(LiteralExpressionSyntax node)
@@ -168,15 +236,20 @@ namespace RobloxCS
             base.VisitLiteralExpression(node);
         }
 
+        public override void VisitParameter(ParameterSyntax node)
+        {
+            Write(GetName(node));
+        }
+
         public override void VisitParameterList(ParameterListSyntax node)
         {
             Write("(");
             foreach (var parameter in node.Parameters)
             {
-                Write(GetName(parameter));
+                Visit(parameter);
                 if (parameter != node.Parameters.Last())
                 {
-                    Write(",");
+                    Write(", ");
                 }
             }
             WriteLine(")");
@@ -309,8 +382,6 @@ namespace RobloxCS
 
         public override void VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
-            var parentClass = FindFirstAncestor<ClassDeclarationSyntax>(node)!;
-            var parentName = GetName(parentClass);
             var isStatic = HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
             var name = GetName(node);
             Write($"function class{(isStatic ? "." : ":")}{name}");
@@ -479,24 +550,6 @@ namespace RobloxCS
         {
             if (_output.Length == 0) return false;
             return _output[_output.Length - 1] == character;
-        }
-
-        private void PrintChildNodes(SyntaxNode node)
-        {
-            Logger.Info($"{node.Kind()} node children: {node.ChildNodes().Count()}");
-            foreach (var child in node.ChildNodes())
-            {
-                Logger.Info(child.Kind().ToString() + ": " + child.GetText());
-            }
-        }
-
-        private void PrintChildTokens(SyntaxNode node)
-        {
-            Logger.Info($"{node.Kind()} token children: {node.ChildTokens().Count()}");
-            foreach (var child in node.ChildTokens())
-            {
-                Logger.Info(child.Kind().ToString() + ": " + child.Text);
-            }
         }
     }
 }

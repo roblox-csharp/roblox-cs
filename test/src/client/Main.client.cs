@@ -6,18 +6,20 @@ namespace TestGame.Client
     {
         public static void Main()
         {
-            Console.Print("hello world");
+            var rect = new Rectangle(4.0f, 3.0f);
+            Console.Print(rect.Width.ToString());
         }
     }
 
-    public class Abc
+    public class Rectangle
     {
-        private readonly int _xyz = 5;
-        private readonly int _blah;
+        public readonly float Width;
+        public readonly float Height;
 
-        public Abc(int blah)
+        public Rectangle(float width, float height)
         {
-            _blah = blah;
+            Width = width;
+            Height = height;
         }
     }
 }

@@ -51,6 +51,10 @@ local CSNamespace = {} do
 		return self.members[index] or CSNamespace[index]
 	end
 
+	CSNamespace["$getMember"] = function(self, name)
+		return self.members[name]
+	end
+
 	CSNamespace["$onLoaded"] = function(self, callback)
 		table.insert(self["$loadCallbacks"], callback)
 	end
@@ -81,7 +85,13 @@ function CS.namespace(name, registerMembers, location)
 end
 
 function CS.getAssemblyType(name)
-	return assemblyGlobal[name]
+	local env
+	if getfenv == nil then
+		env = _ENV
+	else
+		env = getfenv(f)
+	end
+	return assemblyGlobal[name] or env[name]
 end
 
 return CS

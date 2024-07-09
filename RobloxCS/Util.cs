@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using System.Reflection;
 
 namespace RobloxCS
@@ -60,6 +61,24 @@ namespace RobloxCS
             }
 
             return assemblyDirectory!.Split('/').Last();
+        }
+
+        public static void PrintChildNodes(SyntaxNode node)
+        {
+            Logger.Info($"{node.Kind()} node children: {node.ChildNodes().Count()}");
+            foreach (var child in node.ChildNodes())
+            {
+                Logger.Info(child.Kind().ToString() + ": " + child.GetText());
+            }
+        }
+
+        public static void PrintChildTokens(SyntaxNode node)
+        {
+            Logger.Info($"{node.Kind()} token children: {node.ChildTokens().Count()}");
+            foreach (var child in node.ChildTokens())
+            {
+                Logger.Info(child.Kind().ToString() + ": " + child.Text);
+            }
         }
     }
 }
