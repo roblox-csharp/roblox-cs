@@ -1,4 +1,4 @@
-RobloxRuntimelocal TestGame = {}
+local TestGame = {}
 TestGame.Client = {} do
   TestGame.Client.Game = {} do
     local Game = TestGame.Client.Game

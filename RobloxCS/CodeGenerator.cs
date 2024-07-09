@@ -5,7 +5,7 @@ using System.Text;
 
 namespace RobloxCS
 {
-    internal class CodeGenerator : CSharpSyntaxWalker
+    internal sealed class CodeGenerator : CSharpSyntaxWalker
     {
         private readonly List<SyntaxKind> _memberParentSyntaxes = new List<SyntaxKind>([
             SyntaxKind.NamespaceDeclaration,
@@ -14,18 +14,16 @@ namespace RobloxCS
         ]);
 
         private readonly SyntaxNode _root;
-        private readonly string _entryPointName;
-        private readonly string _mainMethodName;
+        private readonly ConfigData _config;
         private readonly int _indentSize;
 
         private readonly StringBuilder _output = new StringBuilder();
         private int _indent = 0;
 
-        public CodeGenerator(SyntaxNode root, string entryPointName, string mainMethodName, int indentSize = 2)
+        public CodeGenerator(SyntaxNode root, ConfigData config, int indentSize = 2)
         {
             _root = root;
-            _entryPointName = entryPointName;
-            _mainMethodName = mainMethodName;
+            _config = config;
             _indentSize = indentSize;
         }
 
@@ -33,6 +31,12 @@ namespace RobloxCS
         {
             Visit(_root);
             return _output.ToString().Trim();
+        }
+
+        public override void VisitUsingDirective(UsingDirectiveSyntax node)
+        {
+            var isStatic = !node.StaticKeyword.IsKind(SyntaxKind.None);
+            var names = GetNames(node);
         }
 
         public override void VisitExpressionStatement(ExpressionStatementSyntax node)
@@ -244,17 +248,17 @@ namespace RobloxCS
                 Visit(method);
             }
 
-            var isEntryPointClass = GetName(node) == _entryPointName;
+            var isEntryPointClass = GetName(node) == _config.CSharpOptions.EntryPointName;
             if (isEntryPointClass)
             {
                 var mainMethod = node.Members
                     .OfType<MethodDeclarationSyntax>()
-                    .Where(method => GetName(method) == _mainMethodName)
+                    .Where(method => GetName(method) == _config.CSharpOptions.MainMethodName)
                     .FirstOrDefault();
 
                 if (mainMethod == null)
                 {
-                    Logger.CodegenError(node.Identifier, $"No main method \"{_mainMethodName}\" found in entry point class");
+                    Logger.CodegenError(node.Identifier, $"No main method \"{_config.CSharpOptions.MainMethodName}\" found in entry point class");
                     return;
                 }
                 if (!HasSyntax(mainMethod.Modifiers, SyntaxKind.StaticKeyword))
@@ -263,7 +267,7 @@ namespace RobloxCS
                 }
 
                 WriteLine();
-                WriteLine($"{_entryPointName}.{_mainMethodName}()");
+                WriteLine($"{_config.CSharpOptions.EntryPointName}.{_config.CSharpOptions.MainMethodName}()");
             }
 
             _indent--;
@@ -450,19 +454,19 @@ namespace RobloxCS
 
         private void PrintChildNodes(SyntaxNode node)
         {
-            Console.WriteLine($"{node.Kind()} node children: {node.ChildNodes().Count()}");
+            Logger.Info($"{node.Kind()} node children: {node.ChildNodes().Count()}");
             foreach (var child in node.ChildNodes())
             {
-                Console.WriteLine(child.Kind().ToString() + ": " + child.GetText());
+                Logger.Info(child.Kind().ToString() + ": " + child.GetText());
             }
         }
 
         private void PrintChildTokens(SyntaxNode node)
         {
-            Console.WriteLine($"{node.Kind()} token children: {node.ChildTokens().Count()}");
+            Logger.Info($"{node.Kind()} token children: {node.ChildTokens().Count()}");
             foreach (var child in node.ChildTokens())
             {
-                Console.WriteLine(child.Kind().ToString() + ": " + child.Text);
+                Logger.Info(child.Kind().ToString() + ": " + child.Text);
             }
         }
     }

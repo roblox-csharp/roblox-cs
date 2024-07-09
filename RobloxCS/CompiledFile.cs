@@ -1,6 +1,6 @@
 ﻿namespace RobloxCS
 {
-    internal class CompiledFile
+    internal sealed class CompiledFile
     {
         public readonly string Path;
         public readonly string LuaSource;
