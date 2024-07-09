@@ -1,11 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.Diagnostics;
-using System.Diagnostics;
-
-namespace RobloxCS
+﻿namespace RobloxCS
 {
-    public class Program
+    public static class Program
     {
         public static void Main(string[] args)
         {

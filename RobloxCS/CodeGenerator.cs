@@ -227,29 +227,22 @@ namespace RobloxCS
                 case SyntaxKind.StringLiteralExpression:
                 case SyntaxKind.Utf8StringLiteralExpression:
                 case SyntaxKind.CharacterLiteralExpression:
-                    {
-                        Write($"\"{node.Token.ValueText}\"");
-                        break;
-                    }
+                    Write($"\"{node.Token.ValueText}\"");
+                    break;
 
                 case SyntaxKind.TrueLiteralExpression:
                 case SyntaxKind.FalseLiteralExpression:
                 case SyntaxKind.NumericLiteralExpression:
-                    {
-                        Write(node.Token.ValueText);
-                        break;
-                    }
+                    Write(node.Token.ValueText);
+                    break;
+
                 case SyntaxKind.NullLiteralExpression:
-                    {
-                        Write("nil");
-                        break;
-                    }
+                    Write("nil");
+                    break;
 
                 case SyntaxKind.DefaultLiteralExpression:
-                    {
-                        Logger.CodegenError(node, "\"default\" keyword is not supported!");
-                        break;
-                    }
+                    Logger.CodegenError(node, "\"default\" keyword is not supported!");
+                    break;
             }
 
             base.VisitLiteralExpression(node);
