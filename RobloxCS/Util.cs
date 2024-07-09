@@ -5,6 +5,8 @@ namespace RobloxCS
 {
     internal static class Util
     {
+        public const string RuntimeAssemblyName = "RobloxRuntime";
+
         public static string FormatLocation(FileLinePositionSpan lineSpan)
         {
             var filePath = lineSpan.Path;
@@ -36,6 +38,10 @@ namespace RobloxCS
             };
         }
 
+        public static string? GetRbxcsDirectory()
+        {
+            return FixPathSep(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Util.GetAssemblyDirectory()))))); // pretend like this isn't here lol
+        }
 
         public static string? GetAssemblyDirectory()
         {

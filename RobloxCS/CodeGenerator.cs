@@ -20,7 +20,7 @@ namespace RobloxCS
         private readonly StringBuilder _output = new StringBuilder();
         private int _indent = 0;
 
-        public CodeGenerator(SyntaxNode root, ConfigData config, int indentSize = 2)
+        public CodeGenerator(SyntaxNode root, ConfigData config, int indentSize = 4)
         {
             _root = root;
             _config = config;
@@ -29,8 +29,32 @@ namespace RobloxCS
 
         public string GenerateLua()
         {
+            WriteHeader();
             Visit(_root);
             return _output.ToString().Trim();
+        }
+
+        private void WriteHeader()
+        {
+            if (Util.IsDebug())
+            {
+                WriteLine($"package.path = \"{Util.GetRbxcsDirectory()}/{Util.RuntimeAssemblyName}/?.lua;\" .. package.path");
+            }
+            WriteLine($"local CS = require({GetLuaRuntimeLibPath()})");
+            WriteLine();
+        }
+
+        private string GetLuaRuntimeLibPath()
+        {
+            if (Util.IsDebug())
+            {
+                return "\"RuntimeLib\"";
+            }
+            else
+            {
+                // TODO: read rojo project file and locate rbxcs_include
+                return "game:GetService(\"ReplicatedStorage\").rbxcs_include.RuntimeLib";
+            }
         }
 
         public override void VisitUsingDirective(UsingDirectiveSyntax node)
@@ -175,61 +199,59 @@ namespace RobloxCS
 
         public override void VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
         {
-            var names = GetNames(node);
-            string currentNamePath = "";
+            var isWithinNamespace = IsDescendantOf<NamespaceDeclarationSyntax>(node);
+            var allNames = GetNames(node);
+            var firstName = allNames.First();
+            allNames.Remove(firstName);
 
-            Write("local ");
-            foreach (var name in names)
-            {
-                currentNamePath += (currentNamePath == "" ? "" : ".") + name;
-                Write(currentNamePath);
-
-                const string text = " = {}";
-                if (name == names.Last())
-                {
-                    Write(text);
-                }
-                else
-                {
-                    WriteLine(text);
-                }
-            }
-
-            WriteLine($" do");
+            WriteLine($"{(isWithinNamespace ? "namespace:" : "CS.")}namespace(\"{firstName}\", function(namespace)");
             _indent++;
 
-            foreach (var member in node.Members)
+            if (allNames.Count > 0)
             {
-                Visit(member);
+                foreach (var name in allNames)
+                {
+                    WriteLine($"namespace:namespace(\"{name}\", function(namespace)");
+                    _indent++;
+
+                    foreach (var member in node.Members)
+                    {
+                        Visit(member);
+                    }
+
+                    _indent--;
+                    WriteLine("end)");
+                }
+            }
+            else
+            {
+                foreach (var member in node.Members)
+                {
+                    Visit(member);
+                }
             }
 
             _indent--;
-            WriteLine("end");
+            WriteLine("end)");
         }
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
             var parentNamespace = FindFirstAncestor<NamespaceDeclarationSyntax>(node);
-            var namespaceName = string.Join(".", GetNames(parentNamespace));
             var className = GetName(node);
-            var luaClassName = namespaceName + (namespaceName == "" ? "" : ".") + className;
-            Write(luaClassName);
-            WriteLine(" = {} do");
+            WriteLine($"namespace:class(\"{className}\", function(namespace)");
             _indent++;
 
-            WriteLine($"local {className} = {luaClassName}");
-            var isStatic = HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
-            if (!isStatic)
-            {
-                WriteLine($"{className}.__index = {className}");
-            }
-
+            WriteLine("local class = {}");
+            WriteLine("class.__index = class");
             WriteLine();
-            var staticFields = node.Members.OfType<FieldDeclarationSyntax>()
-                .Where(member => member.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.StaticKeyword)));
+            InitializeDefaultFields(
+                node.Members
+                    .OfType<FieldDeclarationSyntax>()
+                    .Where(member => HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword))
+            );
 
-            InitializeDefaultFields(staticFields);
-
+            var isStatic = HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
             var constructor = node.Members.OfType<ConstructorDeclarationSyntax>().FirstOrDefault();
             if (!isStatic)
             {
@@ -267,11 +289,22 @@ namespace RobloxCS
                 }
 
                 WriteLine();
-                WriteLine($"{_config.CSharpOptions.EntryPointName}.{_config.CSharpOptions.MainMethodName}()");
+                WriteLine("if namespace == nil then");
+                _indent++;
+                WriteLine($"class.{_config.CSharpOptions.MainMethodName}()");
+                _indent--;
+                WriteLine("else");
+                _indent++;
+                WriteLine($"namespace[\"$onLoaded\"](namespace, class.{_config.CSharpOptions.MainMethodName})");
+                _indent--;
+                Write("end");
             }
 
+            WriteLine();
+            WriteLine($"return {(isStatic ? "class" : "setmetatable({}, class)")}");
+
             _indent--;
-            WriteLine("end");
+            WriteLine("end)");
         }
 
         public override void VisitMethodDeclaration(MethodDeclarationSyntax node)
@@ -280,7 +313,7 @@ namespace RobloxCS
             var parentName = GetName(parentClass);
             var isStatic = HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
             var name = GetName(node);
-            Write($"function {parentName}{(isStatic ? "." : ":")}{name}");
+            Write($"function class{(isStatic ? "." : ":")}{name}");
             Visit(node.ParameterList);
             _indent++;
 
@@ -293,29 +326,31 @@ namespace RobloxCS
         public override void VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
         {
             // TODO: struct support?
-            var parentClass = FindFirstAncestor<ClassDeclarationSyntax>(node)!;
-            var parentName = GetName(parentClass);
-
-            Write($"function {parentName}.new");
+            Write($"function class.new");
             Visit(node.ParameterList);
             _indent++;
 
-            VisitConstructorBody(parentClass, node.Body);
+            VisitConstructorBody(FindFirstAncestor<ClassDeclarationSyntax>(node)!, node.Body);
 
             _indent--;
             WriteLine("end");
         }
 
-        private void VisitConstructorBody(ClassDeclarationSyntax parentClass, BlockSyntax? block)
+        private void VisitNamespace(string name, bool isDescendantOfNamespace)
         {
-            var parentName = GetName(parentClass);
-            WriteLine($"local self = setmetatable({{}}, {parentName})");
+
+        }
+
+        private void VisitConstructorBody(ClassDeclarationSyntax? parentClass, BlockSyntax? block)
+        {
+            WriteLine("local self = setmetatable({}, class)");
             if (parentClass != null)
             {
-                var nonStaticFields = parentClass.Members.OfType<FieldDeclarationSyntax>()
-                    .Where(member => member.Modifiers.All(modifier => !modifier.IsKind(SyntaxKind.StaticKeyword)));
+                var nonStaticFields = parentClass.Members
+                    .OfType<FieldDeclarationSyntax>()
+                    .Where(member => !HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword));
 
-                InitializeDefaultFields(nonStaticFields); // TODO: structs
+                InitializeDefaultFields(nonStaticFields);
             }
 
             if (block != null)
@@ -327,8 +362,7 @@ namespace RobloxCS
 
         private void CreateDefaultConstructor(ClassDeclarationSyntax node)
         {
-            string parentName = GetName(node);
-            WriteLine($"function {parentName}.new()");
+            WriteLine($"function class.new()");
             _indent++;
 
             VisitConstructorBody(node, null);
@@ -341,16 +375,11 @@ namespace RobloxCS
         {
             foreach (var field in fields)
             {
-                var parentClass = FindFirstAncestor<ClassDeclarationSyntax>(field)!;
-                var parentName = GetName(parentClass);
                 var isStatic = HasSyntax(field.Modifiers, SyntaxKind.StaticKeyword);
-
                 foreach (var declarator in field.Declaration.Variables)
                 {
                     if (declarator.Initializer == null) continue;
-
-                    var name = GetName(declarator);
-                    Write($"{(isStatic ? parentName : "self")}.{name} = ");
+                    Write($"{(isStatic ? "class" : "self")}.{GetName(declarator)} = ");
                     Visit(declarator.Initializer);
                     WriteLine();
                 }

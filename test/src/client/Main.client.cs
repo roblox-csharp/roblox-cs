@@ -9,4 +9,15 @@ namespace TestGame.Client
             Console.Print("hello world");
         }
     }
+
+    public class Abc
+    {
+        private readonly int _xyz = 5;
+        private readonly int _blah;
+
+        public Abc(int blah)
+        {
+            _blah = blah;
+        }
+    }
 }

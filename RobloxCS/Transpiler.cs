@@ -5,7 +5,7 @@ namespace RobloxCS
 {
     public sealed class Transpiler
     {
-        private const string _runtimeAssemblyName = "RobloxRuntime";
+    
         private readonly List<SyntaxTree> _fileTrees = new List<SyntaxTree>();
         private readonly ConfigData _config;
         private readonly string _sourceDirectory;
@@ -64,14 +64,13 @@ namespace RobloxCS
 
         private List<PortableExecutableReference> GetCompilationReferences()
         {
-            var assemblyDirectory = Util.GetAssemblyDirectory();
+            var rbxcsDirectory = Util.GetRbxcsDirectory();
             var tfm = Util.GetTargetFramework();
-            var rbxcsDirectory = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(assemblyDirectory)))); // pretend like this isn't here lol
-            var runtimeLibPath = Util.FixPathSep(string.Join('/', rbxcsDirectory, _runtimeAssemblyName));
-            var runtimeLibAssemblyPath = string.Join('/', runtimeLibPath, "bin", "Release", tfm, _runtimeAssemblyName + ".dll");
+            var runtimeLibPath = Util.FixPathSep(string.Join('/', rbxcsDirectory, Util.RuntimeAssemblyName));
+            var runtimeLibAssemblyPath = string.Join('/', runtimeLibPath, "bin", "Release", tfm, Util.RuntimeAssemblyName + ".dll");
             if (!File.Exists(runtimeLibAssemblyPath))
             {
-                Logger.Error($"Failed to find {_runtimeAssemblyName}.dll in {Util.FixPathSep(Path.GetDirectoryName(runtimeLibAssemblyPath))}");
+                Logger.Error($"Failed to find {Util.RuntimeAssemblyName}.dll in {Util.FixPathSep(Path.GetDirectoryName(runtimeLibAssemblyPath))}");
             }
 
             var references = new List<PortableExecutableReference>()
