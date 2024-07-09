@@ -1,6 +1,8 @@
 local CS = {}
 local assemblyGlobal = {}
 
+local fempty = function() end
+
 local split = string.split
 if split == nil then
 	split = function(inputString, separator)
@@ -22,17 +24,23 @@ local function insertRuntimeEnv(f)
 	else
 		env = getfenv(f)
 	end
-	env.Console = {} do
-		function env.Console.Print(...)
+
+	local Console = {} do
+		function Console.WriteLine(...)
 			print(...)
 		end
-		function env.Console.Warn(message)
-			warn(message)
-		end
-		function env.Console.Error(message, level)
-			error(message, level)
-		end
+		Console.Write = Console.WriteLine
+		Console.Read = fempty
+		Console.ReadLine = fempty
+		Console.Clear = fempty
 	end
+	local Math = {} do
+		Math.PI = math.pi
+		Math.Pow = math.pow
+	end
+
+	env.Console = Console
+	env.Math = Math;
 	return f
 end
 

@@ -1,4 +1,5 @@
-using RobloxRuntime;
+using RobloxRuntime.Types;
+using System;
 
 namespace TestGame.Client
 {
@@ -7,7 +8,7 @@ namespace TestGame.Client
         public static void Main()
         {
             var rect = new Rectangle(4.0f, 3.0f);
-            Console.Print(rect.Area().ToString());
+            Console.WriteLine(Math.Pow(4, 2));
         }
     }
 

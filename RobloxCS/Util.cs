@@ -36,17 +36,6 @@ namespace RobloxCS
 #endif
         }
 
-        public static List<PortableExecutableReference> GetCoreLibReferences()
-        {
-            var coreLib = typeof(object).GetTypeInfo().Assembly.Location;
-            var systemRuntime = Path.Combine(Path.GetDirectoryName(coreLib)!, "System.Runtime.dll");
-            return new List<PortableExecutableReference>
-            {
-                MetadataReference.CreateFromFile(coreLib),
-                MetadataReference.CreateFromFile(systemRuntime)
-            };
-        }
-
         public static string? GetRbxcsDirectory()
         {
             return FixPathSep(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Util.GetAssemblyDirectory()))))); // pretend like this isn't here lol

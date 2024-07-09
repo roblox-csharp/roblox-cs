@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using System.Reflection;
 
 namespace RobloxCS
 {
@@ -78,11 +79,24 @@ namespace RobloxCS
                 MetadataReference.CreateFromFile(runtimeLibAssemblyPath)
             };
 
-            foreach (var coreLibReference in Util.GetCoreLibReferences())
+            foreach (var coreLibReference in GetCoreLibReferences())
             {
                 references.Add(coreLibReference);
             }
             return references;
+        }
+
+        private List<PortableExecutableReference> GetCoreLibReferences()
+        {
+            var coreLib = typeof(object).GetTypeInfo().Assembly.Location;
+            var systemRuntime = Path.Combine(Path.GetDirectoryName(coreLib)!, "System.Runtime.dll");
+            var systemConsole = Path.Combine(Path.GetDirectoryName(coreLib)!, "System.Console.dll");
+            return new List<PortableExecutableReference>
+            {
+                MetadataReference.CreateFromFile(coreLib),
+                MetadataReference.CreateFromFile(systemRuntime),
+                MetadataReference.CreateFromFile(systemConsole)
+            };
         }
 
         private void WriteLuaOutput()

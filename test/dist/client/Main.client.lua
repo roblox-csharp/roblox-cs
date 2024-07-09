@@ -9,7 +9,7 @@ CS.namespace("TestGame", function(namespace)
 
             function class.Main()
                 local rect = namespace["$getMember"](namespace, "Rectangle").new(4, 3)
-                CS.getAssemblyType("Console").Print(tostring(rect.Area()))
+                CS.getAssemblyType("Console").WriteLine(CS.getAssemblyType("Math").Pow(4, 2))
             end
 
             if namespace == nil then
@@ -32,6 +32,7 @@ CS.namespace("TestGame", function(namespace)
                 function self.Area()
                     return self.Width * self.Height
                 end
+
                 return self
             end
 

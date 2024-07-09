@@ -427,11 +427,6 @@ namespace RobloxCS
             WriteLine("end");
         }
 
-        private void VisitNamespace(string name, bool isDescendantOfNamespace)
-        {
-
-        }
-
         private void VisitConstructorBody(ClassDeclarationSyntax parentClass, BlockSyntax? block)
         {
             WriteLine("local self = setmetatable({}, class)");
