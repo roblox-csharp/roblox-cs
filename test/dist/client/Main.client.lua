@@ -1,7 +1,7 @@
 package.path = "C:/Users/Riley Peel/Dev/c#/roblox-cs/RobloxRuntime/?.lua;" .. package.path
 local CS = require("RuntimeLib")
 
-CS.getAssemblyType("RobloxRuntime")CS.namespace("TestGame", function(namespace)
+CS.namespace("TestGame", function(namespace)
     namespace:namespace("Client", function(namespace)
         namespace:class("Game", function(namespace)
             local class = {}
@@ -9,7 +9,7 @@ CS.getAssemblyType("RobloxRuntime")CS.namespace("TestGame", function(namespace)
 
             function class.Main()
                 local rect = namespace["$getMember"](namespace, "Rectangle").new(4, 3)
-                CS.getAssemblyType("Console").Print(tostring(rect.Width))
+                CS.getAssemblyType("Console").Print(tostring(rect.Area()))
             end
 
             if namespace == nil then
@@ -25,8 +25,13 @@ CS.getAssemblyType("RobloxRuntime")CS.namespace("TestGame", function(namespace)
 
             function class.new(width, height)
                 local self = setmetatable({}, class)
+
                 self.Width = width
                 self.Height = height
+
+                function self.Area()
+                    return self.Width * self.Height
+                end
                 return self
             end
 

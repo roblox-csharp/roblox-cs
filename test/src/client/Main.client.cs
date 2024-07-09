@@ -7,7 +7,7 @@ namespace TestGame.Client
         public static void Main()
         {
             var rect = new Rectangle(4.0f, 3.0f);
-            Console.Print(rect.Width.ToString());
+            Console.Print(rect.Area().ToString());
         }
     }
 
@@ -20,6 +20,11 @@ namespace TestGame.Client
         {
             Width = width;
             Height = height;
+        }
+
+        public float Area()
+        {
+            return Width * Height;
         }
     }
 }

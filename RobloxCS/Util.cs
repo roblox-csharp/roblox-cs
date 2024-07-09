@@ -14,6 +14,14 @@ namespace RobloxCS
             return $"- {(filePath == "" ? "<anonymous>" : filePath)}:{lineSpan.StartLinePosition.Line + 1}:{lineSpan.StartLinePosition.Character + 1}";
         }
 
+        public static string GetMappedOperator(string op)
+        {
+            switch (op)
+            {
+                default: return op;
+            }
+        }
+
         public static string? FixPathSep(string? path)
         {
             return path?.Replace('\\', '/');

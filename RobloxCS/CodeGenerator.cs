@@ -59,11 +59,30 @@ namespace RobloxCS
             }
         }
 
+        public override void VisitBinaryExpression(BinaryExpressionSyntax node)
+        {
+            Visit(node.Left);
+            Write($" {Util.GetMappedOperator(node.OperatorToken.Text)} ");
+            Visit(node.Right);
+        }
+
         public override void VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
         {
             Visit(node.Type);
             Write(".new");
             Visit(node.ArgumentList);
+        }
+
+        public override void VisitUsingDirective(UsingDirectiveSyntax node)
+        {
+            // do nothing (for now)
+        }
+
+        public override void VisitReturnStatement(ReturnStatementSyntax node)
+        {
+            Write("return ");
+            Visit(node.Expression);
+            WriteLine();
         }
 
         public override void VisitExpressionStatement(ExpressionStatementSyntax node)
@@ -338,7 +357,9 @@ namespace RobloxCS
                 }
             }
 
-            foreach (var method in node.Members.OfType<MethodDeclarationSyntax>())
+            var methods = node.Members.OfType<MethodDeclarationSyntax>();
+            var staticMethods = methods.Where(method => HasSyntax(method.Modifiers, SyntaxKind.StaticKeyword));
+            foreach (var method in staticMethods)
             {
                 Visit(method);
             }
@@ -346,8 +367,7 @@ namespace RobloxCS
             var isEntryPointClass = GetName(node) == _config.CSharpOptions.EntryPointName;
             if (isEntryPointClass)
             {
-                var mainMethod = node.Members
-                    .OfType<MethodDeclarationSyntax>()
+                var mainMethod = methods
                     .Where(method => GetName(method) == _config.CSharpOptions.MainMethodName)
                     .FirstOrDefault();
 
@@ -384,7 +404,7 @@ namespace RobloxCS
         {
             var isStatic = HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
             var name = GetName(node);
-            Write($"function class{(isStatic ? "." : ":")}{name}");
+            Write($"function {(isStatic ? "class" : "self")}.{name}");
             Visit(node.ParameterList);
             _indent++;
 
@@ -412,22 +432,27 @@ namespace RobloxCS
 
         }
 
-        private void VisitConstructorBody(ClassDeclarationSyntax? parentClass, BlockSyntax? block)
+        private void VisitConstructorBody(ClassDeclarationSyntax parentClass, BlockSyntax? block)
         {
             WriteLine("local self = setmetatable({}, class)");
-            if (parentClass != null)
-            {
-                var nonStaticFields = parentClass.Members
-                    .OfType<FieldDeclarationSyntax>()
-                    .Where(member => !HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword));
+            WriteLine();
+            var nonStaticFields = parentClass.Members
+                .OfType<FieldDeclarationSyntax>()
+                .Where(member => !HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword));
 
-                InitializeDefaultFields(nonStaticFields);
-            }
+            InitializeDefaultFields(nonStaticFields);
+            var nonStaticMethods = parentClass.Members
+                .OfType<MethodDeclarationSyntax>()
+                .Where(member => !HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword));
 
-            if (block != null)
+            if (block != null) Visit(block);
+            WriteLine();
+
+            foreach (var method in nonStaticMethods)
             {
-                Visit(block);
+                Visit(method);
             }
+            WriteLine();
             WriteLine("return self");
         }
 
