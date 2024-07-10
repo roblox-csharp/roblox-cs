@@ -11,22 +11,28 @@
             Write("// GENERATED ROBLOX ENUMS");
             Write();
 
+            Write("namespace RobloxRuntime.Enum");
+            Write("{");
+            PushIndent();
             foreach (var rbxEnum in rbxEnums)
             {
                 var enumTypeName = rbxEnum.Name;
                 var enumItems = rbxEnum.Items;
                 Write($"public struct {enumTypeName}");
+                Write("{");
                 PushIndent();
 
                 foreach (var item in enumItems)
                 {
                     var itemLegacyNames = item.LegacyNames ?? [];
-                    Write($"public struct {item.Name}");
+                    Write($"public struct {item.Name} : EnumItem");
+                    Write("{");
                     PushIndent();
 
-                    Write("public const string Name = \"" + item.Name + "\";");
-                    Write("public const int Value = " + item.Value + ";");
-                    Write("public const string EnumType = \"" + enumTypeName + "\";");
+                    // no public modifier & direct access to avoid naming conflicts
+                    Write("string EnumItem.Name => \"" + item.Name + "\";");
+                    Write("uint EnumItem.Value => " + item.Value + ";");
+                    Write("string EnumItem.EnumType => \"" + enumTypeName + "\";");
 
                     PopIndent();
                     Write("}");
@@ -45,6 +51,8 @@
                 }
             }
 
+            PopIndent();
+            Write("}");
             WriteFile();
         }
     }

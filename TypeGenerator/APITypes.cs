@@ -35,7 +35,7 @@ namespace TypeGenerator.APITypes
     {
         public string MemberType { get; set; }
         public string Name { get; set; }
-        public object Security { get; set; }
+        public object? Security { get; set; } // string or Security
         public List<object> Tags { get; set; }
         public string Description { get; set; }
     }
@@ -65,7 +65,7 @@ namespace TypeGenerator.APITypes
 
     internal sealed class Class
     {
-        public List<object> Members { get; set; }
+        public List<MemberBase> Members { get; set; }
         public string MemberCategory { get; set; }
         public List<object> Tags { get; set; }
         public string ThreadSafety { get; set; }
@@ -83,8 +83,8 @@ namespace TypeGenerator.APITypes
 
     internal sealed class ValueType
     {
-        public string Name { get; set; }
         public string Category { get; set; }
+        public string Name { get; set; }
     }
 
     internal sealed class Security
@@ -130,7 +130,7 @@ namespace TypeGenerator.APITypes
                             member.Name = property.Value.GetString();
                             break;
                         case "Security":
-                            member.Security = JsonSerializer.Deserialize<object>(property.Value.GetRawText(), options);
+                            member.Security = JsonSerializer.Deserialize<object?>(property.Value.GetRawText(), options);
                             break;
                         case "Tags":
                             member.Tags = JsonSerializer.Deserialize<List<object>>(property.Value.GetRawText(), options);
@@ -147,7 +147,12 @@ namespace TypeGenerator.APITypes
                         case "ReturnType":
                             if (member is Function function)
                             {
-                                function.ReturnType = JsonSerializer.Deserialize<ValueType>(property.Value.GetRawText(), options);
+                                var rawJson = property.Value.GetRawText();
+                                var type = rawJson.StartsWith("[") ?
+                                    JsonSerializer.Deserialize<List<ValueType>>(rawJson, options)?.First()
+                                    : JsonSerializer.Deserialize<ValueType>(rawJson, options);
+
+                                function.ReturnType = type;
                             }
                             break;
                         case "Category":

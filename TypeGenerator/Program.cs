@@ -1,5 +1,4 @@
 ﻿using CommandLine;
-using CommandLine.Text;
 using TypeGenerator.Generators;
 
 namespace TypeGenerator
@@ -34,9 +33,17 @@ namespace TypeGenerator
             var dump = await StudioAPI.GetDump();
             var reflectionMetadata = await StudioAPI.GetReflectionMetadata();
 
-            var enumsFilePath = Path.Combine(outputDirectory, "generated", "Enums.cs");
+            var enumsFilePath = Path.Combine(outputDirectory, "Generated", "Enums.cs");
             var enumGenerator = new EnumGenerator(enumsFilePath, reflectionMetadata);
             enumGenerator.Generate(dump.Enums);
+
+            var definedClassNames = new HashSet<string>();
+            for (int i = 0; i < _securityLevels!.Length; i++)
+            {
+                var classesFilePath = Path.Combine(outputDirectory, "Generated", $"{_securityLevels[i]}.cs");
+                var classGenerator = new ClassGenerator(classesFilePath, reflectionMetadata, definedClassNames, _securityLevels[i], _securityLevels.ElementAtOrDefault(i - 1));
+                classGenerator.Generate(new List<APITypes.Class>(dump.Classes));
+            }
         }
     }
 }
