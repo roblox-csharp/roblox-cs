@@ -8,8 +8,8 @@ namespace TestGame.Client
     {
         public static void Main()
         {
-            var key = Enum.KeyCode.ButtonA;
-            Console.WriteLine(key.ToString());
+            var part = Instance.Create<Part>();
+            Console.WriteLine(part.Size.ToString());
         }
     }
 }

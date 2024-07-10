@@ -327,7 +327,11 @@
         {
             { "debugger", "debug" },
             { "old", "oldValue" },
-            { "new", "newValue" }
+            { "new", "newValue" },
+            { "params", "parameters" },
+            { "override", "_override" },
+            { "string", "str" },
+            { "object", "obj" }
         };
     }
 }

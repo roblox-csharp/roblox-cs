@@ -492,7 +492,7 @@ namespace RobloxRuntime.Classes
 	
 	public interface AvatarCreationService : Instance
 	{
-		public void SendAnalyticsEvent(string eventName, object params);
+		public void SendAnalyticsEvent(string eventName, object parameters);
 		public AvatarGenerationSession CreateAvatarGenerationSessionAsync(Player player);
 		public object GetAvatarGenerationConfig();
 		public Instance? LoadAvatarModelAsync(string id);
@@ -2063,9 +2063,9 @@ namespace RobloxRuntime.Classes
 		public float Transparency { get; set; }
 		public bool Visible { get; set; }
 		public int ZIndex { get; set; }
-		public bool TweenPosition(UDim2 endPosition, Enum.EasingDirection? easingDirection, Enum.EasingStyle? easingStyle, float? time, bool? override, Action? callback);
-		public bool TweenSize(UDim2 endSize, Enum.EasingDirection? easingDirection, Enum.EasingStyle? easingStyle, float? time, bool? override, Action? callback);
-		public bool TweenSizeAndPosition(UDim2 endSize, UDim2 endPosition, Enum.EasingDirection? easingDirection, Enum.EasingStyle? easingStyle, float? time, bool? override, Action? callback);
+		public bool TweenPosition(UDim2 endPosition, Enum.EasingDirection? easingDirection, Enum.EasingStyle? easingStyle, float? time, bool? _override, Action? callback);
+		public bool TweenSize(UDim2 endSize, Enum.EasingDirection? easingDirection, Enum.EasingStyle? easingStyle, float? time, bool? _override, Action? callback);
+		public bool TweenSizeAndPosition(UDim2 endSize, UDim2 endPosition, Enum.EasingDirection? easingDirection, Enum.EasingStyle? easingStyle, float? time, bool? _override, Action? callback);
 		public ScriptSignal<UDim2> DragBegin { get; }
 		public ScriptSignal<int, int> DragStopped { get; }
 		public ScriptSignal<InputObject> InputBegan { get; }
@@ -3736,7 +3736,7 @@ namespace RobloxRuntime.Classes
 	public partial interface WorldRoot : Model
 	{
 		public bool ArePartsTouchingOthers(Instance[] partList, float? overlapIgnored);
-		public RaycastResult Blockcast(CFrame cframe, Vector3 size, Vector3 direction, RaycastParams? params);
+		public RaycastResult Blockcast(CFrame cframe, Vector3 size, Vector3 direction, RaycastParams? parameters);
 		public void BulkMoveTo(Instance[] partList, object[] cframeList, Enum.BulkMoveMode? eventMode);
 		public object[] FindPartOnRay(Ray ray, Instance? ignoreDescendantsInstance, bool? terrainCellsAreCubes, bool? ignoreWater);
 		public object[] FindPartOnRayWithIgnoreList(Ray ray, Instance[] ignoreDescendantsTable, bool? terrainCellsAreCubes, bool? ignoreWater);
@@ -3750,8 +3750,8 @@ namespace RobloxRuntime.Classes
 		public bool IsRegion3Empty(Region3 region, Instance? ignoreDescendentsInstance);
 		public bool IsRegion3EmptyWithIgnoreList(Region3 region, Instance[] ignoreDescendentsTable);
 		public RaycastResult Raycast(Vector3 origin, Vector3 direction, RaycastParams? raycastParams);
-		public RaycastResult Shapecast(BasePart part, Vector3 direction, RaycastParams? params);
-		public RaycastResult Spherecast(Vector3 position, float radius, Vector3 direction, RaycastParams? params);
+		public RaycastResult Shapecast(BasePart part, Vector3 direction, RaycastParams? parameters);
+		public RaycastResult Spherecast(Vector3 position, float radius, Vector3 direction, RaycastParams? parameters);
 		public object[] findPartOnRay(Ray ray, Instance? ignoreDescendantsInstance, bool? terrainCellsAreCubes, bool? ignoreWater);
 		public Instance[] findPartsInRegion3(Region3 region, Instance? ignoreDescendantsInstance, int? maxParts);
 	}
@@ -5177,11 +5177,11 @@ namespace RobloxRuntime.Classes
 	
 	public interface TextService : Instance
 	{
-		public Vector2 GetTextSize(string string, int fontSize, Enum.Font font, Vector2 frameSize);
+		public Vector2 GetTextSize(string str, int fontSize, Enum.Font font, Vector2 frameSize);
 		public TextFilterTranslatedResult FilterAndTranslateStringAsync(string stringToFilter, long fromUserId, object[] targetLocales, Enum.TextFilterContext? textContext);
 		public TextFilterResult FilterStringAsync(string stringToFilter, long fromUserId, Enum.TextFilterContext? textContext);
 		public object GetFamilyInfoAsync(string assetId);
-		public Vector2 GetTextBoundsAsync(GetTextBoundsParams params);
+		public Vector2 GetTextBoundsAsync(GetTextBoundsParams parameters);
 	}
 	
 	public interface TextSource : Instance
