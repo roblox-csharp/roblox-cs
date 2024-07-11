@@ -220,7 +220,7 @@
         }
 
         /// <summary>Returns true if the X, Y, and Z components of the other <see cref="Vector2"/> are within epsilon units of each corresponding component of this <see cref="Vector2"/>.</summary>
-        public bool FuzzyEq(Vector2 other, double? epsilon)
+        public bool FuzzyEq(Vector2 other, float? epsilon)
         {
             return default;
         }
@@ -416,7 +416,7 @@
         }
 
         /// <summary>Returns true if the X, Y, and Z components of the other <see cref="Vector3"/> are within epsilon units of each corresponding component of this <see cref="Vector3"/>.</summary>
-        public bool FuzzyEq(Vector3 other, double? epsilon)
+        public bool FuzzyEq(Vector3 other, float? epsilon)
         {
             return default;
         }
@@ -706,7 +706,7 @@
         /// <para>The epsilon value is used to control the tolerance for this similarity. This value is optional and should be a small positive value if provided.</para>
         /// <para>The similarity for position is component-wise, and for rotation uses a fast approximation of the angle difference.</para>
         /// </summary>
-        public bool FuzzyEq(CFrame other, double? epsilon)
+        public bool FuzzyEq(CFrame other, float? epsilon)
         {
             return default;
         }
@@ -999,6 +999,73 @@
         public static UDim2 operator -(UDim2 a, UDim2 b)
         {
             return null!;
+        }
+    }
+
+    /// <summary>The <see cref="NumberRange"/> represents a range of numbers.</summary>
+    public sealed class NumberRange
+    {
+        /// <summary>The minimum value of the <see cref="NumberRange"/>.</summary>
+        public readonly float Min;
+        /// <summary>The maximum value of the <see cref="NumberRange"/>.</summary>
+        public readonly float Max;
+
+        /// <summary>Returns a new <see cref="NumberRange"/> with the minimum and maximum set to the value.</summary>
+        public NumberRange(float number)
+        {
+        }
+
+        /// <summary>Returns a new <see cref="NumberRange"/> with the provided minimum and maximum.</summary>
+        public NumberRange(float minimum, float maximum)
+        {
+        }
+    }
+
+    /// <summary>
+    /// <para>The <see cref="NumberSequence"/> data type represents a series of number values from 0 to 1.</para>
+    /// <para>The number values are expressed using the <see cref="NumberSequenceKeypoint"/> type. This type is used in properties such as <see cref="Classes.ParticleEmitter.Size"/> and <see cref="Classes.Beam.Transparency"/> to define a numerical change over time.</para>
+    /// </summary>
+    public sealed class NumberSequence
+    {
+        /// <summary>An array of <see cref="NumberSequenceKeypoint"/> values in ascending order.</summary>
+        public readonly NumberSequenceKeypoint[] Keypoints = null!;
+
+        /// <summary>Returns a <see cref="NumberSequence"/> with the start and end values set to the provided n.</summary>
+        public NumberSequence(float n)
+        {
+        }
+
+        /// <summary>Returns a <see cref="NumberSequence"/> of two keypoints with n0 as the start value and n1 as the end value.</summary>
+        public NumberSequence(float n0, float n1)
+        {
+        }
+
+        /// <summary>Returns a <see cref="NumberSequence"/> from an array of <see cref="NumberSequenceKeypoint"/>s.</summary>
+        public NumberSequence(NumberSequenceKeypoint[] Keypoints)
+        {
+        }
+    }
+
+    /// <summary>
+    /// The <see cref="NumberSequenceKeypoint"/> data type represents keypoints within a <see cref="NumberSequence"/> with a particular time, value, and envelope size.
+    /// </summary>
+    public sealed class NumberSequenceKeypoint
+    {
+        /// <summary>The amount of variance allowed from the value.</summary>
+        public readonly float Envelope;
+        /// <summary>The relative time at which the keypoint is positioned.</summary>
+        public readonly float Time;
+        /// <summary>The base value of the keypoint.</summary>
+        public readonly float Value;
+
+        /// <summary>Returns a keypoint with the specified time and value.</summary>
+        public NumberSequenceKeypoint(float time, float value)
+        { 
+        }
+
+        /// <summary>Returns a keypoint with the specified time, value, and envelope.</summary>
+        public NumberSequenceKeypoint(float time, float value, float envelope)
+        {
         }
     }
 
