@@ -3,6 +3,7 @@
 Roblox CSharp to Lua compiler
 
 # To-do
+- Unit tests
 - Property declarations
 - Macro IEnumerable<T> (or just List<T>) methods
 - Classes/structs/interfaces inside of classes
