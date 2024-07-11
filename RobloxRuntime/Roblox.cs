@@ -1131,6 +1131,153 @@
         }
     }
 
+    /// <summary>
+    /// The <see cref="Random"/> data type generates pseudorandom numbers and directions.
+    /// </summary>
+    public sealed class Random
+    {
+        /// <summary>Returns a new pseudorandom generator using an optional seed.</summary>
+        public Random(long seed)
+        {
+        }
+
+        /// <summary>Returns a pseudorandom number uniformly distributed over [0, 1].</summary>
+        public int NextInteger(int min, int max)
+        {
+            return default;
+        }
+
+        /// <summary>Returns a pseudorandom number uniformly distributed over [min, max].</summary>
+        public int NextNumber()
+        {
+            return default;
+        }
+
+        public int NextNumber(int min, int max)
+        {
+            return default;
+        }
+
+        /// <summary>Uniformly shuffles a table in-place.</summary>
+        public void Shuffle(object[] tb)
+        {
+        }
+
+        /// <summary>Returns a unit vector with a pseudorandom direction.</summary>
+        public int NextUnitVector()
+        {
+            return default;
+        }
+
+        /// <summary>Returns a new <see cref="Random"/> object with the same state as the original.</summary>
+        public Random Clone()
+        {
+            return null!;
+        }
+    }
+
+    public interface TimeTable
+    {
+        public uint Year { get; }
+        public uint Month { get; }
+        public uint Day { get; }
+        public uint Hour { get; }
+        public uint Minute { get; }
+        public uint Second { get; }
+        public uint Millisecond { get; }
+    }
+
+    /// <summary>
+    /// <para>The <see cref="DateTime"/> data type represents a moment in time using a Unix timestamp.</para>
+    /// <para>It can be used to easily format dates and times in specific locales.</para>
+    /// <para>When converted to a string, a string conversion of the stored timestamp integer is returned.</para>
+    /// <para>They don't store timezone values. Instead, timezones are considered when constructing and using <see cref="DateTime"/> objects.</para>
+    /// <para><see cref="DateTime"/> objects are equal if and only if their <see cref="UnixTimestampMillis"/> properties are equal.</para>
+    /// </summary>
+    public interface DateTime
+    {
+        public ulong UnixTimestamp { get; }
+        public ulong UnixTimestampMillis { get; }
+
+#pragma warning disable IDE1006
+        /// <summary>Returns a <see cref="DateTime"/> representing the current moment in time.</summary>
+        public static DateTime now()
+        {
+            return null!;
+        }
+#pragma warning restore IDE1006
+
+        /// <summary>Returns a <see cref="DateTime"/> representing the given Unix timestamp.</summary>
+        public static DateTime fromUnixTimestamp(float unixTimestamp)
+        {
+            return null!;
+        }
+
+        /// <summary>Returns a <see cref="DateTime"/> representing the given Unix timestamp in milliseconds.</summary>
+        public static DateTime fromUnixTimestampMillis(float unixTimestampMillis)
+        {
+            return null!;
+        }
+
+        /// <summary>Returns a new <see cref="DateTime"/> using the given units from a UTC time.</summary>
+        public static DateTime fromUniversalTime(uint year, byte month, byte day, byte hour, byte minute, byte second, ushort millisecond)
+        {
+            return null!;
+        }
+
+        /// <summary>Returns a new <see cref="DateTime"/> using the given units from a local time.summary>
+        public static DateTime fromLocalTime(uint year, byte month, byte day, byte hour, byte minute, byte second, ushort millisecond)
+        {
+            return null!;
+        }
+
+        /// <summary>Returns a <see cref="DateTime"/> from an ISO 8601 date-time string (in UTC).</summary>
+        public static DateTime fromIsoDate(string isoDate)
+        {
+            return null!;
+        }
+
+        /// <summary>Converts the value of this <see cref="DateTime"/> object to Universal Coordinated Time (UTC).</summary>
+        public TimeTable ToUniversalTime()
+        {
+            return null!;
+        }
+
+        /// <summary>Converts the value of this <see cref="DateTime"/> object to local time.</summary>
+        public TimeTable ToLocalTime()
+        {
+            return null!;
+        }
+
+        /// <summary>
+        /// <para>Formats a date as a ISO 8601 date-time string.</para>
+        /// <para>The value returned by this function could be passed to <see cref="fromIsoDate(string)"/> to produce the original <see cref="DateTime"/> object.</para>
+        /// <para>An example ISO 8601 date-time string would be 2020-01-02T10:30:45Z, which represents January 2nd 2020 at 10:30 AM, 45 seconds.</para>
+        /// </summary>
+        public string ToIsoDate()
+        {
+            return null!;
+        }
+
+        /// <summary>
+        /// <para>Generates a string from the <see cref="DateTime"/> value interpreted as Universal Coordinated Time (UTC) and a format string.</para>
+        /// <para>The format string should contain tokens, which will replace to certain date/time values described by the <see cref="DateTime"/> object.</para>
+        /// </summary>
+        public string FormatUniversalTime(string format, string locale)
+        {
+            return null!;
+        }
+
+        /// <summary>
+        /// <para>Generates a string from the <see cref="DateTime"/> value interpreted as local time and a format string.</para>
+        /// <para>The format string should contain tokens, which will replace to certain date/time values described by the <see cref="DateTime"/> object.</para>
+        /// </summary>
+        public string FormatLocalTime(string format, string locale)
+        {
+            return null!;
+        }
+    }
+
     /// <summary>The <see cref="NumberRange"/> represents a range of numbers.</summary>
     public sealed class NumberRange
     {
