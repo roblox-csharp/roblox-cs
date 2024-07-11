@@ -8,7 +8,7 @@ CS.namespace("TestGame", function(namespace)
 
             function class.Main()
                 local part = CS.getAssemblyType("Instance").new("Part", CS.getAssemblyType("game").Workspace)
-                CS.getAssemblyType("Console").WriteLine(part:IsA("Part"))
+                print(part:IsA("Part"))
             end
 
             if namespace == nil then

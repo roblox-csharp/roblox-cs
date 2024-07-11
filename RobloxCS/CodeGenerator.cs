@@ -121,6 +121,12 @@ namespace RobloxCS
                         Visit(memberAccess.Expression);
                         Write(")");
                         return;
+                    case "Write":
+                    case "WriteLine":
+                        if (objectName != "Console") break;
+                        Write("print");
+                        Visit(node.ArgumentList);
+                        return;
                     case "Create":
                         {
                             if (objectName != "Instance") break;

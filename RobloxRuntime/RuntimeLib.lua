@@ -18,21 +18,11 @@ if split == nil then
 end
 
 do
-	local Console = {} do
-		function Console.WriteLine(...)
-			print(...)
-		end
-		Console.Write = Console.WriteLine
-		Console.Read = fempty
-		Console.ReadLine = fempty
-		Console.Clear = fempty
-	end
 	local Math = {} do
 		Math.PI = math.pi
 		Math.Pow = math.pow
 	end
 
-	assemblyGlobal.Console = Console
 	assemblyGlobal.Math = math;
 end
 
