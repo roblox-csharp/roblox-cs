@@ -1199,6 +1199,112 @@
     }
 
     /// <summary>
+    /// The <see cref="Axes"/> data type is for the <see cref="ArcHandles"/> class to control which rotation axes are currently enabled.
+    /// </summary>
+    public class Axes
+    {
+        /// <summary>Whether the X axis is enabled.</summary>
+        public readonly bool X;
+        /// <summary>Whether the Y axis is enabled.</summary>
+        public readonly bool Y;
+        /// <summary>Whether the Z axis is enabled.</summary>
+        public readonly bool Z;
+        /// <summary>Whether the top face is included.</summary>
+        public readonly bool Top;
+        /// <summary>Whether the bottom face is included.</summary>
+        public readonly bool Bottom;
+        /// <summary>Whether the left face is included.</summary>
+        public readonly bool Left;
+        /// <summary>Whether the right face is included.</summary>
+        public readonly bool Right;
+        /// <summary>Whether the back face is included.</summary>
+        public readonly bool Back;
+        /// <summary>Whether the front face is included.</summary>
+        public readonly bool Front;
+
+        /// <summary>Create an empty <see cref="Axes"/></summary>
+        public Axes()
+        { 
+        }
+
+        /// <summary>Creates a new <see cref="Axes"/> using list of axes.</summary>
+        public Axes((Enum.Axis, Enum.Axis?, Enum.Axis?) axes)
+        {
+        }
+
+        /// <summary>Creates a new <see cref="Axes"/> using list of faces. NormalIds (faces) are converted to the corresponding axes.</summary>
+        public Axes((Enum.NormalId, Enum.NormalId?, Enum.NormalId?, Enum.NormalId?, Enum.NormalId?, Enum.NormalId?) axes)
+        {
+        }
+    }
+
+    /// <summary>
+    /// <para>The <see cref="Faces"/> data type contains six booleans representing whether a feature is enabled for each face (<see cref="Enum.NormalId"/>) of a <see cref="Part"/>.</para>
+    /// <para>In other words, this contains a boolean for each axes (X/Y/Z) in both directions (positive/negative). The <see cref="Handles"/> object uses this data type to enable whether a direction has a visible handle on a <see cref="Part"/>'s face.</para>
+    /// <para>Like most data types on Roblox, the <see cref="Faces"/> data type is immutable: you cannot assign to its properties once created.</para>
+    /// </summary>
+    public sealed class Faces
+    {
+        /// <summary>Whether the top face is included.</summary>
+        public readonly bool Top;
+        /// <summary>Whether the bottom face is included.</summary>
+        public readonly bool Bottom;
+        /// <summary>Whether the left face is included.</summary>
+        public readonly bool Left;
+        /// <summary>Whether the right face is included.</summary>
+        public readonly bool Right;
+        /// <summary>Whether the back face is included.</summary>
+        public readonly bool Back;
+        /// <summary>Whether the front face is included.</summary>
+        public readonly bool Front;
+
+        /// <summary>Create an empty <see cref="Faces"/></summary>
+        public Faces()
+        {
+        }
+
+        /// <summary>
+        /// <para>Creates a new <see cref="Faces"/> given some number of <see cref="Enum.NormalId"/> as arguments.</para>
+        /// <para>Each NormalId provided indicates the property of the same name in the new <see cref="Faces"/> will be true.</para>
+        /// <para>Passing values that are not a <see cref="Enum.NormalId"/> will do nothing; they are ignored silently.</para>
+        /// </summary>
+        public Faces((Enum.NormalId, Enum.NormalId?, Enum.NormalId?, Enum.NormalId?, Enum.NormalId?, Enum.NormalId?) axes)
+        {
+        }
+    }
+
+    /// <summary>
+    /// <para>A time-value pair used with <see cref="FloatCurve"/> instances.</para>
+    /// <para>The <see cref="Interpolation"/> property dictates the interpolation mode for the segment started by this key and ended by the next key on the curve. Each segment may use a different interpolation mode.</para>
+    /// <para>The <see cref="LeftTangent"/> and <see cref="RightTangent"/> properties apply to the cubic interpolation mode and define the desired tangent (slope) at the key. Different left and right values can be used to encode discontinuities in slope at the key.</para>
+    /// <para>Attempting to set a <see cref="RightTangent"/> value on a key that doesn't use the cubic interpolation mode will result in a runtime error. It is possible to set the <see cref="LeftTangent"/> property on any key, as it will be used should the preceding segment use cubic interpolation.</para>
+    /// </summary>
+    public sealed class FloatCurveKey
+    {
+        /// <summary>The key interpolation mode for the segment started by this <see cref="FloatCurveKey"/>.</summary
+        public readonly Enum.KeyInterpolationMode Interpolation;
+        /// <summary>The time position of this <see cref="FloatCurveKey"/>.</summary>
+        public readonly float Time;
+        /// <summary>The value of this <see cref="FloatCurveKey"/>.</summary>
+        public readonly float Value;
+        /// <summary>The tangent to the right of this <see cref="FloatCurveKey"/>.</summary>
+        public readonly float RightTangent;
+        /// <summary>The tangent to the left of this <see cref="FloatCurveKey"/>.</summary>
+        public readonly float LeftTangent;
+
+        /// <summary>
+        /// Creates a new <see cref="FloatCurveKey"/> at a given time and value.
+        /// <para><see cref="LeftTangent"/> and <see cref="RightTangent"/> are left uninitialized and, if not initialized, tangent values of 0 will be used when evaluating the curve.</para>
+        /// </summary>
+        /// <param name="time">Time at which to create the new <see cref="FloatCurveKey"/>.</param>
+        /// <param name="value">Value of the new <see cref="FloatCurveKey"/>.</param>
+        /// <param name="interpolation"></param>
+        public FloatCurveKey(float time, float value, Enum.KeyInterpolationMode interpolation)
+        { 
+        }
+    }
+
+    /// <summary>
     /// <para>Describes the font used to render text. Every font consists of a font family (like Source Sans Pro), a weight like <see cref="Enum.FontWeight.Bold"/>, and a style like <see cref="Enum.FontStyle.Italic"/>.</para>
     /// <para>Font families are a type of asset, like images or meshes. Each font family contains a number of font faces, and each face has a different weight and style.</para>
     /// <para><see cref="Font"/> is used by the <see cref="TextLabel.FontFace"/>, <see cref="TextButton.FontFace"/>, and <see cref="TextBox.FontFace"/> properties.</para>
