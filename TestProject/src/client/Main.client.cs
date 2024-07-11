@@ -1,6 +1,5 @@
-using System;
+using RobloxRuntime;
 using RobloxRuntime.Classes;
-using static RobloxRuntime.Globals;
 
 namespace TestGame.Client
 {
@@ -8,7 +7,7 @@ namespace TestGame.Client
     {
         public static void Main()
         {
-            var part = Instance.Create<Part>(game.Workspace);
+            var part = Instance.Create<Part>(Services.Workspace);
             Console.WriteLine(part.IsA<Part>());
         }
     }

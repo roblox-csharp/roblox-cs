@@ -166,7 +166,7 @@ namespace RobloxCS
                             var objectSymbolInfo = _semanticModel.GetSymbolInfo(memberAccess.Expression);
                             var objectDefinitionSymbol = (ILocalSymbol)objectSymbolInfo.Symbol?.OriginalDefinition!;
                             var superclasses = objectDefinitionSymbol.Type.AllInterfaces;
-                            if (!superclasses.Select(@interface => @interface.Name).Contains("Instance")) return;
+                            if (objectDefinitionSymbol.Name != "Instance" && !superclasses.Select(@interface => @interface.Name).Contains("Instance")) return;
 
                             var arguments = node.ArgumentList.Arguments;
                             var instanceType = methodSymbol.TypeArguments.First();
@@ -199,6 +199,17 @@ namespace RobloxCS
 
         public override void VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
         {
+            var objectSymbolInfo = _semanticModel.GetSymbolInfo(node.Expression);
+            var objectDefinitionSymbol = (ITypeSymbol)objectSymbolInfo.Symbol?.OriginalDefinition!;
+            var superclasses = objectDefinitionSymbol.AllInterfaces;
+            if (objectDefinitionSymbol.Name == "Services" || superclasses.Select(@interface => @interface.Name).Contains("Services"))
+            {
+                Write("game:GetService(\"");
+                Visit(node.Name);
+                Write("\")");
+                return;
+            }
+
             Visit(node.Expression);
             Write(".");
             Visit(node.Name);

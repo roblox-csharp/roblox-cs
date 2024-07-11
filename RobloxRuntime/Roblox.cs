@@ -8,6 +8,11 @@
         public static DataModel game { get; } = null!;
     }
 
+    public static class Services
+    {
+        public static Workspace Workspace { get; } = null!;
+    }
+
     namespace Classes
     {
         public interface ClipEvaluator : Instance
@@ -28,9 +33,9 @@
 
         public partial interface Instance
         {
-            public static T Create<T>(Instance? parent = null) where T : ICreatableInstance
+            public static sealed T Create<T>(Instance? parent = null) where T : ICreatableInstance
             {
-                return (T)(object)null!;
+                return default!;
             }
 
             public Instance Clone();

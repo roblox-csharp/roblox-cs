@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Reflection;
 
 namespace RobloxCS
@@ -37,11 +38,17 @@ namespace RobloxCS
             foreach (var sourceFile in sourceFiles)
             {
                 var fileContents = File.ReadAllText(sourceFile);
-                var tree = CSharpSyntaxTree.ParseText(fileContents, null, sourceFile);
+                var cleanTree = CSharpSyntaxTree.ParseText(fileContents);
+                var compilationUnit = (CompilationUnitSyntax)cleanTree.GetRoot();
+                var usingDirective = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System"));
+                var newRoot = compilationUnit.AddUsings(usingDirective);
+                var tree = CSharpSyntaxTree.Create(newRoot, null, sourceFile);
+
                 foreach (var diagnostic in tree.GetDiagnostics())
                 {
                     Logger.HandleDiagnostic(diagnostic);
                 }
+
                 _fileTrees.Add(tree);
             }
         }
