@@ -8,12 +8,6 @@
         public static DataModel game { get; } = null!;
     }
 
-    public static class Services
-    {
-        public static Workspace Workspace { get; } = null!;
-        public static Players Players { get; } = null!;
-    }
-
     namespace Classes
     {
         public interface ClipEvaluator : Instance

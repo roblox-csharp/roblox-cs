@@ -320,8 +320,8 @@ namespace TypeGenerator.Generators
                 return;
 
             var isPartial = Constants.PARTIAL_INTERFACES.Contains(className);
-            var superclass = rbxClass.Superclass == "Instance" && Utility.IsCreatable(rbxClass) ? "ICreatableInstance" : rbxClass.Superclass;
-            Write($"public{(isPartial ? " partial" : "")} interface {className}{(rbxClass.Superclass != Constants.ROOT_CLASS_NAME ? $" : {superclass}" : "")}");
+            var superclasses = rbxClass.Superclass == "Instance" ? "ICreatableInstance" : $"{rbxClass.Superclass}, ICreatableInstance";
+            Write($"public{(isPartial ? " partial" : "")} interface {className}{(rbxClass.Superclass != Constants.ROOT_CLASS_NAME ? $" : {superclasses}" : "")}");
             Write("{");
             PushIndent();
 
