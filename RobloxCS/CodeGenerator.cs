@@ -122,33 +122,70 @@ namespace RobloxCS
                         Write(")");
                         return;
                     case "Create":
-                        if (objectName != "Instance") break;
-                        var symbolInfo = _semanticModel.GetSymbolInfo(node);
-                        var methodSymbol = (IMethodSymbol)symbolInfo.Symbol!;
-                        if (!methodSymbol.IsGenericMethod)
-                            throw new Exception("Attempt to macro Instance.Create<T>() but it is not generic?");
-
-                        var arguments = node.ArgumentList.Arguments;
-                        var instanceType = methodSymbol.TypeArguments.First();
-                        Visit(memberAccess.Expression);
-                        Write($".new(\"{instanceType.Name}\"");
-                        if (arguments.Count > 0)
                         {
-                            Write(", ");
-                            foreach (var argument in arguments)
+                            if (objectName != "Instance") break;
+
+                            var symbolInfo = _semanticModel.GetSymbolInfo(node);
+                            var methodSymbol = (IMethodSymbol)symbolInfo.Symbol!;
+                            if (!methodSymbol.IsGenericMethod)
+                                throw new Exception("Attempt to macro Instance.Create<T>() but it is not generic?");
+
+                            var arguments = node.ArgumentList.Arguments;
+                            var instanceType = methodSymbol.TypeArguments.First();
+                            Visit(memberAccess.Expression);
+                            Write($".new(\"{instanceType.Name}\"");
+                            if (arguments.Count > 0)
                             {
-                                Visit(argument.Expression);
-                                if (argument != arguments.Last())
+                                Write(", ");
+                                foreach (var argument in arguments)
                                 {
-                                    Write(", ");
+                                    Visit(argument.Expression);
+                                    if (argument != arguments.Last())
+                                    {
+                                        Write(", ");
+                                    }
                                 }
                             }
+                            else
+                            {
+                                Write(")");
+                            }
+                            return;
                         }
-                        else
+                    case "IsA":
                         {
-                            Write(")");
+                            var symbolInfo = _semanticModel.GetSymbolInfo(node);
+                            var methodSymbol = (IMethodSymbol)symbolInfo.Symbol!;
+                            if (!methodSymbol.IsGenericMethod)
+                                throw new Exception("Attempt to macro Instance.IsA<T>() but it is not generic?");
+
+                            var objectSymbolInfo = _semanticModel.GetSymbolInfo(memberAccess.Expression);
+                            var objectDefinitionSymbol = (ILocalSymbol)objectSymbolInfo.Symbol?.OriginalDefinition!;
+                            var superclasses = objectDefinitionSymbol.Type.AllInterfaces;
+                            if (!superclasses.Select(@interface => @interface.Name).Contains("Instance")) return;
+
+                            var arguments = node.ArgumentList.Arguments;
+                            var instanceType = methodSymbol.TypeArguments.First();
+                            Visit(memberAccess.Expression);
+                            Write($":IsA(\"{instanceType.Name}\"");
+                            if (arguments.Count > 0)
+                            {
+                                Write(", ");
+                                foreach (var argument in arguments)
+                                {
+                                    Visit(argument.Expression);
+                                    if (argument != arguments.Last())
+                                    {
+                                        Write(", ");
+                                    }
+                                }
+                            }
+                            else
+                            {
+                                Write(")");
+                            }
+                            return;
                         }
-                        return;
                 }
             }
 

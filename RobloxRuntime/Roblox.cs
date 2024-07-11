@@ -29,6 +29,7 @@
             }
 
             public Instance Clone();
+            public bool IsA<T>() where T : Instance;
             public bool IsAncestorOf(Instance descendant);
             public bool IsDescendantOf(Instance ancestor);
             public object? GetAttribute(string attribute);

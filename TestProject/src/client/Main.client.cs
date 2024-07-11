@@ -9,7 +9,7 @@ namespace TestGame.Client
         public static void Main()
         {
             var part = Instance.Create<Part>();
-            Console.WriteLine(part.Size.ToString());
+            Console.WriteLine(part.IsA<Part>());
         }
     }
 }

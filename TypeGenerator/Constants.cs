@@ -205,7 +205,7 @@
         {
             { "Workspace", new HashSet<string> { "FilteringEnabled" } },
             { "CollectionService", new HashSet<string> { "GetCollection" } },
-            { "Instance", new HashSet<string> { "children", "Remove", "Clone", "IsAncestorOf", "IsDescendantOf", "GetAttribute", "GetAttributes", "GetDescendants", "GetTags", "WaitForChild", "clone", "isDescendantOf", "AncestryChanged", "AttributeChanged", "Changed", "ChildAdded", "ChildRemoved", "DescendantAdded", "DescendantRemoving", "Destroying", "childAdded" } }, // defined in Roblox.cs
+            { "Instance", new HashSet<string> { "children", "Remove", "IsA", "Clone", "IsAncestorOf", "IsDescendantOf", "GetAttribute", "GetAttributes", "GetDescendants", "GetTags", "WaitForChild", "clone", "isDescendantOf", "AncestryChanged", "AttributeChanged", "Changed", "ChildAdded", "ChildRemoved", "DescendantAdded", "DescendantRemoving", "Destroying", "childAdded" } }, // defined in Roblox.cs
             { "BodyGyro", new HashSet<string> { "cframe" } },
             { "BodyAngularVelocity", new HashSet<string> { "FilteringEnabled" } },
             { "BodyPosition", new HashSet<string> { "FilteringEnabled" } },
