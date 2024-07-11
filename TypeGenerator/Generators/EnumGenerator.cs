@@ -18,7 +18,7 @@
             {
                 var enumTypeName = rbxEnum.Name;
                 var enumItems = rbxEnum.Items;
-                Write($"public struct {enumTypeName}");
+                Write($"public struct {enumTypeName} : IEnum");
                 Write("{");
                 PushIndent();
 
