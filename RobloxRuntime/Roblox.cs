@@ -738,116 +738,156 @@
         }
     }
 
-    public sealed class Color3(float red = 0, float green = 0, float blue = 0)
+    /// <summary></summary>
+    public sealed class Color3()
     {
-        public readonly float R = red;
-        public readonly float G = green;
-        public readonly float B = blue;
+        /// <summary>The red value of the color.</summary>
+        public readonly float R;
+        /// <summary>The green value of the color.</summary>
+        public readonly float G;
+        /// <summary>The blue value of the color.</summary>
+        public readonly float B;
 
-        public static Color3 fromRGB(byte r, byte g, byte b)
+        /// <summary>Returns a <see cref="Color3"/> with the given red, green, and blue values.</summary>
+        public static Color3 fromRGB(float r = 0, float g = 0, float b = 0)
         {
             return null!;
         }
 
+        /// <summary>Returns a <see cref="Color3"/> from given components within the range of 0 to 255.</summary>
+        public static Color3 fromRGB(byte r = 0, byte g = 0, byte b = 0)
+        {
+            return null!;
+        }
+
+        /// <summary>Returns a <see cref="Color3"/> from the given hue, saturation, and value components.</summary>
         public static Color3 fromHSV(float h, float s, float v)
         {
             return null!;
         }
 
+        /// <summary>Returns a <see cref="Color3"/> from a given hex value.</summary>
         public static Color3 fromHex(string hex)
         {
             return null!;
         }
 
+        /// <summary>Returns a <see cref="Color3"/> interpolated between two colors.</summary>
         public Color3 Lerp(Color3 color, float alpha)
         {
             return null!;
         }
 
+        /// <summary>Returns the hue, saturation, and value of a <see cref="Color3"/>.</summary>
         public (float, float, float) ToHSV()
         {
             return default;
         }
 
+        /// <summary>Returns the hex code of a <see cref="Color3"/>.</summary>
         public string ToHex()
         {
             return null!;
         }
     }
 
+    /// <summary></summary>
     public sealed class BrickColor
     {
+        /// <summary>The unique number that identifies the <see cref="BrickColor"/>.</summary>
         public readonly uint Number;
+        /// <summary>The red component of the <see cref="BrickColor"/> (between 0 and 1).</summary>
         public readonly float r;
+        /// <summary>The green component of the <see cref="BrickColor"/> (between 0 and 1).</summary>
         public readonly float g;
+        /// <summary>The blue component of the <see cref="BrickColor"/> (between 0 and 1).</summary>
         public readonly float b;
+        /// <summary>The name associated with the <see cref="BrickColor"/>.</summary>
         public readonly string Name = null!;
+        /// <summary>The <see cref="Color3"/> associated with the <see cref="BrickColor"/>.</summary>
         public readonly Color3 Color = null!;
 
+        /// <summary>Constructs a <see cref="BrickColor"/> from its numerical index.</summary>
         public BrickColor(uint index)
         { 
         }
 
+        /// <summary>Constructs the closest <see cref="BrickColor"/> that can be matched to the specified RGB components, each between 0 and 1.</summary>
         public BrickColor(float r, float g, float b)
         {
         }
 
+        /// <summary>Constructs a <see cref="BrickColor"/> from its name.</summary>
         public BrickColor(string name)
         {
         }
 
+        /// <summary>Constructs the closest <see cref="BrickColor"/> that can be matched to the specified <see cref="Color3"/>.</summary>
         public BrickColor(Color3 color)
         {
         }
 
+        /// <summary>Constructs a <see cref="BrickColor"/> from its palette index.</summary>
         public static BrickColor palette(uint paletteIndex)
         {
             return null!;
         }
 
+        /// <summary>Returns a random <see cref="BrickColor"/>.</summary>
         public static BrickColor random()
         {
             return null!;
         }
 
+        /// <summary>Returns a random <see cref="BrickColor"/>.</summary>
         public static BrickColor Random()
         {
             return null!;
         }
 
+        /// <summary>Returns the "White" <see cref="BrickColor"/>.</summary>
         public static BrickColor White()
         {
             return null!;
         }
 
+        /// <summary>Returns the "Medium stone grey" <see cref="BrickColor"/>.</summary>
         public static BrickColor Gray()
         {
             return null!;
         }
 
+        /// <summary>Returns the "Dark stone grey" <see cref="BrickColor"/>.</summary>
         public static BrickColor DarkGray()
         {
             return null!;
         }
+
+        /// <summary>Returns the "Black" <see cref="BrickColor"/>.</summary>
         public static BrickColor Black()
         {
             return null!;
         }
 
+        /// <summary>Returns the "Bright Red" <see cref="BrickColor"/>.</summary>
         public static BrickColor Red()
         {
             return null!;
         }
 
+        /// <summary>Returns the "Bright Yellow" <see cref="BrickColor"/>.</summary>
         public static BrickColor Yellow()
         {
             return null!;
         }
 
+        /// <summary>Returns the "Dark Green" <see cref="BrickColor"/>.</summary>
         public static BrickColor Green()
         {
             return null!;
         }
+
+        /// <summary>Returns the "Bright Blue" <see cref="BrickColor"/>.</summary>
         public static BrickColor Blue()
         {
             return null!;
