@@ -316,7 +316,8 @@ namespace TypeGenerator.Generators
                 return;
 
             var isPartial = Constants.PARTIAL_INTERFACES.Contains(className);
-            Write($"public{(isPartial ? " partial" : "")} interface {className}{(rbxClass.Superclass != Constants.ROOT_CLASS_NAME ? $" : {rbxClass.Superclass}" : "")}");
+            var superclass = rbxClass.Superclass == "Instance" && Utility.IsCreatable(rbxClass) ? "ICreatableInstance" : rbxClass.Superclass;
+            Write($"public{(isPartial ? " partial" : "")} interface {className}{(rbxClass.Superclass != Constants.ROOT_CLASS_NAME ? $" : {superclass}" : "")}");
             Write("{");
             PushIndent();
 
