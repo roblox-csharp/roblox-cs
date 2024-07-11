@@ -1,9 +1,14 @@
 ﻿namespace RobloxRuntime
 {
+    using static RobloxRuntime.Enum.StudioScriptEditorColorCategories;
     using HttpHeaders = IDictionary<string, string>;
 
     namespace Classes
     {
+        public interface ClipEvaluator : Instance
+        {
+        }
+
         public partial interface Instance
         {
             public static T Create<T>() where T : Instance
@@ -1067,6 +1072,76 @@
         public NumberSequenceKeypoint(float time, float value, float envelope)
         {
         }
+    }
+
+    /// <summary>
+    /// <para>The <see cref="ColorSequence"/> data type represents a gradient of color values from 0 to 1.</para>
+    /// <para>The color values are expressed using the <see cref="ColorSequenceKeypoint"/> type. This type is used in various properties of <see cref="Classes.ParticleEmitter"/>, <see cref="Classes.Trail"/>, <see cref="Classes.Beam"/>, and other objects that use color gradients.</para>
+    /// </summary>
+    public sealed class ColorSequence
+    {
+        /// <summary>An array of <see cref="ColorSequenceKeypoint"/> values in ascending order.</summary>
+        public readonly ColorSequenceKeypoint[] Keypoint = null!;
+
+        /// <summary>Returns a new <see cref="ColorSequence"/> that is entirely the specified color.</summary>
+        public ColorSequence(Color3 c)
+        {
+        }
+
+        /// <summary>Returns a new <see cref="ColorSequence"/> with c0 as the start value and c1 as the end value.</summary>
+        public ColorSequence(Color3 c0, Color3 c1)
+        {
+        }
+
+        /// <summary>Returns a new <see cref="ColorSequence"/> from an array of ColorSequenceKeypoints.</summary>
+        public ColorSequence(ColorSequenceKeypoint[] keypoints)
+        {
+        }
+    }
+
+    public sealed class ColorSequenceKeypoint
+    {
+        /// <summary>The relative time at which the keypoint is located.</summary>
+        public readonly float Time;
+        /// <summary>The <see cref="Color3"/> value of the keypoint.</summary>
+        public readonly Color3 Value = null!;
+
+        /// <summary>Creates a <see cref="ColorSequenceKeypoint"/> with a specified time and color.</summary>
+        public ColorSequenceKeypoint(float time, Color3 color)
+        {
+        }
+    }
+
+    /// <summary>
+    /// <para>The <see cref="CatalogSearchParams"/> data type stores the parameters of a catalog search via <see cref="Classes.AvatarEditorService.SearchCatalog(CatalogSearchParams)"/>.</para>
+    /// <para>When accessing the value of the <see cref="BundleTypes"/> or <see cref="AssetTypes"/> property the returned table will be read-only to avoid confusion when not directly accessing the <see cref="CatalogSearchParams"/> instance.</para>
+    /// </summary>
+    public sealed class CatalogSearchParams
+    {
+        /// <summary>The keyword to search for catalog results with.</summary>
+        public string SearchKeyword = null!;
+        /// <summary>The minimum item price to search for.</summary>
+        public uint MinPrice;
+        /// <summary>The maximum item price to search for.</summary>
+        public uint MaxPrice;
+        /// <summary>The order in which to sort the results.</summary>
+        public Enum.CatalogSortType SortType;
+        /// <summary>The time period to use to aggregate the sort results.</summary>
+        public Enum.CatalogSortAggregation SortAggregation;
+        /// <summary>The category to filter the search by.</summary>
+        public Enum.CatalogCategoryFilter CategoryFilter;
+        /// <summary>The sales type filter the search by.</summary>
+        public Enum.SalesTypeFilter SalesTypeFilter;
+        /// <summary>An array containing <see cref="Enum.BundleType"/> values to filter the search by.</summary>
+        public Enum.BundleType[] BundleTypes = null!;
+        /// <summary>An array containing <see cref="Enum.AvatarAssetType"/> values to filter the search by.</summary>
+        public Enum.AvatarAssetType[] AssetTypes = null!;
+        /// <summary>Whether off sale items should be included in the results.</summary>
+        public bool IncludeOffSale;
+        /// <summary>Search for items with the given creator.</summary>
+        public string CreatorName = null!;
+        /// <summary>Specifies the number of items to return. Accepts 10, 28, 30, 60, and 120. Defaults to 30.</summary>
+        public byte Limit;
     }
 
     public interface EmoteDictionary : IDictionary<string, int[]>
