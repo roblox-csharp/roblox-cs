@@ -1,5 +1,6 @@
 ﻿namespace RobloxRuntime
 {
+    using RobloxRuntime.Classes;
     using static RobloxRuntime.Enum.StudioScriptEditorColorCategories;
     using HttpHeaders = IDictionary<string, string>;
 
@@ -610,7 +611,7 @@
             return null!;
         }
 
-        /// <summary>Returns an orthonormalized copy of the <see cref="CFrame"/>. The <see cref="Classes.BasePart.CFrame"/> property automatically applies orthonormalization, but other APIs which take <see cref="CFrame"/>s do not, so this method is occasionally necessary when incrementally updating a <see cref="CFrame"/> and using it with them.</summary>
+        /// <summary>Returns an orthonormalized copy of the <see cref="CFrame"/>. The <see cref="BasePart.CFrame"/> property automatically applies orthonormalization, but other APIs which take <see cref="CFrame"/>s do not, so this method is occasionally necessary when incrementally updating a <see cref="CFrame"/> and using it with them.</summary>
         public CFrame Orthonormalize()
         {
             return null!;
@@ -930,6 +931,64 @@
         }
     }
 
+    /// <summary>
+    /// <para>The <see cref="RaycastResult"/> data type stores the result of a successful raycasting operation performed by <see cref="WorldRoot.Raycast(Vector3, Vector3, RaycastParams?)"/>. It contains the properties listed below.</para>
+    /// <para>This object should not be confused with the similarly-named <see cref="RaycastParams"/> which is used to perform a raycast.</para>
+    /// </summary>
+    public sealed class RaycastResult
+    {
+        /// <summary>The distance between the ray origin and the intersection point.</summary>
+        public readonly float Distance;
+        /// <summary>The <see cref="BasePart"/> or <see cref="Terrain"/> cell that the ray intersected.</summary>
+        public readonly Instance? Instance;
+        /// <summary>The <see cref="Enum.Material"/> at the intersection point.</summary>
+        public readonly Enum.Material Material;
+        /// <summary>The position of the intersection between the ray and the part.</summary>
+        public readonly Vector3 Position = null!;
+        /// <summary>The normal vector of the intersected face.</summary>
+        public readonly Vector3 Normal = null!;
+    }
+
+    /// <summary>
+    /// <para>The <see cref="RaycastParams"/> data type stores parameters for <see cref="WorldRoot.Raycast(Vector3, Vector3, RaycastParams?)"/> operations.</para>
+    /// <para>The <see cref="FilterDescendantsInstances"/> property stores an array of objects to use as either an inclusion or exclusion list based on the <see cref="FilterType"/> enum.</para>
+    /// <para>If desired, the <see cref="IgnoreWater"/> property can be used to ignore Terrain water, and the <see cref="CollisionGroup"/> property can specify a collision group for the raycasting operation.</para>
+    /// <para>This object is different from the similarly named <see cref="RaycastResult"/> which provides the results of a raycast.</para>
+    /// <para>Unlike most data types in Luau, you can change all of the members of <see cref="RaycastParams"/> without creating a new object, allowing you to reuse the same object repeatedly.</para>
+    /// </summary>
+    public sealed class RaycastParams
+    {
+        public Instance[]? FilterDescendantsInstances;
+        public Enum.RaycastFilterType? FilterType;
+        public bool? IgnoreWater;
+        public string? CollisionGroup;
+        public bool? RespectCanCollide;
+        public bool? BruteForceAllSlow;
+
+        /// <summary>Returns a blank <see cref="RaycastParams"/>.</summary>
+        public RaycastParams()
+        {
+        }
+
+        /// <summary>
+        /// <para>For efficiency and simplicity, this method is the preferred way to add instances to the filter.</para>
+        /// <para>It has the additional advantage that it allows <see cref="FilterDescendantsInstances"/> to be updated from a parallel context.</para>
+        /// </summary>
+        /// <param name="instance">An instance to add.</param>
+        public void AddToFilter(Instance instance)
+        {
+        }
+
+        /// <summary>
+        /// <para>For efficiency and simplicity, this method is the preferred way to add instances to the filter.</para>
+        /// <para>It has the additional advantage that it allows <see cref="FilterDescendantsInstances"/> to be updated from a parallel context.</para>
+        /// </summary>
+        /// <param name="instances">An array containing instances to add.</param>
+        public void AddToFilter(Instance[] instances)
+        {
+        }
+    }
+
     /// <summary>The <see cref="UDim"/> data type represents a one-dimensional value with two components, a relative scale and an absolute offset.</summary>
     public sealed class UDim
     {
@@ -956,7 +1015,7 @@
 
     /// <summary>
     /// <para>The <see cref="UDim2"/> data type represents a two-dimensional value where each dimension is composed of a relative scale and an absolute offset.</para>
-    /// <para>It is a combination of two <see cref="UDim"/> representing the X and Y dimensions. The most common usages of <see cref="UDim2"/> objects are setting the Size and Position of <see cref="Classes.GuiObject"/>s.</para>
+    /// <para>It is a combination of two <see cref="UDim"/> representing the X and Y dimensions. The most common usages of <see cref="UDim2"/> objects are setting the Size and Position of <see cref="GuiObject"/>s.</para>
     /// </summary>
     public sealed class UDim2
     {
@@ -1028,7 +1087,7 @@
 
     /// <summary>
     /// <para>The <see cref="NumberSequence"/> data type represents a series of number values from 0 to 1.</para>
-    /// <para>The number values are expressed using the <see cref="NumberSequenceKeypoint"/> type. This type is used in properties such as <see cref="Classes.ParticleEmitter.Size"/> and <see cref="Classes.Beam.Transparency"/> to define a numerical change over time.</para>
+    /// <para>The number values are expressed using the <see cref="NumberSequenceKeypoint"/> type. This type is used in properties such as <see cref="ParticleEmitter.Size"/> and <see cref="Beam.Transparency"/> to define a numerical change over time.</para>
     /// </summary>
     public sealed class NumberSequence
     {
@@ -1076,7 +1135,7 @@
 
     /// <summary>
     /// <para>The <see cref="ColorSequence"/> data type represents a gradient of color values from 0 to 1.</para>
-    /// <para>The color values are expressed using the <see cref="ColorSequenceKeypoint"/> type. This type is used in various properties of <see cref="Classes.ParticleEmitter"/>, <see cref="Classes.Trail"/>, <see cref="Classes.Beam"/>, and other objects that use color gradients.</para>
+    /// <para>The color values are expressed using the <see cref="ColorSequenceKeypoint"/> type. This type is used in various properties of <see cref="ParticleEmitter"/>, <see cref="Trail"/>, <see cref="Beam"/>, and other objects that use color gradients.</para>
     /// </summary>
     public sealed class ColorSequence
     {
@@ -1142,7 +1201,7 @@
     /// <summary>
     /// <para>Describes the font used to render text. Every font consists of a font family (like Source Sans Pro), a weight like <see cref="Enum.FontWeight.Bold"/>, and a style like <see cref="Enum.FontStyle.Italic"/>.</para>
     /// <para>Font families are a type of asset, like images or meshes. Each font family contains a number of font faces, and each face has a different weight and style.</para>
-    /// <para><see cref="Font"/> is used by the <see cref="Classes.TextLabel.FontFace"/>, <see cref="Classes.TextButton.FontFace"/>, and <see cref="Classes.TextBox.FontFace"/> properties.</para>
+    /// <para><see cref="Font"/> is used by the <see cref="TextLabel.FontFace"/>, <see cref="TextButton.FontFace"/>, and <see cref="TextBox.FontFace"/> properties.</para>
     /// </summary>
     public sealed class Font
     {
@@ -1204,35 +1263,35 @@
     }
 
     /// <summary>
-    /// <para>The <see cref="CatalogSearchParams"/> data type stores the parameters of a catalog search via <see cref="Classes.AvatarEditorService.SearchCatalog(CatalogSearchParams)"/>.</para>
+    /// <para>The <see cref="CatalogSearchParams"/> data type stores the parameters of a catalog search via <see cref="AvatarEditorService.SearchCatalog(CatalogSearchParams)"/>.</para>
     /// <para>When accessing the value of the <see cref="BundleTypes"/> or <see cref="AssetTypes"/> property the returned table will be read-only to avoid confusion when not directly accessing the <see cref="CatalogSearchParams"/> instance.</para>
     /// </summary>
     public sealed class CatalogSearchParams
     {
         /// <summary>The keyword to search for catalog results with.</summary>
-        public string SearchKeyword = null!;
+        public string? SearchKeyword;
         /// <summary>The minimum item price to search for.</summary>
-        public ulong MinPrice;
+        public ulong? MinPrice;
         /// <summary>The maximum item price to search for.</summary>
-        public ulong MaxPrice;
+        public ulong? MaxPrice;
         /// <summary>The order in which to sort the results.</summary>
-        public Enum.CatalogSortType SortType;
+        public Enum.CatalogSortType? SortType;
         /// <summary>The time period to use to aggregate the sort results.</summary>
-        public Enum.CatalogSortAggregation SortAggregation;
+        public Enum.CatalogSortAggregation? SortAggregation;
         /// <summary>The category to filter the search by.</summary>
-        public Enum.CatalogCategoryFilter CategoryFilter;
+        public Enum.CatalogCategoryFilter? CategoryFilter;
         /// <summary>The sales type filter the search by.</summary>
-        public Enum.SalesTypeFilter SalesTypeFilter;
+        public Enum.SalesTypeFilter? SalesTypeFilter;
         /// <summary>An array containing <see cref="Enum.BundleType"/> values to filter the search by.</summary>
-        public Enum.BundleType[] BundleTypes = null!;
+        public Enum.BundleType[]? BundleTypes;
         /// <summary>An array containing <see cref="Enum.AvatarAssetType"/> values to filter the search by.</summary>
-        public Enum.AvatarAssetType[] AssetTypes = null!;
+        public Enum.AvatarAssetType[]? AssetTypes;
         /// <summary>Whether off sale items should be included in the results.</summary>
-        public bool IncludeOffSale;
+        public bool? IncludeOffSale;
         /// <summary>Search for items with the given creator.</summary>
-        public string CreatorName = null!;
+        public string? CreatorName;
         /// <summary>Specifies the number of items to return. Accepts 10, 28, 30, 60, and 120. Defaults to 30.</summary>
-        public byte Limit;
+        public byte? Limit;
     }
 
     public interface EmoteDictionary : IDictionary<string, int[]>
