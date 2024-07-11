@@ -4,7 +4,10 @@ Roblox CSharp to Lua compiler
 
 # To-do
 - Unit tests
-- Lambdas
+- Referencing the full path of values from imported libraries (i.e. `RobloxRuntime.Classes.Part` vs `Part` with `using RobloxRuntime.Classes`)
+- Collection literals
+- `for`/`foreach`/`while` loops
+- `using name = value` expressions (equivalent to `:=` operator in other languages)
 - Safe navigation
 - Ternary operator
 - Property declarations
