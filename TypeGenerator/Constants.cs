@@ -306,6 +306,7 @@
             { "Dictionary", "object" },
             { "Map", "object" },
             { "RBXScriptSignal", "ScriptSignal" },
+            { "RBXScriptConnection", "ScriptConnection" },
             { "Instance", "Instance?" },
             { "Object", "Instance" },
             { "Objects", "Instance[]" },

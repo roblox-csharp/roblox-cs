@@ -446,6 +446,10 @@ namespace TypeGenerator.Generators
         private void GenerateClasses(List<APITypes.Class> rbxClasses)
         {
             Write("// GENERATED ROBLOX INSTANCE CLASSES");
+            if (_security == "PluginSecurity")
+            {
+                Write("using RobloxRuntime.Classes;");
+            }
             Write();
 
             foreach (var rbxClass in rbxClasses)

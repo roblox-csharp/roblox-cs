@@ -541,6 +541,122 @@
         }
     }
 
+    public sealed class Color3(float red = 0, float green = 0, float blue = 0)
+    {
+        public readonly float R = red;
+        public readonly float G = green;
+        public readonly float B = blue;
+
+        public static Color3 fromRGB(byte r, byte g, byte b)
+        {
+            return null!;
+        }
+
+        public static Color3 fromHSV(float h, float s, float v)
+        {
+            return null!;
+        }
+
+        public static Color3 fromHex(string hex)
+        {
+            return null!;
+        }
+
+        public Color3 Lerp(Color3 color, float alpha)
+        {
+            return null!;
+        }
+
+        public (float, float, float) ToHSV()
+        {
+            return default;
+        }
+
+        public string ToHex()
+        {
+            return null!;
+        }
+    }
+
+    public sealed class BrickColor
+    {
+        public readonly uint Number;
+        public readonly float r;
+        public readonly float g;
+        public readonly float b;
+        public readonly string Name = null!;
+        public readonly Color3 Color = null!;
+
+        public BrickColor(uint index)
+        { 
+        }
+
+        public BrickColor(float r, float g, float b)
+        {
+        }
+
+        public BrickColor(string name)
+        {
+        }
+
+        public BrickColor(Color3 color)
+        {
+        }
+
+        public static BrickColor palette(uint paletteIndex)
+        {
+            return null!;
+        }
+
+        public static BrickColor random()
+        {
+            return null!;
+        }
+
+        public static BrickColor Random()
+        {
+            return null!;
+        }
+
+        public static BrickColor White()
+        {
+            return null!;
+        }
+
+        public static BrickColor Gray()
+        {
+            return null!;
+        }
+
+        public static BrickColor DarkGray()
+        {
+            return null!;
+        }
+        public static BrickColor Black()
+        {
+            return null!;
+        }
+
+        public static BrickColor Red()
+        {
+            return null!;
+        }
+
+        public static BrickColor Yellow()
+        {
+            return null!;
+        }
+
+        public static BrickColor Green()
+        {
+            return null!;
+        }
+        public static BrickColor Blue()
+        {
+            return null!;
+        }
+    }
+
     public interface EmoteDictionary : IDictionary<string, int[]>
     {
     }

@@ -3,6 +3,7 @@
 namespace RobloxRuntime.Plugin
 {
 	// GENERATED ROBLOX INSTANCE CLASSES
+	using RobloxRuntime.Classes;
 	
 	public partial interface Instance
 	{
