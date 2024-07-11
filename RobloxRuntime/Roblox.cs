@@ -955,8 +955,8 @@
     }
 
     /// <summary>
-    /// <para>The UDim2 data type represents a two-dimensional value where each dimension is composed of a relative scale and an absolute offset.</para>
-    /// <para>It is a combination of two UDim representing the X and Y dimensions. The most common usages of <see cref="UDim2"/> objects are setting the Size and Position of <see cref="Classes.GuiObject"/>s.</para>
+    /// <para>The <see cref="UDim2"/> data type represents a two-dimensional value where each dimension is composed of a relative scale and an absolute offset.</para>
+    /// <para>It is a combination of two <see cref="UDim"/> representing the X and Y dimensions. The most common usages of <see cref="UDim2"/> objects are setting the Size and Position of <see cref="Classes.GuiObject"/>s.</para>
     /// </summary>
     public sealed class UDim2
     {
@@ -1112,6 +1112,97 @@
         }
     }
 
+    public sealed class Rect
+    {
+        /// <summary>The width of the <see cref="Rect"/> in pixels.</summary>
+        public readonly float Width;
+        /// <summary>The height of the <see cref="Rect"/> in pixels.</summary>
+        public readonly float Height;
+        /// <summary>The top-left corner.</summary>
+        public readonly Vector2 Min = null!;
+        /// <summary>The bottom-right corner.</summary>
+        public readonly Vector2 Max = null!;
+
+        /// <summary>Returns a new <see cref="Rect"/> with zero <see cref="Vector2"/> positions.</summary>
+        public Rect()
+        { 
+        }
+
+        /// <summary>Returns a new <see cref="Rect"/> from the given <see cref="Vector2"/> positions.</summary>
+        public Rect(Vector2 min, Vector2 max)
+        {
+        }
+
+        /// <summary>Returns a new <see cref="Rect"/> using the first and last two arguments as coordinates for corners.</summary>
+        public Rect(float minX, float minY, float maxX, float maxY)
+        {
+        }
+    }
+
+    /// <summary>
+    /// <para>Describes the font used to render text. Every font consists of a font family (like Source Sans Pro), a weight like <see cref="Enum.FontWeight.Bold"/>, and a style like <see cref="Enum.FontStyle.Italic"/>.</para>
+    /// <para>Font families are a type of asset, like images or meshes. Each font family contains a number of font faces, and each face has a different weight and style.</para>
+    /// <para><see cref="Font"/> is used by the <see cref="Classes.TextLabel.FontFace"/>, <see cref="Classes.TextButton.FontFace"/>, and <see cref="Classes.TextBox.FontFace"/> properties.</para>
+    /// </summary>
+    public sealed class Font
+    {
+        /// <summary>The asset ID for the font family. These start with either rbxasset:// or rbxassetid://.</summary>
+        public readonly string Family = null!;
+        /// <summary>
+        /// <para>How thick the text is. The default value is <see cref="Enum.FontWeight.Regular"/>.</para>
+        /// <para>When set, <see cref="Font.Bold"/> is updated. Bold is true if the weight is <see cref="Enum.FontWeight.SemiBold"/> or thicker.</para>
+        /// </summary>
+        public readonly Enum.FontWeight Weight;
+        /// <summary>
+        /// <para>Whether the font is italic. The default value is <see cref="Enum.FontStyle.Normal"/>.</para>
+        /// <para>The font can be made italic (like this) using <see cref="Enum.FontStyle.Italic"/>.</para>
+        /// </summary>
+        public readonly Enum.FontStyle Style;
+        /// <summary>
+        /// Whether the font is bold. Sets <see cref="Font.Weight"/> to <see cref="Enum.FontWeight.Bold"/> when true, and <see cref="Enum.FontWeight.Regular"/> otherwise.
+        /// </summary>
+        public readonly bool Bold;
+
+        /// <summary>Creates a new <see cref="Font"/>.</summary>
+        /// <param name="family">The asset ID for the font family, starting with rbxasset:// or rbxassetid://.</param>
+        /// <param name="weight">How thick the text is.</param>
+        /// <param name="style">Whether the text is normal or italic.</param>
+        public Font(string family, Enum.FontWeight? weight, Enum.FontStyle? style)
+        {
+        }
+
+        /// <summary>
+        /// <para>Creates a <see cref="Font"/> from an <see cref="Enum.Font"/> value. Throws an error when called with <see cref="Enum.Font.Unknown"/>.</para>
+        /// <para>The following table indicates the family, weight, and style associated with each <see cref="Enum.Font"/>.</para>
+        /// </summary>
+        /// <param name="font">The enum value of the font to use.</param>
+        public static Font fromEnum(Enum.Font font)
+        {
+            return null!;
+        }
+
+        /// <summary>
+        /// <para>This is a convenience method for creating fonts from the content folder. The name you pass in will be converted into an asset ID like "rbxasset://fonts/families/YourFontNameHere.json".</para>
+        /// <para>The name can only contain alphabetical characters, digits, _ (underscore), and - (hyphen). It can't contain any spaces.</para>
+        /// </summary>
+        /// <param name="name">The name of the font.</param>
+        /// <param name="weight">How thick the text is.</param>
+        /// <param name="style">Whether the text is normal or italic.</param>
+        public static Font fromName(string name, Enum.FontWeight? weight, Enum.FontStyle? style)
+        {
+            return null!;
+        }
+
+        /// <summary>This is a convenience method for creating fonts from an asset ID number.</summary>
+        /// <param name="id">The asset ID of the font as a number.</param>
+        /// <param name="weight">How thick the text is.</param>
+        /// <param name="style">Whether the text is normal or italic.</param>
+        public static Font fromId(ulong id, Enum.FontWeight? weight, Enum.FontStyle? style)
+        {
+            return null!;
+        }
+    }
+
     /// <summary>
     /// <para>The <see cref="CatalogSearchParams"/> data type stores the parameters of a catalog search via <see cref="Classes.AvatarEditorService.SearchCatalog(CatalogSearchParams)"/>.</para>
     /// <para>When accessing the value of the <see cref="BundleTypes"/> or <see cref="AssetTypes"/> property the returned table will be read-only to avoid confusion when not directly accessing the <see cref="CatalogSearchParams"/> instance.</para>
@@ -1121,9 +1212,9 @@
         /// <summary>The keyword to search for catalog results with.</summary>
         public string SearchKeyword = null!;
         /// <summary>The minimum item price to search for.</summary>
-        public uint MinPrice;
+        public ulong MinPrice;
         /// <summary>The maximum item price to search for.</summary>
-        public uint MaxPrice;
+        public ulong MaxPrice;
         /// <summary>The order in which to sort the results.</summary>
         public Enum.CatalogSortType SortType;
         /// <summary>The time period to use to aggregate the sort results.</summary>
@@ -1168,7 +1259,7 @@
 
     public interface UserInfo
     {
-        public uint Id { get; set; }
+        public ulong Id { get; set; }
         public string Username { get; set; }
         public string DisplayName { get; set; }
     }
@@ -1177,7 +1268,7 @@
     {
         interface GroupOwner
         {
-            public uint Id { get; set; }
+            public ulong Id { get; set; }
             public string Name { get; set; }
         }
 
@@ -1187,7 +1278,7 @@
             public byte Rank { get; set; }
         }
 
-        public uint Id { get; set; }
+        public ulong Id { get; set; }
         public string Name { get; set; }
         public GroupOwner Owner { get; set; }
         public string EmblemUrl { get; set; }
@@ -1197,7 +1288,7 @@
 
     public interface GetGroupsAsyncResult
     {
-        public uint Id { get; set; }
+        public ulong Id { get; set; }
         public string Name { get; set; }
         public string EmblemUrl { get; set; }
         public string Description { get; set; }
