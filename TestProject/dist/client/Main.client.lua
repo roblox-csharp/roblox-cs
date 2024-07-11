@@ -7,7 +7,7 @@ CS.namespace("TestGame", function(namespace)
             class.__index = class
 
             function class.Main()
-                local part = CS.getAssemblyType("Instance").new("Part")
+                local part = CS.getAssemblyType("Instance").new("Part", CS.getAssemblyType("game").Workspace)
                 CS.getAssemblyType("Console").WriteLine(part:IsA("Part"))
             end
 

@@ -3,6 +3,11 @@
     using RobloxRuntime.Classes;
     using HttpHeaders = IDictionary<string, string>;
 
+    public static class Globals
+    {
+        public static DataModel game { get; } = null!;
+    }
+
     namespace Classes
     {
         public interface ClipEvaluator : Instance

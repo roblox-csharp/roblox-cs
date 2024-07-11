@@ -146,10 +146,8 @@ namespace RobloxCS
                                     }
                                 }
                             }
-                            else
-                            {
-                                Write(")");
-                            }
+
+                            Write(")");
                             return;
                         }
                     case "IsA":
