@@ -1486,6 +1486,67 @@
     }
 
     /// <summary>
+    /// <para>The <see cref="PhysicalProperties"/> data type describes several physical properties of a <see cref="BasePart"/>: <see cref="BasePart.Density"/>, <see cref="BasePart.Elasticity"/>, and <see cref="BasePart.Friction"/>.</para>
+    /// <para>It is used in the similarly-named <see cref="BasePart.CustomPhysicalProperties"/> property.</para>
+    /// </summary>
+    public sealed class PhysicalProperties
+    {
+        /// <summary>The mass per unit volume of the part.</summary>
+        public float Density;
+        /// <summary>The deceleration of the part when rubbing against another part.</summary>
+        public float Friction;
+        /// <summary>The amount of energy retained when colliding with another part.</summary>
+        public float Elasticity;
+        /// <summary>The importance of the part's <see cref="BasePart.Friction"/> property when calculating the friction with the colliding part.</summary>
+        public float FrictionWeight;
+        /// <summary>The importance of the part's <see cref="BasePart.Elasticity"/> property when calculating the elasticity with the colliding part.</summary>
+        public float ElasticityWeight;
+
+        /// <summary>Returns a <see cref="PhysicalProperties"/> container, with the density, friction, and elasticity specified for this Material.</summary>
+        public PhysicalProperties(Enum.Material material)
+        {
+        }
+
+        /// <summary>Returns a <see cref="PhysicalProperties"/> container, with the specified density, friction, and elasticity.</summary>
+        public PhysicalProperties(float density, float friction, float elasticity)
+        {
+        }
+
+        /// <summary>Creates a <see cref="PhysicalProperties"/> container with the specified density, friction, elasticity, weight of friction, and weight of elasticity.</summary>
+        public PhysicalProperties(float density, float friction, float elasticity, float frictionWeight, float elasticityWeight)
+        {
+        }
+    }
+
+    /// <summary>
+    /// The <see cref="Path2DControlPoint"/> data type represents a single control point used with the <see cref="Path2D"/> instance.
+    /// </summary>
+    public sealed class Path2DControlPoint
+    {
+        /// <summary>The position of the <see cref="Path2DControlPoint"/>.</summary>
+        public readonly UDim2 Position = null!;
+        /// <summary>The left tangent of the <see cref="Path2DControlPoint"/>.</summary>
+        public readonly UDim2 LeftTangent = null!;
+        /// <summary>The right tangent of the <see cref="Path2DControlPoint"/>.</summary>
+        public readonly UDim2 RightTangent = null!;
+
+        /// <summary>Returns an empty <see cref="Path2DControlPoint"/>.</summary>
+        public Path2DControlPoint()
+        { 
+        }
+
+        /// <summary>Returns an empty <see cref="Path2DControlPoint"/>.</summary>
+        public Path2DControlPoint(UDim2 position)
+        {
+        }
+
+        /// <summary>Returns an empty <see cref="Path2DControlPoint"/>.</summary>
+        public Path2DControlPoint(UDim2 position, UDim2 leftTangent, UDim2 rightTangent)
+        {
+        }
+    }
+
+    /// <summary>
     /// <para>A time-value pair used with <see cref="FloatCurve"/> instances.</para>
     /// <para>The <see cref="Interpolation"/> property dictates the interpolation mode for the segment started by this key and ended by the next key on the curve. Each segment may use a different interpolation mode.</para>
     /// <para>The <see cref="LeftTangent"/> and <see cref="RightTangent"/> properties apply to the cubic interpolation mode and define the desired tangent (slope) at the key. Different left and right values can be used to encode discontinuities in slope at the key.</para>

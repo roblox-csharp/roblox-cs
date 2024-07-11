@@ -3115,7 +3115,7 @@ namespace RobloxRuntime.Classes
 	
 	public interface LodDataEntity : Instance
 	{
-		public SharedString EntityData { get; set; }
+		public string EntityData { get; set; }
 		public bool EntityLodEnabled { get; set; }
 		public CFrame EntityPosition { get; set; }
 		public Vector3 EntityScale { get; set; }
@@ -3276,7 +3276,7 @@ namespace RobloxRuntime.Classes
 	public interface MessagingService : Instance
 	{
 		public void PublishAsync(string topic, object? message);
-		public RBXScriptConnection SubscribeAsync(string topic, Action callback);
+		public ScriptConnection SubscribeAsync(string topic, Action callback);
 	}
 	
 	public interface MetaBreakpoint : Instance
