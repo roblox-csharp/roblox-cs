@@ -22,8 +22,8 @@ namespace RobloxCS
         public void Transpile()
         {
             ParseSource();
-            CompileASTs();
-            WriteLuaOutput();
+            var compilation = CompileASTs();
+            WriteLuaOutput(compilation);
         }
 
         private void ParseSource()
@@ -47,20 +47,22 @@ namespace RobloxCS
         }
         
 
-        private void CompileASTs()
+        private CSharpCompilation CompileASTs()
         {
             var compilationOptions = new CSharpCompilationOptions(OutputKind.ConsoleApplication);
-            var compiler = CSharpCompilation.Create(
+            var compilation = CSharpCompilation.Create(
                 assemblyName: _config.CSharpOptions.AssemblyName,
                 syntaxTrees: _fileTrees,
                 references: GetCompilationReferences(),
                 options: compilationOptions
             );
 
-            foreach (var diagnostic in compiler.GetDiagnostics())
+            foreach (var diagnostic in compilation.GetDiagnostics())
             {
                 Logger.HandleDiagnostic(diagnostic);
             }
+
+            return compilation;
         }
 
         private List<PortableExecutableReference> GetCompilationReferences()
@@ -99,19 +101,29 @@ namespace RobloxCS
             };
         }
 
-        private void WriteLuaOutput()
+        private void WriteLuaOutput(CSharpCompilation compilation)
         {
             var compiledFiles = new List<CompiledFile>();
             foreach (var tree in _fileTrees)
             {
-                var codeGenerator = new CodeGenerator(tree.GetRoot(), _config);
+                var codeGenerator = new CodeGenerator(tree, compilation, _config);
                 var luaSource = codeGenerator.GenerateLua();
                 var targetPath = tree.FilePath.Replace(_config.SourceFolder, _config.OutputFolder).Replace(".cs", ".lua");
                 var compiledFile = new CompiledFile(targetPath, luaSource);
                 compiledFiles.Add(compiledFile);
             }
 
+            EnsureDirectoriesExist();
             FileManager.WriteCompiledFiles(_outDirectory, compiledFiles);
+        }
+
+        private void EnsureDirectoriesExist()
+        {
+            var subDirectories = Directory.GetDirectories(_sourceDirectory, "*", SearchOption.AllDirectories);
+            foreach (string subDirectory in subDirectories)
+            {
+                Directory.CreateDirectory(subDirectory.Replace(_config.SourceFolder, _config.OutputFolder));
+            }
         }
     }
 }

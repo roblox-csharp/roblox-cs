@@ -17,9 +17,13 @@
         {
         }
 
+        // public interface ICreatableInstance : Instance
+        // { 
+        // }
+
         public partial interface Instance
         {
-            public static T Create<T>() where T : Instance
+            public static T Create<T>(Instance? parent = null) where T : Instance
             {
                 return (T)(object)null!;
             }

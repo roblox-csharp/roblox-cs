@@ -1,8 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Data.Common;
-using System.Reflection.Metadata;
 using System.Text;
 
 namespace RobloxCS
@@ -17,15 +15,19 @@ namespace RobloxCS
 
         private readonly SyntaxNode _root;
         private readonly ConfigData _config;
+        private readonly CSharpCompilation _compilation;
+        private readonly SemanticModel _semanticModel;
         private readonly int _indentSize;
 
         private readonly StringBuilder _output = new StringBuilder();
         private int _indent = 0;
 
-        public CodeGenerator(SyntaxNode root, ConfigData config, int indentSize = 4)
+        public CodeGenerator(SyntaxTree tree, CSharpCompilation compilation, ConfigData config, int indentSize = 4)
         {
-            _root = root;
+            _root = tree.GetRoot();
             _config = config;
+            _compilation = compilation;
+            _semanticModel = compilation.GetSemanticModel(tree);
             _indentSize = indentSize;
         }
 
@@ -110,12 +112,43 @@ namespace RobloxCS
             if (node.Expression is MemberAccessExpressionSyntax)
             {
                 var memberAccess = (MemberAccessExpressionSyntax)node.Expression;
-                if (GetName(memberAccess.Name) == "ToString")
+                var objectName = GetName(memberAccess.Expression);
+                var name = GetName(memberAccess.Name);
+                switch (name)
                 {
-                    Write("tostring(");
-                    Visit(memberAccess.Expression);
-                    Write(")");
-                    return;
+                    case "ToString":
+                        Write("tostring(");
+                        Visit(memberAccess.Expression);
+                        Write(")");
+                        return;
+                    case "Create":
+                        if (objectName != "Instance") break;
+                        var symbolInfo = _semanticModel.GetSymbolInfo(node);
+                        var methodSymbol = (IMethodSymbol)symbolInfo.Symbol!;
+                        if (!methodSymbol.IsGenericMethod)
+                            throw new Exception("Attempt to macro Instance.Create<T>() but it is not generic?");
+
+                        var arguments = node.ArgumentList.Arguments;
+                        var instanceType = methodSymbol.TypeArguments.First();
+                        Visit(memberAccess.Expression);
+                        Write($".new(\"{instanceType.Name}\"");
+                        if (arguments.Count > 0)
+                        {
+                            Write(", ");
+                            foreach (var argument in arguments)
+                            {
+                                Visit(argument.Expression);
+                                if (argument != arguments.Last())
+                                {
+                                    Write(", ");
+                                }
+                            }
+                        }
+                        else
+                        {
+                            Write(")");
+                        }
+                        return;
                 }
             }
 

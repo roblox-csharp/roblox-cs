@@ -4,7 +4,6 @@ Roblox CSharp to Lua compiler
 
 # To-do
 - Property declarations
-- Macro `Instance.Create()` to `Instance.new()`
 - Macro IEnumerable<T> (or just List<T>) methods
 - Classes/structs/interfaces inside of classes
 - Restrict `volatile` and `partial` usage (`partial` maybe supported in the future)
