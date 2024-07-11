@@ -18,7 +18,16 @@ namespace RobloxCS
         {
             switch (op)
             {
-                default: return op;
+                case "!":
+                    return "not ";
+                case "!=":
+                    return "~=";
+                case "&&":
+                    return "and";
+                case "||":
+                    return "or";
+                default:
+                    return op;
             }
         }
 

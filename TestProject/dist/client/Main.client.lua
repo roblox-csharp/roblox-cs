@@ -8,10 +8,17 @@ CS.namespace("TestGame", function(namespace)
 
             function class.Main()
                 local player = game:GetService("Players").LocalPlayer
-                local character = if player.Character == nil then player.CharacterAdded.Wait() else player.Character
+                local character = if player.Character == nil then player.CharacterAdded:Wait() else player.Character
                 local part = CS.getAssemblyType("Instance").new("Part", character)
                 part.Anchored = true
-                part.Position = CS.getAssemblyType("Vector3").new(0, -1, 0)
+                part.CanCollide = false
+                part.Position = character.PrimaryPart.Position
+                local runtime = game:GetService("RunService")
+                local goalColor = CS.getAssemblyType("Color3").fromRGB(255, 0, 0)
+                local alpha = 0.005
+                runtime.RenderStepped:Connect(function(dt)
+                    part.Color = part.Color:Lerp(goalColor, alpha)
+                end)
             end
 
             if namespace == nil then

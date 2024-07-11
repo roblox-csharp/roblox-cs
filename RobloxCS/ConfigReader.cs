@@ -10,9 +10,9 @@ sealed class CSharpOptions
 
     public bool IsValid()
     {
-        return !string.IsNullOrEmpty(EntryPointName) &&
-               !string.IsNullOrEmpty(MainMethodName) &&
-               !string.IsNullOrEmpty(AssemblyName);
+        return !string.IsNullOrEmpty(EntryPointName)
+            && !string.IsNullOrEmpty(MainMethodName)
+            && !string.IsNullOrEmpty(AssemblyName);
     }
 }
 

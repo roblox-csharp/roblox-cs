@@ -11,7 +11,13 @@ namespace TestGame.Client
             var character = player.Character ?? player.CharacterAdded.Wait();
             var part = Instance.Create<Part>(character);
             part.Anchored = true;
-            part.Position = new Vector3(0, -1, 0);
+            part.CanCollide = false;
+            part.Position = character.PrimaryPart!.Position;
+
+            var runtime = Services.RunService;
+            var goalColor = Color3.fromRGB(255, 0, 0);
+            var alpha = 0.005f;
+            runtime.RenderStepped.Connect(dt => part.Color = part.Color.Lerp(goalColor, alpha));
         }
     }
 }

@@ -61,10 +61,65 @@ namespace RobloxCS
             }
         }
 
+        public override void VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node)
+        {
+            Write("function");
+            Visit(node.ParameterList);
+            WriteLine();
+            _indent++;
+
+            Visit(node.Body);
+
+            _indent--;
+            Write("end");
+        }
+
+        public override void VisitSimpleLambdaExpression(SimpleLambdaExpressionSyntax node)
+        {
+            Write("function(");
+            Visit(node.Parameter);
+            Write(")");
+            WriteLine();
+            _indent++;
+
+            if (node.Block != null || node.ExpressionBody.IsKind(SyntaxKind.SimpleAssignmentExpression))
+            {
+                Visit(node.Body);
+            }
+            else
+            {
+                Write("return ");
+                Visit(node.ExpressionBody);
+            }
+            
+            _indent--;
+            WriteLine();
+            Write("end");
+        }
+
+        public override void VisitPrefixUnaryExpression(PrefixUnaryExpressionSyntax node)
+        {
+            Write(Util.GetMappedOperator(node.OperatorToken.Text));
+            Visit(node.Operand);
+        }
+
         public override void VisitBinaryExpression(BinaryExpressionSyntax node)
         {
+            var operatorText = Util.GetMappedOperator(node.OperatorToken.Text);
+            switch (operatorText)
+            {
+                case "??":
+                    Write("if ");
+                    Visit(node.Left);
+                    Write(" == nil then ");
+                    Visit(node.Right);
+                    Write(" else ");
+                    Visit(node.Left);
+                    return;
+            }
+
             Visit(node.Left);
-            Write($" {Util.GetMappedOperator(node.OperatorToken.Text)} ");
+            Write($" {operatorText} ");
             Visit(node.Right);
         }
 
@@ -114,6 +169,7 @@ namespace RobloxCS
                 var memberAccess = (MemberAccessExpressionSyntax)node.Expression;
                 var objectName = GetName(memberAccess.Expression);
                 var name = GetName(memberAccess.Name);
+
                 switch (name)
                 {
                     case "ToString":
@@ -190,6 +246,19 @@ namespace RobloxCS
                             }
                             return;
                         }
+                }
+
+                var nameSymbolInfo = _semanticModel.GetSymbolInfo(node);
+                {
+                    if (nameSymbolInfo.Symbol is IMethodSymbol methodSymbol)
+                    {
+                        var operatorText = methodSymbol.IsStatic ? "." : ":";
+                        Visit(memberAccess.Expression);
+                        Write(operatorText);
+                        Visit(memberAccess.Name);
+                        Visit(node.ArgumentList);
+                        return;
+                    }
                 }
             }
 
