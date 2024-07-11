@@ -605,7 +605,7 @@
             return null!;
         }
 
-        /// <summary>Returns an orthonormalized copy of the <see cref="CFrame"/>. The <see cref="BasePart.CFrame"/> property automatically applies orthonormalization, but other APIs which take <see cref="CFrame"/>s do not, so this method is occasionally necessary when incrementally updating a <see cref="CFrame"/> and using it with them.</summary>
+        /// <summary>Returns an orthonormalized copy of the <see cref="CFrame"/>. The <see cref="Classes.BasePart.CFrame"/> property automatically applies orthonormalization, but other APIs which take <see cref="CFrame"/>s do not, so this method is occasionally necessary when incrementally updating a <see cref="CFrame"/> and using it with them.</summary>
         public CFrame Orthonormalize()
         {
             return null!;
@@ -889,6 +889,114 @@
 
         /// <summary>Returns the "Bright Blue" <see cref="BrickColor"/>.</summary>
         public static BrickColor Blue()
+        {
+            return null!;
+        }
+    }
+
+    /// <summary>
+    /// <para>The <see cref="Ray"/> data type represents a half-line, finite in one direction but infinite in the other.</para>
+    /// <para>It can be defined by a 3D point, where the line originates from, and a direction vector, which is the direction it goes in.</para>
+    /// </summary>
+    public sealed class Ray
+    {
+        /// <summary>The <see cref="Ray"/> with a normalized direction (the direction has a magnitude of 1).</summary>
+        public readonly Ray Unit = null!;
+        /// <summary>The position of the origin.</summary>
+        public readonly Vector3 Origin = null!;
+        /// <summary>The direction vector of the <see cref="Ray"/>.</summary>
+        public readonly Vector3 Direction = null!;
+
+        /// <summary>Returns a <see cref="Ray"/> with the given Origin and Direction.</summary>
+        public Ray(Vector3 Origin, Vector3 Direction)
+        {
+        }
+
+        /// <summary>Returns a <see cref="Vector3"/> projected onto the ray so that it is within the <see cref="Ray"/> line of sight.</summary>
+        public Vector3 ClosestPoint(Vector3 point)
+        {
+            return null!;
+        }
+
+        /// <summary>Returns the distance between the given point and the closest point on the <see cref="Ray"/>.</summary>
+        public float Distance(Vector3 point)
+        {
+            return default;
+        }
+    }
+
+    /// <summary>The <see cref="UDim"/> data type represents a one-dimensional value with two components, a relative scale and an absolute offset.</summary>
+    public sealed class UDim
+    {
+        /// <summary>The relative scale component of the <see cref="UDim"/>.</summary>
+        public readonly float Scale;
+        /// <summary>The absolute offset component of the <see cref="UDim"/>.</summary>
+        public readonly uint Offset;
+
+        /// <summary>Returns a <see cref="UDim"/> from the given components.</summary>
+        public UDim(float Scale, uint Offset)
+        {
+        }
+
+        public static UDim operator +(UDim a, UDim b)
+        {
+            return null!;
+        }
+
+        public static UDim operator -(UDim a, UDim b)
+        {
+            return null!;
+        }
+    }
+
+    /// <summary>
+    /// <para>The UDim2 data type represents a two-dimensional value where each dimension is composed of a relative scale and an absolute offset.</para>
+    /// <para>It is a combination of two UDim representing the X and Y dimensions. The most common usages of <see cref="UDim2"/> objects are setting the Size and Position of <see cref="Classes.GuiObject"/>s.</para>
+    /// </summary>
+    public sealed class UDim2
+    {
+        /// <summary>The X dimension scale and offset of the <see cref="UDim2"/>.</summary>
+        public readonly UDim X = null!;
+        /// <summary>The Y dimension scale and offset of the <see cref="UDim2"/>.</summary>
+        public readonly UDim Y = null!;
+        /// <summary>The X dimension scale and offset of the <see cref="UDim2"/>.</summary>
+        public readonly UDim Width = null!;
+        /// <summary>The Y dimension scale and offset of the <see cref="UDim2"/>.</summary>
+        public readonly UDim Height = null!;
+
+        /// <summary>Returns a new <see cref="UDim2"/> given the coordinates of the two <see cref="UDim"/> components representing each axis.</summary>
+        public UDim2(float xScale = 0, uint xOffset = 0, float yScale = 0, uint yOffset = 0)
+        {
+        }
+
+        /// <summary>Returns a new <see cref="UDim2"/> from the given <see cref="UDim"/> objects representing the X and Y dimensions, respectively.</summary>
+        public UDim2(UDim x, UDim y)
+        {
+        }
+
+        /// <summary>Returns a new <see cref="UDim2"/> with the given scalar coordinates and no offsets.</summary>
+        public static UDim2 fromScale(float xScale = 0, float yScale = 0)
+        {
+            return null!;
+        }
+
+        /// <summary>Returns a new <see cref="UDim2"/> with the given offset coordinates and no scales.</summary>
+        public static UDim2 fromOffset(uint xOffset = 0, uint yOffset = 0)
+        {
+            return null!;
+        }
+
+        public UDim2 Lerp(UDim2 goal, float alpha)
+        {
+            return null!;
+        }
+
+        public static UDim2 operator +(UDim2 a, UDim2 b)
+        {
+            return null!;
+        }
+
+        public static UDim2 operator -(UDim2 a, UDim2 b)
         {
             return null!;
         }

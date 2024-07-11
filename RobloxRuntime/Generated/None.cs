@@ -1058,17 +1058,17 @@ namespace RobloxRuntime.Classes
 		public Enum.KeyCode VRSwitchKeyCode { get; set; }
 		public Vector3 WorldAxis { get; set; }
 		public Vector3 WorldSecondaryAxis { get; set; }
-		public RBXScriptConnection AddConstraintFunction(int priority, Action function);
+		public ScriptConnection AddConstraintFunction(int priority, Action function);
 		public CFrame GetReferenceFrame();
 		public void RestartDrag();
 		public void SetDragStyleFunction(Action function);
 		public void SetPermissionPolicyFunction(Action function);
-		public ScriptSignal<Player, Ray, CFrame, OptionalCoordinateFrame, bool> DragContinue { get; }
-		public ScriptSignal<Player, Ray, CFrame, OptionalCoordinateFrame, bool> DragContinueReplicate { get; }
+		public ScriptSignal<Player, Ray, CFrame, CFrame?, bool> DragContinue { get; }
+		public ScriptSignal<Player, Ray, CFrame, CFrame?, bool> DragContinueReplicate { get; }
 		public ScriptSignal<Player> DragEnd { get; }
 		public ScriptSignal<Player> DragEndReplicate { get; }
-		public ScriptSignal<Player, Ray, CFrame, CFrame, BasePart, OptionalCoordinateFrame, bool> DragStart { get; }
-		public ScriptSignal<Player, Ray, CFrame, CFrame, BasePart, OptionalCoordinateFrame, bool> DragStartReplicate { get; }
+		public ScriptSignal<Player, Ray, CFrame, CFrame, BasePart, CFrame?, bool> DragStart { get; }
+		public ScriptSignal<Player, Ray, CFrame, CFrame, BasePart, CFrame?, bool> DragStartReplicate { get; }
 	}
 	
 	public interface Clouds : Instance
@@ -1976,7 +1976,7 @@ namespace RobloxRuntime.Classes
 	
 	public interface GlobalDataStore : Instance
 	{
-		public RBXScriptConnection OnUpdate(string key, Action callback);
+		public ScriptConnection OnUpdate(string key, Action callback);
 		public object[] GetAsync(string key, DataStoreGetOptions? options);
 		public object? IncrementAsync(string key, int? delta, object[]? userIds, DataStoreIncrementOptions? options);
 		public object[] RemoveAsync(string key);
@@ -3669,7 +3669,7 @@ namespace RobloxRuntime.Classes
 	{
 		public LodDataEntity? LodEntity { get; set; }
 		public CFrame ModelMeshCFrame { get; set; }
-		public SharedString ModelMeshData { get; set; }
+		public string ModelMeshData { get; set; }
 		public Vector3 ModelMeshSize { get; set; }
 		public Enum.ModelStreamingMode ModelStreamingMode { get; set; }
 		public bool NeedsPivotMigration { get; set; }
@@ -3677,7 +3677,7 @@ namespace RobloxRuntime.Classes
 		public float Scale { get; set; }
 		public float ScaleFactor { get; set; }
 		public CFrame WorldPivot { get; set; }
-		public OptionalCoordinateFrame WorldPivotData { get; set; }
+		public CFrame? WorldPivotData { get; set; }
 		public void AddPersistentPlayer(Player? playerInstance);
 		public void BreakJoints();
 		public CFrame GetBoundingBox();
@@ -3703,8 +3703,8 @@ namespace RobloxRuntime.Classes
 	
 	public interface Actor : Model
 	{
-		public RBXScriptConnection BindToMessage(string topic, Action function);
-		public RBXScriptConnection BindToMessageParallel(string topic, Action function);
+		public ScriptConnection BindToMessage(string topic, Action function);
+		public ScriptConnection BindToMessageParallel(string topic, Action function);
 		public void SendMessage(string topic, object[] message);
 	}
 	

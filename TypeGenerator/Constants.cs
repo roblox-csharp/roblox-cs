@@ -296,6 +296,7 @@
         {
             { "Array", "object[]" },
             { "BinaryString", "string" },
+            { "SharedString", "string" },
             { "Connection", "ScriptConnection" },
             { "Content", "string" },
             { "CoordinateFrame", "CFrame" },
@@ -311,6 +312,7 @@
             { "Object", "Instance" },
             { "Objects", "Instance[]" },
             { "Property", "string" },
+            { "OptionalCoordinateFrame", "CFrame?" },
             { "ProtectedString", "string" },
             { "Rect2D", "Rect" },
             { "Tuple", "object[]" },
