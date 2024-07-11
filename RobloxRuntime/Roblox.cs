@@ -63,6 +63,17 @@
         {
         }
 
+        public partial interface Players
+        {
+            public Player LocalPlayer { get; }
+        }
+
+        public partial interface BasePart
+        {
+            public Vector3 Position { get; set; }
+            public Vector3 Orientation { get; set; }
+        }
+
         public interface ICreatableInstance : Instance
         { 
         }

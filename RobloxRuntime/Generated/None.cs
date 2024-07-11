@@ -208,13 +208,13 @@ namespace RobloxRuntime.Classes
 		public void AddTag(string tag);
 		public void ClearAllChildren();
 		public void Destroy();
-		public Instance? FindFirstAncestor(string name);
-		public Instance? FindFirstAncestorOfClass(string className);
-		public Instance? FindFirstAncestorWhichIsA(string className);
-		public Instance? FindFirstChild(string name, bool? recursive);
-		public Instance? FindFirstChildOfClass(string className);
-		public Instance? FindFirstChildWhichIsA(string className, bool? recursive);
-		public Instance? FindFirstDescendant(string name);
+		public Instance FindFirstAncestor(string name);
+		public Instance FindFirstAncestorOfClass(string className);
+		public Instance FindFirstAncestorWhichIsA(string className);
+		public Instance FindFirstChild(string name, bool? recursive);
+		public Instance FindFirstChildOfClass(string className);
+		public Instance FindFirstChildWhichIsA(string className, bool? recursive);
+		public Instance FindFirstDescendant(string name);
 		public Actor GetActor();
 		public ScriptSignal GetAttributeChangedSignal(string attribute);
 		public Instance[] GetChildren();
@@ -238,7 +238,7 @@ namespace RobloxRuntime.Classes
 		public float Puffiness { get; set; }
 		public Vector3 Rotation { get; set; }
 		public Vector3 Scale { get; set; }
-		public Instance? GetAppliedInstance();
+		public Instance GetAppliedInstance();
 	}
 	
 	public interface AccountService : ICreatableInstance
@@ -275,11 +275,11 @@ namespace RobloxRuntime.Classes
 	
 	public interface AnalyticsService : ICreatableInstance
 	{
-		public void FireCustomEvent(Instance? player, string eventCategory, object? customData);
+		public void FireCustomEvent(Player player, string eventCategory, object? customData);
 		public void FireEvent(string category, object? value);
-		public void FireInGameEconomyEvent(Instance? player, string itemName, Enum.AnalyticsEconomyAction economyAction, string itemCategory, int amount, string currency, object? location, object? customData);
-		public void FireLogEvent(Instance? player, Enum.AnalyticsLogLevel logLevel, string message, object? debugInfo, object? customData);
-		public void FirePlayerProgressionEvent(Instance? player, string category, Enum.AnalyticsProgressionStatus progressionStatus, object? location, object? statistics, object? customData);
+		public void FireInGameEconomyEvent(Player player, string itemName, Enum.AnalyticsEconomyAction economyAction, string itemCategory, int amount, string currency, object? location, object? customData);
+		public void FireLogEvent(Player player, Enum.AnalyticsLogLevel logLevel, string message, object? debugInfo, object? customData);
+		public void FirePlayerProgressionEvent(Player player, string category, Enum.AnalyticsProgressionStatus progressionStatus, object? location, object? statistics, object? customData);
 		public void LogEconomyEvent(Player player, Enum.AnalyticsEconomyFlowType flowType, string currencyType, float amount, float endingBalance, string transactionType, string itemSku, object? customFields);
 		public void LogFunnelStepEvent(Player player, string funnelName, string funnelSessionId, int? step, string? stepName, object? customFields);
 		public void LogOnboardingFunnelStepEvent(Player player, int step, string stepName, object? customFields);
@@ -306,9 +306,9 @@ namespace RobloxRuntime.Classes
 	
 	public partial interface KeyframeSequence : AnimationClip, ICreatableInstance
 	{
-		public void AddKeyframe(Instance? keyframe);
+		public void AddKeyframe(Keyframe keyframe);
 		public Instance[] GetKeyframes();
-		public void RemoveKeyframe(Instance? keyframe);
+		public void RemoveKeyframe(Keyframe keyframe);
 	}
 	
 	public partial interface AnimationClipProvider : ICreatableInstance
@@ -316,7 +316,7 @@ namespace RobloxRuntime.Classes
 		public string RegisterActiveAnimationClip(AnimationClip animationClip);
 		public string RegisterAnimationClip(AnimationClip animationClip);
 		public AnimationClip GetAnimationClipAsync(string assetId);
-		public Instance? GetAnimations(long userId);
+		public Instance GetAnimations(long userId);
 		public ClipEvaluator GetClipEvaluatorAsync(string assetId);
 	}
 	
@@ -427,15 +427,15 @@ namespace RobloxRuntime.Classes
 	{
 		public EditableImage CreateEditableImageAsync(string textureId);
 		public EditableMesh CreateEditableMeshAsync(string meshId);
-		public EditableMesh CreateEditableMeshFromPartAsync(Instance? meshPart);
+		public EditableMesh CreateEditableMeshFromPartAsync(MeshPart meshPart);
 		public long CreatePlaceAsync(string placeName, long templatePlaceID, string description);
-		public long CreatePlaceInPlayerInventoryAsync(Instance? player, string placeName, long templatePlaceID, string description);
+		public long CreatePlaceInPlayerInventoryAsync(Player player, string placeName, long templatePlaceID, string description);
 		public object[] GetAssetIdsForPackage(long packageAssetId);
 		public object[] GetAudioMetadataAsync(object[] idList);
 		public object GetBundleDetailsAsync(long bundleId);
 		public long GetCreatorAssetID(long creationID);
-		public Instance? GetGamePlacesAsync();
-		public object[] PromptCreateAssetAsync(Player player, Instance? instance, Enum.AssetType assetType);
+		public Instance GetGamePlacesAsync();
+		public object[] PromptCreateAssetAsync(Player player, Instance instance, Enum.AssetType assetType);
 		public object[] PromptImportAnimationClipFromVideoAsync(Player player, Action progressCallback);
 		public void SavePlaceAsync();
 		public AudioPages SearchAudio(AudioSearchParams searchParameters);
@@ -654,11 +654,11 @@ namespace RobloxRuntime.Classes
 		public void SendAnalyticsEvent(string eventName, object parameters);
 		public AvatarGenerationSession CreateAvatarGenerationSessionAsync(Player player);
 		public object GetAvatarGenerationConfig();
-		public Instance? LoadAvatarModelAsync(string id);
+		public Instance LoadAvatarModelAsync(string id);
 		public EditableImage LoadAvatarPreviewImageAsync(string avatarPreview);
 		public object[] PromptCreateAvatarAsync(Player player, HumanoidDescription humanoidDescription);
-		public object[] ValidateUGCAccessoryAsync(Player player, Instance? accessory, Enum.AccessoryType accessoryType);
-		public object[] ValidateUGCBodyPartAsync(Player player, Instance? instance, Enum.BodyPart bodyPart);
+		public object[] ValidateUGCAccessoryAsync(Player player, Accessory accessory, Enum.AccessoryType accessoryType);
+		public object[] ValidateUGCBodyPartAsync(Player player, Instance instance, Enum.BodyPart bodyPart);
 		public object[] ValidateUGCFullBodyAsync(Player player, HumanoidDescription humanoidDescription);
 	}
 	
@@ -1135,7 +1135,7 @@ namespace RobloxRuntime.Classes
 	{
 		public bool BubbleChatEnabled { get; set; }
 		public bool LoadDefaultChat { get; }
-		public void Chat(Instance? partOrCharacter, string message, Enum.ChatColor? color);
+		public void Chat(Instance partOrCharacter, string message, Enum.ChatColor? color);
 		public object[] InvokeChatCallback(Enum.ChatCallbackType callbackType, object[] callbackArguments);
 		public void RegisterChatCallback(Enum.ChatCallbackType callbackType, Action callbackFunction);
 		public void SetBubbleChatSettings(object? settings);
@@ -1144,7 +1144,7 @@ namespace RobloxRuntime.Classes
 		public string FilterStringAsync(string stringToFilter, Player playerFrom, Player playerTo);
 		public string FilterStringForBroadcast(string stringToFilter, Player playerFrom);
 		public string FilterStringForPlayerAsync(string stringToFilter, Player playerToFilterFor);
-		public ScriptSignal<Instance?, string, Enum.ChatColor> Chatted { get; }
+		public ScriptSignal<Instance, string, Enum.ChatColor> Chatted { get; }
 	}
 	
 	public interface ChatbotUIService : ICreatableInstance
@@ -1217,16 +1217,16 @@ namespace RobloxRuntime.Classes
 	
 	public interface CollectionService : ICreatableInstance
 	{
-		public void AddTag(Instance? instance, string tag);
+		public void AddTag(Instance instance, string tag);
 		public object[] GetAllTags();
 		public ScriptSignal GetInstanceAddedSignal(string tag);
 		public ScriptSignal GetInstanceRemovedSignal(string tag);
 		public Instance[] GetTagged(string tag);
-		public object[] GetTags(Instance? instance);
-		public bool HasTag(Instance? instance, string tag);
-		public void RemoveTag(Instance? instance, string tag);
-		public ScriptSignal<Instance?> ItemAdded { get; }
-		public ScriptSignal<Instance?> ItemRemoved { get; }
+		public object[] GetTags(Instance instance);
+		public bool HasTag(Instance instance, string tag);
+		public void RemoveTag(Instance instance, string tag);
+		public ScriptSignal<Instance> ItemAdded { get; }
+		public ScriptSignal<Instance> ItemRemoved { get; }
 		public ScriptSignal<string> TagAdded { get; }
 		public ScriptSignal<string> TagRemoved { get; }
 	}
@@ -1538,9 +1538,9 @@ namespace RobloxRuntime.Classes
 		public void UnbindAction(string actionName);
 		public void UnbindActivate(Enum.UserInputType userInputTypeForActivation, Enum.KeyCode? keyCodeForActivation);
 		public void UnbindAllActions();
-		public Instance? GetButton(string actionName);
-		public ScriptSignal<Instance?> LocalToolEquipped { get; }
-		public ScriptSignal<Instance?> LocalToolUnequipped { get; }
+		public Instance GetButton(string actionName);
+		public ScriptSignal<Instance> LocalToolEquipped { get; }
+		public ScriptSignal<Instance> LocalToolUnequipped { get; }
 	}
 	
 	public interface Controller : ICreatableInstance
@@ -1779,7 +1779,7 @@ namespace RobloxRuntime.Classes
 	public interface Debris : ICreatableInstance
 	{
 		public int MaxItems { get; set; }
-		public void AddItem(Instance? item, double? lifetime);
+		public void AddItem(Instance item, double? lifetime);
 	}
 	
 	public interface DebuggablePluginWatcher : ICreatableInstance
@@ -1827,7 +1827,7 @@ namespace RobloxRuntime.Classes
 		public float TriggerDistance { get; set; }
 		public Vector3 TriggerOffset { get; set; }
 		public Instance[] GetCurrentPlayers();
-		public ScriptSignal<Instance?, Instance?> DialogChoiceSelected { get; }
+		public ScriptSignal<Instance, Instance> DialogChoiceSelected { get; }
 	}
 	
 	public interface DialogChoice : ICreatableInstance
@@ -1841,7 +1841,7 @@ namespace RobloxRuntime.Classes
 	public interface Dragger : ICreatableInstance
 	{
 		public void AxisRotate(Enum.Axis? axis);
-		public void MouseDown(Instance? mousePart, Vector3 pointOnMousePart, Instance[] parts);
+		public void MouseDown(Instance mousePart, Vector3 pointOnMousePart, Instance[] parts);
 		public void MouseMove(Ray mouseRay);
 		public void MouseUp();
 	}
@@ -2049,7 +2049,7 @@ namespace RobloxRuntime.Classes
 	{
 		public bool GamepadCursorEnabled { get; }
 		public void DisableGamepadCursor();
-		public void EnableGamepadCursor(Instance? guiObject);
+		public void EnableGamepadCursor(GuiObject guiObject);
 	}
 	
 	public interface GenericChallengeService : ICreatableInstance
@@ -2058,10 +2058,10 @@ namespace RobloxRuntime.Classes
 	
 	public interface GeometryService : ICreatableInstance
 	{
-		public object[] CalculateConstraintsToPreserve(Instance? source, object[] destination, object? options);
-		public object[] IntersectAsync(Instance? part, object[] parts, object? options);
-		public object[] SubtractAsync(Instance? part, object[] parts, object? options);
-		public object[] UnionAsync(Instance? part, object[] parts, object? options);
+		public object[] CalculateConstraintsToPreserve(Instance source, object[] destination, object? options);
+		public object[] IntersectAsync(BasePart part, object[] parts, object? options);
+		public object[] SubtractAsync(BasePart part, object[] parts, object? options);
+		public object[] UnionAsync(BasePart part, object[] parts, object? options);
 	}
 	
 	public interface GetTextBoundsParams : ICreatableInstance
@@ -2093,7 +2093,7 @@ namespace RobloxRuntime.Classes
 	
 	public interface OrderedDataStore : GlobalDataStore, ICreatableInstance
 	{
-		public Instance? GetSortedAsync(bool ascending, int pagesize, object? minValue, object? maxValue);
+		public Instance GetSortedAsync(bool ascending, int pagesize, object? minValue, object? maxValue);
 	}
 	
 	public interface GroupService : ICreatableInstance
@@ -2633,18 +2633,18 @@ namespace RobloxRuntime.Classes
 		public GuiObject? SelectedObject { get; set; }
 		public Rect TopbarInset { get; }
 		public bool TouchControlsEnabled { get; set; }
-		public void AddSelectionParent(string selectionName, Instance? selectionParent);
+		public void AddSelectionParent(string selectionName, Instance selectionParent);
 		public void AddSelectionTuple(string selectionName, object[] selections);
 		public void CloseInspectMenu();
 		public bool GetEmotesMenuOpen();
 		public bool GetGameplayPausedNotificationEnabled();
 		public object[] GetGuiInset();
 		public bool GetInspectMenuEnabled();
-		public void InspectPlayerFromHumanoidDescription(Instance? humanoidDescription, string name);
+		public void InspectPlayerFromHumanoidDescription(HumanoidDescription humanoidDescription, string name);
 		public void InspectPlayerFromUserId(long userId);
 		public bool IsTenFootInterface();
 		public void RemoveSelectionGroup(string selectionName);
-		public void Select(Instance? selectionParent);
+		public void Select(Instance selectionParent);
 		public void SetEmotesMenuOpen(bool isOpen);
 		public void SetGameplayPausedNotificationEnabled(bool enabled);
 		public void SetInspectMenuEnabled(bool enabled);
@@ -2727,16 +2727,16 @@ namespace RobloxRuntime.Classes
 		public float WalkSpeed { get; set; }
 		public BasePart? WalkToPart { get; set; }
 		public Vector3 WalkToPoint { get; set; }
-		public void AddAccessory(Instance? accessory);
+		public void AddAccessory(Accessory accessory);
 		public bool AddCustomStatus(string status);
 		public bool AddStatus(Enum.Status? status);
 		public void BuildRigFromAttachments();
 		public void ChangeState(Enum.HumanoidStateType? state);
-		public void EquipTool(Instance? tool);
+		public void EquipTool(Tool tool);
 		public object[] GetAccessories();
 		public HumanoidDescription GetAppliedDescription();
-		public Enum.BodyPartR15 GetBodyPartR15(Instance? part);
-		public Enum.Limb GetLimb(Instance? part);
+		public Enum.BodyPartR15 GetBodyPartR15(BasePart part);
+		public Enum.Limb GetLimb(BasePart part);
 		public Vector3 GetMoveVelocity();
 		public object[] GetPlayingAnimationTracks();
 		public Enum.HumanoidStateType GetState();
@@ -2746,7 +2746,7 @@ namespace RobloxRuntime.Classes
 		public bool HasStatus(Enum.Status? status);
 		public AnimationTrack LoadAnimation(Animation animation);
 		public void Move(Vector3 moveDirection, bool? relativeToCamera);
-		public void MoveTo(Vector3 location, Instance? part);
+		public void MoveTo(Vector3 location, BasePart? part);
 		public void RemoveAccessories();
 		public bool RemoveCustomStatus(string status);
 		public bool RemoveStatus(Enum.Status? status);
@@ -2891,7 +2891,7 @@ namespace RobloxRuntime.Classes
 		public bool AllowInsertFreeModels { get; set; }
 		public void ApproveAssetId(long assetId);
 		public void ApproveAssetVersionId(long assetVersionId);
-		public void Insert(Instance? instance);
+		public void Insert(Instance instance);
 		public MeshPart CreateMeshPartAsync(string meshId, Enum.CollisionFidelity collisionFidelity, Enum.RenderFidelity renderFidelity);
 		public object[] GetBaseCategories();
 		public object[] GetBaseSets();
@@ -2901,8 +2901,8 @@ namespace RobloxRuntime.Classes
 		public long GetLatestAssetVersionAsync(long assetId);
 		public object[] GetUserCategories(long userId);
 		public object[] GetUserSets(long userId);
-		public Instance? LoadAsset(long assetId);
-		public Instance? LoadAssetVersion(long assetVersionId);
+		public Instance LoadAsset(long assetId);
+		public Instance LoadAssetVersion(long assetVersionId);
 	}
 	
 	public interface InternalSyncItem : ICreatableInstance
@@ -2992,20 +2992,20 @@ namespace RobloxRuntime.Classes
 	{
 		public void ClearJoinAfterMoveJoints();
 		public void CreateJoinAfterMoveJoints();
-		public void SetJoinAfterMoveInstance(Instance? joinInstance);
-		public void SetJoinAfterMoveTarget(Instance? joinTarget);
+		public void SetJoinAfterMoveInstance(Instance joinInstance);
+		public void SetJoinAfterMoveTarget(Instance joinTarget);
 		public void ShowPermissibleJoints();
 	}
 	
 	public interface Keyframe : ICreatableInstance
 	{
 		public float Time { get; set; }
-		public void AddMarker(Instance? marker);
-		public void AddPose(Instance? pose);
+		public void AddMarker(Instance marker);
+		public void AddPose(Pose pose);
 		public Instance[] GetMarkers();
 		public Instance[] GetPoses();
-		public void RemoveMarker(Instance? marker);
-		public void RemovePose(Instance? pose);
+		public void RemoveMarker(Instance marker);
+		public void RemovePose(Pose pose);
 	}
 	
 	public interface KeyframeMarker : ICreatableInstance
@@ -3015,10 +3015,10 @@ namespace RobloxRuntime.Classes
 	
 	public partial interface KeyframeSequenceProvider : ICreatableInstance
 	{
-		public string RegisterActiveKeyframeSequence(Instance? keyframeSequence);
-		public string RegisterKeyframeSequence(Instance? keyframeSequence);
-		public Instance? GetAnimations(long userId);
-		public Instance? GetKeyframeSequenceAsync(string assetId);
+		public string RegisterActiveKeyframeSequence(KeyframeSequence keyframeSequence);
+		public string RegisterKeyframeSequence(KeyframeSequence keyframeSequence);
+		public Instance GetAnimations(long userId);
+		public Instance GetKeyframeSequenceAsync(string assetId);
 	}
 	
 	public interface LSPFileSyncService : ICreatableInstance
@@ -3098,10 +3098,10 @@ namespace RobloxRuntime.Classes
 		public string SystemLocaleId { get; }
 		public Instance[] GetCorescriptLocalizations();
 		public object[] GetTableEntries(Instance? instance);
-		public Instance? GetTranslatorForPlayer(Instance? player);
-		public string GetCountryRegionForPlayerAsync(Instance? player);
-		public Instance? GetTranslatorForLocaleAsync(string locale);
-		public Instance? GetTranslatorForPlayerAsync(Instance? player);
+		public Instance GetTranslatorForPlayer(Player player);
+		public string GetCountryRegionForPlayerAsync(Player player);
+		public Instance GetTranslatorForLocaleAsync(string locale);
+		public Instance GetTranslatorForPlayerAsync(Player player);
 	}
 	
 	public interface LocalizationTable : ICreatableInstance
@@ -3110,7 +3110,7 @@ namespace RobloxRuntime.Classes
 		public string GetContents();
 		public object[] GetEntries();
 		public string GetString(string targetLocaleId, string key);
-		public Instance? GetTranslator(string localeId);
+		public Instance GetTranslator(string localeId);
 		public void RemoveEntry(string key, string source, string context);
 		public void RemoveEntryValue(string key, string source, string context, string localeId);
 		public void RemoveKey(string key);
@@ -3189,27 +3189,27 @@ namespace RobloxRuntime.Classes
 	public interface MarketplaceService : ICreatableInstance
 	{
 		public void PromptBulkPurchase(Player player, object[] lineItems, object options);
-		public void PromptBundlePurchase(Instance? player, long bundleId);
-		public void PromptGamePassPurchase(Instance? player, long gamePassId);
-		public void PromptPremiumPurchase(Instance? player);
-		public void PromptProductPurchase(Instance? player, long productId, bool? equipIfPurchased, Enum.CurrencyType? currencyType);
-		public void PromptPurchase(Instance? player, long assetId, bool? equipIfPurchased, Enum.CurrencyType? currencyType);
+		public void PromptBundlePurchase(Player player, long bundleId);
+		public void PromptGamePassPurchase(Player player, long gamePassId);
+		public void PromptPremiumPurchase(Player player);
+		public void PromptProductPurchase(Player player, long productId, bool? equipIfPurchased, Enum.CurrencyType? currencyType);
+		public void PromptPurchase(Player player, long assetId, bool? equipIfPurchased, Enum.CurrencyType? currencyType);
 		public void PromptSubscriptionPurchase(Player user, string subscriptionId);
-		public Instance? GetDeveloperProductsAsync();
+		public Instance GetDeveloperProductsAsync();
 		public object GetProductInfo(long assetId, Enum.InfoType? infoType);
 		public object GetSubscriptionProductInfoAsync(string subscriptionId);
 		public object GetUserSubscriptionDetailsAsync(Player user, string subscriptionId);
 		public object[] GetUserSubscriptionPaymentHistoryAsync(Player user, string subscriptionId);
 		public object GetUserSubscriptionStatusAsync(Player user, string subscriptionId);
-		public bool PlayerOwnsAsset(Instance? player, long assetId);
+		public bool PlayerOwnsAsset(Player player, long assetId);
 		public bool PlayerOwnsBundle(Player player, long bundleId);
 		public bool UserOwnsGamePassAsync(long userId, long gamePassId);
-		public ScriptSignal<Instance?, Enum.MarketplaceBulkPurchasePromptStatus, object> PromptBulkPurchaseFinished { get; }
-		public ScriptSignal<Instance?, long, bool> PromptBundlePurchaseFinished { get; }
-		public ScriptSignal<Instance?, long, bool> PromptGamePassPurchaseFinished { get; }
+		public ScriptSignal<Instance, Enum.MarketplaceBulkPurchasePromptStatus, object> PromptBulkPurchaseFinished { get; }
+		public ScriptSignal<Instance, long, bool> PromptBundlePurchaseFinished { get; }
+		public ScriptSignal<Instance, long, bool> PromptGamePassPurchaseFinished { get; }
 		public ScriptSignal PromptPremiumPurchaseFinished { get; }
 		public ScriptSignal<long, long, bool> PromptProductPurchaseFinished { get; }
-		public ScriptSignal<Instance?, long, bool> PromptPurchaseFinished { get; }
+		public ScriptSignal<Instance, long, bool> PromptPurchaseFinished { get; }
 		public ScriptSignal<Player, string, bool> PromptSubscriptionPurchaseFinished { get; }
 	}
 	
@@ -3365,7 +3365,7 @@ namespace RobloxRuntime.Classes
 		public void PivotTo(CFrame targetCFrame);
 	}
 	
-	public interface BasePart : PVInstance, ICreatableInstance
+	public partial interface BasePart : PVInstance, ICreatableInstance
 	{
 		public bool Anchored { get; set; }
 		public Vector3 AssemblyAngularVelocity { get; set; }
@@ -3419,11 +3419,11 @@ namespace RobloxRuntime.Classes
 		public Instance[] GetConnectedParts(bool? recursive);
 		public Instance[] GetJoints();
 		public float GetMass();
-		public Instance? GetNetworkOwner();
+		public Instance GetNetworkOwner();
 		public bool GetNetworkOwnershipAuto();
 		public Instance[] GetNoCollisionConstraints();
 		public CFrame GetRenderCFrame();
-		public Instance? GetRootPart();
+		public Instance GetRootPart();
 		public Instance[] GetTouchingParts();
 		public Vector3 GetVelocityAtPosition(Vector3 position);
 		public bool IsGrounded();
@@ -3432,9 +3432,9 @@ namespace RobloxRuntime.Classes
 		public void SetNetworkOwner(Player? playerInstance);
 		public void SetNetworkOwnershipAuto();
 		public Vector3 TorqueToAngularAcceleration(Vector3 torque, Vector3? angVelocity);
-		public Instance? IntersectAsync(Instance[] parts, Enum.CollisionFidelity? collisionfidelity, Enum.RenderFidelity? renderFidelity);
-		public Instance? SubtractAsync(Instance[] parts, Enum.CollisionFidelity? collisionfidelity, Enum.RenderFidelity? renderFidelity);
-		public Instance? UnionAsync(Instance[] parts, Enum.CollisionFidelity? collisionfidelity, Enum.RenderFidelity? renderFidelity);
+		public Instance IntersectAsync(Instance[] parts, Enum.CollisionFidelity? collisionfidelity, Enum.RenderFidelity? renderFidelity);
+		public Instance SubtractAsync(Instance[] parts, Enum.CollisionFidelity? collisionfidelity, Enum.RenderFidelity? renderFidelity);
+		public Instance UnionAsync(Instance[] parts, Enum.CollisionFidelity? collisionfidelity, Enum.RenderFidelity? renderFidelity);
 		public ScriptSignal<BasePart> LocalSimulationTouched { get; }
 		public ScriptSignal OutfitChanged { get; }
 		public ScriptSignal<BasePart> StoppedTouching { get; }
@@ -3464,7 +3464,7 @@ namespace RobloxRuntime.Classes
 	{
 		public bool Disabled { get; set; }
 		public Humanoid? Occupant { get; }
-		public void Sit(Instance? humanoid);
+		public void Sit(Humanoid humanoid);
 	}
 	
 	public interface SkateboardPlatform : Part, ICreatableInstance
@@ -3475,9 +3475,9 @@ namespace RobloxRuntime.Classes
 		public bool StickyWheels { get; set; }
 		public int Throttle { get; set; }
 		public void ApplySpecificImpulse(Vector3 impulseWorld);
-		public ScriptSignal<Instance?, Instance?> Equipped { get; }
+		public ScriptSignal<Instance, Instance> Equipped { get; }
 		public ScriptSignal<Enum.MoveState, Enum.MoveState> MoveStateChanged { get; }
-		public ScriptSignal<Instance?> Unequipped { get; }
+		public ScriptSignal<Instance> Unequipped { get; }
 	}
 	
 	public interface SpawnLocation : Part, ICreatableInstance
@@ -3545,7 +3545,7 @@ namespace RobloxRuntime.Classes
 		public string MeshId { get; }
 		public Enum.RenderFidelity RenderFidelity { get; set; }
 		public string TextureID { get; set; }
-		public void ApplyMesh(Instance? meshPart);
+		public void ApplyMesh(MeshPart meshPart);
 	}
 	
 	public interface PartOperation : TriangleMeshPart, ICreatableInstance
@@ -3554,7 +3554,7 @@ namespace RobloxRuntime.Classes
 		public float SmoothingAngle { get; set; }
 		public int TriangleCount { get; }
 		public bool UsePartColor { get; set; }
-		public void SubstituteGeometry(Instance? source);
+		public void SubstituteGeometry(Instance source);
 	}
 	
 	public interface IntersectOperation : PartOperation, ICreatableInstance
@@ -3587,7 +3587,7 @@ namespace RobloxRuntime.Classes
 		public float ThrottleFloat { get; set; }
 		public float Torque { get; set; }
 		public float TurnSpeed { get; set; }
-		public void Sit(Instance? humanoid);
+		public void Sit(Humanoid humanoid);
 	}
 	
 	public interface Model : PVInstance, ICreatableInstance
@@ -3844,10 +3844,10 @@ namespace RobloxRuntime.Classes
 	public interface PathfindingService : ICreatableInstance
 	{
 		public float EmptyCutoff { get; set; }
-		public Instance? CreatePath(object? agentParameters);
-		public Instance? ComputeRawPathAsync(Vector3 start, Vector3 finish, float maxDistance);
-		public Instance? ComputeSmoothPathAsync(Vector3 start, Vector3 finish, float maxDistance);
-		public Instance? FindPathAsync(Vector3 start, Vector3 finish);
+		public Instance CreatePath(object? agentParameters);
+		public Instance ComputeRawPathAsync(Vector3 start, Vector3 finish, float maxDistance);
+		public Instance ComputeSmoothPathAsync(Vector3 start, Vector3 finish, float maxDistance);
+		public Instance FindPathAsync(Vector3 start, Vector3 finish);
 	}
 	
 	public interface PausedState : ICreatableInstance
@@ -3936,13 +3936,13 @@ namespace RobloxRuntime.Classes
 		public bool IsVerified();
 		public void Kick(string message);
 		public bool LoadBoolean(string key);
-		public void LoadCharacterAppearance(Instance? assetInstance);
-		public Instance? LoadInstance(string key);
+		public void LoadCharacterAppearance(Instance assetInstance);
+		public Instance LoadInstance(string key);
 		public double LoadNumber(string key);
 		public string LoadString(string key);
 		public void Move(Vector3 walkDirection, bool? relativeToCamera);
 		public void SaveBoolean(string key, bool value);
-		public void SaveInstance(string key, Instance? value);
+		public void SaveInstance(string key, Instance value);
 		public void SaveNumber(string key, double value);
 		public void SaveString(string key, string value);
 		public object[] GetFriendsOnline(int? maxFriends);
@@ -3989,7 +3989,6 @@ namespace RobloxRuntime.Classes
 		public bool BubbleChat { get; }
 		public bool CharacterAutoLoads { get; set; }
 		public bool ClassicChat { get; }
-		public Player? LocalPlayer { get; }
 		public int MaxPlayers { get; }
 		public int NumPlayers { get; }
 		public int PreferredPlayers { get; }
@@ -4036,7 +4035,7 @@ namespace RobloxRuntime.Classes
 	
 	public interface PolicyService : ICreatableInstance
 	{
-		public object GetPolicyInfoForPlayerAsync(Instance? player);
+		public object GetPolicyInfoForPlayerAsync(Player player);
 	}
 	
 	public interface PoseBase : ICreatableInstance
@@ -4055,9 +4054,9 @@ namespace RobloxRuntime.Classes
 	{
 		public CFrame CFrame { get; set; }
 		public float MaskWeight { get; set; }
-		public void AddSubPose(Instance? pose);
+		public void AddSubPose(Pose pose);
 		public Instance[] GetSubPoses();
-		public void RemoveSubPose(Instance? pose);
+		public void RemoveSubPose(Pose pose);
 	}
 	
 	public interface PostEffect : ICreatableInstance
@@ -4275,7 +4274,7 @@ namespace RobloxRuntime.Classes
 	
 	public partial interface ScriptContext : ICreatableInstance
 	{
-		public ScriptSignal<string, string, Instance?> Error { get; }
+		public ScriptSignal<string, string, Instance> Error { get; }
 	}
 	
 	public partial interface ScriptDocument : ICreatableInstance
@@ -4344,12 +4343,12 @@ namespace RobloxRuntime.Classes
 	
 	public interface ServiceProvider : ICreatableInstance
 	{
-		public Instance? FindService(string className);
-		public Instance? GetService(string className);
-		public Instance? service(string className);
+		public Instance FindService(string className);
+		public Instance GetService(string className);
+		public Instance service(string className);
 		public ScriptSignal Close { get; }
-		public ScriptSignal<Instance?> ServiceAdded { get; }
-		public ScriptSignal<Instance?> ServiceRemoving { get; }
+		public ScriptSignal<Instance> ServiceAdded { get; }
+		public ScriptSignal<Instance> ServiceRemoving { get; }
 	}
 	
 	public partial interface DataModel : ServiceProvider, ICreatableInstance
@@ -4374,7 +4373,7 @@ namespace RobloxRuntime.Classes
 		public bool SavePlace(Enum.SaveFilter? saveFilter);
 		public ScriptSignal AllowedGearTypeChanged { get; }
 		public ScriptSignal<bool> GraphicsQualityChangeRequest { get; }
-		public ScriptSignal<Instance?, string> ItemChanged { get; }
+		public ScriptSignal<Instance, string> ItemChanged { get; }
 		public ScriptSignal Loaded { get; }
 	}
 	
@@ -4443,14 +4442,14 @@ namespace RobloxRuntime.Classes
 	public interface SocialService : ICreatableInstance
 	{
 		public void HideSelfView();
-		public void PromptGameInvite(Instance? player, Instance? experienceInviteOptions);
-		public void PromptPhoneBook(Instance? player, string tag);
+		public void PromptGameInvite(Player player, ExperienceInviteOptions? experienceInviteOptions);
+		public void PromptPhoneBook(Player player, string tag);
 		public void ShowSelfView(Enum.SelfViewPosition? selfViewPosition);
-		public bool CanSendCallInviteAsync(Instance? player);
-		public bool CanSendGameInviteAsync(Instance? player, long? recipientId);
-		public ScriptSignal<Instance?, Enum.InviteState> CallInviteStateChanged { get; }
-		public ScriptSignal<Instance?, object[]> GameInvitePromptClosed { get; }
-		public ScriptSignal<Instance?> PhoneBookPromptClosed { get; }
+		public bool CanSendCallInviteAsync(Player player);
+		public bool CanSendGameInviteAsync(Player player, long? recipientId);
+		public ScriptSignal<Instance, Enum.InviteState> CallInviteStateChanged { get; }
+		public ScriptSignal<Instance, object[]> GameInvitePromptClosed { get; }
+		public ScriptSignal<Instance> PhoneBookPromptClosed { get; }
 	}
 	
 	public interface Sound : ICreatableInstance
@@ -4586,7 +4585,7 @@ namespace RobloxRuntime.Classes
 		public bool RespectFilteringEnabled { get; set; }
 		public float RolloffScale { get; set; }
 		public object[] GetListener();
-		public void PlayLocalSound(Instance? sound);
+		public void PlayLocalSound(Sound sound);
 		public void SetListener(Enum.ListenerType listenerType, object[] listener);
 	}
 	
@@ -4801,21 +4800,21 @@ namespace RobloxRuntime.Classes
 	public interface TeleportService : ICreatableInstance
 	{
 		public bool CustomizedTeleportUI { get; set; }
-		public Instance? GetArrivingTeleportGui();
+		public Instance GetArrivingTeleportGui();
 		public object? GetLocalPlayerTeleportData();
 		public object? GetTeleportSetting(string setting);
-		public void SetTeleportGui(Instance? gui);
+		public void SetTeleportGui(Instance gui);
 		public void SetTeleportSetting(string setting, object? value);
-		public void Teleport(long placeId, Instance? player, object? teleportData, Instance? customLoadingScreen);
-		public void TeleportToPlaceInstance(long placeId, string instanceId, Instance? player, string? spawnName, object? teleportData, Instance? customLoadingScreen);
+		public void Teleport(long placeId, Player? player, object? teleportData, Instance? customLoadingScreen);
+		public void TeleportToPlaceInstance(long placeId, string instanceId, Player? player, string? spawnName, object? teleportData, Instance? customLoadingScreen);
 		public void TeleportToPrivateServer(long placeId, string reservedServerAccessCode, Instance[] players, string spawnName, object? teleportData, Instance? customLoadingScreen);
-		public void TeleportToSpawnByName(long placeId, string spawnName, Instance? player, object? teleportData, Instance? customLoadingScreen);
+		public void TeleportToSpawnByName(long placeId, string spawnName, Player? player, object? teleportData, Instance? customLoadingScreen);
 		public object[] GetPlayerPlaceInstanceAsync(long userId);
 		public object[] ReserveServer(long placeId);
-		public Instance? TeleportAsync(long placeId, Instance[] players, Instance? teleportOptions);
+		public Instance TeleportAsync(long placeId, Instance[] players, TeleportOptions? teleportOptions);
 		public string TeleportPartyAsync(long placeId, Instance[] players, object? teleportData, Instance? customLoadingScreen);
-		public ScriptSignal<Instance?, object?> LocalPlayerArrivedFromTeleport { get; }
-		public ScriptSignal<Instance?, Enum.TeleportResult, string, long, Instance?> TeleportInitFailed { get; }
+		public ScriptSignal<Instance, object?> LocalPlayerArrivedFromTeleport { get; }
+		public ScriptSignal<Instance, Enum.TeleportResult, string, long, Instance> TeleportInitFailed { get; }
 	}
 	
 	public interface TemporaryCageMeshProvider : ICreatableInstance
@@ -4948,10 +4947,10 @@ namespace RobloxRuntime.Classes
 		public Enum.ChatVersion ChatVersion { get; }
 		public bool CreateDefaultCommands { get; set; }
 		public bool CreateDefaultTextChannels { get; set; }
-		public void DisplayBubble(Instance? partOrCharacter, string message);
+		public void DisplayBubble(Instance partOrCharacter, string message);
 		public bool CanUserChatAsync(long userId);
 		public bool CanUsersChatAsync(long userIdFrom, long userIdTo);
-		public ScriptSignal<Instance?, TextChatMessage> BubbleDisplayed { get; }
+		public ScriptSignal<Instance, TextChatMessage> BubbleDisplayed { get; }
 		public ScriptSignal<TextChatMessage> MessageReceived { get; }
 		public ScriptSignal<TextChatMessage> SendingMessage { get; }
 	}
@@ -5051,7 +5050,7 @@ namespace RobloxRuntime.Classes
 	{
 		public string LocaleId { get; }
 		public string FormatByKey(string key, object? args);
-		public string Translate(Instance? context, string text);
+		public string Translate(Instance context, string text);
 	}
 	
 	public interface TutorialService : ICreatableInstance
@@ -5075,7 +5074,7 @@ namespace RobloxRuntime.Classes
 	
 	public interface TweenService : ICreatableInstance
 	{
-		public Tween Create(Instance? instance, TweenInfo tweenInfo, object propertyTable);
+		public Tween Create(Instance instance, TweenInfo tweenInfo, object propertyTable);
 		public float GetValue(float alpha, Enum.EasingStyle easingStyle, Enum.EasingDirection easingDirection);
 	}
 	
@@ -5209,13 +5208,13 @@ namespace RobloxRuntime.Classes
 		public bool ScrollWheelInputEnabled { get; set; }
 		public bool TouchInputEnabled { get; set; }
 		public float TweenTime { get; set; }
-		public void JumpTo(Instance? page);
+		public void JumpTo(Instance page);
 		public void JumpToIndex(int index);
 		public void Next();
 		public void Previous();
-		public ScriptSignal<Instance?> PageEnter { get; }
-		public ScriptSignal<Instance?> PageLeave { get; }
-		public ScriptSignal<Instance?> Stopped { get; }
+		public ScriptSignal<Instance> PageEnter { get; }
+		public ScriptSignal<Instance> PageLeave { get; }
+		public ScriptSignal<Instance> Stopped { get; }
 	}
 	
 	public interface UITableLayout : UIGridStyleLayout, ICreatableInstance
@@ -5441,7 +5440,7 @@ namespace RobloxRuntime.Classes
 	public interface ObjectValue : ValueBase, ICreatableInstance
 	{
 		public Instance? Value { get; set; }
-		public ScriptSignal<Instance?> Changed { get; }
+		public ScriptSignal<Instance> Changed { get; }
 	}
 	
 	public interface RayValue : ValueBase, ICreatableInstance

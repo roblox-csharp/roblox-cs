@@ -7,8 +7,11 @@ CS.namespace("TestGame", function(namespace)
             class.__index = class
 
             function class.Main()
-                local part = CS.getAssemblyType("Instance").new("Part", game:GetService("Workspace"))
-                print(part:IsA("Part"))
+                local player = game:GetService("Players").LocalPlayer
+                local character = player.Character ?? player.CharacterAdded.Wait()
+                local part = CS.getAssemblyType("Instance").new("Part", character)
+                part.Anchored = true
+                part.Position = CS.getAssemblyType("Vector3").new(0, 1, 0)
             end
 
             if namespace == nil then

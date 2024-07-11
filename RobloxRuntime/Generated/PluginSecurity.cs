@@ -703,14 +703,14 @@ namespace RobloxRuntime.PluginClasses
 	public interface DebuggerManager : ICreatableInstance
 	{
 		public bool DebuggingEnabled { get; }
-		public Instance? AddDebugger(Instance? script);
+		public Instance AddDebugger(LuaSourceContainer script);
 		public Instance[] GetDebuggers();
 		public void Resume();
 		public void StepIn();
 		public void StepOut();
 		public void StepOver();
-		public ScriptSignal<Instance?> DebuggerAdded { get; }
-		public ScriptSignal<Instance?> DebuggerRemoved { get; }
+		public ScriptSignal<Instance> DebuggerAdded { get; }
+		public ScriptSignal<Instance> DebuggerRemoved { get; }
 	}
 	
 	public interface DebuggerUIService : ICreatableInstance
@@ -1222,8 +1222,8 @@ namespace RobloxRuntime.PluginClasses
 	
 	public partial interface KeyframeSequenceProvider : ICreatableInstance
 	{
-		public Instance? GetKeyframeSequence(string assetId);
-		public Instance? GetKeyframeSequenceById(long assetId, bool useCache);
+		public Instance GetKeyframeSequence(string assetId);
+		public Instance GetKeyframeSequenceById(long assetId, bool useCache);
 	}
 	
 	public interface Light : ICreatableInstance
@@ -1401,7 +1401,7 @@ namespace RobloxRuntime.PluginClasses
 	
 	public interface NetworkReplicator : ICreatableInstance
 	{
-		public Instance? GetPlayer();
+		public Instance GetPlayer();
 	}
 	
 	public interface ClientReplicator : NetworkReplicator, ICreatableInstance
@@ -1449,7 +1449,7 @@ namespace RobloxRuntime.PluginClasses
 	{
 	}
 	
-	public interface BasePart : PVInstance, ICreatableInstance
+	public partial interface BasePart : PVInstance, ICreatableInstance
 	{
 	}
 	
@@ -1677,7 +1677,7 @@ namespace RobloxRuntime.PluginClasses
 		public Enum.RibbonTool GetSelectedRibbonTool();
 		public object? GetSetting(string key);
 		public long GetStudioUserId();
-		public Instance? Intersect(Instance[] objects);
+		public Instance Intersect(Instance[] objects);
 		public bool IsActivated();
 		public bool IsActivatedWithExclusiveMouse();
 		public Instance[] Negate(Instance[] objects);
@@ -1688,10 +1688,10 @@ namespace RobloxRuntime.PluginClasses
 		public Instance[] Separate(Instance[] objects);
 		public void SetSetting(string key, object? value);
 		public void StartDrag(object dragData);
-		public Instance? Union(Instance[] objects);
+		public Instance Union(Instance[] objects);
 		public DockWidgetPluginGui CreateDockWidgetPluginGui(string pluginGuiId, DockWidgetPluginGuiInfo dockWidgetPluginGuiInfo);
-		public Instance? ImportFbxAnimation(Instance? rigModel, bool? isR15);
-		public Instance? ImportFbxRig(bool? isR15);
+		public Instance ImportFbxAnimation(Instance rigModel, bool? isR15);
+		public Instance ImportFbxRig(bool? isR15);
 		public long PromptForExistingAssetId(string assetType);
 		public bool PromptSaveSelection(string suggestedFileName);
 		public ScriptSignal Deactivation { get; }
@@ -1733,7 +1733,7 @@ namespace RobloxRuntime.PluginClasses
 	
 	public partial interface PluginManagerInterface : ICreatableInstance
 	{
-		public Instance? CreatePlugin();
+		public Instance CreatePlugin();
 		public void ExportPlace(string filePath);
 		public void ExportSelection(string filePath);
 	}
@@ -1742,12 +1742,12 @@ namespace RobloxRuntime.PluginClasses
 	{
 		public string Icon { get; set; }
 		public string Title { get; set; }
-		public void AddAction(Instance? action);
-		public void AddMenu(Instance? menu);
-		public Instance? AddNewAction(string actionId, string text, string icon);
+		public void AddAction(Instance action);
+		public void AddMenu(Instance menu);
+		public Instance AddNewAction(string actionId, string text, string icon);
 		public void AddSeparator();
 		public void Clear();
-		public Instance? ShowAsync();
+		public Instance ShowAsync();
 	}
 	
 	public interface PluginPolicyService : ICreatableInstance
@@ -1934,24 +1934,24 @@ namespace RobloxRuntime.PluginClasses
 		public bool IsDebugging { get; }
 		public bool IsPaused { get; }
 		public Instance? Script { get; }
-		public Instance? AddWatch(string expression);
+		public Instance AddWatch(string expression);
 		public Instance[] GetBreakpoints();
 		public object GetGlobals(int? stackFrame);
 		public object GetLocals(int? stackFrame);
 		public object[] GetStack();
 		public object GetUpvalues(int? stackFrame);
-		public object? GetWatchValue(Instance? watch);
+		public object? GetWatchValue(Instance watch);
 		public Instance[] GetWatches();
-		public Instance? SetBreakpoint(int line, bool isContextDependentBreakpoint);
+		public Instance SetBreakpoint(int line, bool isContextDependentBreakpoint);
 		public void SetGlobal(string name, object? value, int stackFrame);
 		public void SetLocal(string name, object? value, int? stackFrame);
 		public void SetUpvalue(string name, object? value, int? stackFrame);
-		public ScriptSignal<Instance?> BreakpointAdded { get; }
-		public ScriptSignal<Instance?> BreakpointRemoved { get; }
+		public ScriptSignal<Instance> BreakpointAdded { get; }
+		public ScriptSignal<Instance> BreakpointRemoved { get; }
 		public ScriptSignal<int, Enum.BreakReason> EncounteredBreak { get; }
 		public ScriptSignal Resuming { get; }
-		public ScriptSignal<Instance?> WatchAdded { get; }
-		public ScriptSignal<Instance?> WatchRemoved { get; }
+		public ScriptSignal<Instance> WatchAdded { get; }
+		public ScriptSignal<Instance> WatchRemoved { get; }
 	}
 	
 	public partial interface ScriptDocument : ICreatableInstance
@@ -2239,7 +2239,7 @@ namespace RobloxRuntime.PluginClasses
 		public object GetClassIcon(string className);
 		public long GetUserId();
 		public RaycastResult GizmoRaycast(Vector3 origin, Vector3 direction, RaycastParams? raycastParams);
-		public Instance? PromptImportFile(object[]? fileTypeFilter);
+		public Instance PromptImportFile(object[]? fileTypeFilter);
 		public Instance[] PromptImportFiles(object[]? fileTypeFilter);
 	}
 	
@@ -2357,8 +2357,8 @@ namespace RobloxRuntime.PluginClasses
 		public void Warn(bool condition, string description, Instance? source, int? line);
 		public bool isFeatureEnabled(string name);
 		public void Run();
-		public ScriptSignal<bool, string, Instance?, int> ServerCollectConditionalResult { get; }
-		public ScriptSignal<string, Instance?, int> ServerCollectResult { get; }
+		public ScriptSignal<bool, string, Instance, int> ServerCollectConditionalResult { get; }
+		public ScriptSignal<string, Instance, int> ServerCollectResult { get; }
 	}
 	
 	public interface TextChannel : ICreatableInstance

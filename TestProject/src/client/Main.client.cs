@@ -7,8 +7,11 @@ namespace TestGame.Client
     {
         public static void Main()
         {
-            var part = Instance.Create<Part>(Services.Workspace);
-            Console.WriteLine(part.IsA<Part>());
+            var player = Services.Players.LocalPlayer;
+            var character = player.Character ?? player.CharacterAdded.Wait();
+            var part = Instance.Create<Part>(character);
+            part.Anchored = true;
+            part.Position = new Vector3(0, -1, 0);
         }
     }
 }

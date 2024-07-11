@@ -200,14 +200,16 @@ namespace RobloxCS
         public override void VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
         {
             var objectSymbolInfo = _semanticModel.GetSymbolInfo(node.Expression);
-            var objectDefinitionSymbol = (ITypeSymbol)objectSymbolInfo.Symbol?.OriginalDefinition!;
-            var superclasses = objectDefinitionSymbol.AllInterfaces;
-            if (objectDefinitionSymbol.Name == "Services" || superclasses.Select(@interface => @interface.Name).Contains("Services"))
+            if (objectSymbolInfo.Symbol?.OriginalDefinition is ITypeSymbol objectDefinitionSymbol)
             {
-                Write("game:GetService(\"");
-                Visit(node.Name);
-                Write("\")");
-                return;
+                var superclasses = objectDefinitionSymbol.AllInterfaces;
+                if (objectDefinitionSymbol.Name == "Services" || superclasses.Select(@interface => @interface.Name).Contains("Services"))
+                {
+                    Write("game:GetService(\"");
+                    Visit(node.Name);
+                    Write("\")");
+                    return;
+                }
             }
 
             Visit(node.Expression);

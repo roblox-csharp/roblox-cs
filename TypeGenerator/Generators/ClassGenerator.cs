@@ -402,8 +402,7 @@ namespace TypeGenerator.Generators
                         {
                             findings.RemoveAt(partPos);
                         }
-                        paramType = Utility.SafeRenamedInstance(findings.FirstOrDefault(found => found.ToLower() == argName.ToLower())) ??
-                            string.Join(" | ", findings.Select(Utility.SafeRenamedInstance));
+                        paramType = Utility.SafeRenamedInstance(findings.FirstOrDefault(found => found.ToLower() == argName.ToLower())) ?? "Instance";
                     }
                 }
                 args.Add($"{(!string.IsNullOrEmpty(paramType) ? $"{paramType}{(optional && !paramType.EndsWith("?") ? "?" : "")}" : "object")} {argName ?? $"arg{parameters.IndexOf(param)}"}");

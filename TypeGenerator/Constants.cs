@@ -45,6 +45,7 @@
             "NetworkPeer",
             "NetworkClient",
             "NetworkServer",
+            "BasePart"
         };
 
         public static readonly HashSet<string> CREATABLE_BLACKLIST = new HashSet<string>
@@ -206,20 +207,20 @@
 
         public static readonly Dictionary<string, HashSet<string>> MEMBER_BLACKLIST = new Dictionary<string, HashSet<string>>
         {
-            { "Workspace", new HashSet<string> { "FilteringEnabled" } },
-            { "CollectionService", new HashSet<string> { "GetCollection" } },
-            { "Instance", new HashSet<string> { "children", "Remove", "IsA", "Clone", "IsAncestorOf", "IsDescendantOf", "GetAttribute", "GetAttributes", "GetDescendants", "GetTags", "WaitForChild", "clone", "isDescendantOf", "AncestryChanged", "AttributeChanged", "Changed", "ChildAdded", "ChildRemoved", "DescendantAdded", "DescendantRemoving", "Destroying", "childAdded" } }, // defined in Roblox.cs
-            { "BodyGyro", new HashSet<string> { "cframe" } },
-            { "BodyAngularVelocity", new HashSet<string> { "FilteringEnabled" } },
-            { "BodyPosition", new HashSet<string> { "FilteringEnabled" } },
-            { "DataStoreService", new HashSet<string> { "FilteringEnabled" } },
-            { "Debris", new HashSet<string> { "FilteringEnabled" } },
-            { "LayerCollector", new HashSet<string> { "FilteringEnabled" } },
-            { "GuiBase3d", new HashSet<string> { "FilteringEnabled" } },
-            { "Model", new HashSet<string> { "FilteringEnabled" } },
-            { "Players", new HashSet<string> { "FilteringEnabled" } },
-            { "ServiceProvider", new HashSet<string> { "FilteringEnabled" } },
-            { "DataModel", new HashSet<string> { "FilteringEnabled" } }
+            { "Workspace", ["FilteringEnabled"] },
+            { "Players", ["FilteringEnabled", "LocalPlayer"] }, // defined in Roblox.cs
+            { "CollectionService", ["GetCollection"] },
+            { "Instance", ["children", "Remove", "IsA", "Clone", "IsAncestorOf", "IsDescendantOf", "GetAttribute", "GetAttributes", "GetDescendants", "GetTags", "WaitForChild", "clone", "isDescendantOf", "AncestryChanged", "AttributeChanged", "Changed", "ChildAdded", "ChildRemoved", "DescendantAdded", "DescendantRemoving", "Destroying", "childAdded"] }, // defined in Roblox.cs
+            { "BodyGyro", ["cframe"] },
+            { "BodyAngularVelocity", ["FilteringEnabled"] },
+            { "BodyPosition", ["FilteringEnabled"] },
+            { "DataStoreService", ["FilteringEnabled"] },
+            { "Debris", ["FilteringEnabled" ] },
+            { "LayerCollector", ["FilteringEnabled"] },
+            { "GuiBase3d", ["FilteringEnabled"] },
+            { "Model", ["FilteringEnabled"] },
+            { "ServiceProvider", ["FilteringEnabled"] },
+            { "DataModel", ["FilteringEnabled"] }
         };
 
         public static readonly Dictionary<string, List<string>> EXPECTED_EXTRA_MEMBERS = new Dictionary<string, List<string>>
@@ -311,7 +312,7 @@
             { "Map", "object" },
             { "RBXScriptSignal", "ScriptSignal" },
             { "RBXScriptConnection", "ScriptConnection" },
-            { "Instance", "Instance?" },
+            // { "Instance", "Instance?" },
             { "Object", "Instance" },
             { "Objects", "Instance[]" },
             { "Property", "string" },
@@ -320,14 +321,14 @@
             { "Rect2D", "Rect" },
             { "Tuple", "object[]" },
             { "Variant", "object?" },
-            { "Color3uint8", "Color3" }
+            { "Color3uint8", "Color3" },
+            { "any", "object" },
+            { "Array<any>", "object[]" }
         };
 
         public static readonly Dictionary<string, string> RETURN_TYPE_MAP = new Dictionary<string, string>
         {
-            { "null", "void" },
-            { "any", "object" },
-            { "Array<any>", "object[]" }
+            { "null", "void" }
         };
 
         public static readonly Dictionary<string, string> ARG_NAME_MAP = new Dictionary<string, string>
