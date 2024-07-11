@@ -316,7 +316,8 @@
             { "ProtectedString", "string" },
             { "Rect2D", "Rect" },
             { "Tuple", "object[]" },
-            { "Variant", "object?" }
+            { "Variant", "object?" },
+            { "Color3uint8", "Color3" }
         };
 
         public static readonly Dictionary<string, string> RETURN_TYPE_MAP = new Dictionary<string, string>

@@ -3619,10 +3619,10 @@ namespace RobloxRuntime.Classes
 	
 	public interface PartOperation : TriangleMeshPart
 	{
-		public SharedString CSGMesh2KernelMap { get; set; }
+		public string CSGMesh2KernelMap { get; set; }
 		public Enum.RenderFidelity RenderFidelity { get; set; }
-		public SharedString SerializedCSGTree { get; set; }
-		public SharedString SerializedOperationGraph { get; set; }
+		public string SerializedCSGTree { get; set; }
+		public string SerializedOperationGraph { get; set; }
 		public float SmoothingAngle { get; set; }
 		public int TriangleCount { get; set; }
 		public bool UsePartColor { get; set; }

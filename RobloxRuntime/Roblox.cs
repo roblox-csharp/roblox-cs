@@ -13,6 +13,10 @@
         {
         }
 
+        public interface OpenCloudModel : Instance
+        {
+        }
+
         public partial interface Instance
         {
             public static T Create<T>() where T : Instance
@@ -1023,11 +1027,17 @@
     /// </summary>
     public sealed class RaycastParams
     {
+        /// <summary>An array of objects whose descendants are used in filtering raycasting candidates.</summary>
         public Instance[]? FilterDescendantsInstances;
+        /// <summary>Determines how the <see cref="FilterDescendantsInstances"/> array is used.</summary>
         public Enum.RaycastFilterType? FilterType;
+        /// <summary>Determines whether the water material is considered when raycasting against <see cref="Terrain"/>.</summary>
         public bool? IgnoreWater;
+        /// <summary>The collision group used for the operation.</summary>
         public string? CollisionGroup;
+        /// <summary>Determines whether the raycast operation considers a part's <see cref="BasePart.CanCollide"/> property value over its <see cref="BasePart.CanQuery"/> value.</summary>
         public bool? RespectCanCollide;
+        /// <summary>When enabled, the query will ignore all part collision properties and perform a brute-force check on every part.</summary>
         public bool? BruteForceAllSlow;
 
         /// <summary>Returns a blank <see cref="RaycastParams"/>.</summary>
@@ -1049,6 +1059,40 @@
         /// <para>It has the additional advantage that it allows <see cref="FilterDescendantsInstances"/> to be updated from a parallel context.</para>
         /// </summary>
         /// <param name="instances">An array containing instances to add.</param>
+        public void AddToFilter(Instance[] instances)
+        {
+        }
+    }
+
+    /// <summary>
+    /// <para>The <see cref="OverlapParams"/> data type stores parameters for use with <see cref="WorldRoot"/> boundary-querying functions, in particular <see cref="WorldRoot.GetPartBoundsInBox(CFrame, Vector3, OverlapParams?)"/>, <see cref="WorldRoot.GetPartBoundsInRadius(Vector3, float, OverlapParams?)"/> and <see cref="WorldRoot.GetPartsInPart(BasePart, OverlapParams?)"/>.</para>
+    /// <para>The <see cref="FilterDescendantsInstances"/> property stores an array of objects to use as either an inclusion or exclusion list based on the <see cref="FilterType"/> enum, and the <see cref="CollisionGroup"/> property can specify a collision group for the boundary query operation.</para>
+    /// <para>Unlike most data types in Luau, you can change all of the members of <see cref="OverlapParams"/> without creating a new object, allowing you to reuse the same object repeatedly.</para>
+    /// </summary>
+    public sealed class OverlapParams
+    {
+        /// <summary>An array of objects whose descendants is used in filtering candidates.</summary>
+        public Instance[]? FilterDescendantsInstances;
+        /// <summary>Determines how the <see cref="FilterDescendantsInstances"/> list is used.</summary>
+        public Enum.RaycastFilterType? FilterType;
+        /// <summary>The maximum amount of parts to be returned by the query.</summary>
+        public uint MaxParts;
+        /// <summary>The collision group used for the operation.</summary>
+        public string? CollisionGroup;
+        /// <summary>Determines whether the boundary-querying operation considers a part's <see cref="BasePart.CanCollide"/> property value over its <see cref="BasePart.CanQuery"/> value.</summary>
+        public bool? RespectCanCollide;
+        /// <summary>When enabled, the query will ignore all part collision properties and perform a brute-force check on every part.</summary>
+        public bool? BruteForceAllSlow;
+
+        /// <summary>Returns a blank <see cref="OverlapParams"/> object.</summary>
+        public OverlapParams()
+        {
+        }
+
+        public void AddToFilter(Instance instance)
+        {
+        }
+
         public void AddToFilter(Instance[] instances)
         {
         }
@@ -1636,6 +1680,25 @@
         /// <param name="weight">How thick the text is.</param>
         /// <param name="style">Whether the text is normal or italic.</param>
         public static Font fromId(ulong id, Enum.FontWeight? weight, Enum.FontStyle? style)
+        {
+            return null!;
+        }
+    }
+
+    /// <summary>
+    /// <para>The <see cref="Secret"/> data type stores the secret content returned by <see cref="HttpService.GetSecret(string)"/>.</para>
+    /// <para>It cannot be printed or logged, but can be modified using built-in functions, as demonstrated by the code block below.</para>
+    /// </summary>
+    public sealed class Secret
+    {
+        /// <summary>Prepends a string to the secret content.</summary>
+        public Secret AddPrefix(string prefix)
+        {
+            return null!;
+        }
+
+        /// <summary>Appends a string to the secret content.</summary>
+        public Secret AddSuffix(string prefix)
         {
             return null!;
         }
