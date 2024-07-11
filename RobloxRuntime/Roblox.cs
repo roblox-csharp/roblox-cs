@@ -1,12 +1,15 @@
 ﻿namespace RobloxRuntime
 {
     using RobloxRuntime.Classes;
-    using static RobloxRuntime.Enum.StudioScriptEditorColorCategories;
     using HttpHeaders = IDictionary<string, string>;
 
     namespace Classes
     {
         public interface ClipEvaluator : Instance
+        {
+        }
+
+        public interface SystemAddress : Instance
         {
         }
 
@@ -758,7 +761,55 @@
         }
     }
 
-    /// <summary></summary>
+    /// <summary>
+    /// <para>Not to be confused with <see cref="Region3"/>, a separate class that fulfills a different purpose.</para>
+    /// <para>The <see cref="Region3int16"/> data type represents a volume in 3D space similar to an axis-aligned rectangular prism.</para>
+    /// <para>It uses two <see cref="Vector3int16"/> to store the volume's bounds in the <see cref="Min"/> and <see cref="Max"/> properties. It is constructed using <see cref="Region3int16"/>.new(Min, Max), given the two <see cref="Vector3int16"/> bounds.</para>
+    /// <para>This data type features no functions or operations.</para>
+    /// </summary>
+    public sealed class Region3int16
+    {
+        /// <summary>The lower bound of the <see cref="Region3int16"/>.</summary>
+        public readonly Vector3int16 Min = null!;
+        /// <summary>The upper bound of the <see cref="Region3int16"/>.</summary>
+        public readonly Vector3int16 Max = null!;
+
+        public Region3int16(Vector3int16 min, Vector3int16 max)
+        { 
+        }
+    }
+
+    /// <summary>
+    /// <para>The <see cref="Region3"/> data type describes a volume in 3D space similar to an axis-aligned rectangular prism.</para>
+    /// <para>It is commonly used with <see cref="Terrain"/> functions and functions that detect parts within a volume, such as <see cref="WorldRoot.FindPartsInRegion3(Region3, Instance?, int?)"/>.</para>
+    /// <para>The prism's center is accessible using the <see cref="CFrame"/> property and the prism's size is accessible through the <see cref="Size"/> property. Note that the components of this property may be negative.</para>
+    /// <para>The <see cref="ExpandToGrid()"/> method returns a new <see cref="Region3"/> whose bounds comply with a provided resolution value. The resulting volume may be equal to or greater than the original volume, but never smaller.</para>
+    /// <listheader>See also:</listheader>
+    /// <list type="bullet"><see cref="Region3int16"/></list>
+    /// </summary>
+    public sealed class Region3
+    {
+        /// <summary>The center location and rotation of the <see cref="Region3"/>.</summary>
+        public readonly CFrame CFrame = null!;
+        /// <summary>The 3D size of the <see cref="Region3"/>.</summary>
+        public readonly Vector3 Size = null!;
+
+        /// <summary>Returns a new <see cref="Region3"/> using the provided vectors as boundaries.</summary>
+        public Region3(Vector3 min, Vector3 max)
+        {
+        }
+
+        /// <summary>Expands the <see cref="Region3"/> based on the provided resolution and returns the expanded <see cref="Region3"/> aligned to the <see cref="Terrain"/> voxel grid.</summary>
+        public Region3 ExpandToGrid(float resolution)
+        {
+            return null!;
+        }
+    }
+
+    /// <summary>
+    /// <para>The <see cref="Color3"/> data type describes a color using red, green, and blue components in the range of 0 to 1.</para>
+    /// <para>Unlike the <see cref="BrickColor"/> data type which describes named colors, <see cref="Color3"/> is used for precise coloring of objects on screen through properties like <see cref="BasePart.Color"/> and <see cref="GuiObject.BackgroundColor3"/>.</para>
+    /// </summary>
     public sealed class Color3()
     {
         /// <summary>The red value of the color.</summary>
@@ -1379,6 +1430,48 @@
         public static Font fromId(ulong id, Enum.FontWeight? weight, Enum.FontStyle? style)
         {
             return null!;
+        }
+    }
+
+    /// <summary>
+    /// <para>The <see cref="DockWidgetPluginGuiInfo"/> data type describes details for a <see cref="DockWidgetPluginGui"/>.</para>
+    /// <para>This data type is used when constructing a <see cref="PluginGui"/> via the plugin's <see cref="PluginClasses.Plugin.CreateDockWidgetPluginGui(string, DockWidgetPluginGuiInfo)"/> method.</para>
+    /// </summary>
+    public sealed class DockWidgetPluginGuiInfo
+    {
+        /// <summary>
+        /// <para>The initial enabled state of a PluginGui created using this DockWidgetPluginGuiInfo.</para>
+        /// <para>If a PluginGui with the same ''pluginGuiId'' has previously been created in an earlier session of Roblox Studio, then it will reload that saved enabled state (unless <see cref="InitialEnabledShouldOverrideRestore"/> is true).</para>
+        /// </summary>
+        public readonly bool InitialEnabled;
+        /// <summary>
+        /// <para>If true, the value of <see cref="InitialEnabled"/> will override the previously saved enabled state of a <see cref="PluginClasses.PluginGui"/> being created with this <see cref="DockWidgetPluginGuiInfo"/>.</para>
+        /// <para>The previously saved enabled state is loaded based on the pluginGuiId argument of <see cref="PluginClasses.Plugin.CreateDockWidgetPluginGui(string, DockWidgetPluginGuiInfo)"/>.</para>
+        /// </summary>
+        public readonly bool InitialEnabledShouldOverrideRestore;
+        /// <summary>The initial pixel width of a <see cref="PluginClasses.PluginGui"/> created using this <see cref="DockWidgetPluginGuiInfo"/>, when the <see cref="Enum.InitialDockState"/> is set to <see cref="Enum.InitialDockState.Float"/>.</summary>
+        public readonly float FloatingXSize;
+        /// <summary>The initial pixel height of a <see cref="PluginClasses.PluginGui"/> created using this <see cref="DockWidgetPluginGuiInfo"/>, when the <see cref="Enum.InitialDockState"/> is set to <see cref="Enum.InitialDockState.Float"/>.</summary>
+        public readonly float FloatingYSize;
+        /// <summary>
+        /// <para>The minimum width of a <see cref="PluginClasses.PluginGui"/> created using this <see cref="DockWidgetPluginGuiInfo"/>, in pixels.</para>
+        /// <para>Each platform has its own absolute minimum that Roblox will enforce. These variations exist to account for the contents of the title bar (which varies by platform) when the widget is floating. For example, on a Mac, the width can never be less than ~80 pixels to accommodate the close/minimize/maximize buttons.</para>
+        /// </summary>
+        public readonly float MinWidth;
+        /// <summary>The minimum height of a <see cref="PluginClasses.PluginGui"/> created using this <see cref="DockWidgetPluginGuiInfo"/>, in pixels.</summary>
+        public readonly float MinHeight;
+
+        /// <summary>Returns a new <see cref="DockWidgetPluginGuiInfo"/> object.</summary>
+        public DockWidgetPluginGuiInfo(
+            Enum.InitialDockState? initDockState,
+            bool? initEnabled,
+            bool? overrideEnabledRestore,
+            float? floatXSize,
+            float? floatYSize,
+            float? minWidth,
+            float? minHeight
+        )
+        { 
         }
     }
 

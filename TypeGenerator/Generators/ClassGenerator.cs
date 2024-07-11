@@ -166,7 +166,7 @@ namespace TypeGenerator.Generators
 
             var classesToGenerate = rbxClasses.Where(ShouldGenerateClass).ToList();
             GenerateHeader();
-            Write($"namespace RobloxRuntime{(_security == "PluginSecurity" ? ".Plugin" : ".Classes")}");
+            Write($"namespace RobloxRuntime{(_security == "PluginSecurity" ? ".PluginClasses" : ".Classes")}");
             Write("{");
             PushIndent();
             GenerateClasses(classesToGenerate);
