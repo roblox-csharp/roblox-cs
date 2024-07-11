@@ -18,9 +18,17 @@
             {
                 var enumTypeName = rbxEnum.Name;
                 var enumItems = rbxEnum.Items;
-                Write($"public struct {enumTypeName} : IEnum");
+                Write($"public struct {enumTypeName}");
                 Write("{");
                 PushIndent();
+                Write("/// <summary>Returns an array of all <see cref=\"EnumItem\"/> options available for this enum.</summary>");
+                Write("public EnumItem[] GetEnumItems()");
+                Write("{");
+                PushIndent();
+                Write("return null!;");
+                PopIndent();
+                Write("}");
+                Write();
 
                 foreach (var item in enumItems)
                 {

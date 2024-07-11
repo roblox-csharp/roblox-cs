@@ -5,6 +5,12 @@ namespace RobloxRuntime.Enum
 {
 	public struct AccessModifierType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Allow : EnumItem
 		{
 			string EnumItem.Name => "Allow";
@@ -22,6 +28,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AccessoryType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Unknown : EnumItem
 		{
 			string EnumItem.Name => "Unknown";
@@ -165,6 +177,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ActionType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Nothing : EnumItem
 		{
 			string EnumItem.Name => "Nothing";
@@ -203,6 +221,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ActuatorRelativeTo
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Attachment0 : EnumItem
 		{
 			string EnumItem.Name => "Attachment0";
@@ -227,6 +251,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ActuatorType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -251,6 +281,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AdEventType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct RewardedAdLoaded : EnumItem
 		{
 			string EnumItem.Name => "RewardedAdLoaded";
@@ -296,6 +332,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AdShape
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct HorizontalRectangle : EnumItem
 		{
 			string EnumItem.Name => "HorizontalRectangle";
@@ -306,6 +348,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AdTeleportMethod
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Undefined : EnumItem
 		{
 			string EnumItem.Name => "Undefined";
@@ -337,6 +385,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AdUIEventType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct AdLabelClicked : EnumItem
 		{
 			string EnumItem.Name => "AdLabelClicked";
@@ -382,6 +436,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AdUIType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -406,6 +466,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AdUnitStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Inactive : EnumItem
 		{
 			string EnumItem.Name => "Inactive";
@@ -423,6 +489,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AdornCullingMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Automatic : EnumItem
 		{
 			string EnumItem.Name => "Automatic";
@@ -440,6 +512,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AlignType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct PrimaryAxisParallel : EnumItem
 		{
 			string EnumItem.Name => "PrimaryAxisParallel";
@@ -485,6 +563,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AlphaMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Overlay : EnumItem
 		{
 			string EnumItem.Name => "Overlay";
@@ -502,6 +586,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AnalyticsCustomFieldKeys
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct CustomField01 : EnumItem
 		{
 			string EnumItem.Name => "CustomField01";
@@ -526,6 +616,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AnalyticsEconomyAction
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -550,6 +646,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AnalyticsEconomyFlowType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Sink : EnumItem
 		{
 			string EnumItem.Name => "Sink";
@@ -567,6 +669,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AnalyticsEconomyTransactionType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct IAP : EnumItem
 		{
 			string EnumItem.Name => "IAP";
@@ -612,6 +720,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AnalyticsLogLevel
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Trace : EnumItem
 		{
 			string EnumItem.Name => "Trace";
@@ -657,6 +771,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AnalyticsProgressionStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -695,6 +815,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AnalyticsProgressionType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Custom : EnumItem
 		{
 			string EnumItem.Name => "Custom";
@@ -726,6 +852,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AnimationClipFromVideoStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Initializing : EnumItem
 		{
 			string EnumItem.Name => "Initializing";
@@ -813,6 +945,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AnimationPriority
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Core : EnumItem
 		{
 			string EnumItem.Name => "Core";
@@ -865,6 +1003,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AnimatorRetargetingMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -889,6 +1033,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AppShellActionType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -969,6 +1119,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AppShellFeature
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -1021,6 +1177,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AppUpdateStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Unknown : EnumItem
 		{
 			string EnumItem.Name => "Unknown";
@@ -1059,6 +1221,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ApplyStrokeMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Contextual : EnumItem
 		{
 			string EnumItem.Name => "Contextual";
@@ -1076,6 +1244,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AspectType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct FitWithinMaxSize : EnumItem
 		{
 			string EnumItem.Name => "FitWithinMaxSize";
@@ -1093,6 +1267,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AssetCreatorType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct User : EnumItem
 		{
 			string EnumItem.Name => "User";
@@ -1110,6 +1290,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AssetFetchStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Success : EnumItem
 		{
 			string EnumItem.Name => "Success";
@@ -1148,6 +1334,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AssetType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Image : EnumItem
 		{
 			string EnumItem.Name => "Image";
@@ -1564,6 +1756,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AssetTypeVerification
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -1588,6 +1786,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AudioApiRollout
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Disabled : EnumItem
 		{
 			string EnumItem.Name => "Disabled";
@@ -1612,6 +1816,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AudioFilterType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Peak : EnumItem
 		{
 			string EnumItem.Name => "Peak";
@@ -1692,6 +1902,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AudioSubType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Music : EnumItem
 		{
 			string EnumItem.Name => "Music";
@@ -1709,6 +1925,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AudioWindowSize
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Small : EnumItem
 		{
 			string EnumItem.Name => "Small";
@@ -1733,6 +1955,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AutoIndentRule
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Off : EnumItem
 		{
 			string EnumItem.Name => "Off";
@@ -1757,6 +1985,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AutomaticSize
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -1788,6 +2022,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AvatarAssetType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct TShirt : EnumItem
 		{
 			string EnumItem.Name => "TShirt";
@@ -2071,6 +2311,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AvatarChatServiceFeature
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -2151,6 +2397,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AvatarContextMenuOption
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Friend : EnumItem
 		{
 			string EnumItem.Name => "Friend";
@@ -2182,6 +2434,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AvatarGenerationError
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -2227,6 +2485,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AvatarGenerationJobStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct NotStarted : EnumItem
 		{
 			string EnumItem.Name => "NotStarted";
@@ -2258,6 +2522,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AvatarItemType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Asset : EnumItem
 		{
 			string EnumItem.Name => "Asset";
@@ -2275,6 +2545,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AvatarJointUpgrade
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -2299,6 +2575,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AvatarPromptResult
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Success : EnumItem
 		{
 			string EnumItem.Name => "Success";
@@ -2323,6 +2605,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AvatarThumbnailCustomizationType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Closeup : EnumItem
 		{
 			string EnumItem.Name => "Closeup";
@@ -2340,6 +2628,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct AvatarUnificationMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -2364,6 +2658,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct Axis
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct X : EnumItem
 		{
 			string EnumItem.Name => "X";
@@ -2388,6 +2688,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct BinType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Script : EnumItem
 		{
 			string EnumItem.Name => "Script";
@@ -2426,6 +2732,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct BodyPart
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Head : EnumItem
 		{
 			string EnumItem.Name => "Head";
@@ -2471,6 +2783,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct BodyPartR15
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Head : EnumItem
 		{
 			string EnumItem.Name => "Head";
@@ -2593,6 +2911,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct BorderMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Outline : EnumItem
 		{
 			string EnumItem.Name => "Outline";
@@ -2617,6 +2941,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct BreakReason
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Other : EnumItem
 		{
 			string EnumItem.Name => "Other";
@@ -2648,6 +2978,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct BreakpointRemoveReason
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Requested : EnumItem
 		{
 			string EnumItem.Name => "Requested";
@@ -2672,6 +3008,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct BulkMoveMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct FireAllEvents : EnumItem
 		{
 			string EnumItem.Name => "FireAllEvents";
@@ -2689,6 +3031,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct BundleType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct BodyParts : EnumItem
 		{
 			string EnumItem.Name => "BodyParts";
@@ -2727,6 +3075,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct Button
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Jump : EnumItem
 		{
 			string EnumItem.Name => "Jump";
@@ -2744,6 +3098,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ButtonStyle
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Custom : EnumItem
 		{
 			string EnumItem.Name => "Custom";
@@ -2789,6 +3149,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CSGAsyncDynamicCollision
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -2813,6 +3179,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CageType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Inner : EnumItem
 		{
 			string EnumItem.Name => "Inner";
@@ -2830,6 +3202,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CameraMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Classic : EnumItem
 		{
 			string EnumItem.Name => "Classic";
@@ -2847,6 +3225,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CameraPanMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Classic : EnumItem
 		{
 			string EnumItem.Name => "Classic";
@@ -2864,6 +3248,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CameraSpeedAdjustBinding
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -2888,6 +3278,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CameraType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Fixed : EnumItem
 		{
 			string EnumItem.Name => "Fixed";
@@ -2947,6 +3343,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CatalogCategoryFilter
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -2992,6 +3394,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CatalogSortAggregation
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Past12Hours : EnumItem
 		{
 			string EnumItem.Name => "Past12Hours";
@@ -3037,6 +3445,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CatalogSortType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Relevance : EnumItem
 		{
 			string EnumItem.Name => "Relevance";
@@ -3082,6 +3496,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CellBlock
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Solid : EnumItem
 		{
 			string EnumItem.Name => "Solid";
@@ -3120,6 +3540,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CellMaterial
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Empty : EnumItem
 		{
 			string EnumItem.Name => "Empty";
@@ -3249,6 +3675,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CellOrientation
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct NegZ : EnumItem
 		{
 			string EnumItem.Name => "NegZ";
@@ -3280,6 +3712,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CenterDialogType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct UnsolicitedDialog : EnumItem
 		{
 			string EnumItem.Name => "UnsolicitedDialog";
@@ -3311,6 +3749,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CharacterControlMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -3342,6 +3786,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ChatCallbackType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct OnCreatingChatWindow : EnumItem
 		{
 			string EnumItem.Name => "OnCreatingChatWindow";
@@ -3373,6 +3823,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ChatColor
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Blue : EnumItem
 		{
 			string EnumItem.Name => "Blue";
@@ -3404,6 +3860,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ChatMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Menu : EnumItem
 		{
 			string EnumItem.Name => "Menu";
@@ -3421,6 +3883,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ChatPrivacyMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct AllUsers : EnumItem
 		{
 			string EnumItem.Name => "AllUsers";
@@ -3445,6 +3913,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ChatStyle
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Classic : EnumItem
 		{
 			string EnumItem.Name => "Classic";
@@ -3469,6 +3943,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ChatVersion
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct LegacyChatService : EnumItem
 		{
 			string EnumItem.Name => "LegacyChatService";
@@ -3486,6 +3966,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ClientAnimatorThrottlingMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -3510,6 +3996,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CollaboratorStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -3541,6 +4033,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CollisionFidelity
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -3572,6 +4070,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CommandPermission
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Plugin : EnumItem
 		{
 			string EnumItem.Name => "Plugin";
@@ -3589,6 +4093,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CompileTarget
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Client : EnumItem
 		{
 			string EnumItem.Name => "Client";
@@ -3620,6 +4130,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CompletionItemKind
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Text : EnumItem
 		{
 			string EnumItem.Name => "Text";
@@ -3798,6 +4314,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CompletionItemTag
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Deprecated : EnumItem
 		{
 			string EnumItem.Name => "Deprecated";
@@ -3878,6 +4400,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CompletionTriggerKind
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Invoked : EnumItem
 		{
 			string EnumItem.Name => "Invoked";
@@ -3902,6 +4430,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ComputerCameraMovementMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -3940,6 +4474,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ComputerMovementMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -3964,6 +4504,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ConnectionError
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct OK : EnumItem
 		{
 			string EnumItem.Name => "OK";
@@ -4464,6 +5010,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ConnectionState
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Connected : EnumItem
 		{
 			string EnumItem.Name => "Connected";
@@ -4481,6 +5033,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ContextActionPriority
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Low : EnumItem
 		{
 			string EnumItem.Name => "Low";
@@ -4505,6 +5063,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ContextActionResult
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Sink : EnumItem
 		{
 			string EnumItem.Name => "Sink";
@@ -4522,6 +5086,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ControlMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Classic : EnumItem
 		{
 			string EnumItem.Name => "Classic";
@@ -4539,6 +5109,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CoreGuiType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct PlayerList : EnumItem
 		{
 			string EnumItem.Name => "PlayerList";
@@ -4598,6 +5174,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CreateOutfitFailure
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct InvalidName : EnumItem
 		{
 			string EnumItem.Name => "InvalidName";
@@ -4622,6 +5204,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CreatorType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct User : EnumItem
 		{
 			string EnumItem.Name => "User";
@@ -4639,6 +5227,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CreatorTypeFilter
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct User : EnumItem
 		{
 			string EnumItem.Name => "User";
@@ -4663,6 +5257,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CurrencyType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -4687,6 +5287,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct CustomCameraMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -4711,6 +5317,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DataStoreRequestType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct GetAsync : EnumItem
 		{
 			string EnumItem.Name => "GetAsync";
@@ -4777,6 +5389,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DebuggerEndReason
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct ClientRequest : EnumItem
 		{
 			string EnumItem.Name => "ClientRequest";
@@ -4836,6 +5454,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DebuggerExceptionBreakMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Never : EnumItem
 		{
 			string EnumItem.Name => "Never";
@@ -4860,6 +5484,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DebuggerFrameType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct C : EnumItem
 		{
 			string EnumItem.Name => "C";
@@ -4877,6 +5507,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DebuggerPauseReason
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Unknown : EnumItem
 		{
 			string EnumItem.Name => "Unknown";
@@ -4922,6 +5558,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DebuggerStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Success : EnumItem
 		{
 			string EnumItem.Name => "Success";
@@ -4988,6 +5630,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DecreaseMinimumPartDensityMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -5012,6 +5660,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DevCameraOcclusionMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Zoom : EnumItem
 		{
 			string EnumItem.Name => "Zoom";
@@ -5029,6 +5683,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DevComputerCameraMovementMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct UserChoice : EnumItem
 		{
 			string EnumItem.Name => "UserChoice";
@@ -5067,6 +5727,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DevComputerMovementMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct UserChoice : EnumItem
 		{
 			string EnumItem.Name => "UserChoice";
@@ -5098,6 +5764,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DevTouchCameraMovementMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct UserChoice : EnumItem
 		{
 			string EnumItem.Name => "UserChoice";
@@ -5129,6 +5801,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DevTouchMovementMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct UserChoice : EnumItem
 		{
 			string EnumItem.Name => "UserChoice";
@@ -5181,6 +5859,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DeveloperMemoryTag
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Internal : EnumItem
 		{
 			string EnumItem.Name => "Internal";
@@ -5345,6 +6029,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DeviceFeatureType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct DeviceCapture : EnumItem
 		{
 			string EnumItem.Name => "DeviceCapture";
@@ -5355,6 +6045,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DeviceType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Unknown : EnumItem
 		{
 			string EnumItem.Name => "Unknown";
@@ -5386,6 +6082,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DialogBehaviorType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct SinglePlayer : EnumItem
 		{
 			string EnumItem.Name => "SinglePlayer";
@@ -5403,6 +6105,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DialogPurpose
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Quest : EnumItem
 		{
 			string EnumItem.Name => "Quest";
@@ -5427,6 +6135,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DialogTone
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Neutral : EnumItem
 		{
 			string EnumItem.Name => "Neutral";
@@ -5451,6 +6165,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DominantAxis
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Width : EnumItem
 		{
 			string EnumItem.Name => "Width";
@@ -5468,6 +6188,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DraftStatusCode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct OK : EnumItem
 		{
 			string EnumItem.Name => "OK";
@@ -5499,6 +6225,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DragDetectorDragStyle
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct TranslateLine : EnumItem
 		{
 			string EnumItem.Name => "TranslateLine";
@@ -5565,6 +6297,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DragDetectorPermissionPolicy
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Nobody : EnumItem
 		{
 			string EnumItem.Name => "Nobody";
@@ -5589,6 +6327,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DragDetectorResponseStyle
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Geometric : EnumItem
 		{
 			string EnumItem.Name => "Geometric";
@@ -5613,6 +6357,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DraggerCoordinateSpace
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Object : EnumItem
 		{
 			string EnumItem.Name => "Object";
@@ -5630,6 +6380,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct DraggerMovementMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Geometric : EnumItem
 		{
 			string EnumItem.Name => "Geometric";
@@ -5647,6 +6403,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct EasingDirection
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct In : EnumItem
 		{
 			string EnumItem.Name => "In";
@@ -5671,6 +6433,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct EasingStyle
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Linear : EnumItem
 		{
 			string EnumItem.Name => "Linear";
@@ -5751,6 +6519,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ElasticBehavior
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct WhenScrollable : EnumItem
 		{
 			string EnumItem.Name => "WhenScrollable";
@@ -5775,6 +6549,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct EnviromentalPhysicsThrottle
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct DefaultAuto : EnumItem
 		{
 			string EnumItem.Name => "DefaultAuto";
@@ -5827,6 +6607,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ExperienceAuthScope
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct DefaultScope : EnumItem
 		{
 			string EnumItem.Name => "DefaultScope";
@@ -5844,6 +6630,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ExplosionType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct NoCraters : EnumItem
 		{
 			string EnumItem.Name => "NoCraters";
@@ -5861,6 +6653,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct FACSDataLod
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct LOD0 : EnumItem
 		{
 			string EnumItem.Name => "LOD0";
@@ -5885,6 +6683,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct FacialAnimationStreamingState
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -5923,6 +6727,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct FieldOfViewMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Vertical : EnumItem
 		{
 			string EnumItem.Name => "Vertical";
@@ -5947,6 +6757,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct FillDirection
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Horizontal : EnumItem
 		{
 			string EnumItem.Name => "Horizontal";
@@ -5964,6 +6780,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct FilterResult
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Accepted : EnumItem
 		{
 			string EnumItem.Name => "Accepted";
@@ -5981,6 +6803,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct FinishRecordingOperation
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Cancel : EnumItem
 		{
 			string EnumItem.Name => "Cancel";
@@ -6005,6 +6833,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct FluidFidelity
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Automatic : EnumItem
 		{
 			string EnumItem.Name => "Automatic";
@@ -6029,6 +6863,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct FluidForces
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -6046,6 +6886,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct Font
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Legacy : EnumItem
 		{
 			string EnumItem.Name => "Legacy";
@@ -6420,6 +7266,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct FontSize
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Size8 : EnumItem
 		{
 			string EnumItem.Name => "Size8";
@@ -6528,6 +7380,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct FontStyle
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Normal : EnumItem
 		{
 			string EnumItem.Name => "Normal";
@@ -6545,6 +7403,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct FontWeight
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Thin : EnumItem
 		{
 			string EnumItem.Name => "Thin";
@@ -6611,6 +7475,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ForceLimitMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Magnitude : EnumItem
 		{
 			string EnumItem.Name => "Magnitude";
@@ -6628,6 +7498,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct FormFactor
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Symmetric : EnumItem
 		{
 			string EnumItem.Name => "Symmetric";
@@ -6659,6 +7535,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct FrameStyle
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Custom : EnumItem
 		{
 			string EnumItem.Name => "Custom";
@@ -6711,6 +7593,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct FramerateManagerMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Automatic : EnumItem
 		{
 			string EnumItem.Name => "Automatic";
@@ -6735,6 +7623,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct FriendRequestEvent
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Issue : EnumItem
 		{
 			string EnumItem.Name => "Issue";
@@ -6766,6 +7660,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct FriendStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Unknown : EnumItem
 		{
 			string EnumItem.Name => "Unknown";
@@ -6804,6 +7704,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct FunctionalTestResult
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Passed : EnumItem
 		{
 			string EnumItem.Name => "Passed";
@@ -6828,6 +7734,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct GameAvatarType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct R6 : EnumItem
 		{
 			string EnumItem.Name => "R6";
@@ -6852,6 +7764,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct GamepadType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Unknown : EnumItem
 		{
 			string EnumItem.Name => "Unknown";
@@ -6883,6 +7801,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct GearGenreSetting
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct AllGenres : EnumItem
 		{
 			string EnumItem.Name => "AllGenres";
@@ -6900,6 +7824,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct GearType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct MeleeWeapons : EnumItem
 		{
 			string EnumItem.Name => "MeleeWeapons";
@@ -6966,6 +7896,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct Genre
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct All : EnumItem
 		{
 			string EnumItem.Name => "All";
@@ -7067,6 +8003,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct GraphicsMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Automatic : EnumItem
 		{
 			string EnumItem.Name => "Automatic";
@@ -7112,6 +8054,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct GuiState
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Idle : EnumItem
 		{
 			string EnumItem.Name => "Idle";
@@ -7143,6 +8091,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct GuiType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Core : EnumItem
 		{
 			string EnumItem.Name => "Core";
@@ -7181,6 +8135,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct HandlesStyle
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Resize : EnumItem
 		{
 			string EnumItem.Name => "Resize";
@@ -7198,6 +8158,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct HighlightDepthMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct AlwaysOnTop : EnumItem
 		{
 			string EnumItem.Name => "AlwaysOnTop";
@@ -7215,6 +8181,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct HorizontalAlignment
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Center : EnumItem
 		{
 			string EnumItem.Name => "Center";
@@ -7239,6 +8211,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct HoverAnimateSpeed
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct VerySlow : EnumItem
 		{
 			string EnumItem.Name => "VerySlow";
@@ -7277,6 +8255,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct HttpCachePolicy
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -7315,6 +8299,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct HttpCompression
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -7332,6 +8322,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct HttpContentType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct ApplicationJson : EnumItem
 		{
 			string EnumItem.Name => "ApplicationJson";
@@ -7370,6 +8366,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct HttpError
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct OK : EnumItem
 		{
 			string EnumItem.Name => "OK";
@@ -7464,6 +8466,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct HttpRequestType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -7516,6 +8524,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct HumanoidCollisionType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct OuterBox : EnumItem
 		{
 			string EnumItem.Name => "OuterBox";
@@ -7533,6 +8547,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct HumanoidDisplayDistanceType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Viewer : EnumItem
 		{
 			string EnumItem.Name => "Viewer";
@@ -7557,6 +8577,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct HumanoidHealthDisplayType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct DisplayWhenDamaged : EnumItem
 		{
 			string EnumItem.Name => "DisplayWhenDamaged";
@@ -7581,6 +8607,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct HumanoidRigType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct R6 : EnumItem
 		{
 			string EnumItem.Name => "R6";
@@ -7598,6 +8630,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct HumanoidStateType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct FallingDown : EnumItem
 		{
 			string EnumItem.Name => "FallingDown";
@@ -7720,6 +8758,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct IKCollisionsMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct NoCollisions : EnumItem
 		{
 			string EnumItem.Name => "NoCollisions";
@@ -7744,6 +8788,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct IKControlConstraintSupport
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -7768,6 +8818,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct IKControlType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Transform : EnumItem
 		{
 			string EnumItem.Name => "Transform";
@@ -7799,6 +8855,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct IXPLoadingStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -7851,6 +8913,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ImageAlphaType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -7875,6 +8943,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ImageCombineType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct BlendSourceOver : EnumItem
 		{
 			string EnumItem.Name => "BlendSourceOver";
@@ -7913,6 +8987,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct InOut
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Edge : EnumItem
 		{
 			string EnumItem.Name => "Edge";
@@ -7937,6 +9017,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct InfoType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Asset : EnumItem
 		{
 			string EnumItem.Name => "Asset";
@@ -7975,6 +9061,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct InitialDockState
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Top : EnumItem
 		{
 			string EnumItem.Name => "Top";
@@ -8013,6 +9105,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct InputType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct NoInput : EnumItem
 		{
 			string EnumItem.Name => "NoInput";
@@ -8037,6 +9135,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct InterpolationThrottlingMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -8061,6 +9165,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct InviteState
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Placed : EnumItem
 		{
 			string EnumItem.Name => "Placed";
@@ -8092,6 +9202,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ItemLineAlignment
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Automatic : EnumItem
 		{
 			string EnumItem.Name => "Automatic";
@@ -8130,6 +9246,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct JoinSource
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct CreatedItemAttribution : EnumItem
 		{
 			string EnumItem.Name => "CreatedItemAttribution";
@@ -8140,6 +9262,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct JointCreationMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct All : EnumItem
 		{
 			string EnumItem.Name => "All";
@@ -8164,6 +9292,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct KeyCode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Unknown : EnumItem
 		{
 			string EnumItem.Name => "Unknown";
@@ -9945,6 +11079,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct KeyInterpolationMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Constant : EnumItem
 		{
 			string EnumItem.Name => "Constant";
@@ -9969,6 +11109,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct KeywordFilterType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Include : EnumItem
 		{
 			string EnumItem.Name => "Include";
@@ -9986,6 +11132,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct Language
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -9996,6 +11148,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct LeftRight
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Left : EnumItem
 		{
 			string EnumItem.Name => "Left";
@@ -10020,6 +11178,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct Limb
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Head : EnumItem
 		{
 			string EnumItem.Name => "Head";
@@ -10072,6 +11236,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct LineJoinMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Round : EnumItem
 		{
 			string EnumItem.Name => "Round";
@@ -10096,6 +11266,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ListDisplayMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Horizontal : EnumItem
 		{
 			string EnumItem.Name => "Horizontal";
@@ -10113,6 +11289,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ListenerType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Camera : EnumItem
 		{
 			string EnumItem.Name => "Camera";
@@ -10144,6 +11326,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct LiveEditingAtomicUpdateResponse
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Success : EnumItem
 		{
 			string EnumItem.Name => "Success";
@@ -10175,6 +11363,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct LiveEditingBroadcastMessageType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Normal : EnumItem
 		{
 			string EnumItem.Name => "Normal";
@@ -10199,6 +11393,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct LoadCharacterLayeredClothing
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -10223,6 +11423,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct LoadDynamicHeads
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -10247,6 +11453,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct MarketplaceBulkPurchasePromptStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Completed : EnumItem
 		{
 			string EnumItem.Name => "Completed";
@@ -10271,6 +11483,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct MarketplaceItemPurchaseStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Success : EnumItem
 		{
 			string EnumItem.Name => "Success";
@@ -10365,6 +11583,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct MarketplaceProductType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct AvatarAsset : EnumItem
 		{
 			string EnumItem.Name => "AvatarAsset";
@@ -10382,6 +11606,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct MarkupKind
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct PlainText : EnumItem
 		{
 			string EnumItem.Name => "PlainText";
@@ -10399,6 +11629,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct Material
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Plastic : EnumItem
 		{
 			string EnumItem.Name => "Plastic";
@@ -10717,6 +11953,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct MaterialPattern
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Regular : EnumItem
 		{
 			string EnumItem.Name => "Regular";
@@ -10734,6 +11976,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct MembershipType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -10772,6 +12020,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct MeshPartDetailLevel
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct DistanceBased : EnumItem
 		{
 			string EnumItem.Name => "DistanceBased";
@@ -10817,6 +12071,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct MeshPartHeadsAndAccessories
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -10841,6 +12101,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct MeshScaleUnit
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Stud : EnumItem
 		{
 			string EnumItem.Name => "Stud";
@@ -10886,6 +12152,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct MeshType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Head : EnumItem
 		{
 			string EnumItem.Name => "Head";
@@ -10973,6 +12245,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct MessageType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct MessageOutput : EnumItem
 		{
 			string EnumItem.Name => "MessageOutput";
@@ -11004,6 +12282,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ModelLevelOfDetail
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Automatic : EnumItem
 		{
 			string EnumItem.Name => "Automatic";
@@ -11028,6 +12312,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ModelStreamingBehavior
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -11052,6 +12342,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ModelStreamingMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -11090,6 +12386,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ModerationStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct ReviewedApproved : EnumItem
 		{
 			string EnumItem.Name => "ReviewedApproved";
@@ -11128,6 +12430,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ModifierKey
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Shift : EnumItem
 		{
 			string EnumItem.Name => "Shift";
@@ -11159,6 +12467,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct MouseBehavior
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -11183,6 +12497,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct MoveState
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Stopped : EnumItem
 		{
 			string EnumItem.Name => "Stopped";
@@ -11221,6 +12541,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct MoverConstraintRootBehaviorMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -11245,6 +12571,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct MuteState
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Unmuted : EnumItem
 		{
 			string EnumItem.Name => "Unmuted";
@@ -11262,6 +12594,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct NameOcclusion
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct NoOcclusion : EnumItem
 		{
 			string EnumItem.Name => "NoOcclusion";
@@ -11286,6 +12624,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct NetworkOwnership
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Automatic : EnumItem
 		{
 			string EnumItem.Name => "Automatic";
@@ -11310,6 +12654,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct NetworkStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Unknown : EnumItem
 		{
 			string EnumItem.Name => "Unknown";
@@ -11334,6 +12684,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct NoiseType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct SimplexGabor : EnumItem
 		{
 			string EnumItem.Name => "SimplexGabor";
@@ -11344,6 +12700,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct NormalId
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Right : EnumItem
 		{
 			string EnumItem.Name => "Right";
@@ -11389,6 +12751,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct OperationType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Null : EnumItem
 		{
 			string EnumItem.Name => "Null";
@@ -11427,6 +12795,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct OrientationAlignmentMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct OneAttachment : EnumItem
 		{
 			string EnumItem.Name => "OneAttachment";
@@ -11444,6 +12818,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct OutfitSource
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct All : EnumItem
 		{
 			string EnumItem.Name => "All";
@@ -11468,6 +12848,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct OutfitType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct All : EnumItem
 		{
 			string EnumItem.Name => "All";
@@ -11492,6 +12878,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct OutputLayoutMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Horizontal : EnumItem
 		{
 			string EnumItem.Name => "Horizontal";
@@ -11509,6 +12901,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct OverrideMouseIconBehavior
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -11533,6 +12931,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PackagePermission
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -11578,6 +12982,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PartType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Ball : EnumItem
 		{
 			string EnumItem.Name => "Ball";
@@ -11616,6 +13026,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ParticleEmitterShape
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Box : EnumItem
 		{
 			string EnumItem.Name => "Box";
@@ -11647,6 +13063,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ParticleEmitterShapeInOut
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Outward : EnumItem
 		{
 			string EnumItem.Name => "Outward";
@@ -11671,6 +13093,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ParticleEmitterShapeStyle
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Volume : EnumItem
 		{
 			string EnumItem.Name => "Volume";
@@ -11688,6 +13116,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ParticleFlipbookLayout
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -11719,6 +13153,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ParticleFlipbookMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Loop : EnumItem
 		{
 			string EnumItem.Name => "Loop";
@@ -11750,6 +13190,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ParticleFlipbookTextureCompatible
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct NotCompatible : EnumItem
 		{
 			string EnumItem.Name => "NotCompatible";
@@ -11774,6 +13220,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ParticleOrientation
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct FacingCamera : EnumItem
 		{
 			string EnumItem.Name => "FacingCamera";
@@ -11805,6 +13257,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PathStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Success : EnumItem
 		{
 			string EnumItem.Name => "Success";
@@ -11850,6 +13308,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PathWaypointAction
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Walk : EnumItem
 		{
 			string EnumItem.Name => "Walk";
@@ -11874,6 +13338,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PermissionLevelShown
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Game : EnumItem
 		{
 			string EnumItem.Name => "Game";
@@ -11912,6 +13382,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PhysicsSimulationRate
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Fixed240Hz : EnumItem
 		{
 			string EnumItem.Name => "Fixed240Hz";
@@ -11936,6 +13412,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PhysicsSteppingMethod
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -11960,6 +13442,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct Platform
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Windows : EnumItem
 		{
 			string EnumItem.Name => "Windows";
@@ -12110,6 +13598,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PlaybackState
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Begin : EnumItem
 		{
 			string EnumItem.Name => "Begin";
@@ -12155,6 +13649,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PlayerActions
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct CharacterForward : EnumItem
 		{
 			string EnumItem.Name => "CharacterForward";
@@ -12193,6 +13693,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PlayerCharacterDestroyBehavior
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -12217,6 +13723,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PlayerChatType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct All : EnumItem
 		{
 			string EnumItem.Name => "All";
@@ -12241,6 +13753,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PoseEasingDirection
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct In : EnumItem
 		{
 			string EnumItem.Name => "In";
@@ -12265,6 +13783,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PoseEasingStyle
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Linear : EnumItem
 		{
 			string EnumItem.Name => "Linear";
@@ -12303,6 +13827,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PositionAlignmentMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct OneAttachment : EnumItem
 		{
 			string EnumItem.Name => "OneAttachment";
@@ -12320,6 +13850,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PreferredTextSize
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Medium : EnumItem
 		{
 			string EnumItem.Name => "Medium";
@@ -12351,6 +13887,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PrimalPhysicsSolver
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -12375,6 +13917,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PrimitiveType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Null : EnumItem
 		{
 			string EnumItem.Name => "Null";
@@ -12420,6 +13968,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PrivilegeType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Owner : EnumItem
 		{
 			string EnumItem.Name => "Owner";
@@ -12458,6 +14012,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ProductLocationRestriction
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct AvatarShop : EnumItem
 		{
 			string EnumItem.Name => "AvatarShop";
@@ -12482,6 +14042,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ProductPurchaseDecision
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct NotProcessedYet : EnumItem
 		{
 			string EnumItem.Name => "NotProcessedYet";
@@ -12499,6 +14065,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PromptCreateAssetResult
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Success : EnumItem
 		{
 			string EnumItem.Name => "Success";
@@ -12544,6 +14116,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PromptCreateAvatarResult
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Success : EnumItem
 		{
 			string EnumItem.Name => "Success";
@@ -12617,6 +14195,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PromptPublishAssetResult
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Success : EnumItem
 		{
 			string EnumItem.Name => "Success";
@@ -12662,6 +14246,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct PropertyStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Ok : EnumItem
 		{
 			string EnumItem.Name => "Ok";
@@ -12686,6 +14276,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ProximityPromptExclusivity
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct OnePerButton : EnumItem
 		{
 			string EnumItem.Name => "OnePerButton";
@@ -12710,6 +14306,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ProximityPromptInputType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Keyboard : EnumItem
 		{
 			string EnumItem.Name => "Keyboard";
@@ -12734,6 +14336,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ProximityPromptStyle
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -12751,6 +14359,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct QualityLevel
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Automatic : EnumItem
 		{
 			string EnumItem.Name => "Automatic";
@@ -12908,6 +14522,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct R15CollisionType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct OuterBox : EnumItem
 		{
 			string EnumItem.Name => "OuterBox";
@@ -12925,6 +14545,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct RaycastFilterType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Exclude : EnumItem
 		{
 			string EnumItem.Name => "Exclude";
@@ -12942,6 +14568,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct RejectCharacterDeletions
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -12966,6 +14598,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct RenderFidelity
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Automatic : EnumItem
 		{
 			string EnumItem.Name => "Automatic";
@@ -12990,6 +14628,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct RenderPriority
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct First : EnumItem
 		{
 			string EnumItem.Name => "First";
@@ -13028,6 +14672,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct RenderingCacheOptimizationMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -13052,6 +14702,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct RenderingTestComparisonMethod
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct psnr : EnumItem
 		{
 			string EnumItem.Name => "psnr";
@@ -13069,6 +14725,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ReplicateInstanceDestroySetting
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -13093,6 +14755,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ResamplerMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -13110,6 +14778,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ReservedHighlightId
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Standard : EnumItem
 		{
 			string EnumItem.Name => "Standard";
@@ -13141,6 +14815,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct RestPose
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -13165,6 +14845,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ReturnKeyType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -13210,6 +14896,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ReverbType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct NoReverb : EnumItem
 		{
 			string EnumItem.Name => "NoReverb";
@@ -13381,6 +15073,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct RibbonTool
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Select : EnumItem
 		{
 			string EnumItem.Name => "Select";
@@ -13461,6 +15159,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct RigScale
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -13485,6 +15189,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct RigType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct R15 : EnumItem
 		{
 			string EnumItem.Name => "R15";
@@ -13509,6 +15219,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct RollOffMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Inverse : EnumItem
 		{
 			string EnumItem.Name => "Inverse";
@@ -13540,6 +15256,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct RotationOrder
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct XYZ : EnumItem
 		{
 			string EnumItem.Name => "XYZ";
@@ -13585,6 +15307,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct RotationType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct MovementRelative : EnumItem
 		{
 			string EnumItem.Name => "MovementRelative";
@@ -13602,6 +15330,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct RtlTextSupport
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -13626,6 +15360,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct RunContext
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Legacy : EnumItem
 		{
 			string EnumItem.Name => "Legacy";
@@ -13657,6 +15397,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct RunState
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Stopped : EnumItem
 		{
 			string EnumItem.Name => "Stopped";
@@ -13681,6 +15427,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct RuntimeUndoBehavior
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Aggregate : EnumItem
 		{
 			string EnumItem.Name => "Aggregate";
@@ -13705,6 +15457,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SafeAreaCompatibility
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -13722,6 +15480,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SalesTypeFilter
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct All : EnumItem
 		{
 			string EnumItem.Name => "All";
@@ -13746,6 +15510,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SaveAvatarThumbnailCustomizationFailure
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct BadThumbnailType : EnumItem
 		{
 			string EnumItem.Name => "BadThumbnailType";
@@ -13791,6 +15561,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SaveFilter
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct SaveWorld : EnumItem
 		{
 			string EnumItem.Name => "SaveWorld";
@@ -13815,6 +15591,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SavedQualitySetting
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Automatic : EnumItem
 		{
 			string EnumItem.Name => "Automatic";
@@ -13895,6 +15677,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ScaleType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Stretch : EnumItem
 		{
 			string EnumItem.Name => "Stretch";
@@ -13933,6 +15721,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ScopeCheckResult
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct ConsentAccepted : EnumItem
 		{
 			string EnumItem.Name => "ConsentAccepted";
@@ -13992,6 +15786,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ScreenInsets
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -14023,6 +15823,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ScreenOrientation
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct LandscapeLeft : EnumItem
 		{
 			string EnumItem.Name => "LandscapeLeft";
@@ -14061,6 +15867,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ScrollBarInset
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -14085,6 +15897,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ScrollingDirection
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct X : EnumItem
 		{
 			string EnumItem.Name => "X";
@@ -14109,6 +15927,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SelectionBehavior
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Escape : EnumItem
 		{
 			string EnumItem.Name => "Escape";
@@ -14126,6 +15950,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SelectionRenderMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Outlines : EnumItem
 		{
 			string EnumItem.Name => "Outlines";
@@ -14150,6 +15980,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SelfViewPosition
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct LastPosition : EnumItem
 		{
 			string EnumItem.Name => "LastPosition";
@@ -14188,6 +16024,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SensorMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Floor : EnumItem
 		{
 			string EnumItem.Name => "Floor";
@@ -14205,6 +16047,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SensorUpdateType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct OnRead : EnumItem
 		{
 			string EnumItem.Name => "OnRead";
@@ -14222,6 +16070,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ServerLiveEditingMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Uninitialized : EnumItem
 		{
 			string EnumItem.Name => "Uninitialized";
@@ -14246,6 +16100,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ServiceVisibility
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Always : EnumItem
 		{
 			string EnumItem.Name => "Always";
@@ -14270,6 +16130,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct Severity
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Error : EnumItem
 		{
 			string EnumItem.Name => "Error";
@@ -14301,6 +16167,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SignalBehavior
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -14332,6 +16204,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SizeConstraint
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct RelativeXY : EnumItem
 		{
 			string EnumItem.Name => "RelativeXY";
@@ -14356,6 +16234,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SolverConvergenceMetricType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct IterationBased : EnumItem
 		{
 			string EnumItem.Name => "IterationBased";
@@ -14373,6 +16257,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SolverConvergenceVisualizationMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Disabled : EnumItem
 		{
 			string EnumItem.Name => "Disabled";
@@ -14397,6 +16287,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SortDirection
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Ascending : EnumItem
 		{
 			string EnumItem.Name => "Ascending";
@@ -14414,6 +16310,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SortOrder
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Name : EnumItem
 		{
 			string EnumItem.Name => "Name";
@@ -14438,6 +16340,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SpecialKey
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Insert : EnumItem
 		{
 			string EnumItem.Name => "Insert";
@@ -14483,6 +16391,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct StartCorner
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct TopLeft : EnumItem
 		{
 			string EnumItem.Name => "TopLeft";
@@ -14514,6 +16428,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct Status
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Poison : EnumItem
 		{
 			string EnumItem.Name => "Poison";
@@ -14531,6 +16451,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct StreamOutBehavior
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -14555,6 +16481,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct StreamingIntegrityMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -14586,6 +16518,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct StreamingPauseMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -14610,6 +16548,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct StudioCloseMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -14641,6 +16585,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct StudioDataModelType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Edit : EnumItem
 		{
 			string EnumItem.Name => "Edit";
@@ -14679,6 +16629,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct StudioPlaceUpdateFailureReason
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Other : EnumItem
 		{
 			string EnumItem.Name => "Other";
@@ -14696,6 +16652,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct StudioScriptEditorColorCategories
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -15021,6 +16983,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct StudioScriptEditorColorPresets
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct RobloxDefault : EnumItem
 		{
 			string EnumItem.Name => "RobloxDefault";
@@ -15052,6 +17020,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct StudioStyleGuideColor
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct MainBackground : EnumItem
 		{
 			string EnumItem.Name => "MainBackground";
@@ -15965,6 +17939,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct StudioStyleGuideModifier
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -16003,6 +17983,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct Style
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct AlternatingSupports : EnumItem
 		{
 			string EnumItem.Name => "AlternatingSupports";
@@ -16027,6 +18013,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SubscriptionExpirationReason
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct ProductInactive : EnumItem
 		{
 			string EnumItem.Name => "ProductInactive";
@@ -16065,6 +18057,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SubscriptionPaymentStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Paid : EnumItem
 		{
 			string EnumItem.Name => "Paid";
@@ -16082,6 +18080,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SubscriptionPeriod
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Month : EnumItem
 		{
 			string EnumItem.Name => "Month";
@@ -16092,6 +18096,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SubscriptionState
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct NeverSubscribed : EnumItem
 		{
 			string EnumItem.Name => "NeverSubscribed";
@@ -16130,6 +18140,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SurfaceConstraint
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -16161,6 +18177,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SurfaceGuiShape
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Flat : EnumItem
 		{
 			string EnumItem.Name => "Flat";
@@ -16178,6 +18200,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SurfaceGuiSizingMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct FixedSize : EnumItem
 		{
 			string EnumItem.Name => "FixedSize";
@@ -16195,6 +18223,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SurfaceType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Smooth : EnumItem
 		{
 			string EnumItem.Name => "Smooth";
@@ -16268,6 +18302,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct SwipeDirection
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Right : EnumItem
 		{
 			string EnumItem.Name => "Right";
@@ -16306,6 +18346,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TableMajorAxis
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct RowMajor : EnumItem
 		{
 			string EnumItem.Name => "RowMajor";
@@ -16323,6 +18369,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct Technology
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Voxel : EnumItem
 		{
 			string EnumItem.Name => "Voxel";
@@ -16361,6 +18413,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TeleportMethod
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct TeleportToSpawnByName : EnumItem
 		{
 			string EnumItem.Name => "TeleportToSpawnByName";
@@ -16406,6 +18464,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TeleportResult
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Success : EnumItem
 		{
 			string EnumItem.Name => "Success";
@@ -16465,6 +18529,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TeleportState
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct RequestedFromServer : EnumItem
 		{
 			string EnumItem.Name => "RequestedFromServer";
@@ -16503,6 +18573,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TeleportType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct ToPlace : EnumItem
 		{
 			string EnumItem.Name => "ToPlace";
@@ -16534,6 +18610,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TerrainAcquisitionMethod
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -16621,6 +18703,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TerrainFace
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Top : EnumItem
 		{
 			string EnumItem.Name => "Top";
@@ -16645,6 +18733,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TextChatMessageStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Unknown : EnumItem
 		{
 			string EnumItem.Name => "Unknown";
@@ -16704,6 +18798,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TextDirection
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Auto : EnumItem
 		{
 			string EnumItem.Name => "Auto";
@@ -16728,6 +18828,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TextFilterContext
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct PublicChat : EnumItem
 		{
 			string EnumItem.Name => "PublicChat";
@@ -16745,6 +18851,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TextInputType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -16811,6 +18923,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TextTruncate
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -16835,6 +18953,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TextXAlignment
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Left : EnumItem
 		{
 			string EnumItem.Name => "Left";
@@ -16859,6 +18983,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TextYAlignment
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Top : EnumItem
 		{
 			string EnumItem.Name => "Top";
@@ -16883,6 +19013,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TextureMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Stretch : EnumItem
 		{
 			string EnumItem.Name => "Stretch";
@@ -16907,6 +19043,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TextureQueryType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct NonHumanoid : EnumItem
 		{
 			string EnumItem.Name => "NonHumanoid";
@@ -16938,6 +19080,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ThreadPoolConfig
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct PerCore4 : EnumItem
 		{
 			string EnumItem.Name => "PerCore4";
@@ -17018,6 +19166,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ThrottlingPriority
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Extreme : EnumItem
 		{
 			string EnumItem.Name => "Extreme";
@@ -17042,6 +19196,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ThumbnailSize
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Size48x48 : EnumItem
 		{
 			string EnumItem.Name => "Size48x48";
@@ -17094,6 +19254,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ThumbnailType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct HeadShot : EnumItem
 		{
 			string EnumItem.Name => "HeadShot";
@@ -17118,6 +19284,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TickCountSampleMethod
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Fast : EnumItem
 		{
 			string EnumItem.Name => "Fast";
@@ -17142,6 +19314,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TopBottom
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Top : EnumItem
 		{
 			string EnumItem.Name => "Top";
@@ -17166,6 +19344,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TouchCameraMovementMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -17197,6 +19381,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TouchMovementMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -17242,6 +19432,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TrackerError
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Ok : EnumItem
 		{
 			string EnumItem.Name => "Ok";
@@ -17322,6 +19518,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TrackerExtrapolationFlagMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Auto : EnumItem
 		{
 			string EnumItem.Name => "Auto";
@@ -17353,6 +19555,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TrackerFaceTrackingStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct FaceTrackingSuccess : EnumItem
 		{
 			string EnumItem.Name => "FaceTrackingSuccess";
@@ -17405,6 +19613,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TrackerLodFlagMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Auto : EnumItem
 		{
 			string EnumItem.Name => "Auto";
@@ -17429,6 +19643,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TrackerLodValueMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Auto : EnumItem
 		{
 			string EnumItem.Name => "Auto";
@@ -17453,6 +19673,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TrackerMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -17484,6 +19710,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TrackerPromptEvent
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct LODCameraRecommendDisable : EnumItem
 		{
 			string EnumItem.Name => "LODCameraRecommendDisable";
@@ -17494,6 +19726,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TrackerType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -17518,6 +19756,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TriStateBoolean
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct False : EnumItem
 		{
 			string EnumItem.Name => "False";
@@ -17542,6 +19786,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct TweenStatus
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Canceled : EnumItem
 		{
 			string EnumItem.Name => "Canceled";
@@ -17559,6 +19809,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct UIDragDetectorDragRelativity
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Absolute : EnumItem
 		{
 			string EnumItem.Name => "Absolute";
@@ -17576,6 +19832,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct UIDragDetectorDragSpace
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Parent : EnumItem
 		{
 			string EnumItem.Name => "Parent";
@@ -17600,6 +19862,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct UIDragDetectorDragStyle
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct TranslatePlane : EnumItem
 		{
 			string EnumItem.Name => "TranslatePlane";
@@ -17631,6 +19899,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct UIDragDetectorResponseStyle
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Offset : EnumItem
 		{
 			string EnumItem.Name => "Offset";
@@ -17662,6 +19936,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct UIFlexAlignment
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -17700,6 +19980,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct UIFlexMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -17738,6 +20024,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct UITheme
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Light : EnumItem
 		{
 			string EnumItem.Name => "Light";
@@ -17755,6 +20047,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct UiMessageType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct UiMessageError : EnumItem
 		{
 			string EnumItem.Name => "UiMessageError";
@@ -17772,6 +20070,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct UsageContext
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -17789,6 +20093,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct UserCFrame
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Head : EnumItem
 		{
 			string EnumItem.Name => "Head";
@@ -17820,6 +20130,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct UserInputState
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Begin : EnumItem
 		{
 			string EnumItem.Name => "Begin";
@@ -17858,6 +20174,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct UserInputType
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct MouseButton1 : EnumItem
 		{
 			string EnumItem.Name => "MouseButton1";
@@ -18008,6 +20330,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct VRComfortSetting
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Comfort : EnumItem
 		{
 			string EnumItem.Name => "Comfort";
@@ -18039,6 +20367,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct VRSafetyBubbleMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct NoOne : EnumItem
 		{
 			string EnumItem.Name => "NoOne";
@@ -18063,6 +20397,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct VRScaling
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct World : EnumItem
 		{
 			string EnumItem.Name => "World";
@@ -18080,6 +20420,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct VRSessionState
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Undefined : EnumItem
 		{
 			string EnumItem.Name => "Undefined";
@@ -18118,6 +20464,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct VRTouchpad
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Left : EnumItem
 		{
 			string EnumItem.Name => "Left";
@@ -18135,6 +20487,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct VRTouchpadMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Touch : EnumItem
 		{
 			string EnumItem.Name => "Touch";
@@ -18159,6 +20517,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct VelocityConstraintMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Line : EnumItem
 		{
 			string EnumItem.Name => "Line";
@@ -18183,6 +20547,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct VerticalAlignment
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Center : EnumItem
 		{
 			string EnumItem.Name => "Center";
@@ -18207,6 +20577,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct VerticalScrollBarPosition
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Right : EnumItem
 		{
 			string EnumItem.Name => "Right";
@@ -18224,6 +20600,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct VibrationMotor
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Large : EnumItem
 		{
 			string EnumItem.Name => "Large";
@@ -18269,6 +20651,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct VideoDeviceCaptureQuality
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -18300,6 +20688,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct VideoError
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Ok : EnumItem
 		{
 			string EnumItem.Name => "Ok";
@@ -18436,6 +20830,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ViewMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -18467,6 +20867,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct VirtualCursorMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Default : EnumItem
 		{
 			string EnumItem.Name => "Default";
@@ -18491,6 +20897,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct VirtualInputMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -18515,6 +20927,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct VoiceChatState
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Idle : EnumItem
 		{
 			string EnumItem.Name => "Idle";
@@ -18567,6 +20985,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct VoiceControlPath
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Publish : EnumItem
 		{
 			string EnumItem.Name => "Publish";
@@ -18591,6 +21015,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct VolumetricAudio
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Disabled : EnumItem
 		{
 			string EnumItem.Name => "Disabled";
@@ -18615,6 +21045,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct WaterDirection
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct NegX : EnumItem
 		{
 			string EnumItem.Name => "NegX";
@@ -18660,6 +21096,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct WaterForce
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -18698,6 +21140,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct WeldConstraintPreserve
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct All : EnumItem
 		{
 			string EnumItem.Name => "All";
@@ -18722,6 +21170,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct WrapLayerAutoSkin
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Disabled : EnumItem
 		{
 			string EnumItem.Name => "Disabled";
@@ -18746,6 +21200,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct WrapLayerDebugMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -18847,6 +21307,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct WrapTargetDebugMode
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct None : EnumItem
 		{
 			string EnumItem.Name => "None";
@@ -18913,6 +21379,12 @@ namespace RobloxRuntime.Enum
 	
 	public struct ZIndexBehavior
 	{
+		/// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
+		public EnumItem[] GetEnumItems()
+		{
+			return null!;
+		}
+		
 		public struct Global : EnumItem
 		{
 			string EnumItem.Name => "Global";

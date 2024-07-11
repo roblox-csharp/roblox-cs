@@ -137,6 +137,7 @@ namespace TypeGenerator.Generators
         private readonly Dictionary<string, APITypes.Class> _classRefs = new Dictionary<string, APITypes.Class>();
         private readonly ReflectionMetadataReader _metadata;
         private readonly HashSet<string> _definedClassNames;
+        private readonly Dictionary<string, HashSet<string>> _definedMemberNames = new Dictionary<string, HashSet<string>>();
         private readonly string _security;
         private readonly string? _lowerSecurity;
 
@@ -260,6 +261,9 @@ namespace TypeGenerator.Generators
             if (Utility.HasTag(member, "NotScriptable"))
                 return false;
 
+            if (_definedMemberNames[rbxClass.Name].Contains(member.Name.Trim()))
+                return false;
+
             return true;
         }
 
@@ -291,8 +295,10 @@ namespace TypeGenerator.Generators
         private void GenerateClass(APITypes.Class rbxClass)
         {
             _definedClassNames.Add(rbxClass.Name);
+            _definedMemberNames[rbxClass.Name] = new HashSet<string>();
+
             var className = AssertClassName(rbxClass.Name);
-            var members = rbxClass.Members.Where(member => ShouldGenerateMember(rbxClass, member)).ToList();
+            var members = rbxClass.Members;
             var noSecurity = _security == "None" || IsPluginOnlyClass(rbxClass);
             if (noSecurity)
             {
@@ -316,6 +322,9 @@ namespace TypeGenerator.Generators
 
             foreach (var member in members)
             {
+                if (!ShouldGenerateMember(rbxClass, member)) continue;
+
+                _definedMemberNames[rbxClass.Name].Add(member.Name.Trim());
                 switch (member.MemberType)
                 {
                     case "Callback":

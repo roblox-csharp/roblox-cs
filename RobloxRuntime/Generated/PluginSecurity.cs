@@ -11,6 +11,46 @@ namespace RobloxRuntime.PluginClasses
 		public string GetDebugId(int? scopeLength);
 	}
 	
+	public interface AccessoryDescription : Instance
+	{
+	}
+	
+	public interface AccountService : Instance
+	{
+	}
+	
+	public interface Accoutrement : Instance
+	{
+	}
+	
+	public interface Accessory : Accoutrement
+	{
+	}
+	
+	public interface AchievementService : Instance
+	{
+	}
+	
+	public interface ActivityHistoryService : Instance
+	{
+	}
+	
+	public interface AdPortal : Instance
+	{
+	}
+	
+	public interface AnalyticsService : Instance
+	{
+	}
+	
+	public interface Animation : Instance
+	{
+	}
+	
+	public interface AnimationClip : Instance
+	{
+	}
+	
 	public partial interface KeyframeSequence : AnimationClip
 	{
 		public float AuthoredHipHeight { get; set; }
@@ -22,9 +62,61 @@ namespace RobloxRuntime.PluginClasses
 		public AnimationClip GetAnimationClipById(long assetId, bool useCache);
 	}
 	
+	public interface AnimationController : Instance
+	{
+	}
+	
+	public interface AnimationFromVideoCreatorService : Instance
+	{
+	}
+	
+	public interface AnimationFromVideoCreatorStudioService : Instance
+	{
+	}
+	
+	public interface AnimationRigData : Instance
+	{
+	}
+	
+	public interface AnimationStreamTrack : Instance
+	{
+	}
+	
+	public interface AnimationTrack : Instance
+	{
+	}
+	
 	public partial interface Animator : Instance
 	{
 		public void StepAnimations(float deltaTime);
+	}
+	
+	public interface AppLifecycleObserverService : Instance
+	{
+	}
+	
+	public interface AppUpdateService : Instance
+	{
+	}
+	
+	public interface AssetDeliveryProxy : Instance
+	{
+	}
+	
+	public interface AssetImportService : Instance
+	{
+	}
+	
+	public interface AssetImportSession : Instance
+	{
+	}
+	
+	public interface AssetManagerService : Instance
+	{
+	}
+	
+	public interface AssetPatchSettings : Instance
+	{
 	}
 	
 	public partial interface AssetService : Instance
@@ -32,15 +124,247 @@ namespace RobloxRuntime.PluginClasses
 		public MeshPart CreateMeshPartAsync(string meshId, object? options);
 	}
 	
+	public interface Atmosphere : Instance
+	{
+	}
+	
+	public interface Attachment : Instance
+	{
+	}
+	
+	public interface Bone : Attachment
+	{
+	}
+	
+	public interface AudioAnalyzer : Instance
+	{
+	}
+	
+	public interface AudioChorus : Instance
+	{
+	}
+	
+	public interface AudioCompressor : Instance
+	{
+	}
+	
+	public interface AudioDeviceInput : Instance
+	{
+	}
+	
+	public interface AudioDeviceOutput : Instance
+	{
+	}
+	
+	public interface AudioDistortion : Instance
+	{
+	}
+	
+	public interface AudioEcho : Instance
+	{
+	}
+	
+	public interface AudioEmitter : Instance
+	{
+	}
+	
+	public interface AudioEqualizer : Instance
+	{
+	}
+	
+	public interface AudioFader : Instance
+	{
+	}
+	
+	public interface AudioFilter : Instance
+	{
+	}
+	
+	public interface AudioFlanger : Instance
+	{
+	}
+	
+	public interface AudioListener : Instance
+	{
+	}
+	
+	public interface AudioPitchShifter : Instance
+	{
+	}
+	
+	public interface AudioPlayer : Instance
+	{
+	}
+	
+	public interface AudioReverb : Instance
+	{
+	}
+	
+	public interface AudioSearchParams : Instance
+	{
+	}
+	
+	public interface AvatarChatService : Instance
+	{
+	}
+	
+	public interface AvatarCreationService : Instance
+	{
+	}
+	
+	public interface AvatarEditorService : Instance
+	{
+	}
+	
+	public interface AvatarGenerationJob : Instance
+	{
+	}
+	
+	public interface Avatar2DGenerationJob : AvatarGenerationJob
+	{
+	}
+	
+	public interface Avatar3DGenerationJob : AvatarGenerationJob
+	{
+	}
+	
+	public interface AvatarGenerationSession : Instance
+	{
+	}
+	
+	public interface AvatarImportService : Instance
+	{
+	}
+	
+	public interface BadgeService : Instance
+	{
+	}
+	
+	public interface BaseImportData : Instance
+	{
+	}
+	
+	public interface GroupImportData : BaseImportData
+	{
+	}
+	
+	public interface MaterialImportData : BaseImportData
+	{
+	}
+	
+	public interface MeshImportData : BaseImportData
+	{
+	}
+	
+	public interface RootImportData : BaseImportData
+	{
+	}
+	
+	public interface BasePlayerGui : Instance
+	{
+	}
+	
 	public interface CoreGui : BasePlayerGui
 	{
 		public int Version { get; set; }
+	}
+	
+	public interface PlayerGui : BasePlayerGui
+	{
 	}
 	
 	public partial interface StarterGui : BasePlayerGui
 	{
 		public bool ProcessUserInput { get; set; }
 		public bool ShowDevelopmentGui { get; set; }
+	}
+	
+	public interface RemoteEvent : BaseRemoteEvent
+	{
+	}
+	
+	public interface UnreliableRemoteEvent : BaseRemoteEvent
+	{
+	}
+	
+	public interface BaseWrap : Instance
+	{
+	}
+	
+	public interface WrapLayer : BaseWrap
+	{
+	}
+	
+	public interface WrapTarget : BaseWrap
+	{
+	}
+	
+	public interface Beam : Instance
+	{
+	}
+	
+	public interface BindableEvent : Instance
+	{
+	}
+	
+	public interface BindableFunction : Instance
+	{
+	}
+	
+	public interface BodyAngularVelocity : BodyMover
+	{
+	}
+	
+	public interface BodyForce : BodyMover
+	{
+	}
+	
+	public interface BodyGyro : BodyMover
+	{
+	}
+	
+	public interface BodyPosition : BodyMover
+	{
+	}
+	
+	public interface BodyThrust : BodyMover
+	{
+	}
+	
+	public interface BodyVelocity : BodyMover
+	{
+	}
+	
+	public interface RocketPropulsion : BodyMover
+	{
+	}
+	
+	public interface BodyPartDescription : Instance
+	{
+	}
+	
+	public interface Breakpoint : Instance
+	{
+	}
+	
+	public interface BubbleChatMessageProperties : Instance
+	{
+	}
+	
+	public interface BulkImportService : Instance
+	{
+	}
+	
+	public interface CalloutService : Instance
+	{
+	}
+	
+	public interface Camera : Instance
+	{
+	}
+	
+	public interface CaptureService : Instance
+	{
 	}
 	
 	public interface ChangeHistoryService : Instance
@@ -61,7 +385,267 @@ namespace RobloxRuntime.PluginClasses
 		public ScriptSignal<string> OnUndo { get; }
 	}
 	
+	public interface BodyColors : CharacterAppearance
+	{
+	}
+	
+	public interface CharacterMesh : CharacterAppearance
+	{
+	}
+	
+	public interface Clothing : CharacterAppearance
+	{
+	}
+	
+	public interface Pants : Clothing
+	{
+	}
+	
+	public interface Shirt : Clothing
+	{
+	}
+	
+	public interface ShirtGraphic : CharacterAppearance
+	{
+	}
+	
+	public interface Chat : Instance
+	{
+	}
+	
+	public interface ChatbotUIService : Instance
+	{
+	}
+	
+	public interface ClickDetector : Instance
+	{
+	}
+	
+	public interface DragDetector : ClickDetector
+	{
+	}
+	
+	public interface Clouds : Instance
+	{
+	}
+	
+	public interface Collaborator : Instance
+	{
+	}
+	
+	public interface CollaboratorsService : Instance
+	{
+	}
+	
+	public interface CollectionService : Instance
+	{
+	}
+	
+	public interface CommandInstance : Instance
+	{
+	}
+	
+	public interface CommandService : Instance
+	{
+	}
+	
+	public interface CommerceService : Instance
+	{
+	}
+	
+	public interface ConnectivityService : Instance
+	{
+	}
+	
+	public interface Constraint : Instance
+	{
+	}
+	
+	public interface AlignOrientation : Constraint
+	{
+	}
+	
+	public interface AlignPosition : Constraint
+	{
+	}
+	
+	public interface AngularVelocity : Constraint
+	{
+	}
+	
+	public interface AnimationConstraint : Constraint
+	{
+	}
+	
+	public interface BallSocketConstraint : Constraint
+	{
+	}
+	
+	public interface HingeConstraint : Constraint
+	{
+	}
+	
+	public interface LineForce : Constraint
+	{
+	}
+	
+	public interface LinearVelocity : Constraint
+	{
+	}
+	
+	public interface RodConstraint : Constraint
+	{
+	}
+	
+	public interface RopeConstraint : Constraint
+	{
+	}
+	
+	public interface SlidingBallConstraint : Constraint
+	{
+	}
+	
+	public interface CylindricalConstraint : SlidingBallConstraint
+	{
+	}
+	
+	public interface SpringConstraint : Constraint
+	{
+	}
+	
+	public interface Torque : Constraint
+	{
+	}
+	
+	public interface TorsionSpringConstraint : Constraint
+	{
+	}
+	
+	public interface UniversalConstraint : Constraint
+	{
+	}
+	
+	public interface VectorForce : Constraint
+	{
+	}
+	
+	public interface ContentProvider : Instance
+	{
+	}
+	
+	public interface ContextActionService : Instance
+	{
+	}
+	
+	public interface Controller : Instance
+	{
+	}
+	
+	public interface SkateboardController : Controller
+	{
+	}
+	
+	public interface ControllerBase : Instance
+	{
+	}
+	
+	public interface AirController : ControllerBase
+	{
+	}
+	
+	public interface ClimbController : ControllerBase
+	{
+	}
+	
+	public interface GroundController : ControllerBase
+	{
+	}
+	
+	public interface SwimController : ControllerBase
+	{
+	}
+	
+	public interface ControllerManager : Instance
+	{
+	}
+	
+	public interface ConversationalAIAcceptanceService : Instance
+	{
+	}
+	
+	public interface CrossDMScriptChangeListener : Instance
+	{
+	}
+	
+	public interface DataModelMesh : Instance
+	{
+	}
+	
+	public interface BevelMesh : DataModelMesh
+	{
+	}
+	
+	public interface EditableMesh : DataModelMesh
+	{
+	}
+	
+	public interface RobloxEditableMesh : EditableMesh
+	{
+	}
+	
+	public interface FileMesh : DataModelMesh
+	{
+	}
+	
+	public interface SpecialMesh : FileMesh
+	{
+	}
+	
+	public interface DataModelPatchService : Instance
+	{
+	}
+	
 	public interface DataModelSession : Instance
+	{
+	}
+	
+	public interface DataStoreGetOptions : Instance
+	{
+	}
+	
+	public interface DataStoreIncrementOptions : Instance
+	{
+	}
+	
+	public interface DataStoreInfo : Instance
+	{
+	}
+	
+	public interface DataStoreKey : Instance
+	{
+	}
+	
+	public interface DataStoreKeyInfo : Instance
+	{
+	}
+	
+	public interface DataStoreObjectVersionInfo : Instance
+	{
+	}
+	
+	public interface DataStoreOptions : Instance
+	{
+	}
+	
+	public interface DataStoreService : Instance
+	{
+	}
+	
+	public interface DataStoreSetOptions : Instance
+	{
+	}
+	
+	public interface Debris : Instance
 	{
 	}
 	
@@ -88,6 +672,18 @@ namespace RobloxRuntime.PluginClasses
 		public int line { get; set; }
 	}
 	
+	public interface DebuggerConnection : Instance
+	{
+	}
+	
+	public interface DebuggerConnectionManager : Instance
+	{
+	}
+	
+	public interface DebuggerLuaResponse : Instance
+	{
+	}
+	
 	public interface DebuggerManager : Instance
 	{
 		public bool DebuggingEnabled { get; set; }
@@ -101,9 +697,85 @@ namespace RobloxRuntime.PluginClasses
 		public ScriptSignal<Instance?> DebuggerRemoved { get; }
 	}
 	
+	public interface DebuggerUIService : Instance
+	{
+	}
+	
+	public interface DebuggerVariable : Instance
+	{
+	}
+	
 	public interface DebuggerWatch : Instance
 	{
 		public string Expression { get; set; }
+	}
+	
+	public interface DeviceIdService : Instance
+	{
+	}
+	
+	public interface Dialog : Instance
+	{
+	}
+	
+	public interface DialogChoice : Instance
+	{
+	}
+	
+	public interface Dragger : Instance
+	{
+	}
+	
+	public interface DraggerService : Instance
+	{
+	}
+	
+	public interface EditableImage : Instance
+	{
+	}
+	
+	public interface RobloxEditableImage : EditableImage
+	{
+	}
+	
+	public interface EulerRotationCurve : Instance
+	{
+	}
+	
+	public interface EventIngestService : Instance
+	{
+	}
+	
+	public interface ExampleService : Instance
+	{
+	}
+	
+	public interface ExperienceAuthService : Instance
+	{
+	}
+	
+	public interface ExperienceInviteOptions : Instance
+	{
+	}
+	
+	public interface ExperienceNotificationService : Instance
+	{
+	}
+	
+	public interface ExperienceService : Instance
+	{
+	}
+	
+	public interface ExperienceStateCaptureService : Instance
+	{
+	}
+	
+	public interface Explosion : Instance
+	{
+	}
+	
+	public interface FaceAnimatorService : Instance
+	{
 	}
 	
 	public interface FaceControls : Instance
@@ -160,6 +832,34 @@ namespace RobloxRuntime.PluginClasses
 		public float UpperLipSuck { get; set; }
 	}
 	
+	public interface FaceInstance : Instance
+	{
+	}
+	
+	public interface Decal : FaceInstance
+	{
+	}
+	
+	public interface Texture : Decal
+	{
+	}
+	
+	public interface FacialAnimationRecordingService : Instance
+	{
+	}
+	
+	public interface FacialAnimationStreamingServiceStats : Instance
+	{
+	}
+	
+	public interface FacialAnimationStreamingServiceV2 : Instance
+	{
+	}
+	
+	public interface Feature : Instance
+	{
+	}
+	
 	public interface File : Instance
 	{
 		public long Size { get; set; }
@@ -167,9 +867,121 @@ namespace RobloxRuntime.PluginClasses
 		public string GetTemporaryId();
 	}
 	
+	public interface Fire : Instance
+	{
+	}
+	
+	public interface FloatCurve : Instance
+	{
+	}
+	
+	public interface Folder : Instance
+	{
+	}
+	
+	public interface ForceField : Instance
+	{
+	}
+	
+	public interface GamePassService : Instance
+	{
+	}
+	
 	public partial interface GameSettings : Instance
 	{
 		public bool VideoCaptureEnabled { get; set; }
+	}
+	
+	public interface GamepadService : Instance
+	{
+	}
+	
+	public interface GenericChallengeService : Instance
+	{
+	}
+	
+	public interface GeometryService : Instance
+	{
+	}
+	
+	public interface GetTextBoundsParams : Instance
+	{
+	}
+	
+	public interface GlobalDataStore : Instance
+	{
+	}
+	
+	public interface DataStore : GlobalDataStore
+	{
+	}
+	
+	public interface OrderedDataStore : GlobalDataStore
+	{
+	}
+	
+	public interface GroupService : Instance
+	{
+	}
+	
+	public interface GuiBase2d : GuiBase
+	{
+	}
+	
+	public interface GuiObject : GuiBase2d
+	{
+	}
+	
+	public interface CanvasGroup : GuiObject
+	{
+	}
+	
+	public interface Frame : GuiObject
+	{
+	}
+	
+	public interface GuiButton : GuiObject
+	{
+	}
+	
+	public interface ImageButton : GuiButton
+	{
+	}
+	
+	public interface TextButton : GuiButton
+	{
+	}
+	
+	public interface ImageLabel : GuiLabel
+	{
+	}
+	
+	public interface TextLabel : GuiLabel
+	{
+	}
+	
+	public interface ScrollingFrame : GuiObject
+	{
+	}
+	
+	public interface TextBox : GuiObject
+	{
+	}
+	
+	public interface VideoFrame : GuiObject
+	{
+	}
+	
+	public interface ViewportFrame : GuiObject
+	{
+	}
+	
+	public interface LayerCollector : GuiBase2d
+	{
+	}
+	
+	public interface BillboardGui : LayerCollector
+	{
 	}
 	
 	public interface PluginGui : LayerCollector
@@ -193,13 +1005,269 @@ namespace RobloxRuntime.PluginClasses
 	{
 	}
 	
+	public interface ScreenGui : LayerCollector
+	{
+	}
+	
+	public interface SurfaceGuiBase : LayerCollector
+	{
+	}
+	
+	public interface AdGui : SurfaceGuiBase
+	{
+	}
+	
+	public interface SurfaceGui : SurfaceGuiBase
+	{
+	}
+	
+	public interface GuiBase3d : GuiBase
+	{
+	}
+	
+	public interface FloorWire : GuiBase3d
+	{
+	}
+	
+	public interface InstanceAdornment : GuiBase3d
+	{
+	}
+	
+	public interface SelectionBox : InstanceAdornment
+	{
+	}
+	
+	public interface PVAdornment : GuiBase3d
+	{
+	}
+	
+	public interface HandleAdornment : PVAdornment
+	{
+	}
+	
+	public interface BoxHandleAdornment : HandleAdornment
+	{
+	}
+	
+	public interface ConeHandleAdornment : HandleAdornment
+	{
+	}
+	
+	public interface CylinderHandleAdornment : HandleAdornment
+	{
+	}
+	
+	public interface ImageHandleAdornment : HandleAdornment
+	{
+	}
+	
+	public interface LineHandleAdornment : HandleAdornment
+	{
+	}
+	
+	public interface SphereHandleAdornment : HandleAdornment
+	{
+	}
+	
+	public interface WireframeHandleAdornment : HandleAdornment
+	{
+	}
+	
+	public interface ParabolaAdornment : PVAdornment
+	{
+	}
+	
+	public interface SelectionSphere : PVAdornment
+	{
+	}
+	
+	public interface PartAdornment : GuiBase3d
+	{
+	}
+	
+	public interface ArcHandles : HandlesBase
+	{
+	}
+	
+	public interface Handles : HandlesBase
+	{
+	}
+	
+	public interface SurfaceSelection : PartAdornment
+	{
+	}
+	
+	public interface SelectionLasso : GuiBase3d
+	{
+	}
+	
+	public interface SelectionPartLasso : SelectionLasso
+	{
+	}
+	
+	public interface SelectionPointLasso : SelectionLasso
+	{
+	}
+	
+	public interface Path2D : GuiBase
+	{
+	}
+	
+	public interface GuiService : Instance
+	{
+	}
+	
+	public interface HapticService : Instance
+	{
+	}
+	
+	public interface HeightmapImporterService : Instance
+	{
+	}
+	
+	public interface HiddenSurfaceRemovalAsset : Instance
+	{
+	}
+	
+	public interface Highlight : Instance
+	{
+	}
+	
+	public interface HttpService : Instance
+	{
+	}
+	
+	public interface Humanoid : Instance
+	{
+	}
+	
+	public interface HumanoidDescription : Instance
+	{
+	}
+	
+	public interface IKControl : Instance
+	{
+	}
+	
+	public interface IXPService : Instance
+	{
+	}
+	
+	public interface IncrementalPatchBuilder : Instance
+	{
+	}
+	
+	public interface InputObject : Instance
+	{
+	}
+	
+	public interface InsertService : Instance
+	{
+	}
+	
+	public interface InternalSyncItem : Instance
+	{
+	}
+	
+	public interface JointInstance : Instance
+	{
+	}
+	
+	public interface DynamicRotate : JointInstance
+	{
+	}
+	
+	public interface Glue : JointInstance
+	{
+	}
+	
+	public interface Motor : JointInstance
+	{
+	}
+	
+	public interface Motor6D : Motor
+	{
+	}
+	
+	public interface VelocityMotor : JointInstance
+	{
+	}
+	
+	public interface JointsService : Instance
+	{
+	}
+	
+	public interface Keyframe : Instance
+	{
+	}
+	
+	public interface KeyframeMarker : Instance
+	{
+	}
+	
 	public partial interface KeyframeSequenceProvider : Instance
 	{
 		public Instance? GetKeyframeSequence(string assetId);
 		public Instance? GetKeyframeSequenceById(long assetId, bool useCache);
 	}
 	
+	public interface Light : Instance
+	{
+	}
+	
+	public interface PointLight : Light
+	{
+	}
+	
+	public interface SpotLight : Light
+	{
+	}
+	
+	public interface SurfaceLight : Light
+	{
+	}
+	
+	public interface Lighting : Instance
+	{
+	}
+	
+	public interface LinkingService : Instance
+	{
+	}
+	
+	public interface LiveScriptingService : Instance
+	{
+	}
+	
+	public interface LocalizationService : Instance
+	{
+	}
+	
+	public interface LocalizationTable : Instance
+	{
+	}
+	
+	public interface LodDataEntity : Instance
+	{
+	}
+	
+	public interface LogReporterService : Instance
+	{
+	}
+	
+	public interface LogService : Instance
+	{
+	}
+	
 	public interface LuaSettings : Instance
+	{
+	}
+	
+	public interface LuaSourceContainer : Instance
+	{
+	}
+	
+	public interface BaseScript : LuaSourceContainer
 	{
 	}
 	
@@ -211,6 +1279,26 @@ namespace RobloxRuntime.PluginClasses
 	public interface ModuleScript : LuaSourceContainer
 	{
 		public string Source { get; set; }
+	}
+	
+	public interface MarkerCurve : Instance
+	{
+	}
+	
+	public interface MarketplaceService : Instance
+	{
+	}
+	
+	public interface MaterialGenerationService : Instance
+	{
+	}
+	
+	public interface MaterialGenerationSession : Instance
+	{
+	}
+	
+	public interface MaterialService : Instance
+	{
 	}
 	
 	public interface MaterialVariant : Instance
@@ -226,12 +1314,60 @@ namespace RobloxRuntime.PluginClasses
 		public void Disconnect();
 	}
 	
+	public interface MemoryStoreHashMap : Instance
+	{
+	}
+	
+	public interface MemoryStoreQueue : Instance
+	{
+	}
+	
+	public interface MemoryStoreService : Instance
+	{
+	}
+	
+	public interface MemoryStoreSortedMap : Instance
+	{
+	}
+	
+	public interface MessageBusConnection : Instance
+	{
+	}
+	
+	public interface MessageBusService : Instance
+	{
+	}
+	
+	public interface MessagingService : Instance
+	{
+	}
+	
+	public interface MetaBreakpoint : Instance
+	{
+	}
+	
+	public interface MetaBreakpointContext : Instance
+	{
+	}
+	
+	public interface MetaBreakpointManager : Instance
+	{
+	}
+	
+	public interface Mouse : Instance
+	{
+	}
+	
 	public interface PluginMouse : Mouse
 	{
 		public ScriptSignal<Instance[]> DragEnter { get; }
 	}
 	
 	public interface MultipleDocumentInterfaceInstance : Instance
+	{
+	}
+	
+	public interface NetworkMarker : Instance
 	{
 	}
 	
@@ -276,14 +1412,98 @@ namespace RobloxRuntime.PluginClasses
 		public bool ShowActiveAnimationAsset { get; set; }
 	}
 	
+	public interface NoCollisionConstraint : Instance
+	{
+	}
+	
+	public interface Noise : Instance
+	{
+	}
+	
+	public interface OmniRecommendationsService : Instance
+	{
+	}
+	
+	public interface OpenCloudApiV1 : Instance
+	{
+	}
+	
+	public interface OpenCloudService : Instance
+	{
+	}
+	
+	public interface PVInstance : Instance
+	{
+	}
+	
+	public interface BasePart : PVInstance
+	{
+	}
+	
+	public interface FormFactorPart : BasePart
+	{
+	}
+	
+	public interface Part : FormFactorPart
+	{
+	}
+	
+	public interface Platform : Part
+	{
+	}
+	
+	public interface Seat : Part
+	{
+	}
+	
+	public interface SkateboardPlatform : Part
+	{
+	}
+	
+	public interface SpawnLocation : Part
+	{
+	}
+	
 	public partial interface Terrain : BasePart
 	{
 		public void ConvertToSmooth();
 	}
 	
+	public interface TriangleMeshPart : BasePart
+	{
+	}
+	
+	public interface MeshPart : TriangleMeshPart
+	{
+	}
+	
+	public interface PartOperation : TriangleMeshPart
+	{
+	}
+	
+	public interface TrussPart : BasePart
+	{
+	}
+	
+	public interface VehicleSeat : BasePart
+	{
+	}
+	
 	public interface Model : PVInstance
 	{
 		public Enum.ModelLevelOfDetail LevelOfDetail { get; set; }
+	}
+	
+	public interface Actor : Model
+	{
+	}
+	
+	public interface BackpackItem : Model
+	{
+	}
+	
+	public interface Tool : BackpackItem
+	{
 	}
 	
 	public partial interface WorldRoot : Model
@@ -299,7 +1519,67 @@ namespace RobloxRuntime.PluginClasses
 		public void ZoomToExtents();
 	}
 	
+	public interface PackageLink : Instance
+	{
+	}
+	
 	public interface PackageService : Instance
+	{
+	}
+	
+	public interface PackageUIService : Instance
+	{
+	}
+	
+	public interface Pages : Instance
+	{
+	}
+	
+	public interface DataStoreKeyPages : Pages
+	{
+	}
+	
+	public interface DataStoreListingPages : Pages
+	{
+	}
+	
+	public interface ParticleEmitter : Instance
+	{
+	}
+	
+	public interface PatchMapping : Instance
+	{
+	}
+	
+	public interface Path : Instance
+	{
+	}
+	
+	public interface PathfindingLink : Instance
+	{
+	}
+	
+	public interface PathfindingModifier : Instance
+	{
+	}
+	
+	public interface PathfindingService : Instance
+	{
+	}
+	
+	public interface PausedState : Instance
+	{
+	}
+	
+	public interface PausedStateBreakpoint : PausedState
+	{
+	}
+	
+	public interface PausedStateException : PausedState
+	{
+	}
+	
+	public interface PhysicsService : Instance
 	{
 	}
 	
@@ -334,10 +1614,34 @@ namespace RobloxRuntime.PluginClasses
 		public bool UseCSGv2 { get; set; }
 	}
 	
+	public interface PlacesService : Instance
+	{
+	}
+	
+	public interface PlatformCloudStorageService : Instance
+	{
+	}
+	
+	public interface PlatformFriendsService : Instance
+	{
+	}
+	
 	public partial interface Player : Instance
 	{
 		public void SetAccountAge(int accountAge);
 		public void SetSuperSafeChat(bool value);
+	}
+	
+	public interface PlayerHydrationService : Instance
+	{
+	}
+	
+	public interface PlayerScripts : Instance
+	{
+	}
+	
+	public interface PlayerViewService : Instance
+	{
 	}
 	
 	public partial interface Players : Instance
@@ -391,6 +1695,10 @@ namespace RobloxRuntime.PluginClasses
 		public ScriptSignal Triggered { get; }
 	}
 	
+	public interface PluginCapabilities : Instance
+	{
+	}
+	
 	public interface PluginDebugService : Instance
 	{
 	}
@@ -404,6 +1712,10 @@ namespace RobloxRuntime.PluginClasses
 	}
 	
 	public interface PluginGuiService : Instance
+	{
+	}
+	
+	public interface PluginManagementService : Instance
 	{
 	}
 	
@@ -426,6 +1738,10 @@ namespace RobloxRuntime.PluginClasses
 		public Instance? ShowAsync();
 	}
 	
+	public interface PluginPolicyService : Instance
+	{
+	}
+	
 	public interface PluginToolbar : Instance
 	{
 		public PluginToolbarButton CreateButton(string buttonId, string tooltip, string iconname, string text);
@@ -438,6 +1754,78 @@ namespace RobloxRuntime.PluginClasses
 		public string Icon { get; set; }
 		public void SetActive(bool active);
 		public ScriptSignal Click { get; }
+	}
+	
+	public interface PolicyService : Instance
+	{
+	}
+	
+	public interface PoseBase : Instance
+	{
+	}
+	
+	public interface NumberPose : PoseBase
+	{
+	}
+	
+	public interface Pose : PoseBase
+	{
+	}
+	
+	public interface PostEffect : Instance
+	{
+	}
+	
+	public interface BloomEffect : PostEffect
+	{
+	}
+	
+	public interface BlurEffect : PostEffect
+	{
+	}
+	
+	public interface ColorCorrectionEffect : PostEffect
+	{
+	}
+	
+	public interface DepthOfFieldEffect : PostEffect
+	{
+	}
+	
+	public interface SunRaysEffect : PostEffect
+	{
+	}
+	
+	public interface ProjectFolderService : Instance
+	{
+	}
+	
+	public interface ProximityPrompt : Instance
+	{
+	}
+	
+	public interface ProximityPromptService : Instance
+	{
+	}
+	
+	public interface PublishService : Instance
+	{
+	}
+	
+	public interface RTAnimationTracker : Instance
+	{
+	}
+	
+	public interface ReflectionService : Instance
+	{
+	}
+	
+	public interface RemoteCursorService : Instance
+	{
+	}
+	
+	public interface RemoteFunction : Instance
+	{
 	}
 	
 	public interface RenderSettings : Instance
@@ -480,7 +1868,23 @@ namespace RobloxRuntime.PluginClasses
 		public void RenderdocTriggerCapture();
 	}
 	
+	public interface ReplicatedFirst : Instance
+	{
+	}
+	
+	public interface RibbonNotificationService : Instance
+	{
+	}
+	
 	public interface RobloxPluginGuiService : Instance
+	{
+	}
+	
+	public interface RomarkService : Instance
+	{
+	}
+	
+	public interface RotationCurve : Instance
 	{
 	}
 	
@@ -492,6 +1896,22 @@ namespace RobloxRuntime.PluginClasses
 		public void Reset();
 		public void Run();
 		public void Stop();
+	}
+	
+	public interface SafetyService : Instance
+	{
+	}
+	
+	public interface ScreenshotHud : Instance
+	{
+	}
+	
+	public interface SyncScriptBuilder : ScriptBuilder
+	{
+	}
+	
+	public interface ScriptChangeService : Instance
+	{
 	}
 	
 	public partial interface ScriptContext : Instance
@@ -576,6 +1996,10 @@ namespace RobloxRuntime.PluginClasses
 		public ScriptSignal<Player, string> OnNewData { get; }
 	}
 	
+	public interface ScriptRegistrationService : Instance
+	{
+	}
+	
 	public interface Selection : Instance
 	{
 		public float SelectionThickness { get; set; }
@@ -584,6 +2008,30 @@ namespace RobloxRuntime.PluginClasses
 		public void Remove(Instance[] instancesToRemove);
 		public void Set(Instance[] selection);
 		public ScriptSignal SelectionChanged { get; }
+	}
+	
+	public interface SensorBase : Instance
+	{
+	}
+	
+	public interface AtmosphereSensor : SensorBase
+	{
+	}
+	
+	public interface BuoyancySensor : SensorBase
+	{
+	}
+	
+	public interface ControllerPartSensor : ControllerSensor
+	{
+	}
+	
+	public interface ServerScriptService : Instance
+	{
+	}
+	
+	public interface ServiceProvider : Instance
+	{
 	}
 	
 	public partial interface DataModel : ServiceProvider
@@ -600,9 +2048,117 @@ namespace RobloxRuntime.PluginClasses
 		public string GetFVariable(string name);
 	}
 	
+	public interface UserSettings : GenericSettings
+	{
+	}
+	
+	public interface ServiceVisibilityService : Instance
+	{
+	}
+	
+	public interface SessionService : Instance
+	{
+	}
+	
+	public interface SharedTableRegistry : Instance
+	{
+	}
+	
+	public interface ShorelineUpgraderService : Instance
+	{
+	}
+	
+	public interface Sky : Instance
+	{
+	}
+	
+	public interface Smoke : Instance
+	{
+	}
+	
+	public interface SmoothVoxelsUpgraderService : Instance
+	{
+	}
+	
+	public interface SocialService : Instance
+	{
+	}
+	
+	public interface Sound : Instance
+	{
+	}
+	
+	public interface SoundEffect : Instance
+	{
+	}
+	
+	public interface ChorusSoundEffect : SoundEffect
+	{
+	}
+	
+	public interface CompressorSoundEffect : SoundEffect
+	{
+	}
+	
+	public interface ChannelSelectorSoundEffect : CustomSoundEffect
+	{
+	}
+	
+	public interface DistortionSoundEffect : SoundEffect
+	{
+	}
+	
+	public interface EchoSoundEffect : SoundEffect
+	{
+	}
+	
+	public interface EqualizerSoundEffect : SoundEffect
+	{
+	}
+	
+	public interface FlangeSoundEffect : SoundEffect
+	{
+	}
+	
+	public interface PitchShiftSoundEffect : SoundEffect
+	{
+	}
+	
+	public interface ReverbSoundEffect : SoundEffect
+	{
+	}
+	
+	public interface TremoloSoundEffect : SoundEffect
+	{
+	}
+	
+	public interface SoundGroup : Instance
+	{
+	}
+	
 	public partial interface SoundService : Instance
 	{
 		public void OpenAttenuationCurveEditor(Instance[] selectedCurveObjects);
+	}
+	
+	public interface Sparkles : Instance
+	{
+	}
+	
+	public interface StackFrame : Instance
+	{
+	}
+	
+	public interface StarterPlayer : Instance
+	{
+	}
+	
+	public interface StartupMessageService : Instance
+	{
+	}
+	
+	public interface Stats : Instance
+	{
 	}
 	
 	public interface StatsItem : Instance
@@ -628,7 +2184,39 @@ namespace RobloxRuntime.PluginClasses
 	{
 	}
 	
+	public interface StreamingService : Instance
+	{
+	}
+	
+	public interface StudioAssetService : Instance
+	{
+	}
+	
+	public interface StudioAttachment : Instance
+	{
+	}
+	
+	public interface StudioCallout : Instance
+	{
+	}
+	
 	public interface StudioData : Instance
+	{
+	}
+	
+	public interface StudioDeviceEmulatorService : Instance
+	{
+	}
+	
+	public interface StudioWidget : StudioObjectBase
+	{
+	}
+	
+	public interface StudioPublishService : Instance
+	{
+	}
+	
+	public interface StudioSdkService : Instance
 	{
 	}
 	
@@ -654,6 +2242,34 @@ namespace RobloxRuntime.PluginClasses
 		public Color3 GetColor(Enum.StudioStyleGuideColor styleguideitem, Enum.StudioStyleGuideModifier? modifier);
 	}
 	
+	public interface StudioWidgetsService : Instance
+	{
+	}
+	
+	public interface StyleBase : Instance
+	{
+	}
+	
+	public interface StyleRule : StyleBase
+	{
+	}
+	
+	public interface StyleSheet : StyleBase
+	{
+	}
+	
+	public interface StyleDerive : Instance
+	{
+	}
+	
+	public interface StyleLink : Instance
+	{
+	}
+	
+	public interface StylingService : Instance
+	{
+	}
+	
 	public interface SurfaceAppearance : Instance
 	{
 		public Enum.AlphaMode AlphaMode { get; set; }
@@ -669,6 +2285,34 @@ namespace RobloxRuntime.PluginClasses
 		public double SchedulerRate { get; set; }
 		public Enum.ThreadPoolConfig ThreadPoolConfig { get; set; }
 		public int ThreadPoolSize { get; set; }
+	}
+	
+	public interface Team : Instance
+	{
+	}
+	
+	public interface TeamCreateData : Instance
+	{
+	}
+	
+	public interface TeamCreateService : Instance
+	{
+	}
+	
+	public interface Teams : Instance
+	{
+	}
+	
+	public interface TeleportAsyncResult : Instance
+	{
+	}
+	
+	public interface TeleportOptions : Instance
+	{
+	}
+	
+	public interface TeleportService : Instance
+	{
 	}
 	
 	public interface TerrainDetail : Instance
@@ -713,7 +2357,259 @@ namespace RobloxRuntime.PluginClasses
 		public ScriptSignal<string, Instance?, int> ServerCollectResult { get; }
 	}
 	
+	public interface TextChannel : Instance
+	{
+	}
+	
+	public interface TextChatCommand : Instance
+	{
+	}
+	
+	public interface BubbleChatConfiguration : TextChatConfigurations
+	{
+	}
+	
+	public interface ChatInputBarConfiguration : TextChatConfigurations
+	{
+	}
+	
+	public interface ChatWindowConfiguration : TextChatConfigurations
+	{
+	}
+	
+	public interface TextChatMessage : Instance
+	{
+	}
+	
+	public interface TextChatMessageProperties : Instance
+	{
+	}
+	
+	public interface TextChatService : Instance
+	{
+	}
+	
+	public interface TextFilterResult : Instance
+	{
+	}
+	
+	public interface TextFilterTranslatedResult : Instance
+	{
+	}
+	
+	public interface TextService : Instance
+	{
+	}
+	
+	public interface TextSource : Instance
+	{
+	}
+	
+	public interface TextureGenerationPartGroup : Instance
+	{
+	}
+	
+	public interface TextureGenerationService : Instance
+	{
+	}
+	
+	public interface TextureGenerationUnwrappingRequest : Instance
+	{
+	}
+	
+	public interface ThreadState : Instance
+	{
+	}
+	
+	public interface ToastNotificationService : Instance
+	{
+	}
+	
+	public interface TracerService : Instance
+	{
+	}
+	
+	public interface TrackerLodController : Instance
+	{
+	}
+	
+	public interface Trail : Instance
+	{
+	}
+	
+	public interface Translator : Instance
+	{
+	}
+	
+	public interface TutorialService : Instance
+	{
+	}
+	
+	public interface TweenBase : Instance
+	{
+	}
+	
+	public interface Tween : TweenBase
+	{
+	}
+	
+	public interface TweenService : Instance
+	{
+	}
+	
+	public interface UIAspectRatioConstraint : UIConstraint
+	{
+	}
+	
+	public interface UISizeConstraint : UIConstraint
+	{
+	}
+	
+	public interface UITextSizeConstraint : UIConstraint
+	{
+	}
+	
+	public interface UICorner : UIComponent
+	{
+	}
+	
+	public interface UIDragDetector : UIComponent
+	{
+	}
+	
+	public interface UIFlexItem : UIComponent
+	{
+	}
+	
+	public interface UIGradient : UIComponent
+	{
+	}
+	
+	public interface UIGridStyleLayout : UILayout
+	{
+	}
+	
+	public interface UIGridLayout : UIGridStyleLayout
+	{
+	}
+	
+	public interface UIListLayout : UIGridStyleLayout
+	{
+	}
+	
+	public interface UIPageLayout : UIGridStyleLayout
+	{
+	}
+	
+	public interface UITableLayout : UIGridStyleLayout
+	{
+	}
+	
+	public interface UIPadding : UIComponent
+	{
+	}
+	
+	public interface UIScale : UIComponent
+	{
+	}
+	
+	public interface UIStroke : UIComponent
+	{
+	}
+	
+	public interface UnvalidatedAssetService : Instance
+	{
+	}
+	
+	public interface UserGameSettings : Instance
+	{
+	}
+	
+	public interface UserInputService : Instance
+	{
+	}
+	
+	public interface UserService : Instance
+	{
+	}
+	
+	public interface VRService : Instance
+	{
+	}
+	
+	public interface BoolValue : ValueBase
+	{
+	}
+	
+	public interface BrickColorValue : ValueBase
+	{
+	}
+	
+	public interface CFrameValue : ValueBase
+	{
+	}
+	
+	public interface Color3Value : ValueBase
+	{
+	}
+	
+	public interface DoubleConstrainedValue : ValueBase
+	{
+	}
+	
+	public interface IntConstrainedValue : ValueBase
+	{
+	}
+	
+	public interface IntValue : ValueBase
+	{
+	}
+	
+	public interface NumberValue : ValueBase
+	{
+	}
+	
+	public interface ObjectValue : ValueBase
+	{
+	}
+	
+	public interface RayValue : ValueBase
+	{
+	}
+	
+	public interface StringValue : ValueBase
+	{
+	}
+	
+	public interface Vector3Value : ValueBase
+	{
+	}
+	
+	public interface Vector3Curve : Instance
+	{
+	}
+	
 	public interface VersionControlService : Instance
+	{
+	}
+	
+	public interface VideoCaptureService : Instance
+	{
+	}
+	
+	public interface VideoDeviceInput : Instance
+	{
+	}
+	
+	public interface VisualizationMode : Instance
+	{
+	}
+	
+	public interface VisualizationModeCategory : Instance
+	{
+	}
+	
+	public interface VoiceChatInternal : Instance
 	{
 	}
 	
@@ -721,6 +2617,14 @@ namespace RobloxRuntime.PluginClasses
 	{
 		public bool EnableDefaultVoice { get; set; }
 		public Enum.AudioApiRollout UseAudioApi { get; set; }
+	}
+	
+	public interface WeldConstraint : Instance
+	{
+	}
+	
+	public interface Wire : Instance
+	{
 	}
 	
 }
