@@ -1243,13 +1243,11 @@
         public ulong UnixTimestamp { get; }
         public ulong UnixTimestampMillis { get; }
 
-#pragma warning disable IDE1006
         /// <summary>Returns a <see cref="DateTime"/> representing the current moment in time.</summary>
         public static DateTime now()
         {
             return null!;
         }
-#pragma warning restore IDE1006
 
         /// <summary>Returns a <see cref="DateTime"/> representing the given Unix timestamp.</summary>
         public static DateTime fromUnixTimestamp(float unixTimestamp)
@@ -1590,6 +1588,38 @@
         }
     }
 
+
+    /// <summary>
+    /// <para>A time-value pair used with <see cref="RotationCurve"/> instances.</para>
+    /// <para>The <see cref="Interpolation"/> property dictates the interpolation mode for the segment started by this key and ended by the next key on the curve. Each segment may use a different interpolation mode.</para>
+    /// <para>The <see cref="LeftTangent"/> and <see cref="RightTangent"/> properties apply to the cubic interpolation mode and define the desired tangent (slope) at the key. Different left and right values can be used to encode discontinuities in slope at the key.</para>
+    /// <para>Attempting to set a <see cref="RightTangent"/> value on a key that doesn't use the cubic interpolation mode will result in a runtime error. It is possible to set the <see cref="LeftTangent"/> property on any key, as it will be used should the preceding segment use cubic interpolation.</para>
+    /// </summary>
+    public sealed class RotationCurveKey
+    {
+        /// <summary>The key interpolation mode for the segment started by this <see cref="RotationCurveKey"/>.</summary
+        public readonly Enum.KeyInterpolationMode Interpolation;
+        /// <summary>The time position of this <see cref="RotationCurveKey"/>.</summary>
+        public readonly float Time;
+        /// <summary>The value of this <see cref="RotationCurveKey"/>.</summary>
+        public readonly CFrame Value = null!;
+        /// <summary>The tangent to the right of this <see cref="RotationCurveKey"/>.</summary>
+        public readonly float RightTangent;
+        /// <summary>The tangent to the left of this <see cref="RotationCurveKey"/>.</summary>
+        public readonly float LeftTangent;
+
+        /// <summary>
+        /// <para>Creates a new <see cref="RotationCurveKey"/> at a given time with a given <see cref="CFrame"/>.</para>
+        /// <para><see cref="LeftTangent"/> and <see cref="RightTangent"/> are left uninitialized and, if not initialized, tangent values of 0 will be used when evaluating the curve.</para>
+        /// </summary>
+        /// <param name="time">Time at which to create the new <see cref="RotationCurveKey"/>.</param>
+        /// <param name="value">CFrame of the new <see cref="RotationCurveKey"/>.</param>
+        /// <param name="interpolation"></param>
+        public RotationCurveKey(float time, CFrame cframe, Enum.KeyInterpolationMode interpolation)
+        {
+        }
+    }
+
     /// <summary>
     /// <para>A time-value pair used with <see cref="FloatCurve"/> instances.</para>
     /// <para>The <see cref="Interpolation"/> property dictates the interpolation mode for the segment started by this key and ended by the next key on the curve. Each segment may use a different interpolation mode.</para>
@@ -1610,7 +1640,7 @@
         public readonly float LeftTangent;
 
         /// <summary>
-        /// Creates a new <see cref="FloatCurveKey"/> at a given time and value.
+        /// <para>Creates a new <see cref="FloatCurveKey"/> at a given time and value.</para>
         /// <para><see cref="LeftTangent"/> and <see cref="RightTangent"/> are left uninitialized and, if not initialized, tangent values of 0 will be used when evaluating the curve.</para>
         /// </summary>
         /// <param name="time">Time at which to create the new <see cref="FloatCurveKey"/>.</param>
@@ -1776,6 +1806,72 @@
         public string? CreatorName;
         /// <summary>Specifies the number of items to return. Accepts 10, 28, 30, 60, and 120. Defaults to 30.</summary>
         public byte? Limit;
+    }
+
+    /// <summary>
+    /// <para>The <see cref="TweenInfo"/> data type stores parameters for <see cref="TweenService.Create(Instance?, TweenInfo, object)"/> to specify the behavior of the tween.</para>
+    /// <para>The properties of a <see cref="TweenInfo"/> cannot be written to after its creation.</para>
+    /// </summary>
+    public sealed class TweenInfo
+    {
+        /// <summary>The style in which the tween executes.</summary>
+        public readonly Enum.EasingStyle EasingStyle;
+        /// <summary>The direction in which the EasingStyle executes.</summary>
+        public readonly Enum.EasingDirection EasingDirection;
+        /// <summary>The amount of time the tween takes in seconds.</summary>
+        public readonly float Time;
+        /// <summary>The amount of time that elapses before tween starts in seconds.</summary>
+        public readonly float DelayTime;
+        /// <summary>The number of times the tween repeats after tweening once.</summary>
+        public readonly ushort RepeatCount;
+        /// <summary>Whether or not the tween does the reverse tween once the initial tween completes.</summary>
+        public readonly bool Reverses;
+
+        /// <summary>Creates a new <see cref="TweenInfo"/> from the provided parameters.</summary>
+        public TweenInfo(float? time, Enum.EasingStyle? easingStyle, Enum.EasingDirection? easingDirection, ushort? repeatCount, float? delayTime, bool? reverses)
+        {
+        }
+    }
+
+    /// <summary>
+    /// <para>Represents a table-like data structure that can be shared across execution contexts.</para>
+    /// <para>While it can be used for various sorts of general data storage, it is designed especially for use with Parallel Luau, where it can be used to share state across scripts parented under different <see cref="Actor"/> instances.</para>
+    /// <para>There are a couple idiomatic ways to communicate shared tables between scripts. One method is to store and retrieve <see cref="SharedTable"/> objects in the <see cref="SharedTableRegistry"/>. The registry lets any script in the same data model get or set a <see cref="SharedTable"/> by name. Another method is to use <see cref="Actor.SendMessage(string, object[])"/> to send a shared table to another <see cref="Actor"/> inside a message.</para>
+    /// </summary>
+    public sealed class SharedTable : Dictionary<string, object>
+    {
+        public static void clear(SharedTable st)
+        { 
+        }
+
+        public static SharedTable clone(SharedTable st, bool? deep)
+        {
+            return null!;
+        }
+
+        public static SharedTable cloneAndFreeze(SharedTable st, bool? deep)
+        {
+            return null!;
+        }
+
+        public static float increment(SharedTable st, string key, float delta)
+        {
+            return default;
+        }
+
+        public static bool isFrozen(SharedTable st)
+        {
+            return default;
+        }
+
+        public static ushort size(SharedTable st)
+        {
+            return default;
+        }
+
+        public static void update(SharedTable st, string key, Func<object> f)
+        {
+        }
     }
 
     public interface EmoteDictionary : IDictionary<string, int[]>

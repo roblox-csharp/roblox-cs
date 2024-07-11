@@ -3394,7 +3394,7 @@ namespace RobloxRuntime.Classes
 		public string CollisionGroup { get; set; }
 		public int CollisionGroupId { get; set; }
 		public Color3 Color { get; set; }
-		public Color3uint8 Color3uint8 { get; set; }
+		public Color3 Color3uint8 { get; set; }
 		public PhysicalProperties CurrentPhysicalProperties { get; set; }
 		public PhysicalProperties CustomPhysicalProperties { get; set; }
 		public bool DraggingV1 { get; set; }
@@ -4823,7 +4823,6 @@ namespace RobloxRuntime.Classes
 		public float HealthDisplayDistance { get; set; }
 		public bool LoadCharacterAppearance { get; set; }
 		public Enum.LoadCharacterLayeredClothing LoadCharacterLayeredClothing { get; set; }
-		public Enum.LoadCharacterLayeredClothing LoadCharacterLayeredClothing { get; set; }
 		public Enum.CharacterControlMode LuaCharacterController { get; set; }
 		public float NameDisplayDistance { get; set; }
 		public bool UserEmotesEnabled { get; set; }
@@ -5344,7 +5343,7 @@ namespace RobloxRuntime.Classes
 		public UDim2 MinDragTranslation { get; set; }
 		public GuiObject? ReferenceUIInstance { get; set; }
 		public Enum.UIDragDetectorResponseStyle ResponseStyle { get; set; }
-		public RBXScriptConnection AddConstraintFunction(int priority, Action function);
+		public ScriptConnection AddConstraintFunction(int priority, Action function);
 		public UDim2 GetReferencePosition();
 		public float GetReferenceRotation();
 		public void SetDragStyleFunction(Action function);

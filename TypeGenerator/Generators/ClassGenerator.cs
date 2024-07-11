@@ -254,6 +254,9 @@ namespace TypeGenerator.Generators
                 }
             }
 
+            if (Utility.HasTag(member, "Hidden"))
+                return false;
+
             if (Utility.HasTag(member, "NotScriptable"))
                 return false;
 
