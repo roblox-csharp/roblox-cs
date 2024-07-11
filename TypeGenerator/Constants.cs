@@ -41,7 +41,10 @@
             "ScriptProfilerService",
             "DataModel",
             "SoundService",
-            "TerrainRegion"
+            "TerrainRegion",
+            "NetworkPeer",
+            "NetworkClient",
+            "NetworkServer",
         };
 
         public static readonly HashSet<string> CREATABLE_BLACKLIST = new HashSet<string>

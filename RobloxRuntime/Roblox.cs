@@ -11,6 +11,7 @@
     public static class Services
     {
         public static Workspace Workspace { get; } = null!;
+        public static Players Players { get; } = null!;
     }
 
     namespace Classes
@@ -24,6 +25,47 @@
         }
 
         public interface OpenCloudModel : Instance
+        {
+        }
+
+        public interface HSRDataContentProvider : Instance
+        {
+        }
+
+        public interface MeshContentProvider : Instance
+        {
+        }
+
+        public interface SolidModelContentProvider : Instance
+        {
+        }
+
+        public interface CSGDictionaryService : Instance
+        {
+        }
+
+        public interface NonReplicatedCSGDictionaryService : Instance
+        {
+        }
+
+        public interface AppStorageService : Instance
+        {
+        }
+
+        public interface UserStorageService : Instance
+        {
+        }
+
+        public partial interface NetworkPeer : Instance
+        {
+            public void SetOutgoingKBPSLimit(int limit);
+        }
+
+        public partial interface NetworkClient : NetworkPeer
+        {
+        }
+
+        public partial interface NetworkServer : NetworkPeer
         {
         }
 
