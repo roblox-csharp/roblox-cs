@@ -33,9 +33,26 @@ public sealed class ConfigData
 
 namespace RobloxCS
 {
-
-    internal static class ConfigReader
+    public static class ConfigReader
     {
+        public static ConfigData UnitTestingConfig
+        {
+            get
+            {
+                return new ConfigData()
+                {
+                    SourceFolder = "test-src",
+                    OutputFolder = "test-dist",
+                    CSharpOptions = new CSharpOptions()
+                    {
+                        EntryPointName = "UnitTest",
+                        MainMethodName = "Main",
+                        AssemblyName = "UnitTesting"
+                    }
+                };
+            }
+        }
+
         private const string _fileName = "roblox-cs.yml";
 
         public static ConfigData Read(string inputDirectory)
