@@ -7,6 +7,7 @@ namespace TestGame.Client
     {
         public static void Main()
         {
+            var poo = Instance.Create<Frame>();
             var players = Services.Players.GetPlayers();
             foreach (var player in players)
             {

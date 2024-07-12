@@ -17,6 +17,8 @@ namespace RobloxCS
         private readonly ConfigData _config;
         private readonly CSharpCompilation _compilation;
         private readonly SemanticModel _semanticModel;
+        private readonly INamespaceSymbol _globalNamespace;
+        private readonly INamespaceSymbol _runtimeLibNamespace;
         private readonly int _indentSize;
 
         private readonly StringBuilder _output = new StringBuilder();
@@ -28,6 +30,8 @@ namespace RobloxCS
             _config = config;
             _compilation = compilation;
             _semanticModel = compilation.GetSemanticModel(tree);
+            _globalNamespace = compilation.GlobalNamespace;
+            _runtimeLibNamespace = _globalNamespace.GetNamespaceMembers().FirstOrDefault(ns => ns.Name == Util.RuntimeAssemblyName)!;
             _indentSize = indentSize;
         }
 
@@ -360,6 +364,13 @@ namespace RobloxCS
                     .Where(member => GetNames(member).Contains(identifierName))
                     .Count() > 0;
 
+                var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
+                var robloxClassesNamespace = _runtimeLibNamespace.GetNamespaceMembers().FirstOrDefault(ns => ns.Name == "Classes");
+                var runtimeNamespaceIncludesIdentifier = symbol != null ? (
+                    IsDescendantOfNamespaceSymbol(symbol, _runtimeLibNamespace)
+                    || (robloxClassesNamespace != null && IsDescendantOfNamespaceSymbol(symbol, robloxClassesNamespace))
+                ) : false;
+
                 var parentAccessExpression = FindFirstAncestor<MemberAccessExpressionSyntax>(node);
                 var isLeftSide = parentAccessExpression == null ? true : node == parentAccessExpression.Expression;
                 var parentBlocks = GetAncestors<SyntaxNode>(node);
@@ -376,7 +387,7 @@ namespace RobloxCS
                             || forEachStatements.Where(checkNamePredicate).Count() > 0;
                     });
 
-                if (isLeftSide && !localScopeIncludesIdentifier)
+                if (isLeftSide && !localScopeIncludesIdentifier && !runtimeNamespaceIncludesIdentifier)
                 {
                     if (namespaceIncludesIdentifier)
                     {
@@ -679,6 +690,20 @@ namespace RobloxCS
         private bool HasSyntax(SyntaxTokenList tokens, SyntaxKind syntax)
         {
             return tokens.Any(token => token.IsKind(syntax));
+        }
+
+        private bool IsDescendantOfNamespaceSymbol(ISymbol symbol, INamespaceSymbol ancestor)
+        {
+            var namespaceSymbol = symbol.ContainingNamespace;
+            while (namespaceSymbol != null)
+            {
+                if (SymbolEqualityComparer.Default.Equals(namespaceSymbol, ancestor))
+                {
+                    return true;
+                }
+                namespaceSymbol = namespaceSymbol.ContainingNamespace;
+            }
+            return false;
         }
 
         private bool IsDescendantOf<T>(SyntaxNode node) where T : SyntaxNode

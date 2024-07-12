@@ -1,4 +1,4 @@
-# roblox-cs
+﻿# roblox-cs
 
 Roblox CSharp to Lua compiler
 
@@ -8,6 +8,7 @@ Roblox CSharp to Lua compiler
 - Collection literals
 - Tuple literals
 - String interpolation
+- Inheritance chains 🤮
 - `for`/`foreach`/`while` loops
 - `using name = value` expressions (equivalent to `:=` operator in other languages)
 - Safe navigation
