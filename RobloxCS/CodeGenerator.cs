@@ -10,10 +10,11 @@ namespace RobloxCS
         private readonly List<SyntaxKind> _memberParentSyntaxes = new List<SyntaxKind>([
             SyntaxKind.NamespaceDeclaration,
             SyntaxKind.ClassDeclaration,
+            SyntaxKind.InterfaceDeclaration,
             SyntaxKind.StructDeclaration
         ]);
 
-        private readonly SyntaxNode _root;
+        private readonly SyntaxTree _tree;
         private readonly ConfigData _config;
         private readonly CSharpCompilation _compilation;
         private readonly SemanticModel _semanticModel;
@@ -26,7 +27,7 @@ namespace RobloxCS
 
         public CodeGenerator(SyntaxTree tree, CSharpCompilation compilation, ConfigData config, int indentSize = 4)
         {
-            _root = tree.GetRoot();
+            _tree = tree;
             _config = config;
             _compilation = compilation;
             _semanticModel = compilation.GetSemanticModel(tree);
@@ -38,7 +39,7 @@ namespace RobloxCS
         public string GenerateLua()
         {
             WriteHeader();
-            Visit(_root);
+            Visit(_tree.GetRoot());
             return _output.ToString().Trim();
         }
 
@@ -119,6 +120,14 @@ namespace RobloxCS
             _indent--;
             WriteLine();
             Write("end");
+        }
+
+        public override void VisitConditionalAccessExpression(ConditionalAccessExpressionSyntax node)
+        {
+            Write("if ");
+            Visit(node.Expression);
+            Write(" == nil then nil else ");
+            Visit(node.WhenNotNull);
         }
 
         public override void VisitConditionalExpression(ConditionalExpressionSyntax node)

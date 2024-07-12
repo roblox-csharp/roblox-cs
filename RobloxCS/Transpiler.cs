@@ -42,14 +42,18 @@ namespace RobloxCS
                 var compilationUnit = (CompilationUnitSyntax)cleanTree.GetRoot();
                 var usingDirective = SyntaxFactory.UsingDirective(SyntaxFactory.ParseName("System"));
                 var newRoot = compilationUnit.AddUsings(usingDirective);
-                var tree = CSharpSyntaxTree.Create(newRoot, null, sourceFile);
+                var tree = cleanTree
+                    .WithRootAndOptions(newRoot, cleanTree.Options)
+                    .WithFilePath(sourceFile);
 
-                foreach (var diagnostic in tree.GetDiagnostics())
+                var transformer = new Transformer(tree, _config);
+                var transformedTree = tree.WithRootAndOptions(transformer.GetRoot(), cleanTree.Options);
+                foreach (var diagnostic in transformedTree.GetDiagnostics())
                 {
                     Logger.HandleDiagnostic(diagnostic);
                 }
 
-                _fileTrees.Add(tree);
+                _fileTrees.Add(transformedTree);
             }
         }
         

@@ -7,8 +7,8 @@ CS.namespace("TestGame", function(namespace)
             class.__index = class
 
             function class.Main()
-                local x = 5
-                print(if x == 5 then "x is 5" else "x is not 5")
+                local player = if game:GetService("Players") == nil then nil else game:GetService("Players").LocalPlayer
+                print(player)
             end
 
             if namespace == nil then

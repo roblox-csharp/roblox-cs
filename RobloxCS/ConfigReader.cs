@@ -2,7 +2,7 @@
 using YamlDotNet.Serialization.NamingConventions;
 
 #pragma warning disable CS8618
-sealed class CSharpOptions
+public sealed class CSharpOptions
 {
     public string EntryPointName { get; set; }
     public string MainMethodName { get; set; }
@@ -16,7 +16,7 @@ sealed class CSharpOptions
     }
 }
 
-sealed class ConfigData
+public sealed class ConfigData
 {
     public string SourceFolder { get; set; }
     public string OutputFolder { get; set; }

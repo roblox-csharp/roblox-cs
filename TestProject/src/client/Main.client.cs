@@ -7,8 +7,8 @@ namespace TestGame.Client
     {
         public static void Main()
         {
-            var x = 5;
-            Console.WriteLine(x == 5 ? "x is 5" : "x is not 5");
+            var player = Services.Players?.LocalPlayer;
+            Console.WriteLine(player);
         }
     }
 }
