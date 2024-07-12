@@ -7,10 +7,10 @@ namespace RobloxCS
 {
     public static class TranspilerUtility
     {
-        public static string CleanUpLuaForTests(string luaSource, int lineCount = 3)
+        public static string CleanUpLuaForTests(string luaSource, int? extraLines)
         {
             var lines = luaSource.Split('\n').ToList();
-            lines.RemoveRange(0, lineCount);
+            lines.RemoveRange(0, 3 + (extraLines ?? 0));
             return string.Join('\n', lines);
         }
 
