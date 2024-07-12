@@ -7,7 +7,6 @@ Roblox CSharp to Lua compiler
 - Referencing the full path of values from imported libraries (i.e. `RobloxRuntime.Classes.Part` vs `Part` with `using RobloxRuntime.Classes`)
 - Tuple literals (create a table and macro `obj.ItemN` to `obj[N]`)
 - Imports
-- String interpolation
 - Inheritance chains 🤮
 - `for`/`while` loops
 - `using name = value` expressions (equivalent to `:=` operator in other languages)

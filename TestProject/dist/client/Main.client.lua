@@ -5,12 +5,12 @@ CS.namespace("TestGame", function(namespace)
         namespace:class("Game", function(namespace)
             local class = {}
             class.__index = class
-
+            
             function class.Main()
-                local player = if game:GetService("Players") == nil then nil else game:GetService("Players").LocalPlayer
-                print(player)
+                local player = game:GetService("Players").LocalPlayer
+                print(`local player: {player}`)
             end
-
+            
             if namespace == nil then
                 class.Main()
             else

@@ -103,7 +103,7 @@ namespace RobloxCS
         {
             Write("function(");
             Visit(node.Parameter);
-            Write(")");
+            Write(')');
             WriteLine();
             _indent++;
 
@@ -168,7 +168,7 @@ namespace RobloxCS
 
         public override void VisitCollectionExpression(CollectionExpressionSyntax node)
         {
-            Write("{");
+            Write('{');
             foreach (var element in node.Elements)
             {
                 var children = element.ChildNodes();
@@ -181,7 +181,7 @@ namespace RobloxCS
                     Write(", ");
                 }
             }
-            Write("}");
+            Write('}');
         }
 
         public override void VisitArrayCreationExpression(ArrayCreationExpressionSyntax node)
@@ -196,21 +196,7 @@ namespace RobloxCS
 
         public override void VisitInitializerExpression(InitializerExpressionSyntax node)
         {
-            GenerateListTable(node.Expressions.ToList());
-        }
-
-        private void GenerateListTable(List<ExpressionSyntax> expressions)
-        {
-            Write("{");
-            foreach (var expression in expressions)
-            {
-                Visit(expression);
-                if (expression != expressions.Last())
-                {
-                    Write(", ");
-                }
-            }
-            Write("}");
+            WriteListTable(node.Expressions.ToList());
         }
 
         public override void VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
@@ -240,7 +226,7 @@ namespace RobloxCS
 
         public override void VisitArgumentList(ArgumentListSyntax node)
         {
-            Write("(");
+            Write('(');
             foreach (var argument in node.Arguments)
             {
                 Visit(argument);
@@ -249,7 +235,7 @@ namespace RobloxCS
                     Write(", ");
                 }
             }
-            Write(")");
+            Write(')');
         }
 
         public override void VisitInvocationExpression(InvocationExpressionSyntax node)
@@ -265,7 +251,7 @@ namespace RobloxCS
                     case "ToString":
                         Write("tostring(");
                         Visit(memberAccess.Expression);
-                        Write(")");
+                        Write(')');
                         return;
                     case "Write":
                     case "WriteLine":
@@ -299,7 +285,7 @@ namespace RobloxCS
                                 }
                             }
 
-                            Write(")");
+                            Write(')');
                             return;
                         }
                     case "IsA":
@@ -332,7 +318,7 @@ namespace RobloxCS
                             }
                             else
                             {
-                                Write(")");
+                                Write(')');
                             }
                             return;
                         }
@@ -475,6 +461,28 @@ namespace RobloxCS
             }
         }
 
+        public override void VisitInterpolatedStringText(InterpolatedStringTextSyntax node)
+        {
+            Write(node.TextToken.Text);
+        }
+
+        public override void VisitInterpolation(InterpolationSyntax node)
+        {
+            Write('{');
+            Visit(node.Expression);
+            Write('}');
+        }
+
+        public override void VisitInterpolatedStringExpression(InterpolatedStringExpressionSyntax node)
+        {
+            Write('`');
+            foreach (var content in node.Contents)
+            {
+                Visit(content);
+            }
+            Write('`');
+        }
+
         public override void VisitLiteralExpression(LiteralExpressionSyntax node)
         {
             switch (node.Kind())
@@ -510,7 +518,7 @@ namespace RobloxCS
 
         public override void VisitParameterList(ParameterListSyntax node)
         {
-            Write("(");
+            Write('(');
             foreach (var parameter in node.Parameters)
             {
                 Visit(parameter);
@@ -519,7 +527,7 @@ namespace RobloxCS
                     Write(", ");
                 }
             }
-            WriteLine(")");
+            WriteLine(')');
             _indent++;
 
             foreach (var parameter in node.Parameters)
@@ -725,7 +733,31 @@ namespace RobloxCS
             }
         }
 
-        private void WriteLine(string? text = null)
+        private void WriteListTable(List<ExpressionSyntax> expressions)
+        {
+            Write('{');
+            foreach (var expression in expressions)
+            {
+                Visit(expression);
+                if (expression != expressions.Last())
+                {
+                    Write(", ");
+                }
+            }
+            Write('}');
+        }
+
+        private void WriteLine()
+        {
+            WriteLine("");
+        }
+
+        private void WriteLine(char text)
+        {
+            WriteLine(text.ToString());
+        }
+
+        private void WriteLine(string text)
         {
             if (text == null)
             {
@@ -735,6 +767,11 @@ namespace RobloxCS
 
             WriteTab();
             _output.AppendLine(text);
+        }
+
+        private void Write(char text)
+        {
+            Write(text.ToString());
         }
 
         private void Write(string text)

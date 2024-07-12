@@ -7,8 +7,8 @@ namespace TestGame.Client
     {
         public static void Main()
         {
-            var player = Services.Players?.LocalPlayer;
-            Console.WriteLine(player);
+            var player = Services.Players.LocalPlayer;
+            Console.WriteLine($"local player: {player}");
         }
     }
 }
