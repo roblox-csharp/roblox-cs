@@ -31,6 +31,24 @@
             Assert.Equal("local part = Instance.new(\"Part\")", cleanedLua);
         }
 
+        [Fact]
+        public void GenerateLua_InstanceIsA_Macros()
+        {
+
+            var cleanedLua = GetCleanLua("using RobloxRuntime.Classes; var part = Instance.Create<Part>(); part.IsA<Frame>();", 1);
+            Assert.Equal("part:IsA(\"Frame\")", cleanedLua);
+        }
+
+        [Theory]
+        [InlineData("Write")]
+        [InlineData("WriteLine")]
+        public void GenerateLua_ConsoleMethods_Macro(string method)
+        {
+
+            var cleanedLua = GetCleanLua($"Console.{method}(\"hello world\")");
+            Assert.Equal("print(\"hello world\")", cleanedLua);
+        }
+
         [Theory]
         [InlineData("object obj; obj?.Name;")]
         [InlineData("object a; a.b?.c;")]
