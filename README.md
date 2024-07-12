@@ -1,5 +1,6 @@
 ﻿# roblox-cs
 
+![Tests](https://github.com/R-unic/roblox-cs/actions/workflows/tests.yml/badge.svg) 
 Roblox CSharp to Lua compiler
 
 # To-do
