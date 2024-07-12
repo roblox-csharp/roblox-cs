@@ -16,7 +16,7 @@ namespace RobloxCS
 
         private readonly SyntaxTree _tree;
         private readonly ConfigData _config;
-        private readonly CSharpCompilation _compilation;
+        private readonly CSharpCompilation _compiler;
         private readonly SemanticModel _semanticModel;
         private readonly INamespaceSymbol _globalNamespace;
         private readonly INamespaceSymbol _runtimeLibNamespace;
@@ -25,14 +25,14 @@ namespace RobloxCS
         private readonly StringBuilder _output = new StringBuilder();
         private int _indent = 0;
 
-        public CodeGenerator(SyntaxTree tree, CSharpCompilation compilation, ConfigData config, int indentSize = 4)
+        public CodeGenerator(SyntaxTree tree, CSharpCompilation compiler, ConfigData config, int indentSize = 4)
         {
             _tree = tree;
             _config = config;
-            _compilation = compilation;
-            _semanticModel = compilation.GetSemanticModel(tree);
-            _globalNamespace = compilation.GlobalNamespace;
-            _runtimeLibNamespace = _globalNamespace.GetNamespaceMembers().FirstOrDefault(ns => ns.Name == Util.RuntimeAssemblyName)!;
+            _compiler = compiler;
+            _semanticModel = compiler.GetSemanticModel(tree);
+            _globalNamespace = compiler.GlobalNamespace;
+            _runtimeLibNamespace = _globalNamespace.GetNamespaceMembers().FirstOrDefault(ns => ns.Name == Utility.RuntimeAssemblyName)!;
             _indentSize = indentSize;
         }
 
@@ -45,9 +45,9 @@ namespace RobloxCS
 
         private void WriteHeader()
         {
-            if (Util.IsDebug())
+            if (Utility.IsDebug())
             {
-                WriteLine($"package.path = \"{Util.GetRbxcsDirectory()}/{Util.RuntimeAssemblyName}/?.lua;\" .. package.path");
+                WriteLine($"package.path = \"{Utility.GetRbxcsDirectory()}/{Utility.RuntimeAssemblyName}/?.lua;\" .. package.path");
             }
             WriteLine($"local CS = require({GetLuaRuntimeLibPath()})");
             WriteLine();
@@ -55,7 +55,7 @@ namespace RobloxCS
 
         private string GetLuaRuntimeLibPath()
         {
-            if (Util.IsDebug())
+            if (Utility.IsDebug())
             {
                 return "\"RuntimeLib\"";
             }
@@ -142,13 +142,13 @@ namespace RobloxCS
 
         public override void VisitPrefixUnaryExpression(PrefixUnaryExpressionSyntax node)
         {
-            Write(Util.GetMappedOperator(node.OperatorToken.Text));
+            Write(Utility.GetMappedOperator(node.OperatorToken.Text));
             Visit(node.Operand);
         }
 
         public override void VisitBinaryExpression(BinaryExpressionSyntax node)
         {
-            var operatorText = Util.GetMappedOperator(node.OperatorToken.Text);
+            var operatorText = Utility.GetMappedOperator(node.OperatorToken.Text);
             switch (operatorText)
             {
                 case "??":

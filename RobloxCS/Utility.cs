@@ -1,10 +1,12 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Diagnostics;
 using System.Reflection;
 
 namespace RobloxCS
 {
-    internal static class Util
+    public static class Utility
     {
         public const string RuntimeAssemblyName = "RobloxRuntime";
 
@@ -47,7 +49,7 @@ namespace RobloxCS
 
         public static string? GetRbxcsDirectory()
         {
-            return FixPathSep(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Util.GetAssemblyDirectory()))))); // pretend like this isn't here lol
+            return FixPathSep(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Utility.GetAssemblyDirectory()))))); // pretend like this isn't here lol
         }
 
         public static string? GetAssemblyDirectory()

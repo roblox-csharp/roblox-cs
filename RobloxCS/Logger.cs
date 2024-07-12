@@ -24,7 +24,7 @@ namespace RobloxCS
         {
             var lineSpan = diagnostic.Location.GetLineSpan();
             var diagnosticMessage = $"{diagnostic.Id}: {diagnostic.GetMessage()}";
-            var location = "\n\t" + Util.FormatLocation(lineSpan);
+            var location = "\n\t" + Utility.FormatLocation(lineSpan);
             switch (diagnostic.Severity)
             {
                 case DiagnosticSeverity.Error:
@@ -56,7 +56,7 @@ namespace RobloxCS
         public static void CodegenError(SyntaxToken token, string message)
         {
             var lineSpan = token.GetLocation().GetLineSpan();
-            Error($"{message}\n\t{Util.FormatLocation(lineSpan)}");
+            Error($"{message}\n\t{Utility.FormatLocation(lineSpan)}");
         }
 
         public static void CodegenError(SyntaxNode node, string message)
@@ -71,7 +71,7 @@ namespace RobloxCS
 
         public static void Debug(string message)
         {
-            if (!Util.IsDebug()) return;
+            if (!Utility.IsDebug()) return;
             Log(message, ConsoleColor.Magenta, "DEBUG");
         }
 
