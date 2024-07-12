@@ -109,16 +109,6 @@
         }
     }
 
-    /// <summary>
-    /// <para>The <see cref="IEnum">Enum</see> data type represents an individual enum in Roblox.</para>
-    /// <para>An individual enum can be indexed through <see cref="Enum"/>, via the name of the enum itself.</para>
-    /// </summary>
-    public interface IEnum
-    {
-        /// <summary>Returns an array of all <see cref="EnumItem"/> options available for this enum.</summary>
-        public EnumItem[] GetEnumItems();
-    }
-
     /// <summary>The <see cref="EnumItem"/> data type represents an individual item in a Roblox enum.</summary>
     public interface EnumItem
     {

@@ -147,6 +147,53 @@ namespace RobloxCS
             Visit(node.Right);
         }
 
+        public override void VisitCollectionExpression(CollectionExpressionSyntax node)
+        {
+            Write("{");
+            foreach (var element in node.Elements)
+            {
+                var children = element.ChildNodes();
+                foreach (var child in children)
+                {
+                    Visit(child);
+                }
+                if (element != node.Elements.Last())
+                {
+                    Write(", ");
+                }
+            }
+            Write("}");
+        }
+
+        public override void VisitArrayCreationExpression(ArrayCreationExpressionSyntax node)
+        {
+            Visit(node.Initializer);
+        }
+
+        public override void VisitImplicitArrayCreationExpression(ImplicitArrayCreationExpressionSyntax node)
+        {
+            Visit(node.Initializer);
+        }
+
+        public override void VisitInitializerExpression(InitializerExpressionSyntax node)
+        {
+            GenerateListTable(node.Expressions.ToList());
+        }
+
+        private void GenerateListTable(List<ExpressionSyntax> expressions)
+        {
+            Write("{");
+            foreach (var expression in expressions)
+            {
+                Visit(expression);
+                if (expression != expressions.Last())
+                {
+                    Write(", ");
+                }
+            }
+            Write("}");
+        }
+
         public override void VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
         {
             Visit(node.Type);

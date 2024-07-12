@@ -7,11 +7,10 @@ namespace TestGame.Client
     {
         public static void Main()
         {
-            var poo = Instance.Create<Frame>();
-            var players = Services.Players.GetPlayers();
-            foreach (var player in players)
+            int[] numbers = [1, 2, 3, 4, 5];
+            foreach (var number in numbers)
             {
-                Console.WriteLine(player.Name);
+                Console.WriteLine(number);
             }
         }
     }

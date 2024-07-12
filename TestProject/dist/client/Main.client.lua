@@ -7,10 +7,9 @@ CS.namespace("TestGame", function(namespace)
             class.__index = class
 
             function class.Main()
-                local poo = Instance.new("Frame")
-                local players = game:GetService("Players"):GetPlayers()
-                for _, player in players do
-                    print(player.Name)
+                local numbers = {1, 2, 3, 4, 5}
+                for _, number in numbers do
+                    print(number)
                 end
             end
 
