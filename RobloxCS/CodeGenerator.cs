@@ -61,6 +61,26 @@ namespace RobloxCS
             }
         }
 
+        public override void VisitForEachVariableStatement(ForEachVariableStatementSyntax node)
+        {
+            Visit(node.Variable);
+        }
+
+        public override void VisitForEachStatement(ForEachStatementSyntax node)
+        {
+            Write("for _, ");
+            Write(GetName(node));
+            Write(" in ");
+            Visit(node.Expression);
+            WriteLine(" do");
+            _indent++;
+
+            Visit(node.Statement);
+
+            _indent--;
+            WriteLine("end");
+        }
+
         public override void VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node)
         {
             Write("function");
@@ -348,10 +368,12 @@ namespace RobloxCS
                     {
                         var descendants = block.DescendantNodes();
                         var variableDeclarators = descendants.OfType<VariableDeclaratorSyntax>();
+                        var forEachStatements = descendants.OfType<ForEachStatementSyntax>();
                         var parameters = descendants.OfType<ParameterSyntax>();
                         var checkNamePredicate = (SyntaxNode node) => GetName(node) == identifierName;
                         return variableDeclarators.Where(checkNamePredicate).Count() > 0
-                            || parameters.Where(checkNamePredicate).Count() > 0;
+                            || parameters.Where(checkNamePredicate).Count() > 0
+                            || forEachStatements.Where(checkNamePredicate).Count() > 0;
                     });
 
                 if (isLeftSide && !localScopeIncludesIdentifier)
