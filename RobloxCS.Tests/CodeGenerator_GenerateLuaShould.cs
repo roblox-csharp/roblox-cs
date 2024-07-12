@@ -11,6 +11,38 @@
             Assert.Equal(expectedLua.Trim(), cleanedLua);
         }
 
+        [Fact]
+        public void GenerateLua_ClassDeclaration_GeneratesRuntimeCalls()
+        {
+            var cleanedLua = GetCleanLua("namespace Test { class HelloWorld { } }");
+            var lines = GetLines(cleanedLua);
+            var expectedLines = new List<string>
+            {
+                "CS.namespace(\"Test\", function(namespace)",
+                    "namespace:class(\"HelloWorld\", function(namespace)",
+                        "local class = {}",
+                        "class.__index = class",
+                        "",
+                        "function class.new()",
+                            "local self = setmetatable({}, class)",
+                            "",
+                            "",
+                            "",
+                            "return self",
+                        "end",
+                        "",
+                        "return setmetatable({}, class)",
+                    "end)",
+                "end)"
+            };
+
+            foreach (var line in lines)
+            {
+                var expectedLine = expectedLines.ElementAt(lines.IndexOf(line));
+                Assert.Equal(expectedLine, line);
+            }
+        }
+
         [Theory]
         [InlineData("Vector3")]
         [InlineData("NumberRange")]
@@ -72,6 +104,11 @@
             
             var cleanedLua = GetCleanLua("int? x; int? y; x ?? y", 2);
             Assert.Equal("if x == nil then y else x", cleanedLua);
+        }
+
+        private List<string> GetLines(string cleanLua)
+        {
+            return cleanLua.Split('\n').Select(line => line.Trim()).ToList();
         }
 
         private string GetCleanLua(string source, int extraLines = 0)
