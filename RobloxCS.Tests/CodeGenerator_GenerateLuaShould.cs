@@ -6,9 +6,26 @@
         public void GenerateLua_NamespaceDeclaration_GeneratesRuntimeCalls()
         {
 
-            var cleanedLua = GetCleanLua("namespace TestNamespace { }");
-            var expectedLua = "CS.namespace(\"TestNamespace\", function(namespace)\r\nend)";
+            var cleanedLua = GetCleanLua("namespace Test { }");
+            var expectedLua = "CS.namespace(\"Test\", function(namespace)\r\nend)";
             Assert.Equal(expectedLua.Trim(), cleanedLua);
+        }
+
+        [Fact]
+        public void GenerateLua_NestedNamespaceDeclaration_GeneratesRuntimeCalls()
+        {
+
+            var cleanedLua = GetCleanLua("namespace Test.Nested { }");
+            var lines = GetLines(cleanedLua);
+            var expectedLines = new List<string>
+            {
+                "CS.namespace(\"Test\", function(namespace)",
+                    "namespace:namespace(\"Nested\", function(namespace)",
+                    "end)",
+                "end)"
+            };
+
+            AssertEqualLines(lines, expectedLines);
         }
 
         [Fact]
@@ -36,6 +53,11 @@
                 "end)"
             };
 
+            AssertEqualLines(lines, expectedLines);
+        }
+
+        private static void AssertEqualLines(List<string> lines, List<string> expectedLines)
+        {
             foreach (var line in lines)
             {
                 var expectedLine = expectedLines.ElementAt(lines.IndexOf(line));
