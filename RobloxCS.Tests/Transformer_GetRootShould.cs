@@ -6,7 +6,7 @@ namespace RobloxCS.Tests
         [InlineData("obj?.Name;")]
         [InlineData("hello?.World;")]
         [InlineData("a.b?.c;")]
-        public void GetRoot_TernaryOps_TransformsElseBranch(string source)
+        public void GetRoot_SafeNavigation_TransformsWhenNotNull(string source)
         {
             var cleanTree = TranspilerUtility.ParseTree(source);
             var transformedTree = TranspilerUtility.TransformTree(cleanTree);

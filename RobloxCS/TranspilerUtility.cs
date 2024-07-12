@@ -7,6 +7,13 @@ namespace RobloxCS
 {
     public static class TranspilerUtility
     {
+        public static string CleanUpLuaForTests(string luaSource, int lineCount = 3)
+        {
+            var lines = luaSource.Split('\n').ToList();
+            lines.RemoveRange(0, lineCount);
+            return string.Join('\n', lines);
+        }
+
         public static string GenerateLua(SyntaxTree tree, CSharpCompilation compiler, ConfigData? config = null)
         {
             config ??= ConfigReader.UnitTestingConfig;
