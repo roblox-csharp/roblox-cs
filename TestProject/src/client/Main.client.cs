@@ -7,11 +7,8 @@ namespace TestGame.Client
     {
         public static void Main()
         {
-            int[] numbers = [1, 2, 3, 4, 5];
-            foreach (var number in numbers)
-            {
-                Console.WriteLine(number);
-            }
+            var x = 5;
+            Console.WriteLine(x == 5 ? "x is 5" : "x is not 5");
         }
     }
 }

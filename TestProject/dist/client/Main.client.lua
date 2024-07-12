@@ -7,10 +7,8 @@ CS.namespace("TestGame", function(namespace)
             class.__index = class
 
             function class.Main()
-                local numbers = {1, 2, 3, 4, 5}
-                for _, number in numbers do
-                    print(number)
-                end
+                local x = 5
+                print(if x == 5 then "x is 5" else "x is not 5")
             end
 
             if namespace == nil then

@@ -5,14 +5,13 @@ Roblox CSharp to Lua compiler
 # To-do
 - Unit tests
 - Referencing the full path of values from imported libraries (i.e. `RobloxRuntime.Classes.Part` vs `Part` with `using RobloxRuntime.Classes`)
-- Tuple literals
+- Tuple literals (create a table and macro `obj.ItemN` to `obj[N]`)
 - Imports
 - String interpolation
 - Inheritance chains 🤮
 - `for`/`while` loops
 - `using name = value` expressions (equivalent to `:=` operator in other languages)
-- Safe navigation
-- Ternary operator
+- Safe navigation (`ConditionalAccessExpression`)
 - Property declarations
 - Macro IEnumerable<T> (or just List<T>) methods
 - Classes/structs/interfaces nested in classes

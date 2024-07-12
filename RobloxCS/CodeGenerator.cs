@@ -121,6 +121,16 @@ namespace RobloxCS
             Write("end");
         }
 
+        public override void VisitConditionalExpression(ConditionalExpressionSyntax node)
+        {
+            Write("if ");
+            Visit(node.Condition);
+            Write(" then ");
+            Visit(node.WhenTrue);
+            Write(" else ");
+            Visit(node.WhenFalse);
+        }
+
         public override void VisitPrefixUnaryExpression(PrefixUnaryExpressionSyntax node)
         {
             Write(Util.GetMappedOperator(node.OperatorToken.Text));
