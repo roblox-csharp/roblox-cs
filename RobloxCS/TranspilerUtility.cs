@@ -38,7 +38,7 @@ namespace RobloxCS
         public static SyntaxTree TransformTree(SyntaxTree cleanTree, ConfigData? config = null)
         {
             config ??= ConfigReader.UnitTestingConfig;
-            var transformer = new Transformer(cleanTree, config);
+            var transformer = new MainTransformer(cleanTree, config);
             return cleanTree.WithRootAndOptions(transformer.GetRoot(), cleanTree.Options);
         }
 
