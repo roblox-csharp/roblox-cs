@@ -4,10 +4,17 @@ namespace TestGame.Client
     {
         public static void Main()
         {
-            for (int i = 0; i < 10; i++)
-            {
-                Console.WriteLine(i);
-            }
+            var config = new Config();
+            config.DoSomeCoolStuff = true;
+            config.AnAwesomeProgrammer = "CharSiewGuy";
+
+            Console.WriteLine($"the awesomest programmer: {config.AnAwesomeProgrammer}");
         }
+    }
+
+    public class Config
+    {
+        public bool DoSomeCoolStuff { get; set; }
+        public string? AnAwesomeProgrammer { get; set; }
     }
 }

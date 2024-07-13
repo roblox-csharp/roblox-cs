@@ -1,5 +1,4 @@
-package.path = "C:/Users/Riley Peel/Dev/c#/roblox-cs/RobloxRuntime/?.lua;" .. package.path
-local CS = require("RuntimeLib")
+local CS = require(game:GetService("ReplicatedStorage").rbxcs_include.RuntimeLib)
 
 CS.namespace("TestGame", function(namespace)
     namespace:namespace("Client", function(namespace)
@@ -8,14 +7,10 @@ CS.namespace("TestGame", function(namespace)
             class.__index = class
             
             function class.Main()
-                do
-                    local i = 0
-                    while true do
-                        if not (i < 10) then break end
-                        print(i)
-                        i += 1
-                    end
-                end
+                local config = namespace["$getMember"](namespace, "Config").new()
+                config.DoSomeCoolStuff = true
+                config.AnAwesomeProgrammer = "CharSiewGuy"
+                print(`the awesomest programmer: {config.AnAwesomeProgrammer}`)
             end
             
             if namespace == nil then
@@ -24,6 +19,21 @@ CS.namespace("TestGame", function(namespace)
                 namespace["$onLoaded"](namespace, class.Main)
             end
             return class
+        end)
+        namespace:class("Config", function(namespace)
+            local class = {}
+            class.__index = class
+            
+            function class.new()
+                local self = setmetatable({}, class)
+                
+                self.CoolNumber = 69
+                
+                
+                return self
+            end
+            
+            return setmetatable({}, class)
         end)
     end)
 end)

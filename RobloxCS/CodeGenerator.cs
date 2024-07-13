@@ -115,6 +115,19 @@ namespace RobloxCS
             WriteLine("end");
         }
 
+        public override void VisitWhileStatement(WhileStatementSyntax node)
+        {
+            Write("while ");
+            Visit(node.Condition);
+            WriteLine(" do");
+            _indent++;
+
+            Visit(node.Statement);
+
+            _indent--;
+            WriteLine("end");
+        }
+
         public override void VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node)
         {
             Write("function");
@@ -122,7 +135,15 @@ namespace RobloxCS
             WriteLine();
             _indent++;
 
-            Visit(node.Body);
+            if (node.Block != null || node.ExpressionBody.IsKind(SyntaxKind.SimpleAssignmentExpression))
+            {
+                Visit(node.Body);
+            }
+            else
+            {
+                Write("return ");
+                Visit(node.ExpressionBody);
+            }
 
             _indent--;
             Write("end");
@@ -711,9 +732,14 @@ namespace RobloxCS
             WriteLine("local class = {}");
             WriteLine("class.__index = class");
             WriteLine();
-            InitializeDefaultFields(
+            InitializeFields(
                 node.Members
                     .OfType<FieldDeclarationSyntax>()
+                    .Where(member => HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword))
+            );
+            InitializeProperties(
+                node.Members
+                    .OfType<PropertyDeclarationSyntax>()
                     .Where(member => HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword))
             );
 
@@ -805,11 +831,17 @@ namespace RobloxCS
         {
             WriteLine("local self = setmetatable({}, class)");
             WriteLine();
-            var nonStaticFields = parentClass.Members
-                .OfType<FieldDeclarationSyntax>()
-                .Where(member => !HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword));
 
-            InitializeDefaultFields(nonStaticFields);
+            var isNotStatic = (MemberDeclarationSyntax member) => !HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword);
+            var nonStaticFields = parentClass.Members
+                .Where(isNotStatic)
+                .OfType<FieldDeclarationSyntax>();
+            var nonStaticProperties = parentClass.Members
+                .Where(isNotStatic)
+                .OfType<PropertyDeclarationSyntax>();
+
+            InitializeFields(nonStaticFields);
+            InitializeProperties(nonStaticProperties);
             var nonStaticMethods = parentClass.Members
                 .OfType<MethodDeclarationSyntax>()
                 .Where(member => !HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword));
@@ -836,7 +868,7 @@ namespace RobloxCS
             WriteLine("end");
         }
 
-        private void InitializeDefaultFields(IEnumerable<FieldDeclarationSyntax> fields)
+        private void InitializeFields(IEnumerable<FieldDeclarationSyntax> fields)
         {
             foreach (var field in fields)
             {
@@ -848,6 +880,19 @@ namespace RobloxCS
                     Visit(declarator.Initializer);
                     WriteLine();
                 }
+            }
+        }
+
+        private void InitializeProperties(IEnumerable<PropertyDeclarationSyntax> properties)
+        {
+            foreach (var property in properties)
+            {
+                if (property.Initializer == null) continue;
+
+                var isStatic = HasSyntax(property.Modifiers, SyntaxKind.StaticKeyword);
+                Write($"{(isStatic ? "class" : "self")}.{GetName(property)} = ");
+                Visit(property.Initializer);
+                WriteLine();
             }
         }
 
