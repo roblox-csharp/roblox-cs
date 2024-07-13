@@ -166,6 +166,11 @@ namespace RobloxCS
             Visit(node.Right);
         }
 
+        public override void VisitTupleExpression(TupleExpressionSyntax node)
+        {
+            WriteListTable(node.Arguments.Select(arg => arg.Expression).ToList());
+        }
+
         public override void VisitCollectionExpression(CollectionExpressionSyntax node)
         {
             Write('{');
@@ -364,7 +369,6 @@ namespace RobloxCS
 
             if (objectSymbolInfo.Symbol != null && (objectSymbolInfo.Symbol.Kind == SymbolKind.Namespace || (objectSymbolInfo.Symbol.Kind == SymbolKind.NamedType && objectSymbolInfo.Symbol.IsStatic)))
             {
-
                 var fullyQualifiedName = objectSymbolInfo.Symbol.ToDisplayString();
                 var root = node.SyntaxTree.GetRoot();
                 var compilationUnit = root as CompilationUnitSyntax;
@@ -410,6 +414,23 @@ namespace RobloxCS
                         throw new NotSupportedException("Unsupported node.Expression type for a NO_FULL_QUALIFICATION_NAMESPACES member");
                     }
                     return;
+                }
+            }
+
+            if (objectSymbolInfo.Symbol?.OriginalDefinition is ILocalSymbol typeSymbol)
+            {
+                switch (typeSymbol.Type.Name)
+                {
+                    case "ValueTuple":
+                        var name = GetName(node.Name);
+                        if (name.StartsWith("Item"))
+                        {
+                            var itemIndex = name.Split("Item").Last();
+                            Visit(node.Expression);
+                            Write($"[{itemIndex}]");
+                            return;
+                        }
+                        break;
                 }
             }
 

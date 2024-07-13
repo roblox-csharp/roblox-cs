@@ -4,12 +4,10 @@
 Roblox CSharp to Lua compiler
 
 # To-do
-- Unit tests
-- Tuple literals (create a table and macro `obj.ItemN` to `obj[N]`)
 - Imports
 - Inheritance chains 🤮
 - `for`/`while` loops
-- `using name = value` expressions (equivalent to `:=` operator in other languages)
+- `using name = value` expressions (equivalent to `:=` operator in other languages) (MAYBE)
 - Property declarations
 - Macro `IEnumerable<T>` (or just `List<T>`) methods
 - Classes/structs/interfaces nested in classes/structs/interfaces

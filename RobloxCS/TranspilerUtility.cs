@@ -9,8 +9,9 @@ namespace RobloxCS
     {
         public static string CleanUpLuaForTests(string luaSource, int? extraLines)
         {
+            var debugExtraLines = Utility.IsDebug() ? 1 : 0;
             var lines = luaSource.Split('\n').ToList();
-            lines.RemoveRange(0, 3 + (extraLines ?? 0));
+            lines.RemoveRange(0, 2 + (extraLines ?? 0) + debugExtraLines);
             return string.Join('\n', lines);
         }
 

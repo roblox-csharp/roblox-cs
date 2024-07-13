@@ -8,8 +8,8 @@ CS.namespace("TestGame", function(namespace)
             class.__index = class
             
             function class.Main()
-                local result = CS.getAssemblyType("TestBrah").HelloNiga()
-                print(`result: {result}`)
+                local tuple = {1, 2, 3}
+                print(tuple[1])
             end
             
             if namespace == nil then
@@ -22,15 +22,17 @@ CS.namespace("TestGame", function(namespace)
     end)
 end)
 
-CS.namespace("MyOtherNamespace", function(namespace)
-    namespace:class("TestBrah", function(namespace)
-        local class = {}
-        class.__index = class
-        
-        function class.HelloNiga()
-            return 69
-        end
-        
-        return class
+CS.namespace("TestGame", function(namespace)
+    namespace:namespace("Client", function(namespace)
+        namespace:class("TestBrah", function(namespace)
+            local class = {}
+            class.__index = class
+            
+            function class.HelloNiga()
+                return 69
+            end
+            
+            return class
+        end)
     end)
 end)

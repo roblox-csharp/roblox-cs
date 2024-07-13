@@ -4,8 +4,8 @@ namespace TestGame.Client
     {
         public static void Main()
         {
-            var result = TestBrah.HelloNiga();
-            Console.WriteLine($"result: {result}");
+            var tuple = (1, 2, 3);
+            Console.WriteLine(tuple.Item1);
         }
     }
 }
