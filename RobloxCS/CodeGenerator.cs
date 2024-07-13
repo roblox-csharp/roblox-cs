@@ -593,11 +593,6 @@ namespace RobloxCS
 
             if (prefix == "")
             {
-                var parentNamespace = FindFirstAncestor<NamespaceDeclarationSyntax>(node);
-                var namespaceIncludesIdentifier = parentNamespace != null && parentNamespace.Members
-                    .Where(member => GetNames(member).Contains(identifierName))
-                    .Count() > 0;
-
                 var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
                 var robloxClassesNamespace = _runtimeLibNamespace.GetNamespaceMembers().FirstOrDefault(ns => ns.Name == "Classes");
                 var runtimeNamespaceIncludesIdentifier = symbol != null ? (
@@ -625,9 +620,23 @@ namespace RobloxCS
 
                 if (isLeftSide && !localScopeIncludesIdentifier && !runtimeNamespaceIncludesIdentifier)
                 {
+                    var parentNamespace = FindFirstAncestor<NamespaceDeclarationSyntax>(node);
+                    var namespaceIncludesIdentifier = parentNamespace != null && parentNamespace.Members
+                        .Where(member => GetNames(member).Contains(identifierName))
+                        .Count() > 0;
+
+                    var parentClass = FindFirstAncestor<ClassDeclarationSyntax>(node);
+                    var classIncludesIdentifier = parentClass != null && parentClass.Members
+                        .Where(member => GetName(member) == identifierName)
+                        .Count() > 0;
+
                     if (namespaceIncludesIdentifier)
                     {
                         Write($"namespace[\"$getMember\"](namespace, \"{identifierName}\")");
+                    }
+                    else if (classIncludesIdentifier)
+                    {
+                        Write($"class.{identifierName}");
                     }
                     else
                     {
@@ -876,19 +885,22 @@ namespace RobloxCS
             WriteLine();
 
             var isNotStatic = (MemberDeclarationSyntax member) => !HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword);
+            var isNotAbstract = (MemberDeclarationSyntax member) => !HasSyntax(member.Modifiers, SyntaxKind.AbstractKeyword);
             var nonStaticFields = parentClass.Members
                 .Where(isNotStatic)
+                .Where(isNotAbstract)
                 .OfType<FieldDeclarationSyntax>();
             var nonStaticProperties = parentClass.Members
                 .Where(isNotStatic)
+                .Where(isNotAbstract)
                 .OfType<PropertyDeclarationSyntax>();
+            var nonStaticMethods = parentClass.Members
+                .Where(isNotStatic)
+                .Where(isNotAbstract)
+                .OfType<MethodDeclarationSyntax>();
 
             InitializeFields(nonStaticFields);
             InitializeProperties(nonStaticProperties);
-            var nonStaticMethods = parentClass.Members
-                .OfType<MethodDeclarationSyntax>()
-                .Where(member => !HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword));
-
             if (block != null)
             {
                 Visit(block);

@@ -54,12 +54,12 @@ CS.namespace("TestGame", function(namespace)
                 for _, instance in instances do
                     local component = CS.getAssemblyType("TComponent").new()
                     component.Instance = instance
-                    CS.getAssemblyType("Run")(component)
+                    namespace["$getMember"](namespace, "ComponentRunner").Run(component)
                 end
             end
             function class.Run(component)
                 component:Start()
-                local updateEvent = CS.getAssemblyType("GetUpdateEvent")(component)
+                local updateEvent = namespace["$getMember"](namespace, "ComponentRunner").GetUpdateEvent(component)
                 updateEvent:Connect(component.Update)
             end
             function class.GetUpdateEvent(component)
