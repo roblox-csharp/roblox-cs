@@ -3,7 +3,7 @@
     public class CodeGenerator_GenerateLuaShould
     {
         [Fact]
-        public void GenerateLua_NamespaceDeclaration_GeneratesRuntimeCalls()
+        public void Generate_NamespaceDeclaration_GeneratesRuntimeCalls()
         {
 
             var cleanedLua = GetCleanLua("namespace Test { }");
@@ -12,7 +12,7 @@
         }
 
         [Fact]
-        public void GenerateLua_NestedNamespaceDeclaration_GeneratesRuntimeCalls()
+        public void Generate_NestedNamespaceDeclaration_GeneratesRuntimeCalls()
         {
 
             var cleanedLua = GetCleanLua("namespace Test.Nested { }");
@@ -29,7 +29,7 @@
         }
 
         [Fact]
-        public void GenerateLua_ClassDeclaration_GeneratesRuntimeCalls()
+        public void Generate_ClassDeclaration_GeneratesRuntimeCalls()
         {
             var cleanedLua = GetCleanLua("namespace Test { class HelloWorld { } }");
             var lines = GetLines(cleanedLua);
@@ -70,7 +70,7 @@
         [InlineData("NumberRange")]
         [InlineData("BrickColor")]
         [InlineData("Instance")]
-        public void GenerateLua_RobloxType_DoesNotGenerateGetAssemblyTypeCall(string robloxType)
+        public void Generate_RobloxType_DoesNotGenerateGetAssemblyTypeCall(string robloxType)
         {
 
             var cleanedLua = GetCleanLua($"using RobloxRuntime; using RobloxRuntime.Classes; {robloxType}.a;");
@@ -80,14 +80,14 @@
         [Theory]
         [InlineData("Instance")]
         [InlineData("RobloxRuntime.Classes.Instance")]
-        public void GenerateLua_InstanceCreate_Macros(string instanceClassPath)
+        public void Generate_InstanceCreate_Macros(string instanceClassPath)
         {
             var cleanedLua = GetCleanLua($"using RobloxRuntime.Classes; var part = {instanceClassPath}.Create<Part>()");
             Assert.Equal("local part = Instance.new(\"Part\")", cleanedLua);
         }
 
         [Fact]
-        public void GenerateLua_InstanceIsA_Macros()
+        public void Generate_InstanceIsA_Macros()
         {
             var cleanedLua = GetCleanLua("using RobloxRuntime.Classes; var part = Instance.Create<Part>(); part.IsA<Frame>();", 1);
             Assert.Equal("part:IsA(\"Frame\")", cleanedLua);
@@ -98,14 +98,14 @@
         [InlineData("Console.WriteLine")]
         [InlineData("System.Console.Write")]
         [InlineData("System.Console.WriteLine")]
-        public void GenerateLua_ConsoleMethods_Macro(string fullMethodPath)
+        public void Generate_ConsoleMethods_Macro(string fullMethodPath)
         {
             var cleanedLua = GetCleanLua($"{fullMethodPath}(\"hello world\")");
             Assert.Equal("print(\"hello world\")", cleanedLua);
         }
 
         [Fact]
-        public void GenerateLua_StaticClass_NoFullQualification()
+        public void Generate_StaticClass_NoFullQualification()
         {
             var cleanedLua = GetCleanLua($"RobloxRuntime.Globals.game");
             Assert.Equal("game", cleanedLua);
@@ -114,7 +114,7 @@
         [Theory]
         [InlineData("object obj; obj?.Name;")]
         [InlineData("object a; a.b?.c;")]
-        public void GenerateLua_SafeNavigation_GeneratesIfStatement(string source)
+        public void Generate_SafeNavigation_GeneratesIfStatement(string source)
         {
             var cleanedLua = GetCleanLua(source, 1);
             switch (source)
@@ -129,7 +129,7 @@
         }
 
         [Fact]
-        public void GenerateLua_NullCoalescing_GeneratesIfStatement()
+        public void Generate_NullCoalescing_GeneratesIfStatement()
         {
             
             var cleanedLua = GetCleanLua("int? x; int? y; x ?? y", 2);
@@ -137,14 +137,14 @@
         }
 
         [Fact]
-        public void GenerateLua_TupleExpression_GeneratesTable()
+        public void Generate_TupleExpression_GeneratesTable()
         {
             var cleanedLua = GetCleanLua("var tuple = (1, 2, 3)");
             Assert.Equal("local tuple = {1, 2, 3}", cleanedLua);
         }
 
         [Fact]
-        public void GenerateLua_TupleIndexing_GeneratesTableIndexing()
+        public void Generate_TupleIndexing_GeneratesTableIndexing()
         {
             var cleanedLua = GetCleanLua("var tuple = (1, 2, 3);\ntuple.Item1;\ntuple.Item2;\ntuple.Item3;\n", 1);
             var lines = GetLines(cleanedLua);
