@@ -255,10 +255,15 @@ namespace RobloxCS
                         return;
                     case "Write":
                     case "WriteLine":
-                        if (objectName != "Console") break;
-                        Write("print");
-                        Visit(node.ArgumentList);
-                        return;
+                        {
+                            var objectSymbolInfo = _semanticModel.GetSymbolInfo(memberAccess.Expression);
+                            var objectDefinitionSymbol = (ITypeSymbol)objectSymbolInfo.Symbol!;
+                            if (objectDefinitionSymbol.Name != "Console") return;
+
+                            Write("print");
+                            Visit(node.ArgumentList);
+                            return;
+                        }
                     case "Create":
                         {
                             if (objectName != "Instance") break;
@@ -345,7 +350,7 @@ namespace RobloxCS
         public override void VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
         {
             var objectSymbolInfo = _semanticModel.GetSymbolInfo(node.Expression);
-            if (objectSymbolInfo.Symbol?.OriginalDefinition is ITypeSymbol objectDefinitionSymbol)
+            if (objectSymbolInfo.Symbol?.OriginalDefinition is INamedTypeSymbol objectDefinitionSymbol)
             {
                 var superclasses = objectDefinitionSymbol.AllInterfaces;
                 if (objectDefinitionSymbol.Name == "Services" || superclasses.Select(@interface => @interface.Name).Contains("Services"))
@@ -353,6 +358,57 @@ namespace RobloxCS
                     Write("game:GetService(\"");
                     Visit(node.Name);
                     Write("\")");
+                    return;
+                }
+            }
+
+            if (objectSymbolInfo.Symbol != null && (objectSymbolInfo.Symbol.Kind == SymbolKind.Namespace || (objectSymbolInfo.Symbol.Kind == SymbolKind.NamedType && objectSymbolInfo.Symbol.IsStatic)))
+            {
+
+                var fullyQualifiedName = objectSymbolInfo.Symbol.ToDisplayString();
+                var root = node.SyntaxTree.GetRoot();
+                var compilationUnit = root as CompilationUnitSyntax;
+                var usings = root.DescendantNodes().OfType<UsingDirectiveSyntax>().ToList();
+                var filePathsContainingType = objectSymbolInfo.Symbol.Locations
+                    .Where(location => location.SourceTree != null)
+                    .Select(location => location.SourceTree!.FilePath)
+                    .FirstOrDefault();
+
+                if (compilationUnit != null)
+                {
+                    foreach (var usingDirective in compilationUnit.Usings)
+                    {
+                        usings.Add(usingDirective);
+                    }
+                }
+
+                var noFullQualification = Constants.NO_FULL_QUALIFICATION_TYPES.Contains(fullyQualifiedName);
+                var typeIsImported = usings.Any(usingDirective => usingDirective.Name != null && fullyQualifiedName.StartsWith(GetName(usingDirective)));
+                var cannotAccess = filePathsContainingType != null && filePathsContainingType != node.SyntaxTree.FilePath && typeIsImported;
+                if (cannotAccess)
+                {
+                    Logger.Debug("Attempt to fully qualify member of un-imported namespace.");
+                    return;
+                }
+                else if (noFullQualification && fullyQualifiedName != "System")
+                {
+                    if (node.Expression is IdentifierNameSyntax identifier)
+                    {
+                        Visit(node.Name);
+                    }
+                    else if (node.Expression is MemberAccessExpressionSyntax memberAccess)
+                    {
+                        if (fullyQualifiedName == "RobloxRuntime" && GetName(memberAccess) != "Globals")
+                        {
+                            Visit(memberAccess.Name);
+                            Write(".");
+                        }
+                        Visit(node.Name);
+                    }
+                    else
+                    {
+                        throw new NotSupportedException("Unsupported node.Expression type for a NO_FULL_QUALIFICATION_NAMESPACES member");
+                    }
                     return;
                 }
             }
@@ -581,6 +637,7 @@ namespace RobloxCS
 
             _indent--;
             WriteLine("end)");
+            WriteLine();
         }
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)

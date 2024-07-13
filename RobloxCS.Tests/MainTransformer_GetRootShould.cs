@@ -1,6 +1,6 @@
 namespace RobloxCS.Tests
 {
-    public class Transformer_GetRootShould
+    public class MainTransformer_GetRootShould
     {
         [Theory]
         [InlineData("obj?.Name;")]

@@ -1,20 +1,36 @@
-local CS = require(game:GetService("ReplicatedStorage").rbxcs_include.RuntimeLib)
+package.path = "C:/Users/Riley Peel/Dev/C#/roblox-cs/RobloxRuntime/?.lua;" .. package.path
+local CS = require("RuntimeLib")
 
-CS.namespace("Test", function(namespace)
-    namespace:class("HelloWorld", function(namespace)
+CS.namespace("TestGame", function(namespace)
+    namespace:namespace("Client", function(namespace)
+        namespace:class("Game", function(namespace)
+            local class = {}
+            class.__index = class
+            
+            function class.Main()
+                local result = CS.getAssemblyType("TestBrah").HelloNiga()
+                print(`result: {result}`)
+            end
+            
+            if namespace == nil then
+                class.Main()
+            else
+                namespace["$onLoaded"](namespace, class.Main)
+            end
+            return class
+        end)
+    end)
+end)
+
+CS.namespace("MyOtherNamespace", function(namespace)
+    namespace:class("TestBrah", function(namespace)
         local class = {}
         class.__index = class
         
-        function class.new()
-            local self = setmetatable({}, class)
-            
-            
-            
-            return self
-        end
-        function class.Main()
+        function class.HelloNiga()
+            return 69
         end
         
-        return setmetatable({}, class)
+        return class
     end)
 end)

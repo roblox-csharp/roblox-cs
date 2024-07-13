@@ -1,14 +1,12 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Reflection;
 
 namespace RobloxCS
 {
     public sealed class Transpiler
     {
     
-        private readonly List<SyntaxTree> _fileTrees = new List<SyntaxTree>();
+        private List<SyntaxTree> _fileTrees = new List<SyntaxTree>();
         private readonly ConfigData _config;
         private readonly string _sourceDirectory;
         private readonly string _outDirectory;
@@ -23,8 +21,8 @@ namespace RobloxCS
         public void Transpile()
         {
             ParseSource();
-            var compilation = CompileASTs();
-            WriteLuaOutput(compilation);
+            var compiler = CompileASTs();
+            WriteLuaOutput(compiler);
         }
 
         private void ParseSource()
