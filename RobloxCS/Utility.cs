@@ -54,10 +54,8 @@ namespace RobloxCS
 
         public static string? GetAssemblyDirectory()
         {
-            var location = Assembly.GetExecutingAssembly().Location;
-            var uri = new UriBuilder(location);
-            var path = Uri.UnescapeDataString(uri.Path);
-            return FixPathSep(Path.GetDirectoryName(path));
+            var location = FixPathSep(Assembly.GetExecutingAssembly().Location);
+            return FixPathSep(Path.GetDirectoryName(location));
         }
 
         public static string GetTargetFramework()
