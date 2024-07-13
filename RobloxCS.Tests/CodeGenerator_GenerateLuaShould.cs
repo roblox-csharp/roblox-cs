@@ -89,7 +89,6 @@
         [Fact]
         public void GenerateLua_InstanceIsA_Macros()
         {
-
             var cleanedLua = GetCleanLua("using RobloxRuntime.Classes; var part = Instance.Create<Part>(); part.IsA<Frame>();", 1);
             Assert.Equal("part:IsA(\"Frame\")", cleanedLua);
         }
@@ -101,9 +100,15 @@
         [InlineData("System.Console.WriteLine")]
         public void GenerateLua_ConsoleMethods_Macro(string fullMethodPath)
         {
-
             var cleanedLua = GetCleanLua($"{fullMethodPath}(\"hello world\")");
             Assert.Equal("print(\"hello world\")", cleanedLua);
+        }
+
+        [Fact]
+        public void GenerateLua_StaticClass_NoFullQualification()
+        {
+            var cleanedLua = GetCleanLua($"RobloxRuntime.Globals.game");
+            Assert.Equal("game", cleanedLua);
         }
 
         [Theory]
