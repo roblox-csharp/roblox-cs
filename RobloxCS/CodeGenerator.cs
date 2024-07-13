@@ -232,7 +232,7 @@ namespace RobloxCS
         public override void VisitPostfixUnaryExpression(PostfixUnaryExpressionSyntax node)
         {
             Visit(node.Operand);
-            if (node.Operand.IsKind(SyntaxKind.SuppressNullableWarningExpression)) return;
+            if (node.IsKind(SyntaxKind.SuppressNullableWarningExpression)) return;
 
             var mappedOperator = Utility.GetMappedOperator(node.OperatorToken.Text);
             WriteLine($" {mappedOperator} 1");

@@ -52,8 +52,7 @@ CS.namespace("TestGame", function(namespace)
             function class.AttachTag(tag)
                 local instances = game:GetService("CollectionService"):GetTagged(tag)
                 for _, instance in instances do
-                    local component = CS.getAssemblyType("TComponent").new() not  1
-                    
+                    local component = CS.getAssemblyType("TComponent").new()
                     component.Instance = instance
                     CS.getAssemblyType("Run")(component)
                 end
@@ -102,8 +101,7 @@ CS.namespace("TestGame", function(namespace)
             function class.new()
                 local self = setmetatable({}, class)
                 
-                self.Instance = nil not  1
-                
+                self.Instance = nil
                 
                 return self
             end
