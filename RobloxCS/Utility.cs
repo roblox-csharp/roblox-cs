@@ -1,8 +1,6 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Reflection;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Diagnostics;
-using System.Reflection;
 
 namespace RobloxCS
 {
@@ -20,6 +18,10 @@ namespace RobloxCS
         {
             switch (op)
             {
+                case "++":
+                    return "+=";
+                case "--":
+                    return "--";
                 case "!":
                     return "not ";
                 case "!=":

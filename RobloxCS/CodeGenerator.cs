@@ -91,6 +91,7 @@ namespace RobloxCS
             WriteLine("do");
             _indent++;
 
+            Visit(node.Declaration);
             foreach (var initializer in node.Initializers)
             {
                 Visit(initializer);
@@ -166,6 +167,15 @@ namespace RobloxCS
             Visit(node.WhenTrue);
             Write(" else ");
             Visit(node.WhenFalse);
+        }
+
+        public override void VisitPostfixUnaryExpression(PostfixUnaryExpressionSyntax node)
+        {
+            Visit(node.Operand);
+            if (node.Operand.IsKind(SyntaxKind.SuppressNullableWarningExpression)) return;
+
+            var mappedOperator = Utility.GetMappedOperator(node.OperatorToken.Text);
+            WriteLine($" {mappedOperator} 1");
         }
 
         public override void VisitPrefixUnaryExpression(PrefixUnaryExpressionSyntax node)

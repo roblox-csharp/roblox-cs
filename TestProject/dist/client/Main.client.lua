@@ -1,4 +1,5 @@
-local CS = require(game:GetService("ReplicatedStorage").rbxcs_include.RuntimeLib)
+package.path = "C:/Users/Riley Peel/Dev/c#/roblox-cs/RobloxRuntime/?.lua;" .. package.path
+local CS = require("RuntimeLib")
 
 CS.namespace("TestGame", function(namespace)
     namespace:namespace("Client", function(namespace)
@@ -8,10 +9,12 @@ CS.namespace("TestGame", function(namespace)
             
             function class.Main()
                 do
+                    local i = 0
                     while true do
                         if not (i < 10) then break end
                         print(i)
-                        iend
+                        i += 1
+                    end
                 end
             end
             
