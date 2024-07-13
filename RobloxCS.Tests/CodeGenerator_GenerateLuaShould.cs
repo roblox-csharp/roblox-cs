@@ -7,7 +7,7 @@
         {
 
             var cleanedLua = GetCleanLua("namespace Test { }");
-            var expectedLua = "CS.namespace(\"Test\", function(namespace)\r\nend)";
+            var expectedLua = "CS.namespace(\"Test\", function(namespace)\nend)";
             Assert.Equal(expectedLua.Trim(), cleanedLua);
         }
 

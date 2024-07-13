@@ -12,7 +12,8 @@ namespace RobloxCS
             var debugExtraLines = Utility.IsDebug() ? 1 : 0;
             var lines = luaSource.Split('\n').ToList();
             lines.RemoveRange(0, 2 + (extraLines ?? 0) + debugExtraLines);
-            return string.Join('\n', lines);
+            return string.Join('\n', lines)
+                .Replace("\r", "");
         }
 
         public static string GenerateLua(SyntaxTree tree, CSharpCompilation compiler, ConfigData? config = null)
