@@ -5,6 +5,7 @@ Roblox CSharp to Lua compiler
 
 # To-do
 - Imports
+- Default values (via `default` keyword)
 - Inheritance chains 🤮
 - Macro `IEnumerable<T>` (or just `List<T>`) methods
 - Classes/structs/interfaces nested in classes/structs/interfaces

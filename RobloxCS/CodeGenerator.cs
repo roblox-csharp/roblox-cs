@@ -128,6 +128,40 @@ namespace RobloxCS
             WriteLine("end");
         }
 
+        public override void VisitIfStatement(IfStatementSyntax node)
+        {
+            Write("if ");
+            Visit(node.Condition);
+            WriteLine(" then");
+            _indent++;
+
+            Visit(node.Statement);
+
+            _indent--;
+            if (node.Else != null)
+            {
+                var isElseIf = node.Else.Statement.IsKind(SyntaxKind.IfStatement);
+
+                Write("else");
+                if (!isElseIf)
+                {
+                    WriteLine();
+                    _indent++;
+                }
+
+                Visit(node.Else);
+                if (!isElseIf)
+                {
+                    _indent--;
+                    WriteLine("end");
+                }
+            }
+            else
+            {
+                WriteLine("end");
+            }
+        }
+
         public override void VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node)
         {
             Write("function");
@@ -637,12 +671,9 @@ namespace RobloxCS
                     Write(node.Token.ValueText);
                     break;
 
+                case SyntaxKind.DefaultLiteralExpression:
                 case SyntaxKind.NullLiteralExpression:
                     Write("nil");
-                    break;
-
-                case SyntaxKind.DefaultLiteralExpression:
-                    Logger.CodegenError(node, "\"default\" keyword is not supported!");
                     break;
             }
 
@@ -846,13 +877,16 @@ namespace RobloxCS
                 .OfType<MethodDeclarationSyntax>()
                 .Where(member => !HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword));
 
-            if (block != null) Visit(block);
-            WriteLine();
-
+            if (block != null)
+            {
+                Visit(block);
+                WriteLine();
+            }
             foreach (var method in nonStaticMethods)
             {
                 Visit(method);
             }
+
             WriteLine();
             WriteLine("return self");
         }

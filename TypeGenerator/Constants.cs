@@ -312,7 +312,7 @@
             { "Map", "object" },
             { "RBXScriptSignal", "ScriptSignal" },
             { "RBXScriptConnection", "ScriptConnection" },
-            // { "Instance", "Instance?" },
+            { "Instance", "Instance?" },
             { "Object", "Instance" },
             { "Objects", "Instance[]" },
             { "Property", "string" },
