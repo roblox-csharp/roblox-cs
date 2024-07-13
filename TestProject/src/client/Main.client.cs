@@ -19,12 +19,10 @@ namespace TestGame.Client
             : base(instance)
         {
             Instance = instance;
-            Console.WriteLine($"lava component created with {instance}");
         }
 
         public override void Start()
         {
-            Console.WriteLine("lava component started");
             Instance.Touched.Connect(hit =>
             {
                 var model = (Model?)hit.FindFirstAncestorOfClass("Model");
@@ -56,7 +54,6 @@ namespace TestGame.Client
             {
                 if (attached) return;
                 var instance = Services.CollectionService.GetTagged(tag)[0];
-                Console.WriteLine(instance);
                 Run(attachComponent(instance));
                 attached = true;
             });

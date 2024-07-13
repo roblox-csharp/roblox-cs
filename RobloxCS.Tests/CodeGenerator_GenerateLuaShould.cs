@@ -44,7 +44,6 @@
                             "local self = setmetatable({}, class)",
                             "",
                             "",
-                            "",
                             "return self",
                         "end",
                         "",
