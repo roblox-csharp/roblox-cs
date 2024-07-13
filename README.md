@@ -5,7 +5,6 @@ Roblox CSharp to Lua compiler
 
 # To-do
 - Unit tests
-- Referencing the full path of values from imported libraries (i.e. `RobloxRuntime.Classes.Part` vs `Part` with `using RobloxRuntime.Classes`)
 - Tuple literals (create a table and macro `obj.ItemN` to `obj[N]`)
 - Imports
 - Inheritance chains 🤮

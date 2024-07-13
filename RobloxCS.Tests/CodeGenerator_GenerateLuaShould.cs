@@ -77,11 +77,12 @@
             Assert.Equal(robloxType + ".a", cleanedLua);
         }
 
-        [Fact]
-        public void GenerateLua_InstanceCreate_Macros()
+        [Theory]
+        [InlineData("Instance")]
+        [InlineData("RobloxRuntime.Classes.Instance")]
+        public void GenerateLua_InstanceCreate_Macros(string instanceClassPath)
         {
-
-            var cleanedLua = GetCleanLua("using RobloxRuntime.Classes; var part = Instance.Create<Part>()");
+            var cleanedLua = GetCleanLua($"using RobloxRuntime.Classes; var part = {instanceClassPath}.Create<Part>()");
             Assert.Equal("local part = Instance.new(\"Part\")", cleanedLua);
         }
 
@@ -94,12 +95,14 @@
         }
 
         [Theory]
-        [InlineData("Write")]
-        [InlineData("WriteLine")]
-        public void GenerateLua_ConsoleMethods_Macro(string method)
+        [InlineData("Console.Write")]
+        [InlineData("Console.WriteLine")]
+        [InlineData("System.Console.Write")]
+        [InlineData("System.Console.WriteLine")]
+        public void GenerateLua_ConsoleMethods_Macro(string fullMethodPath)
         {
 
-            var cleanedLua = GetCleanLua($"Console.{method}(\"hello world\")");
+            var cleanedLua = GetCleanLua($"{fullMethodPath}(\"hello world\")");
             Assert.Equal("print(\"hello world\")", cleanedLua);
         }
 

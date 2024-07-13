@@ -1,18 +1,16 @@
 namespace TestGame.Client
 {
-    using MyOtherNamespace;
-
     public static class Game
     {
         public static void Main()
         {
             var result = TestBrah.HelloNiga();
-            System.Console.WriteLine($"result: {result}");
+            Console.WriteLine($"result: {result}");
         }
     }
 }
 
-namespace MyOtherNamespace
+namespace TestGame.Client
 {
     public static class TestBrah
     {
