@@ -7,7 +7,8 @@ CS.namespace("TestGame", function(namespace)
             class.__index = class
             
             function class.Main()
-                namespace["$getMember"](namespace, "ComponentRunner").Lava("Lava")
+                namespace["$getMember"](namespace, "ComponentRunner").AttachTag("Lava", function(instance)
+                    return namespace["$getMember"](namespace, "LavaComponent").new(instance)end)
             end
             
             if namespace == nil then
@@ -17,22 +18,24 @@ CS.namespace("TestGame", function(namespace)
             end
             return class
         end)
-        namespace:class("Lava", function(namespace)
+        namespace:class("LavaComponent", function(namespace)
             local class = {}
             class.__index = class
             
-            function class.new()
+            function class.new(instance)
                 local self = setmetatable({}, class)
                 
+                print("lava component created")
+                
                 function self.Start()
+                    print("lava component started")
                     CS.getAssemblyType("Instance").Touched:Connect(function(hit)
-                        local model = 
-                        local humanoid = 
+                        local model = hit:FindFirstAncestorOfClass("Model")
+                        local humanoid = if model == nil then nil else model:FindFirstChildOfClass("Humanoid")
                         if humanoid == nil then
                             return 
                         end
                         humanoid:TakeDamage(10)
-                    
                     end)
                 end
                 function self.Update(dt)
@@ -49,17 +52,22 @@ CS.namespace("TestGame", function(namespace)
             local class = {}
             class.__index = class
             
-            function class.AttachTag(tag)
+            function class.AttachTag(tag, attachComponent)
+                local attached = false
                 local instances = game:GetService("CollectionService"):GetTagged(tag)
+                game:GetService("CollectionService").TagAdded:Connect(function(tag)
+                    local instance = game:GetService("CollectionService"):GetTagged(tag)[0]
+                    class.Run(attachComponent(instance))
+                    attached = true
+                end)
                 for _, instance in instances do
-                    local component = CS.getAssemblyType("TComponent").new()
-                    component.Instance = instance
-                    namespace["$getMember"](namespace, "ComponentRunner").Run(component)
+                    class.Run(attachComponent(instance))
+                    attached = true
                 end
             end
             function class.Run(component)
                 component:Start()
-                local updateEvent = namespace["$getMember"](namespace, "ComponentRunner").GetUpdateEvent(component)
+                local updateEvent = class.GetUpdateEvent(component)
                 updateEvent:Connect(component.Update)
             end
             function class.GetUpdateEvent(component)
@@ -82,12 +90,6 @@ CS.namespace("TestGame", function(namespace)
                 local self = setmetatable({}, class)
                 
                 self.UpdateMethod = if game:GetService("RunService"):IsClient() then "RenderStepped" else "Heartbeat"
-                function self.Start()
-                end
-                function self.Update(dt)
-                end
-                function self.Destroy()
-                end
                 
                 return self
             end
@@ -98,10 +100,11 @@ CS.namespace("TestGame", function(namespace)
             local class = {}
             class.__index = class
             
-            function class.new()
+            function class.new(instance)
                 local self = setmetatable({}, class)
                 
-                self.Instance = nil
+                class.Instance = instance
+                
                 
                 return self
             end

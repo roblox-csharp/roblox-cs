@@ -69,6 +69,7 @@ namespace RobloxCS
         public override void VisitCastExpression(CastExpressionSyntax node)
         {
             // ignore
+            Visit(node.Expression);
         }
 
         public override void VisitForEachVariableStatement(ForEachVariableStatementSyntax node)
@@ -207,8 +208,21 @@ namespace RobloxCS
             }
             
             _indent--;
-            WriteLine();
             Write("end");
+        }
+
+        public override void VisitBracketedArgumentList(BracketedArgumentListSyntax node)
+        {
+            Write('[');
+            foreach (var argument in node.Arguments)
+            {
+                Visit(argument);
+                if (argument != node.Arguments.Last())
+                {
+                    Write(", ");
+                }
+            }
+            Write(']');
         }
 
         public override void VisitConditionalAccessExpression(ConditionalAccessExpressionSyntax node)
