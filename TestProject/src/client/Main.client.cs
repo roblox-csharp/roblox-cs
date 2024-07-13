@@ -13,11 +13,13 @@ namespace TestGame.Client
 
     public class LavaComponent : GameComponent<Part>
     {
+        public new Part Instance { get; set; }
+
         public LavaComponent(Part instance)
             : base(instance)
         {
             Instance = instance;
-            Console.WriteLine("lava component created");
+            Console.WriteLine($"lava component created with {instance}");
         }
 
         public override void Start()
@@ -54,6 +56,7 @@ namespace TestGame.Client
             {
                 if (attached) return;
                 var instance = Services.CollectionService.GetTagged(tag)[0];
+                Console.WriteLine(instance);
                 Run(attachComponent(instance));
                 attached = true;
             });

@@ -15,5 +15,17 @@
         {
             "as"
         };
+
+        public static readonly HashSet<string> INTEGER_TYPES = new HashSet<string>
+        {
+            "sbyte",
+            "byte",
+            "short",
+            "ushort",
+            "int",
+            "uint",
+            "long",
+            "ulong"
+        };
     }
 }

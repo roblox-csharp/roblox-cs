@@ -8,7 +8,8 @@ CS.namespace("TestGame", function(namespace)
             
             function class.Main()
                 namespace["$getMember"](namespace, "ComponentRunner").AttachTag("Lava", function(instance)
-                    return namespace["$getMember"](namespace, "LavaComponent").new(instance)end)
+                    return namespace["$getMember"](namespace, "LavaComponent").new(instance)
+                end)
             end
             
             if namespace == nil then
@@ -25,11 +26,12 @@ CS.namespace("TestGame", function(namespace)
             function class.new(instance)
                 local self = setmetatable({}, class)
                 
-                print("lava component created")
+                self.Instance = instance
+                print(`lava component created with {instance}`)
                 
                 function self.Start()
                     print("lava component started")
-                    CS.getAssemblyType("Instance").Touched:Connect(function(hit)
+                    self.Instance.Touched:Connect(function(hit)
                         local model = hit:FindFirstAncestorOfClass("Model")
                         local humanoid = if model == nil then nil else model:FindFirstChildOfClass("Humanoid")
                         if humanoid == nil then
@@ -56,11 +58,17 @@ CS.namespace("TestGame", function(namespace)
                 local attached = false
                 local instances = game:GetService("CollectionService"):GetTagged(tag)
                 game:GetService("CollectionService").TagAdded:Connect(function(tag)
-                    local instance = game:GetService("CollectionService"):GetTagged(tag)[0]
+                    if attached then
+                        return 
+                    end
+                    local instance = game:GetService("CollectionService"):GetTagged(tag)[1]
+                    print(instance)
                     class.Run(attachComponent(instance))
                     attached = true
                 end)
                 for _, instance in instances do
+                    if attached then
+                    end
                     class.Run(attachComponent(instance))
                     attached = true
                 end
@@ -103,7 +111,7 @@ CS.namespace("TestGame", function(namespace)
             function class.new(instance)
                 local self = setmetatable({}, class)
                 
-                class.Instance = instance
+                self.Instance = instance
                 
                 
                 return self

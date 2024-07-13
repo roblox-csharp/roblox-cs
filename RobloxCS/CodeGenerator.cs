@@ -183,6 +183,7 @@ namespace RobloxCS
             {
                 Write("return ");
                 Visit(node.ExpressionBody);
+                WriteLine();
             }
 
             _indent--;
@@ -205,6 +206,7 @@ namespace RobloxCS
             {
                 Write("return ");
                 Visit(node.ExpressionBody);
+                WriteLine();
             }
             
             _indent--;
@@ -216,7 +218,24 @@ namespace RobloxCS
             Write('[');
             foreach (var argument in node.Arguments)
             {
-                Visit(argument);
+                if (argument.Expression is LiteralExpressionSyntax numericalLiteral)
+                {
+                    int.TryParse(numericalLiteral.Token.ValueText, out var indexValue);
+                    Write((indexValue + 1).ToString());
+                }
+                else
+                {
+                    var argumentSymbol = _semanticModel.GetSymbolInfo(argument.Expression).Symbol;
+                    var definitionSymbol = argumentSymbol?.OriginalDefinition;
+                    var indexSymbol = definitionSymbol ?? argumentSymbol;
+                    var isNumericalIndex = indexSymbol is ITypeSymbol typeSymbol && Constants.INTEGER_TYPES.Contains(typeSymbol.Name);
+                    Visit(argument);
+                    if (isNumericalIndex)
+                    {
+                        Write(" + 1");
+                    }
+                }
+
                 if (argument != node.Arguments.Last())
                 {
                     Write(", ");
@@ -634,23 +653,24 @@ namespace RobloxCS
 
                 if (isLeftSide && !localScopeIncludesIdentifier && !runtimeNamespaceIncludesIdentifier)
                 {
+                    // TODO: check for inherited members
                     var parentNamespace = FindFirstAncestor<NamespaceDeclarationSyntax>(node);
                     var namespaceIncludesIdentifier = parentNamespace != null && parentNamespace.Members
                         .Where(member => GetNames(member).Contains(identifierName))
                         .Count() > 0;
 
                     var parentClass = FindFirstAncestor<ClassDeclarationSyntax>(node);
-                    var classIncludesIdentifier = parentClass != null && parentClass.Members
+                    var classMember= parentClass?.Members
                         .Where(member => GetName(member) == identifierName)
-                        .Count() > 0;
+                        .FirstOrDefault();
 
                     if (namespaceIncludesIdentifier)
                     {
                         Write($"namespace[\"$getMember\"](namespace, \"{identifierName}\")");
                     }
-                    else if (classIncludesIdentifier)
+                    else if (classMember != null)
                     {
-                        Write($"class.{identifierName}");
+                        Write($"{(HasSyntax(classMember.Modifiers, SyntaxKind.StaticKeyword) ? "class" : "self")}.{identifierName}");
                     }
                     else
                     {
