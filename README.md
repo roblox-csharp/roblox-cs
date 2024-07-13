@@ -6,7 +6,7 @@ Roblox CSharp to Lua compiler
 # To-do
 - Imports
 - Inheritance chains 🤮
-- `for`/`while` loops
+- `while` loops
 - `using name = value` expressions (equivalent to `:=` operator in other languages) (MAYBE)
 - Property declarations
 - Macro `IEnumerable<T>` (or just `List<T>`) methods

@@ -4,19 +4,10 @@ namespace TestGame.Client
     {
         public static void Main()
         {
-            var tuple = (1, 2, 3);
-            Console.WriteLine(tuple.Item1);
-        }
-    }
-}
-
-namespace TestGame.Client
-{
-    public static class TestBrah
-    {
-        public static uint HelloNiga()
-        {
-            return 69;
+            for (int i = 0; i < 10; i++)
+            {
+                Console.WriteLine(i);
+            }
         }
     }
 }

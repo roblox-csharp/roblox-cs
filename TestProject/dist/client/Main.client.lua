@@ -1,5 +1,4 @@
-package.path = "C:/Users/Riley Peel/Dev/C#/roblox-cs/RobloxRuntime/?.lua;" .. package.path
-local CS = require("RuntimeLib")
+local CS = require(game:GetService("ReplicatedStorage").rbxcs_include.RuntimeLib)
 
 CS.namespace("TestGame", function(namespace)
     namespace:namespace("Client", function(namespace)
@@ -8,8 +7,12 @@ CS.namespace("TestGame", function(namespace)
             class.__index = class
             
             function class.Main()
-                local tuple = {1, 2, 3}
-                print(tuple[1])
+                do
+                    while true do
+                        if not (i < 10) then break end
+                        print(i)
+                        iend
+                end
             end
             
             if namespace == nil then
@@ -17,21 +20,6 @@ CS.namespace("TestGame", function(namespace)
             else
                 namespace["$onLoaded"](namespace, class.Main)
             end
-            return class
-        end)
-    end)
-end)
-
-CS.namespace("TestGame", function(namespace)
-    namespace:namespace("Client", function(namespace)
-        namespace:class("TestBrah", function(namespace)
-            local class = {}
-            class.__index = class
-            
-            function class.HelloNiga()
-                return 69
-            end
-            
             return class
         end)
     end)

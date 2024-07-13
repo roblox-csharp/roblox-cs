@@ -86,6 +86,34 @@ namespace RobloxCS
             WriteLine("end");
         }
 
+        public override void VisitForStatement(ForStatementSyntax node)
+        {
+            WriteLine("do");
+            _indent++;
+
+            foreach (var initializer in node.Initializers)
+            {
+                Visit(initializer);
+            }
+            WriteLine("while true do");
+            _indent++;
+
+            Write("if not (");
+            Visit(node.Condition);
+            WriteLine(") then break end");
+            Visit(node.Statement);
+            foreach (var incrementor in node.Incrementors)
+            {
+                Visit(incrementor);
+            }
+
+            _indent--;
+            WriteLine("end");
+
+            _indent--;
+            WriteLine("end");
+        }
+
         public override void VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node)
         {
             Write("function");
@@ -509,11 +537,13 @@ namespace RobloxCS
                         var descendants = block.DescendantNodes();
                         var variableDeclarators = descendants.OfType<VariableDeclaratorSyntax>();
                         var forEachStatements = descendants.OfType<ForEachStatementSyntax>();
+                        var forStatements = descendants.OfType<ForStatementSyntax>();
                         var parameters = descendants.OfType<ParameterSyntax>();
                         var checkNamePredicate = (SyntaxNode node) => GetName(node) == identifierName;
                         return variableDeclarators.Where(checkNamePredicate).Count() > 0
                             || parameters.Where(checkNamePredicate).Count() > 0
-                            || forEachStatements.Where(checkNamePredicate).Count() > 0;
+                            || forEachStatements.Where(checkNamePredicate).Count() > 0
+                            || forStatements.Any(forStatement => forStatement.Initializers.Count() > 0);
                     });
 
                 if (isLeftSide && !localScopeIncludesIdentifier && !runtimeNamespaceIncludesIdentifier)
