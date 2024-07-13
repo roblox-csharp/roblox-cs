@@ -66,6 +66,11 @@ namespace RobloxCS
             }
         }
 
+        public override void VisitCastExpression(CastExpressionSyntax node)
+        {
+            // ignore
+        }
+
         public override void VisitForEachVariableStatement(ForEachVariableStatementSyntax node)
         {
             Visit(node.Variable);
@@ -241,8 +246,15 @@ namespace RobloxCS
 
         public override void VisitBinaryExpression(BinaryExpressionSyntax node)
         {
-            var operatorText = Utility.GetMappedOperator(node.OperatorToken.Text);
-            switch (operatorText)
+            var operatorText = node.OperatorToken.Text;
+            if (Constants.IGNORED_BINARY_OPERATORS.Contains(operatorText))
+            {
+                Visit(node.Left);
+                return;
+            }
+
+            var mappedOperator = Utility.GetMappedOperator(operatorText);
+            switch (mappedOperator)
             {
                 case "??":
                     Write("if ");
@@ -255,7 +267,7 @@ namespace RobloxCS
             }
 
             Visit(node.Left);
-            Write($" {operatorText} ");
+            Write($" {mappedOperator} ");
             Visit(node.Right);
         }
 

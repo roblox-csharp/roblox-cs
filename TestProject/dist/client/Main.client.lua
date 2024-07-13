@@ -26,8 +26,8 @@ CS.namespace("TestGame", function(namespace)
                 
                 function self.Start()
                     CS.getAssemblyType("Instance").Touched:Connect(function(hit)
-                        local model = Modelhit:FindFirstAncestorOfClass("Model")
-                        local humanoid = Humanoidif model == nil then nil else model:FindFirstChildOfClass("Humanoid")
+                        local model = 
+                        local humanoid = 
                         if humanoid == nil then
                             return 
                         end
@@ -52,7 +52,7 @@ CS.namespace("TestGame", function(namespace)
             function class.AttachTag(tag)
                 local instances = game:GetService("CollectionService"):GetTagged(tag)
                 for _, instance in instances do
-                    local component = CS.getAssemblyType("TComponent").new() as Instance not  1
+                    local component = CS.getAssemblyType("TComponent").new() not  1
                     
                     component.Instance = instance
                     CS.getAssemblyType("Run")(component)

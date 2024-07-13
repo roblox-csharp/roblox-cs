@@ -10,5 +10,10 @@
             "RobloxRuntime.PluginClasses",
             "RobloxRuntime.Globals"
         };
+
+        public static readonly HashSet<string> IGNORED_BINARY_OPERATORS = new HashSet<string>
+        {
+            "as"
+        };
     }
 }
