@@ -136,6 +136,23 @@
             Assert.Equal("if x == nil then y else x", cleanedLua);
         }
 
+        [Fact]
+        public void GenerateLua_TupleExpression_GeneratesTable()
+        {
+            var cleanedLua = GetCleanLua("var tuple = (1, 2, 3)");
+            Assert.Equal("local tuple = {1, 2, 3}", cleanedLua);
+        }
+
+        [Fact]
+        public void GenerateLua_TupleIndexing_GeneratesTableIndexing()
+        {
+            var cleanedLua = GetCleanLua("var tuple = (1, 2, 3);\ntuple.Item1;\ntuple.Item2;\ntuple.Item3;\n", 1);
+            var lines = GetLines(cleanedLua);
+            Assert.Equal("tuple[1]", lines[0]);
+            Assert.Equal("tuple[2]", lines[1]);
+            Assert.Equal("tuple[3]", lines[2]);
+        }
+
         private List<string> GetLines(string cleanLua)
         {
             return cleanLua.Split('\n').Select(line => line.Trim()).ToList();
