@@ -6,7 +6,7 @@
         {
             try
             {
-                return Directory.GetFiles(sourceDirectory, "*.cs", SearchOption.AllDirectories).Select(path => path.Replace("\\", "/"));
+                return Directory.GetFiles(sourceDirectory, "*.cs", SearchOption.AllDirectories).Select(Utility.FixPathSep);
             }
             catch (Exception e)
             {

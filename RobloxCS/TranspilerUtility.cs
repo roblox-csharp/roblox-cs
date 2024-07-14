@@ -70,7 +70,8 @@ namespace RobloxCS
             var runtimeLibAssemblyPath = string.Join('/', runtimeLibPath, "bin", "Release", tfm, Utility.RuntimeAssemblyName + ".dll");
             if (!File.Exists(runtimeLibAssemblyPath))
             {
-                Logger.Error($"Failed to find {Utility.RuntimeAssemblyName}.dll in {Utility.FixPathSep(Path.GetDirectoryName(runtimeLibAssemblyPath))}");
+                var directoryName = Path.GetDirectoryName(runtimeLibAssemblyPath);
+                Logger.Error($"Failed to find {Utility.RuntimeAssemblyName}.dll in {(directoryName == null ? "(could not find assembly directory)" : Utility.FixPathSep(directoryName))}");
             }
 
             var references = new List<PortableExecutableReference>()

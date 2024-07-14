@@ -26,7 +26,11 @@ namespace RobloxCS
                         {
                             if (!objectName.EndsWith("Console")) break;
 
-                            var fileInfo = $"[{Utility.FormatLocation(node.GetLocation().GetLineSpan())}]:";
+                            var fileLocation = Utility.FormatLocation(node.GetLocation().GetLineSpan())
+                                .Replace(_config.SourceFolder + "/", "")
+                                .Replace("./", "");
+
+                            var fileInfo = $"[{fileLocation}]:";
                             var literalToken = SyntaxFactory.Token(SyntaxFactory.TriviaList(), SyntaxKind.StringLiteralToken, fileInfo, fileInfo, SyntaxFactory.TriviaList()); // why is trivia required bruh
                             var literal = SyntaxFactory.LiteralExpression(SyntaxKind.StringLiteralExpression, literalToken);
                             var argument = SyntaxFactory.Argument(literal);

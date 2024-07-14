@@ -72,9 +72,9 @@ namespace RobloxCS
             }
         }
 
-        public static string? FixPathSep(string? path)
+        public static string FixPathSep(string path)
         {
-            return path?.Replace('\\', '/');
+            return path.Replace('\\', '/').Replace("//", "/");
         }
 
         public static bool IsDebug()
@@ -88,13 +88,15 @@ namespace RobloxCS
 
         public static string? GetRbxcsDirectory()
         {
-            return FixPathSep(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Utility.GetAssemblyDirectory()))))); // pretend like this isn't here lol
+            var directoryName = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Utility.GetAssemblyDirectory()))));
+            return directoryName == null ? null : FixPathSep(directoryName); // pretend like this isn't here lol
         }
 
         public static string? GetAssemblyDirectory()
         {
             var location = FixPathSep(Assembly.GetExecutingAssembly().Location);
-            return FixPathSep(Path.GetDirectoryName(location));
+            var directoryName = Path.GetDirectoryName(location);
+            return directoryName == null ? null : FixPathSep(directoryName);
         }
 
         public static string GetTargetFramework()

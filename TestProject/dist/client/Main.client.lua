@@ -7,7 +7,7 @@ CS.namespace("TestGame", function(namespace)
             class.__index = class
             
             function class.Main()
-                print("[./TestProject//src/client/Main.client.cs:7:13]:", "hello" .. " " .. "world")
+                print("[TestProject/client/Main.client.cs:7:13]:", "hello" .. " " .. "world")
             end
             
             if namespace == nil then
