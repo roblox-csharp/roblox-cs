@@ -64,6 +64,14 @@
             }
         }
 
+        [Fact]
+        public void StringInterpolation_GeneratesInterpolation()
+        {
+            var cleanedLua = GetCleanLua("int count = 6; $\"count: {count}\"", 1);
+            var expectedLua = "`count: {count}`";
+            Assert.Equal(expectedLua.Trim(), cleanedLua);
+        }
+
         [Theory]
         [InlineData("Vector3")]
         [InlineData("NumberRange")]
