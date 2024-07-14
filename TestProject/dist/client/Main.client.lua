@@ -5,7 +5,7 @@ CS.class("Game", function(namespace)
     class.__index = class
     
     function class.Main()
-        warn("[TestProject/Client/Main.client.cs:7:9]:", "hello baby")
+        print("[TestProject/Client/Main.client.cs:5:9]:", 420)
     end
     
     if namespace == nil then

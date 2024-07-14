@@ -55,13 +55,18 @@
             AssertEqualLines(lines, expectedLines);
         }
 
-        private static void AssertEqualLines(List<string> lines, List<string> expectedLines)
+        [Theory]
+        [InlineData("69", "69")]
+        [InlineData("420.0f", "420")]
+        [InlineData("'h'", "\"h\"")]
+        [InlineData("\"abcefg\"", "\"abcefg\"")]
+        [InlineData("true", "true")]
+        [InlineData("false", "false")]
+        [InlineData("null", "nil")]
+        public void Literal_GeneratesLiteral(string input, string expected)
         {
-            foreach (var line in lines)
-            {
-                var expectedLine = expectedLines.ElementAt(lines.IndexOf(line));
-                Assert.Equal(expectedLine, line);
-            }
+            var cleanedLua = GetCleanLua(input);
+            Assert.Equal(expected.Trim(), cleanedLua);
         }
 
         [Fact]
@@ -158,6 +163,15 @@
             Assert.Equal("tuple[1]", lines[0]);
             Assert.Equal("tuple[2]", lines[1]);
             Assert.Equal("tuple[3]", lines[2]);
+        }
+
+        private static void AssertEqualLines(List<string> lines, List<string> expectedLines)
+        {
+            foreach (var line in lines)
+            {
+                var expectedLine = expectedLines.ElementAt(lines.IndexOf(line));
+                Assert.Equal(expectedLine, line);
+            }
         }
 
         private List<string> GetLines(string cleanLua)
