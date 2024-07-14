@@ -7,7 +7,7 @@
     {
         public static DataModel game { get; } = null!;
 
-        public static void warn(string message)
+        public static void warn(params string[] messages)
         {
         }
 

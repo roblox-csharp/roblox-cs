@@ -5,7 +5,7 @@
 		"ServerScriptService": {
 			"$className": "ServerScriptService",
 			"C#": {
-				"$path": "dist/server"
+				"$path": "dist/Server"
 			}
 		},
 		"ReplicatedStorage": {
@@ -14,7 +14,7 @@
 				"$path": "./include"
 			},
 			"shared": {
-				"$path": "dist/shared"
+				"$path": "dist/Shared"
 			}
 		},
 		"StarterPlayer": {
@@ -22,7 +22,7 @@
 			"StarterPlayerScripts": {
 				"$className": "StarterPlayerScripts",
 				"C#": {
-					"$path": "dist/client"
+					"$path": "dist/Client"
 				}
 			}
 		},

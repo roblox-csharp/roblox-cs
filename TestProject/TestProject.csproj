@@ -11,4 +11,8 @@
     <ProjectReference Include="..\RobloxRuntime\RobloxRuntime.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="dist\" />
+  </ItemGroup>
+
 </Project>

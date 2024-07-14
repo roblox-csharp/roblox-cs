@@ -16,9 +16,9 @@ namespace RobloxCS
             _config = config;
         }
 
-        public SyntaxNode TransformRoot()
+        public SyntaxTree TransformTree()
         {
-            return Visit(_root);
+            return _tree.WithRootAndOptions(Visit(_root), _tree.Options);
         }
 
         protected string GetName(SyntaxNode node)

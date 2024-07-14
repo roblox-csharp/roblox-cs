@@ -4,6 +4,6 @@ public static class Game
 {
     public static void Main()
     {
-        error("hello baby");
+        warn("hello baby");
     }
 }
