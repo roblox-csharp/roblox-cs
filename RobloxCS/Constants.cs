@@ -16,6 +16,11 @@
             "as"
         };
 
+        public static readonly Dictionary<List<string>, (string, string)> PER_TYPE_BINARY_OPERATOR_MAP = new Dictionary<List<string>, (string, string)>
+        {
+            { ["String", "string"], ("+", "..") }
+        };
+
         public static readonly HashSet<string> INTEGER_TYPES = new HashSet<string>
         {
             "sbyte",

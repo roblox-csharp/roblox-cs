@@ -138,12 +138,32 @@ namespace RobloxCS
         {
             Write("if ");
             Visit(node.Condition);
-            WriteLine(" then");
-            _indent++;
 
-            Visit(node.Statement);
+            if (
+                (node.Statement is ReturnStatementSyntax returnStatement && returnStatement.Expression == null
+                || node.Statement is ContinueStatementSyntax)
+                && node.Else == null
+            )
+            {
+                Write(" then ");
+                Visit(node.Statement);
+                if (node.Statement is ReturnStatementSyntax)
+                {
+                    RemoveLastCharacters(3);
+                }
+                WriteLine(" end");
+                return;
+            }
+            else
+            {
+                WriteLine(" then");
+                _indent++;
 
-            _indent--;
+                Visit(node.Statement);
+
+                _indent--;
+            }
+
             if (node.Else != null)
             {
                 var isElseIf = node.Else.Statement.IsKind(SyntaxKind.IfStatement);
@@ -166,6 +186,11 @@ namespace RobloxCS
             {
                 WriteLine("end");
             }
+        }
+
+        private void RemoveLastCharacters(int amount)
+        {
+            _output.Remove(_output.Length - amount, amount);
         }
 
         public override void VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node)
@@ -218,18 +243,19 @@ namespace RobloxCS
             Write('[');
             foreach (var argument in node.Arguments)
             {
-                if (argument.Expression is LiteralExpressionSyntax numericalLiteral)
+                if (argument.Expression is LiteralExpressionSyntax numericLiteral && numericLiteral.IsKind(SyntaxKind.NumericLiteralExpression))
                 {
-                    int.TryParse(numericalLiteral.Token.ValueText, out var indexValue);
+                    int.TryParse(numericLiteral.Token.ValueText, out var indexValue);
                     Write((indexValue + 1).ToString());
                 }
                 else
                 {
+                    Visit(argument);
+
                     var argumentSymbol = _semanticModel.GetSymbolInfo(argument.Expression).Symbol;
                     var definitionSymbol = argumentSymbol?.OriginalDefinition;
                     var indexSymbol = definitionSymbol ?? argumentSymbol;
                     var isNumericalIndex = indexSymbol is ITypeSymbol typeSymbol && Constants.INTEGER_TYPES.Contains(typeSymbol.Name);
-                    Visit(argument);
                     if (isNumericalIndex)
                     {
                         Write(" + 1");
@@ -280,6 +306,24 @@ namespace RobloxCS
         public override void VisitBinaryExpression(BinaryExpressionSyntax node)
         {
             var operatorText = node.OperatorToken.Text;
+            var leftSymbolInfo = _semanticModel.GetSymbolInfo(node.Left);
+            var rightSymbolInfo = _semanticModel.GetSymbolInfo(node.Right);
+            var leftSymbol = leftSymbolInfo.Symbol?.OriginalDefinition ?? leftSymbolInfo.Symbol ?? _semanticModel.GetTypeInfo(node.Left).Type;
+            var rightSymbol = rightSymbolInfo.Symbol?.OriginalDefinition ?? rightSymbolInfo.Symbol ?? _semanticModel.GetTypeInfo(node.Right).Type;
+            var perTypeOperators = Constants.PER_TYPE_BINARY_OPERATOR_MAP;
+            if (
+                (leftSymbol != null && perTypeOperators.Any(pair => pair.Key.Contains(leftSymbol.Name)))
+                || (rightSymbol != null && perTypeOperators.Any(pair => pair.Key.Contains(rightSymbol.Name)))
+            )
+            {
+                var typeList = perTypeOperators.FirstOrDefault(pair => pair.Key.Contains(leftSymbol!.Name) || pair.Key.Contains(rightSymbol!.Name)).Key;
+                var operatorMap = perTypeOperators[typeList];
+                if (operatorText == operatorMap.Item1)
+                {
+                    operatorText = operatorMap.Item2;
+                }
+            }
+
             if (Constants.IGNORED_BINARY_OPERATORS.Contains(operatorText))
             {
                 Visit(node.Left);
@@ -352,6 +396,11 @@ namespace RobloxCS
         public override void VisitUsingDirective(UsingDirectiveSyntax node)
         {
             // do nothing (for now)
+        }
+
+        public override void VisitContinueStatement(ContinueStatementSyntax node)
+        {
+            Write("continue");
         }
 
         public override void VisitReturnStatement(ReturnStatementSyntax node)

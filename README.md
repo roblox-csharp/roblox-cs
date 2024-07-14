@@ -6,10 +6,8 @@ Roblox CSharp to Lua compiler
 # To-do
 - Imports
 - Inheritance chains 🤮
-- String concatenation
 - Default values (via `default` keyword)
 - Classes outside of namespaces
-- Minify `if condition then return end` generation
 - Macro `IEnumerable<T>` (or just `List<T>`) methods
 - Classes/structs/interfaces nested in classes/structs/interfaces
 - Restrict `volatile` and `partial` usage (`partial` maybe supported in the future)
