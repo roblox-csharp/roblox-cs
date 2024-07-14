@@ -7,7 +7,6 @@ Roblox CSharp to Lua compiler
 - Macro `ServiceProvider.GetService<T>()` to `ServiceProvider:GetService("T")`
 - Imports
 - Inheritance chains 🤮
-- Append ` = null` to generated nullable properties
 - Copy `RuntimeLib.lua` into `<project-dir>/include` on compile
 - Default values (via `default` keyword)
 - Macro `IEnumerable<T>` (or just `List<T>`) methods

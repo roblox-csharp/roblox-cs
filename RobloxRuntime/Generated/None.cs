@@ -208,10 +208,10 @@ namespace RobloxRuntime.Classes
 		public void AddTag(string tag);
 		public void ClearAllChildren();
 		public void Destroy();
-        public Instance? FindFirstChild(string name, bool? recursive);
-        public Instance? FindFirstAncestor(string name);
-        public Instance? FindFirstDescendant(string name);
-        public Actor GetActor();
+		public Instance FindFirstAncestor(string name);
+		public Instance FindFirstChild(string name, bool? recursive = null);
+		public Instance FindFirstDescendant(string name);
+		public Actor GetActor();
 		public ScriptSignal GetAttributeChangedSignal(string attribute);
 		public Instance[] GetChildren();
 		public string GetFullName();
@@ -220,7 +220,7 @@ namespace RobloxRuntime.Classes
 		public bool IsPropertyModified(string name);
 		public void RemoveTag(string tag);
 		public void ResetPropertyToDefault(string name);
-		public void SetAttribute(string attribute, object? value);
+		public void SetAttribute(string attribute, object value);
 	}
 	
 	public interface AccessoryDescription : ICreatableInstance
@@ -271,18 +271,18 @@ namespace RobloxRuntime.Classes
 	
 	public interface AnalyticsService : ICreatableInstance
 	{
-		public void FireCustomEvent(Player player, string eventCategory, object? customData);
-		public void FireEvent(string category, object? value);
-		public void FireInGameEconomyEvent(Player player, string itemName, Enum.AnalyticsEconomyAction economyAction, string itemCategory, int amount, string currency, object? location, object? customData);
-		public void FireLogEvent(Player player, Enum.AnalyticsLogLevel logLevel, string message, object? debugInfo, object? customData);
-		public void FirePlayerProgressionEvent(Player player, string category, Enum.AnalyticsProgressionStatus progressionStatus, object? location, object? statistics, object? customData);
-		public void LogEconomyEvent(Player player, Enum.AnalyticsEconomyFlowType flowType, string currencyType, float amount, float endingBalance, string transactionType, string itemSku, object? customFields);
-		public void LogFunnelStepEvent(Player player, string funnelName, string funnelSessionId, int? step, string? stepName, object? customFields);
-		public void LogOnboardingFunnelStepEvent(Player player, int step, string stepName, object? customFields);
-		public void LogProgressionCompleteEvent(Player player, string progressionPathName, int level, string levelName, object? customFields);
-		public void LogProgressionEvent(Player player, string progressionPathName, Enum.AnalyticsProgressionType status, int level, string levelName, object? customFields);
-		public void LogProgressionFailEvent(Player player, string progressionPathName, int level, string levelName, object? customFields);
-		public void LogProgressionStartEvent(Player player, string progressionPathName, int level, string levelName, object? customFields);
+		public void FireCustomEvent(Player player, string eventCategory, object customData);
+		public void FireEvent(string category, object value);
+		public void FireInGameEconomyEvent(Player player, string itemName, Enum.AnalyticsEconomyAction economyAction, string itemCategory, int amount, string currency, object location, object customData);
+		public void FireLogEvent(Player player, Enum.AnalyticsLogLevel logLevel, string message, object debugInfo, object customData);
+		public void FirePlayerProgressionEvent(Player player, string category, Enum.AnalyticsProgressionStatus progressionStatus, object location, object statistics, object customData);
+		public void LogEconomyEvent(Player player, Enum.AnalyticsEconomyFlowType flowType, string currencyType, float amount, float endingBalance, string transactionType, string itemSku, object? customFields = null);
+		public void LogFunnelStepEvent(Player player, string funnelName, string funnelSessionId, int? step = null, string? stepName = null, object? customFields = null);
+		public void LogOnboardingFunnelStepEvent(Player player, int step, string stepName, object? customFields = null);
+		public void LogProgressionCompleteEvent(Player player, string progressionPathName, int level, string levelName, object? customFields = null);
+		public void LogProgressionEvent(Player player, string progressionPathName, Enum.AnalyticsProgressionType status, int level, string levelName, object? customFields = null);
+		public void LogProgressionFailEvent(Player player, string progressionPathName, int level, string levelName, object? customFields = null);
+		public void LogProgressionStartEvent(Player player, string progressionPathName, int level, string levelName, object? customFields = null);
 	}
 	
 	public interface Animation : ICreatableInstance
@@ -350,12 +350,12 @@ namespace RobloxRuntime.Classes
 		public float TimePosition { get; set; }
 		public float WeightCurrent { get; }
 		public float WeightTarget { get; }
-		public void AdjustSpeed(float? speed);
-		public void AdjustWeight(float? weight, float? fadeTime);
+		public void AdjustSpeed(float? speed = null);
+		public void AdjustWeight(float? weight = null, float? fadeTime = null);
 		public ScriptSignal GetMarkerReachedSignal(string name);
 		public double GetTimeOfKeyframe(string keyframeName);
-		public void Play(float? fadeTime, float? weight, float? speed);
-		public void Stop(float? fadeTime);
+		public void Play(float? fadeTime = null, float? weight = null, float? speed = null);
+		public void Stop(float? fadeTime = null);
 		public ScriptSignal DidLoop { get; }
 		public ScriptSignal Ended { get; }
 		public ScriptSignal<string> KeyframeReached { get; }
@@ -368,7 +368,7 @@ namespace RobloxRuntime.Classes
 		public bool PreferLodEnabled { get; set; }
 		public CFrame RootMotion { get; }
 		public float RootMotionWeight { get; }
-		public void ApplyJointVelocities(object? motors);
+		public void ApplyJointVelocities(object motors);
 		public object[] GetPlayingAnimationTracks();
 		public AnimationTrack LoadAnimation(Animation animation);
 		public void RegisterEvaluationParallelCallback(Action callback);
@@ -676,12 +676,12 @@ namespace RobloxRuntime.Classes
 		public InventoryPages GetInventory(object[] assetTypes);
 		public object GetItemDetails(long itemId, Enum.AvatarItemType itemType);
 		public object GetOutfitDetails(long outfitId);
-		public OutfitPages GetOutfits(Enum.OutfitSource? outfitSource, Enum.OutfitType? outfitType);
-		public object[] GetRecommendedAssets(Enum.AvatarAssetType assetType, long? contextAssetId);
+		public OutfitPages GetOutfits(Enum.OutfitSource? outfitSource = null, Enum.OutfitType? outfitType = null);
+		public object[] GetRecommendedAssets(Enum.AvatarAssetType assetType, long? contextAssetId = null);
 		public object[] GetRecommendedBundles(long bundleId);
 		public CatalogPages SearchCatalog(CatalogSearchParams searchParameters);
 		public ScriptSignal<Enum.AvatarPromptResult> PromptAllowInventoryReadAccessCompleted { get; }
-		public ScriptSignal<Enum.AvatarPromptResult, object?> PromptCreateOutfitCompleted { get; }
+		public ScriptSignal<Enum.AvatarPromptResult, object> PromptCreateOutfitCompleted { get; }
 		public ScriptSignal<Enum.AvatarPromptResult> PromptDeleteOutfitCompleted { get; }
 		public ScriptSignal<Enum.AvatarPromptResult> PromptRenameOutfitCompleted { get; }
 		public ScriptSignal<Enum.AvatarPromptResult, HumanoidDescription> PromptSaveAvatarCompleted { get; }
@@ -845,9 +845,9 @@ namespace RobloxRuntime.Classes
 		public bool ResetPlayerGuiOnSpawn { get; set; }
 		public Enum.ScreenOrientation ScreenOrientation { get; set; }
 		public bool GetCoreGuiEnabled(Enum.CoreGuiType coreGuiType);
-		public void SetCore(string parameterName, object? value);
+		public void SetCore(string parameterName, object value);
 		public void SetCoreGuiEnabled(Enum.CoreGuiType coreGuiType, bool enabled);
-		public object? GetCore(string parameterName);
+		public object GetCore(string parameterName);
 	}
 	
 	public interface BaseRemoteEvent : ICreatableInstance
@@ -920,7 +920,7 @@ namespace RobloxRuntime.Classes
 		public float Width0 { get; set; }
 		public float Width1 { get; set; }
 		public float ZOffset { get; set; }
-		public void SetTextureOffset(float? offset);
+		public void SetTextureOffset(float? offset = null);
 	}
 	
 	public interface BindableEvent : ICreatableInstance
@@ -1056,11 +1056,11 @@ namespace RobloxRuntime.Classes
 		public float GetTiltSpeed();
 		public void Interpolate(CFrame endPos, CFrame endFocus, float duration);
 		public void PanUnits(int units);
-		public Ray ScreenPointToRay(float x, float y, float? depth);
-		public void SetCameraPanMode(Enum.CameraPanMode? mode);
+		public Ray ScreenPointToRay(float x, float y, float? depth = null);
+		public void SetCameraPanMode(Enum.CameraPanMode? mode = null);
 		public void SetRoll(float rollAngle);
 		public bool TiltUnits(int units);
-		public Ray ViewportPointToRay(float x, float y, float? depth);
+		public Ray ViewportPointToRay(float x, float y, float? depth = null);
 		public object[] WorldToScreenPoint(Vector3 worldPoint);
 		public object[] WorldToViewportPoint(Vector3 worldPoint);
 		public void ZoomToExtents(CFrame boundingBoxCFrame, Vector3 boundingBoxSize);
@@ -1131,10 +1131,10 @@ namespace RobloxRuntime.Classes
 	{
 		public bool BubbleChatEnabled { get; set; }
 		public bool LoadDefaultChat { get; }
-		public void Chat(Instance partOrCharacter, string message, Enum.ChatColor? color);
+		public void Chat(Instance partOrCharacter, string message, Enum.ChatColor? color = null);
 		public object[] InvokeChatCallback(Enum.ChatCallbackType callbackType, object[] callbackArguments);
 		public void RegisterChatCallback(Enum.ChatCallbackType callbackType, Action callbackFunction);
-		public void SetBubbleChatSettings(object? settings);
+		public void SetBubbleChatSettings(object settings);
 		public bool CanUserChatAsync(long userId);
 		public bool CanUsersChatAsync(long userIdFrom, long userIdTo);
 		public string FilterStringAsync(string stringToFilter, Player playerFrom, Player playerTo);
@@ -1514,7 +1514,7 @@ namespace RobloxRuntime.Classes
 		public void RegisterSessionEncryptedAsset(string contentId, string sessionKey);
 		public void UnregisterDefaultEncryptionKey();
 		public void UnregisterEncryptedAsset(string assetId);
-		public void PreloadAsync(object[] contentIdList, Action? callbackFunction);
+		public void PreloadAsync(object[] contentIdList, Action? callbackFunction = null);
 		public ScriptSignal<string> AssetFetchFailed { get; }
 	}
 	
@@ -1532,7 +1532,7 @@ namespace RobloxRuntime.Classes
 		public void SetPosition(string actionName, UDim2 position);
 		public void SetTitle(string actionName, string title);
 		public void UnbindAction(string actionName);
-		public void UnbindActivate(Enum.UserInputType userInputTypeForActivation, Enum.KeyCode? keyCodeForActivation);
+		public void UnbindActivate(Enum.UserInputType userInputTypeForActivation, Enum.KeyCode? keyCodeForActivation = null);
 		public void UnbindAllActions();
 		public Instance GetButton(string actionName);
 		public ScriptSignal<Instance> LocalToolEquipped { get; }
@@ -1690,7 +1690,7 @@ namespace RobloxRuntime.Classes
 		public void SetVertexColor(long vertexId, Color3 color);
 		public void SetVertexColorAlpha(long vertexId, float alpha);
 		public void SetVertexNormal(long vertexId, Vector3 vnormal);
-		public MeshPart CreateMeshPartAsync(object? options);
+		public MeshPart CreateMeshPartAsync(object? options = null);
 	}
 	
 	public interface RobloxEditableMesh : EditableMesh, ICreatableInstance
@@ -1759,11 +1759,11 @@ namespace RobloxRuntime.Classes
 	
 	public interface DataStoreService : ICreatableInstance
 	{
-		public GlobalDataStore GetDataStore(string name, string? scope, Instance? options);
+		public GlobalDataStore GetDataStore(string name, string? scope = null, Instance? options = null);
 		public GlobalDataStore GetGlobalDataStore();
-		public OrderedDataStore GetOrderedDataStore(string name, string? scope);
+		public OrderedDataStore GetOrderedDataStore(string name, string? scope = null);
 		public int GetRequestBudgetForRequestType(Enum.DataStoreRequestType requestType);
-		public DataStoreListingPages ListDataStoresAsync(string prefix, int? pageSize, string? cursor);
+		public DataStoreListingPages ListDataStoresAsync(string prefix, int? pageSize = null, string? cursor = null);
 	}
 	
 	public interface DataStoreSetOptions : ICreatableInstance
@@ -1775,7 +1775,7 @@ namespace RobloxRuntime.Classes
 	public interface Debris : ICreatableInstance
 	{
 		public int MaxItems { get; set; }
-		public void AddItem(Instance item, double? lifetime);
+		public void AddItem(Instance item, double? lifetime = null);
 	}
 	
 	public interface DebuggablePluginWatcher : ICreatableInstance
@@ -1836,7 +1836,7 @@ namespace RobloxRuntime.Classes
 	
 	public interface Dragger : ICreatableInstance
 	{
-		public void AxisRotate(Enum.Axis? axis);
+		public void AxisRotate(Enum.Axis? axis = null);
 		public void MouseDown(Instance mousePart, Vector3 pointOnMousePart, Instance[] parts);
 		public void MouseMove(Ray mouseRay);
 		public void MouseUp();
@@ -2023,7 +2023,7 @@ namespace RobloxRuntime.Classes
 		public object[] GetKeys();
 		public float? GetValueAtTime(float time);
 		public object[] InsertKey(FloatCurveKey key);
-		public int RemoveKeyAtIndex(int startingIndex, int? count);
+		public int RemoveKeyAtIndex(int startingIndex, int? count = null);
 		public int SetKeys(object[] keys);
 	}
 	
@@ -2054,10 +2054,10 @@ namespace RobloxRuntime.Classes
 	
 	public interface GeometryService : ICreatableInstance
 	{
-		public object[] CalculateConstraintsToPreserve(Instance source, object[] destination, object? options);
-		public object[] IntersectAsync(BasePart part, object[] parts, object? options);
-		public object[] SubtractAsync(BasePart part, object[] parts, object? options);
-		public object[] UnionAsync(BasePart part, object[] parts, object? options);
+		public object[] CalculateConstraintsToPreserve(Instance source, object[] destination, object? options = null);
+		public object[] IntersectAsync(BasePart part, object[] parts, object? options = null);
+		public object[] SubtractAsync(BasePart part, object[] parts, object? options = null);
+		public object[] UnionAsync(BasePart part, object[] parts, object? options = null);
 	}
 	
 	public interface GetTextBoundsParams : ICreatableInstance
@@ -2072,31 +2072,31 @@ namespace RobloxRuntime.Classes
 	public interface GlobalDataStore : ICreatableInstance
 	{
 		public ScriptConnection OnUpdate(string key, Action callback);
-		public object[] GetAsync(string key, DataStoreGetOptions? options);
-		public object? IncrementAsync(string key, int? delta, object[]? userIds, DataStoreIncrementOptions? options);
+		public object[] GetAsync(string key, DataStoreGetOptions? options = null);
+		public object IncrementAsync(string key, int? delta = null, object[]? userIds = null, DataStoreIncrementOptions? options = null);
 		public object[] RemoveAsync(string key);
-		public object? SetAsync(string key, object? value, object[]? userIds, DataStoreSetOptions? options);
+		public object SetAsync(string key, object value, object[]? userIds = null, DataStoreSetOptions? options = null);
 		public object[] UpdateAsync(string key, Action transformFunction);
 	}
 	
 	public interface DataStore : GlobalDataStore, ICreatableInstance
 	{
 		public object[] GetVersionAsync(string key, string version);
-		public DataStoreKeyPages ListKeysAsync(string prefix, int? pageSize, string? cursor, bool? excludeDeleted);
-		public DataStoreVersionPages ListVersionsAsync(string key, Enum.SortDirection? sortDirection, long? minDate, long? maxDate, int? pageSize);
+		public DataStoreKeyPages ListKeysAsync(string prefix, int? pageSize = null, string? cursor = null, bool? excludeDeleted = null);
+		public DataStoreVersionPages ListVersionsAsync(string key, Enum.SortDirection? sortDirection = null, long? minDate = null, long? maxDate = null, int? pageSize = null);
 		public void RemoveVersionAsync(string key, string version);
 	}
 	
 	public interface OrderedDataStore : GlobalDataStore, ICreatableInstance
 	{
-		public Instance GetSortedAsync(bool ascending, int pagesize, object? minValue, object? maxValue);
+		public Instance GetSortedAsync(bool ascending, int pagesize, object minValue, object maxValue);
 	}
 	
 	public interface GroupService : ICreatableInstance
 	{
 		public StandardPages GetAlliesAsync(long groupId);
 		public StandardPages GetEnemiesAsync(long groupId);
-		public object? GetGroupInfoAsync(long groupId);
+		public object GetGroupInfoAsync(long groupId);
 		public object[] GetGroupsAsync(long userId);
 	}
 	
@@ -2147,9 +2147,9 @@ namespace RobloxRuntime.Classes
 		public Enum.SizeConstraint SizeConstraint { get; set; }
 		public bool Visible { get; set; }
 		public int ZIndex { get; set; }
-		public bool TweenPosition(UDim2 endPosition, Enum.EasingDirection? easingDirection, Enum.EasingStyle? easingStyle, float? time, bool? _override, Action? callback);
-		public bool TweenSize(UDim2 endSize, Enum.EasingDirection? easingDirection, Enum.EasingStyle? easingStyle, float? time, bool? _override, Action? callback);
-		public bool TweenSizeAndPosition(UDim2 endSize, UDim2 endPosition, Enum.EasingDirection? easingDirection, Enum.EasingStyle? easingStyle, float? time, bool? _override, Action? callback);
+		public bool TweenPosition(UDim2 endPosition, Enum.EasingDirection? easingDirection = null, Enum.EasingStyle? easingStyle = null, float? time = null, bool? _override = null, Action? callback = null);
+		public bool TweenSize(UDim2 endSize, Enum.EasingDirection? easingDirection = null, Enum.EasingStyle? easingStyle = null, float? time = null, bool? _override = null, Action? callback = null);
+		public bool TweenSizeAndPosition(UDim2 endSize, UDim2 endPosition, Enum.EasingDirection? easingDirection = null, Enum.EasingStyle? easingStyle = null, float? time = null, bool? _override = null, Action? callback = null);
 		public ScriptSignal<UDim2> DragBegin { get; }
 		public ScriptSignal<int, int> DragStopped { get; }
 		public ScriptSignal<InputObject> InputBegan { get; }
@@ -2342,7 +2342,7 @@ namespace RobloxRuntime.Classes
 		public Enum.TextYAlignment TextYAlignment { get; set; }
 		public void CaptureFocus();
 		public bool IsFocused();
-		public void ReleaseFocus(bool? submitted);
+		public void ReleaseFocus(bool? submitted = null);
 		public ScriptSignal<bool, InputObject> FocusLost { get; }
 		public ScriptSignal Focused { get; }
 		public ScriptSignal ReturnPressedFromOnScreenKeyboard { get; }
@@ -2536,7 +2536,7 @@ namespace RobloxRuntime.Classes
 		public void AddLine(Vector3 from, Vector3 to);
 		public void AddLines(object[] points);
 		public void AddPath(object[] points, bool loop);
-		public void AddText(Vector3 point, string text, int? size);
+		public void AddText(Vector3 point, string text, int? size = null);
 		public void Clear();
 	}
 	
@@ -2678,13 +2678,13 @@ namespace RobloxRuntime.Classes
 	public interface HttpService : ICreatableInstance
 	{
 		public bool HttpEnabled { get; }
-		public string GenerateGUID(bool? wrapInCurlyBraces);
+		public string GenerateGUID(bool? wrapInCurlyBraces = null);
 		public Secret GetSecret(string key);
-		public object? JSONDecode(string input);
-		public string JSONEncode(object? input);
+		public object JSONDecode(string input);
+		public string JSONEncode(object input);
 		public string UrlEncode(string input);
-		public string GetAsync(object? url, bool? nocache, object? headers);
-		public string PostAsync(object? url, string data, Enum.HttpContentType? content_type, bool? compress, object? headers);
+		public string GetAsync(object url, bool? nocache = null, object? headers = null);
+		public string PostAsync(object url, string data, Enum.HttpContentType? content_type = null, bool? compress = null, object? headers = null);
 		public object RequestAsync(object requestOptions);
 	}
 	
@@ -2725,9 +2725,9 @@ namespace RobloxRuntime.Classes
 		public Vector3 WalkToPoint { get; set; }
 		public void AddAccessory(Accessory accessory);
 		public bool AddCustomStatus(string status);
-		public bool AddStatus(Enum.Status? status);
+		public bool AddStatus(Enum.Status? status = null);
 		public void BuildRigFromAttachments();
-		public void ChangeState(Enum.HumanoidStateType? state);
+		public void ChangeState(Enum.HumanoidStateType? state = null);
 		public void EquipTool(Tool tool);
 		public object[] GetAccessories();
 		public HumanoidDescription GetAppliedDescription();
@@ -2739,19 +2739,19 @@ namespace RobloxRuntime.Classes
 		public bool GetStateEnabled(Enum.HumanoidStateType state);
 		public object[] GetStatuses();
 		public bool HasCustomStatus(string status);
-		public bool HasStatus(Enum.Status? status);
+		public bool HasStatus(Enum.Status? status = null);
 		public AnimationTrack LoadAnimation(Animation animation);
-		public void Move(Vector3 moveDirection, bool? relativeToCamera);
-		public void MoveTo(Vector3 location, BasePart? part);
+		public void Move(Vector3 moveDirection, bool? relativeToCamera = null);
+		public void MoveTo(Vector3 location, BasePart? part = null);
 		public void RemoveAccessories();
 		public bool RemoveCustomStatus(string status);
-		public bool RemoveStatus(Enum.Status? status);
+		public bool RemoveStatus(Enum.Status? status = null);
 		public bool ReplaceBodyPartR15(Enum.BodyPartR15 bodyPart, BasePart part);
 		public void SetStateEnabled(Enum.HumanoidStateType state, bool enabled);
 		public void TakeDamage(float amount);
 		public void UnequipTools();
-		public void ApplyDescription(HumanoidDescription humanoidDescription, Enum.AssetTypeVerification? assetTypeVerification);
-		public void ApplyDescriptionReset(HumanoidDescription humanoidDescription, Enum.AssetTypeVerification? assetTypeVerification);
+		public void ApplyDescription(HumanoidDescription humanoidDescription, Enum.AssetTypeVerification? assetTypeVerification = null);
+		public void ApplyDescriptionReset(HumanoidDescription humanoidDescription, Enum.AssetTypeVerification? assetTypeVerification = null);
 		public bool PlayEmote(string emoteName);
 		public ScriptSignal<AnimationTrack> AnimationPlayed { get; }
 		public ScriptSignal<HumanoidDescription> ApplyDescriptionFinished { get; }
@@ -3093,7 +3093,7 @@ namespace RobloxRuntime.Classes
 		public string RobloxLocaleId { get; }
 		public string SystemLocaleId { get; }
 		public Instance[] GetCorescriptLocalizations();
-		public object[] GetTableEntries(Instance? instance);
+		public object[] GetTableEntries(Instance? instance = null);
 		public Instance GetTranslatorForPlayer(Player player);
 		public string GetCountryRegionForPlayerAsync(Player player);
 		public Instance GetTranslatorForLocaleAsync(string locale);
@@ -3112,7 +3112,7 @@ namespace RobloxRuntime.Classes
 		public void RemoveKey(string key);
 		public void RemoveTargetLocale(string localeId);
 		public void SetContents(string contents);
-		public void SetEntries(object? entries);
+		public void SetEntries(object entries);
 		public void SetEntry(string key, string targetLocaleId, string text);
 		public void SetEntryContext(string key, string source, string context, string newContext);
 		public void SetEntryExample(string key, string source, string context, string example);
@@ -3179,7 +3179,7 @@ namespace RobloxRuntime.Classes
 		public object GetMarkerAtIndex(int index);
 		public object[] GetMarkers();
 		public object[] InsertMarkerAtTime(float time, string marker);
-		public int RemoveMarkerAtIndex(int startingIndex, int? count);
+		public int RemoveMarkerAtIndex(int startingIndex, int? count = null);
 	}
 	
 	public interface MarketplaceService : ICreatableInstance
@@ -3188,11 +3188,11 @@ namespace RobloxRuntime.Classes
 		public void PromptBundlePurchase(Player player, long bundleId);
 		public void PromptGamePassPurchase(Player player, long gamePassId);
 		public void PromptPremiumPurchase(Player player);
-		public void PromptProductPurchase(Player player, long productId, bool? equipIfPurchased, Enum.CurrencyType? currencyType);
-		public void PromptPurchase(Player player, long assetId, bool? equipIfPurchased, Enum.CurrencyType? currencyType);
+		public void PromptProductPurchase(Player player, long productId, bool? equipIfPurchased = null, Enum.CurrencyType? currencyType = null);
+		public void PromptPurchase(Player player, long assetId, bool? equipIfPurchased = null, Enum.CurrencyType? currencyType = null);
 		public void PromptSubscriptionPurchase(Player user, string subscriptionId);
 		public Instance GetDeveloperProductsAsync();
-		public object GetProductInfo(long assetId, Enum.InfoType? infoType);
+		public object GetProductInfo(long assetId, Enum.InfoType? infoType = null);
 		public object GetSubscriptionProductInfoAsync(string subscriptionId);
 		public object GetUserSubscriptionDetailsAsync(Player user, string subscriptionId);
 		public object[] GetUserSubscriptionPaymentHistoryAsync(Player user, string subscriptionId);
@@ -3234,33 +3234,33 @@ namespace RobloxRuntime.Classes
 	
 	public interface MemoryStoreHashMap : ICreatableInstance
 	{
-		public object? GetAsync(string key);
+		public object GetAsync(string key);
 		public MemoryStoreHashMapPages ListItemsAsync(int count);
 		public void RemoveAsync(string key);
-		public bool SetAsync(string key, object? value, long expiration);
-		public object? UpdateAsync(string key, Action transformFunction, long expiration);
+		public bool SetAsync(string key, object value, long expiration);
+		public object UpdateAsync(string key, Action transformFunction, long expiration);
 	}
 	
 	public interface MemoryStoreQueue : ICreatableInstance
 	{
-		public void AddAsync(object? value, long expiration, double? priority);
-		public object[] ReadAsync(int count, bool? allOrNothing, double? waitTimeout);
+		public void AddAsync(object value, long expiration, double? priority = null);
+		public object[] ReadAsync(int count, bool? allOrNothing = null, double? waitTimeout = null);
 		public void RemoveAsync(string id);
 	}
 	
 	public interface MemoryStoreService : ICreatableInstance
 	{
 		public MemoryStoreHashMap GetHashMap(string name);
-		public MemoryStoreQueue GetQueue(string name, int? invisibilityTimeout);
+		public MemoryStoreQueue GetQueue(string name, int? invisibilityTimeout = null);
 		public MemoryStoreSortedMap GetSortedMap(string name);
 	}
 	
 	public interface MemoryStoreSortedMap : ICreatableInstance
 	{
 		public object[] GetAsync(string key);
-		public object[] GetRangeAsync(Enum.SortDirection direction, int count, object? exclusiveLowerBound, object? exclusiveUpperBound);
+		public object[] GetRangeAsync(Enum.SortDirection direction, int count, object exclusiveLowerBound, object exclusiveUpperBound);
 		public void RemoveAsync(string key);
-		public bool SetAsync(string key, object? value, long expiration, object? sortKey);
+		public bool SetAsync(string key, object value, long expiration, object sortKey);
 		public object[] UpdateAsync(string key, Action transformFunction, long expiration);
 	}
 	
@@ -3274,7 +3274,7 @@ namespace RobloxRuntime.Classes
 	
 	public interface MessagingService : ICreatableInstance
 	{
-		public void PublishAsync(string topic, object? message);
+		public void PublishAsync(string topic, object message);
 		public ScriptConnection SubscribeAsync(string topic, Action callback);
 	}
 	
@@ -3404,7 +3404,7 @@ namespace RobloxRuntime.Classes
 		public float SpecificGravity { get; }
 		public Enum.SurfaceType TopSurface { get; set; }
 		public float Transparency { get; set; }
-		public Vector3 AngularAccelerationToTorque(Vector3 angAcceleration, Vector3? angVelocity);
+		public Vector3 AngularAccelerationToTorque(Vector3 angAcceleration, Vector3? angVelocity = null);
 		public void ApplyAngularImpulse(Vector3 impulse);
 		public void ApplyImpulse(Vector3 impulse);
 		public void ApplyImpulseAtPosition(Vector3 impulse, Vector3 position);
@@ -3412,7 +3412,7 @@ namespace RobloxRuntime.Classes
 		public bool CanCollideWith(BasePart part);
 		public object[] CanSetNetworkOwnership();
 		public Vector3 GetClosestPointOnSurface(Vector3 position);
-		public Instance[] GetConnectedParts(bool? recursive);
+		public Instance[] GetConnectedParts(bool? recursive = null);
 		public Instance[] GetJoints();
 		public float GetMass();
 		public Instance GetNetworkOwner();
@@ -3425,12 +3425,12 @@ namespace RobloxRuntime.Classes
 		public bool IsGrounded();
 		public void MakeJoints();
 		public bool Resize(Enum.NormalId normalId, int deltaAmount);
-		public void SetNetworkOwner(Player? playerInstance);
+		public void SetNetworkOwner(Player? playerInstance = null);
 		public void SetNetworkOwnershipAuto();
-		public Vector3 TorqueToAngularAcceleration(Vector3 torque, Vector3? angVelocity);
-		public Instance IntersectAsync(Instance[] parts, Enum.CollisionFidelity? collisionfidelity, Enum.RenderFidelity? renderFidelity);
-		public Instance SubtractAsync(Instance[] parts, Enum.CollisionFidelity? collisionfidelity, Enum.RenderFidelity? renderFidelity);
-		public Instance UnionAsync(Instance[] parts, Enum.CollisionFidelity? collisionfidelity, Enum.RenderFidelity? renderFidelity);
+		public Vector3 TorqueToAngularAcceleration(Vector3 torque, Vector3? angVelocity = null);
+		public Instance IntersectAsync(Instance[] parts, Enum.CollisionFidelity? collisionfidelity = null, Enum.RenderFidelity? renderFidelity = null);
+		public Instance SubtractAsync(Instance[] parts, Enum.CollisionFidelity? collisionfidelity = null, Enum.RenderFidelity? renderFidelity = null);
+		public Instance UnionAsync(Instance[] parts, Enum.CollisionFidelity? collisionfidelity = null, Enum.RenderFidelity? renderFidelity = null);
 		public ScriptSignal<BasePart> LocalSimulationTouched { get; }
 		public ScriptSignal OutfitChanged { get; }
 		public ScriptSignal<BasePart> StoppedTouching { get; }
@@ -3591,7 +3591,7 @@ namespace RobloxRuntime.Classes
 		public Enum.ModelStreamingMode ModelStreamingMode { get; set; }
 		public BasePart? PrimaryPart { get; set; }
 		public CFrame WorldPivot { get; set; }
-		public void AddPersistentPlayer(Player? playerInstance);
+		public void AddPersistentPlayer(Player? playerInstance = null);
 		public void BreakJoints();
 		public CFrame GetBoundingBox();
 		public Vector3 GetExtentsSize();
@@ -3602,7 +3602,7 @@ namespace RobloxRuntime.Classes
 		public float GetScale();
 		public void MakeJoints();
 		public void MoveTo(Vector3 position);
-		public void RemovePersistentPlayer(Player? playerInstance);
+		public void RemovePersistentPlayer(Player? playerInstance = null);
 		public void ResetOrientationToIdentity();
 		public void ScaleTo(float newScaleFactor);
 		public void SetIdentityOrientation();
@@ -3641,23 +3641,23 @@ namespace RobloxRuntime.Classes
 	
 	public partial interface WorldRoot : Model, ICreatableInstance
 	{
-		public bool ArePartsTouchingOthers(Instance[] partList, float? overlapIgnored);
-		public RaycastResult Blockcast(CFrame cframe, Vector3 size, Vector3 direction, RaycastParams? parameters);
-		public void BulkMoveTo(Instance[] partList, object[] cframeList, Enum.BulkMoveMode? eventMode);
-		public object[] FindPartOnRay(Ray ray, Instance? ignoreDescendantsInstance, bool? terrainCellsAreCubes, bool? ignoreWater);
-		public object[] FindPartOnRayWithIgnoreList(Ray ray, Instance[] ignoreDescendantsTable, bool? terrainCellsAreCubes, bool? ignoreWater);
-		public object[] FindPartOnRayWithWhitelist(Ray ray, Instance[] whitelistDescendantsTable, bool? ignoreWater);
-		public Instance[] FindPartsInRegion3(Region3 region, Instance? ignoreDescendantsInstance, int? maxParts);
-		public Instance[] FindPartsInRegion3WithIgnoreList(Region3 region, Instance[] ignoreDescendantsTable, int? maxParts);
-		public Instance[] FindPartsInRegion3WithWhiteList(Region3 region, Instance[] whitelistDescendantsTable, int? maxParts);
-		public Instance[] GetPartBoundsInBox(CFrame cframe, Vector3 size, OverlapParams? overlapParams);
-		public Instance[] GetPartBoundsInRadius(Vector3 position, float radius, OverlapParams? overlapParams);
-		public Instance[] GetPartsInPart(BasePart part, OverlapParams? overlapParams);
-		public bool IsRegion3Empty(Region3 region, Instance? ignoreDescendentsInstance);
+		public bool ArePartsTouchingOthers(Instance[] partList, float? overlapIgnored = null);
+		public RaycastResult Blockcast(CFrame cframe, Vector3 size, Vector3 direction, RaycastParams? parameters = null);
+		public void BulkMoveTo(Instance[] partList, object[] cframeList, Enum.BulkMoveMode? eventMode = null);
+		public object[] FindPartOnRay(Ray ray, Instance? ignoreDescendantsInstance = null, bool? terrainCellsAreCubes = null, bool? ignoreWater = null);
+		public object[] FindPartOnRayWithIgnoreList(Ray ray, Instance[] ignoreDescendantsTable, bool? terrainCellsAreCubes = null, bool? ignoreWater = null);
+		public object[] FindPartOnRayWithWhitelist(Ray ray, Instance[] whitelistDescendantsTable, bool? ignoreWater = null);
+		public Instance[] FindPartsInRegion3(Region3 region, Instance? ignoreDescendantsInstance = null, int? maxParts = null);
+		public Instance[] FindPartsInRegion3WithIgnoreList(Region3 region, Instance[] ignoreDescendantsTable, int? maxParts = null);
+		public Instance[] FindPartsInRegion3WithWhiteList(Region3 region, Instance[] whitelistDescendantsTable, int? maxParts = null);
+		public Instance[] GetPartBoundsInBox(CFrame cframe, Vector3 size, OverlapParams? overlapParams = null);
+		public Instance[] GetPartBoundsInRadius(Vector3 position, float radius, OverlapParams? overlapParams = null);
+		public Instance[] GetPartsInPart(BasePart part, OverlapParams? overlapParams = null);
+		public bool IsRegion3Empty(Region3 region, Instance? ignoreDescendentsInstance = null);
 		public bool IsRegion3EmptyWithIgnoreList(Region3 region, Instance[] ignoreDescendentsTable);
-		public RaycastResult Raycast(Vector3 origin, Vector3 direction, RaycastParams? raycastParams);
-		public RaycastResult Shapecast(BasePart part, Vector3 direction, RaycastParams? parameters);
-		public RaycastResult Spherecast(Vector3 position, float radius, Vector3 direction, RaycastParams? parameters);
+		public RaycastResult Raycast(Vector3 origin, Vector3 direction, RaycastParams? raycastParams = null);
+		public RaycastResult Shapecast(BasePart part, Vector3 direction, RaycastParams? parameters = null);
+		public RaycastResult Spherecast(Vector3 position, float radius, Vector3 direction, RaycastParams? parameters = null);
 	}
 	
 	public partial interface Workspace : WorldRoot, ICreatableInstance
@@ -3798,7 +3798,7 @@ namespace RobloxRuntime.Classes
 		public bool WindAffectsDrag { get; set; }
 		public float ZOffset { get; set; }
 		public void Clear();
-		public void Emit(int? particleCount);
+		public void Emit(int? particleCount = null);
 	}
 	
 	public interface PatchBundlerFileWatch : ICreatableInstance
@@ -3840,7 +3840,7 @@ namespace RobloxRuntime.Classes
 	public interface PathfindingService : ICreatableInstance
 	{
 		public float EmptyCutoff { get; set; }
-		public Instance CreatePath(object? agentParameters);
+		public Instance CreatePath(object? agentParameters = null);
 		public Instance ComputeRawPathAsync(Vector3 start, Vector3 finish, float maxDistance);
 		public Instance ComputeSmoothPathAsync(Vector3 start, Vector3 finish, float maxDistance);
 		public Instance FindPathAsync(Vector3 start, Vector3 finish);
@@ -3936,12 +3936,12 @@ namespace RobloxRuntime.Classes
 		public Instance LoadInstance(string key);
 		public double LoadNumber(string key);
 		public string LoadString(string key);
-		public void Move(Vector3 walkDirection, bool? relativeToCamera);
+		public void Move(Vector3 walkDirection, bool? relativeToCamera = null);
 		public void SaveBoolean(string key, bool value);
 		public void SaveInstance(string key, Instance value);
 		public void SaveNumber(string key, double value);
 		public void SaveString(string key, string value);
-		public object[] GetFriendsOnline(int? maxFriends);
+		public object[] GetFriendsOnline(int? maxFriends = null);
 		public int GetRankInGroup(long groupId);
 		public string GetRoleInGroup(long groupId);
 		public bool IsBestFriendsWith(long userId);
@@ -3949,7 +3949,7 @@ namespace RobloxRuntime.Classes
 		public bool IsInGroup(long groupId);
 		public void LoadCharacter();
 		public void LoadCharacterWithHumanoidDescription(HumanoidDescription humanoidDescription);
-		public void RequestStreamAroundAsync(Vector3 position, double? timeOut);
+		public void RequestStreamAroundAsync(Vector3 position, double? timeOut = null);
 		public bool WaitForDataReady();
 		public ScriptSignal<Model> CharacterAdded { get; }
 		public ScriptSignal<Model> CharacterAppearanceLoaded { get; }
@@ -3977,7 +3977,7 @@ namespace RobloxRuntime.Classes
 	
 	public interface PlayerViewService : ICreatableInstance
 	{
-		public CFrame GetDeviceCameraCFrame(Player? player);
+		public CFrame GetDeviceCameraCFrame(Player? player = null);
 	}
 	
 	public partial interface Players : ICreatableInstance
@@ -3995,7 +3995,7 @@ namespace RobloxRuntime.Classes
 		public Player playerFromCharacter(Model character);
 		public Instance[] players();
 		public void BanAsync(object config);
-		public Model CreateHumanoidModelFromDescription(HumanoidDescription description, Enum.HumanoidRigType rigType, Enum.AssetTypeVerification? assetTypeVerification);
+		public Model CreateHumanoidModelFromDescription(HumanoidDescription description, Enum.HumanoidRigType rigType, Enum.AssetTypeVerification? assetTypeVerification = null);
 		public Model CreateHumanoidModelFromUserId(long userId);
 		public BanHistoryPages GetBanHistoryAsync(long userId);
 		public Model GetCharacterAppearanceAsync(long userId);
@@ -4198,7 +4198,7 @@ namespace RobloxRuntime.Classes
 		public object[] GetKeys();
 		public CFrame? GetValueAtTime(float time);
 		public object[] InsertKey(RotationCurveKey key);
-		public int RemoveKeyAtIndex(int startingIndex, int? count);
+		public int RemoveKeyAtIndex(int startingIndex, int? count = null);
 		public int SetKeys(object[] keys);
 	}
 	
@@ -4364,7 +4364,7 @@ namespace RobloxRuntime.Classes
 		public bool GetRemoteBuildMode();
 		public bool IsGearTypeAllowed(Enum.GearType gearType);
 		public bool IsLoaded();
-		public bool SavePlace(Enum.SaveFilter? saveFilter);
+		public bool SavePlace(Enum.SaveFilter? saveFilter = null);
 		public ScriptSignal AllowedGearTypeChanged { get; }
 		public ScriptSignal<bool> GraphicsQualityChangeRequest { get; }
 		public ScriptSignal<Instance, string> ItemChanged { get; }
@@ -4392,7 +4392,7 @@ namespace RobloxRuntime.Classes
 	public interface SharedTableRegistry : ICreatableInstance
 	{
 		public SharedTable GetSharedTable(string name);
-		public void SetSharedTable(string name, SharedTable? st);
+		public void SetSharedTable(string name, SharedTable? st = null);
 	}
 	
 	public interface ShorelineUpgraderService : ICreatableInstance
@@ -4436,11 +4436,11 @@ namespace RobloxRuntime.Classes
 	public interface SocialService : ICreatableInstance
 	{
 		public void HideSelfView();
-		public void PromptGameInvite(Player player, ExperienceInviteOptions? experienceInviteOptions);
+		public void PromptGameInvite(Player player, ExperienceInviteOptions? experienceInviteOptions = null);
 		public void PromptPhoneBook(Player player, string tag);
-		public void ShowSelfView(Enum.SelfViewPosition? selfViewPosition);
+		public void ShowSelfView(Enum.SelfViewPosition? selfViewPosition = null);
 		public bool CanSendCallInviteAsync(Player player);
-		public bool CanSendGameInviteAsync(Player player, long? recipientId);
+		public bool CanSendGameInviteAsync(Player player, long? recipientId = null);
 		public ScriptSignal<Instance, Enum.InviteState> CallInviteStateChanged { get; }
 		public ScriptSignal<Instance, object[]> GameInvitePromptClosed { get; }
 		public ScriptSignal<Instance> PhoneBookPromptClosed { get; }
@@ -4707,7 +4707,7 @@ namespace RobloxRuntime.Classes
 	public interface StyleBase : ICreatableInstance
 	{
 		public Instance[] GetStyleRules();
-		public void InsertStyleRule(StyleRule rule, int? index);
+		public void InsertStyleRule(StyleRule rule, int? index = null);
 		public void SetStyleRules(Instance[] rules);
 		public ScriptSignal StyleRulesChanged { get; }
 	}
@@ -4717,9 +4717,9 @@ namespace RobloxRuntime.Classes
 		public string Selector { get; set; }
 		public string SelectorError { get; }
 		public object GetProperties();
-		public object? GetProperty(string name);
+		public object GetProperty(string name);
 		public void SetProperties(object table);
-		public void SetProperty(string name, object? value);
+		public void SetProperty(string name, object value);
 	}
 	
 	public interface StyleSheet : StyleBase, ICreatableInstance
@@ -4787,27 +4787,27 @@ namespace RobloxRuntime.Classes
 		public string ReservedServerAccessCode { get; set; }
 		public string ServerInstanceId { get; set; }
 		public bool ShouldReserveServer { get; set; }
-		public object? GetTeleportData();
-		public void SetTeleportData(object? teleportData);
+		public object GetTeleportData();
+		public void SetTeleportData(object teleportData);
 	}
 	
 	public interface TeleportService : ICreatableInstance
 	{
 		public bool CustomizedTeleportUI { get; set; }
 		public Instance GetArrivingTeleportGui();
-		public object? GetLocalPlayerTeleportData();
-		public object? GetTeleportSetting(string setting);
+		public object GetLocalPlayerTeleportData();
+		public object GetTeleportSetting(string setting);
 		public void SetTeleportGui(Instance gui);
-		public void SetTeleportSetting(string setting, object? value);
-		public void Teleport(long placeId, Player? player, object? teleportData, Instance? customLoadingScreen);
-		public void TeleportToPlaceInstance(long placeId, string instanceId, Player? player, string? spawnName, object? teleportData, Instance? customLoadingScreen);
-		public void TeleportToPrivateServer(long placeId, string reservedServerAccessCode, Instance[] players, string spawnName, object? teleportData, Instance? customLoadingScreen);
-		public void TeleportToSpawnByName(long placeId, string spawnName, Player? player, object? teleportData, Instance? customLoadingScreen);
+		public void SetTeleportSetting(string setting, object value);
+		public void Teleport(long placeId, Player? player = null, object? teleportData = null, Instance? customLoadingScreen = null);
+		public void TeleportToPlaceInstance(long placeId, string instanceId, Player? player = null, string? spawnName = null, object? teleportData = null, Instance? customLoadingScreen = null);
+		public void TeleportToPrivateServer(long placeId, string reservedServerAccessCode, Instance[] players, string spawnName, object teleportData, Instance? customLoadingScreen = null);
+		public void TeleportToSpawnByName(long placeId, string spawnName, Player? player = null, object? teleportData = null, Instance? customLoadingScreen = null);
 		public object[] GetPlayerPlaceInstanceAsync(long userId);
 		public object[] ReserveServer(long placeId);
-		public Instance TeleportAsync(long placeId, Instance[] players, TeleportOptions? teleportOptions);
-		public string TeleportPartyAsync(long placeId, Instance[] players, object? teleportData, Instance? customLoadingScreen);
-		public ScriptSignal<Instance, object?> LocalPlayerArrivedFromTeleport { get; }
+		public Instance TeleportAsync(long placeId, Instance[] players, TeleportOptions? teleportOptions = null);
+		public string TeleportPartyAsync(long placeId, Instance[] players, object teleportData, Instance? customLoadingScreen = null);
+		public ScriptSignal<Instance, object> LocalPlayerArrivedFromTeleport { get; }
 		public ScriptSignal<Instance, Enum.TeleportResult, string, long, Instance> TeleportInitFailed { get; }
 	}
 	
@@ -4967,8 +4967,8 @@ namespace RobloxRuntime.Classes
 	public interface TextService : ICreatableInstance
 	{
 		public Vector2 GetTextSize(string str, int fontSize, Enum.Font font, Vector2 frameSize);
-		public TextFilterTranslatedResult FilterAndTranslateStringAsync(string stringToFilter, long fromUserId, object[] targetLocales, Enum.TextFilterContext? textContext);
-		public TextFilterResult FilterStringAsync(string stringToFilter, long fromUserId, Enum.TextFilterContext? textContext);
+		public TextFilterTranslatedResult FilterAndTranslateStringAsync(string stringToFilter, long fromUserId, object[] targetLocales, Enum.TextFilterContext? textContext = null);
+		public TextFilterResult FilterStringAsync(string stringToFilter, long fromUserId, Enum.TextFilterContext? textContext = null);
 		public object GetFamilyInfoAsync(string assetId);
 		public Vector2 GetTextBoundsAsync(GetTextBoundsParams parameters);
 	}
@@ -5043,7 +5043,7 @@ namespace RobloxRuntime.Classes
 	public interface Translator : ICreatableInstance
 	{
 		public string LocaleId { get; }
-		public string FormatByKey(string key, object? args);
+		public string FormatByKey(string key, object args);
 		public string Translate(Instance context, string text);
 	}
 	
@@ -5168,7 +5168,7 @@ namespace RobloxRuntime.Classes
 		public Enum.SortOrder SortOrder { get; set; }
 		public Enum.VerticalAlignment VerticalAlignment { get; set; }
 		public void ApplyLayout();
-		public void SetCustomSortFunction(Action? function);
+		public void SetCustomSortFunction(Action? function = null);
 	}
 	
 	public interface UIGridLayout : UIGridStyleLayout, ICreatableInstance
@@ -5505,8 +5505,8 @@ namespace RobloxRuntime.Classes
 		public int GetVoiceChatAvailable();
 		public bool IsPublishPaused();
 		public bool IsSubscribePaused(long userId);
-		public bool JoinByGroupId(string groupId, bool? isMicMuted);
-		public bool JoinByGroupIdToken(string groupId, bool isMicMuted, bool? isRetry);
+		public bool JoinByGroupId(string groupId, bool? isMicMuted = null);
+		public bool JoinByGroupIdToken(string groupId, bool isMicMuted, bool? isRetry = null);
 		public void Leave();
 		public bool PublishPause(bool paused);
 		public void SetMicDevice(string micDeviceName, string micDeviceGuid);

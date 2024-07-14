@@ -312,7 +312,7 @@
             { "Map", "object" },
             { "RBXScriptSignal", "ScriptSignal" },
             { "RBXScriptConnection", "ScriptConnection" },
-            { "Instance", "Instance?" },
+            // { "Instance", "Instance?" },
             { "Object", "Instance" },
             { "Objects", "Instance[]" },
             { "Property", "string" },
@@ -320,7 +320,7 @@
             { "ProtectedString", "string" },
             { "Rect2D", "Rect" },
             { "Tuple", "object[]" },
-            { "Variant", "object?" },
+            { "Variant", "object" },
             { "Color3uint8", "Color3" },
             { "any", "object" },
             { "Array<any>", "object[]" }

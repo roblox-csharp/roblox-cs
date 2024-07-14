@@ -405,7 +405,9 @@ namespace TypeGenerator.Generators
                         paramType = Utility.SafeRenamedInstance(findings.FirstOrDefault(found => found.ToLower() == argName.ToLower())) ?? "Instance";
                     }
                 }
-                args.Add($"{(!string.IsNullOrEmpty(paramType) ? $"{paramType}{(optional && !paramType.EndsWith("?") ? "?" : "")}" : "object")} {argName ?? $"arg{parameters.IndexOf(param)}"}");
+
+                var isOptional = optional || (paramType != null && paramType.EndsWith("?"));
+                args.Add($"{(!string.IsNullOrEmpty(paramType) ? $"{paramType}{(optional && !paramType.EndsWith("?") ? "?" : "")}" : "object")} {argName ?? $"arg{parameters.IndexOf(param)}"}{(isOptional ? " = null" : "")}");
             }
             return string.Join(", ", args);
         }

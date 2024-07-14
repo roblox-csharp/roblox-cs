@@ -5,6 +5,6 @@ public static class Game
 {
     public static void Main()
     {
-        game.Workspace.FindFirstChildOfClass<Camera>();
+        var child = game.Workspace.FindFirstChild("ChildName");
     }
 }

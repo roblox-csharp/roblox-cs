@@ -27,7 +27,7 @@ namespace RobloxRuntime.PluginClasses
 	
 	public partial interface Instance
 	{
-		public string GetDebugId(int? scopeLength);
+		public string GetDebugId(int? scopeLength = null);
 	}
 	
 	public interface AccessoryDescription : ICreatableInstance
@@ -139,7 +139,7 @@ namespace RobloxRuntime.PluginClasses
 	
 	public partial interface AssetService : ICreatableInstance
 	{
-		public MeshPart CreateMeshPartAsync(string meshId, object? options);
+		public MeshPart CreateMeshPartAsync(string meshId, object? options = null);
 	}
 	
 	public interface Atmosphere : ICreatableInstance
@@ -386,15 +386,15 @@ namespace RobloxRuntime.PluginClasses
 	
 	public interface ChangeHistoryService : ICreatableInstance
 	{
-		public void FinishRecording(string identifier, Enum.FinishRecordingOperation operation, object? finalOptions);
+		public void FinishRecording(string identifier, Enum.FinishRecordingOperation operation, object? finalOptions = null);
 		public object[] GetCanRedo();
 		public object[] GetCanUndo();
-		public bool IsRecordingInProgress(string? identifier);
+		public bool IsRecordingInProgress(string? identifier = null);
 		public void Redo();
 		public void ResetWaypoints();
 		public void SetEnabled(bool state);
 		public void SetWaypoint(string name);
-		public string? TryBeginRecording(string name, string? displayName);
+		public string? TryBeginRecording(string name, string? displayName = null);
 		public void Undo();
 		public ScriptSignal<string, string?, string?, Enum.FinishRecordingOperation, object?> OnRecordingFinished { get; }
 		public ScriptSignal<string, string?> OnRecordingStarted { get; }
@@ -1002,7 +1002,7 @@ namespace RobloxRuntime.PluginClasses
 	public interface PluginGui : LayerCollector, ICreatableInstance
 	{
 		public string Title { get; set; }
-		public void BindToClose(Action? function);
+		public void BindToClose(Action? function = null);
 		public Vector2 GetRelativeMousePosition();
 		public ScriptSignal<object> PluginDragDropped { get; }
 		public ScriptSignal<object> PluginDragEntered { get; }
@@ -1521,8 +1521,8 @@ namespace RobloxRuntime.PluginClasses
 	
 	public partial interface WorldRoot : Model, ICreatableInstance
 	{
-		public void IKMoveTo(BasePart part, CFrame target, float? translateStiffness, float? rotateStiffness, Enum.IKCollisionsMode? collisionsMode);
-		public void StepPhysics(float dt, Instance[]? parts);
+		public void IKMoveTo(BasePart part, CFrame target, float? translateStiffness = null, float? rotateStiffness = null, Enum.IKCollisionsMode? collisionsMode = null);
+		public void StepPhysics(float dt, Instance[]? parts = null);
 	}
 	
 	public partial interface Workspace : WorldRoot, ICreatableInstance
@@ -1659,7 +1659,7 @@ namespace RobloxRuntime.PluginClasses
 	public partial interface Players : ICreatableInstance
 	{
 		public void Chat(string message);
-		public void SetChatStyle(Enum.ChatStyle? style);
+		public void SetChatStyle(Enum.ChatStyle? style = null);
 		public void TeamChat(string message);
 	}
 	
@@ -1668,30 +1668,30 @@ namespace RobloxRuntime.PluginClasses
 		public bool CollisionEnabled { get; }
 		public float GridSize { get; }
 		public void Activate(bool exclusiveMouse);
-		public PluginAction CreatePluginAction(string actionId, string text, string statusTip, string iconName, bool? allowBinding);
+		public PluginAction CreatePluginAction(string actionId, string text, string statusTip, string iconName, bool? allowBinding = null);
 		public PluginMenu CreatePluginMenu(string id, string title, string icon);
 		public PluginToolbar CreateToolbar(string name);
 		public void Deactivate();
 		public Enum.JointCreationMode GetJoinMode();
 		public PluginMouse GetMouse();
 		public Enum.RibbonTool GetSelectedRibbonTool();
-		public object? GetSetting(string key);
+		public object GetSetting(string key);
 		public long GetStudioUserId();
 		public Instance Intersect(Instance[] objects);
 		public bool IsActivated();
 		public bool IsActivatedWithExclusiveMouse();
 		public Instance[] Negate(Instance[] objects);
-		public void OpenScript(LuaSourceContainer script, int? lineNumber);
+		public void OpenScript(LuaSourceContainer script, int? lineNumber = null);
 		public void OpenWikiPage(string url);
 		public void SaveSelectedToRoblox();
 		public void SelectRibbonTool(Enum.RibbonTool tool, UDim2 position);
 		public Instance[] Separate(Instance[] objects);
-		public void SetSetting(string key, object? value);
+		public void SetSetting(string key, object value);
 		public void StartDrag(object dragData);
 		public Instance Union(Instance[] objects);
 		public DockWidgetPluginGui CreateDockWidgetPluginGui(string pluginGuiId, DockWidgetPluginGuiInfo dockWidgetPluginGuiInfo);
-		public Instance ImportFbxAnimation(Instance rigModel, bool? isR15);
-		public Instance ImportFbxRig(bool? isR15);
+		public Instance ImportFbxAnimation(Instance rigModel, bool? isR15 = null);
+		public Instance ImportFbxRig(bool? isR15 = null);
 		public long PromptForExistingAssetId(string assetType);
 		public bool PromptSaveSelection(string suggestedFileName);
 		public ScriptSignal Deactivation { get; }
@@ -1936,16 +1936,16 @@ namespace RobloxRuntime.PluginClasses
 		public Instance? Script { get; }
 		public Instance AddWatch(string expression);
 		public Instance[] GetBreakpoints();
-		public object GetGlobals(int? stackFrame);
-		public object GetLocals(int? stackFrame);
+		public object GetGlobals(int? stackFrame = null);
+		public object GetLocals(int? stackFrame = null);
 		public object[] GetStack();
-		public object GetUpvalues(int? stackFrame);
-		public object? GetWatchValue(Instance watch);
+		public object GetUpvalues(int? stackFrame = null);
+		public object GetWatchValue(Instance watch);
 		public Instance[] GetWatches();
 		public Instance SetBreakpoint(int line, bool isContextDependentBreakpoint);
-		public void SetGlobal(string name, object? value, int stackFrame);
-		public void SetLocal(string name, object? value, int? stackFrame);
-		public void SetUpvalue(string name, object? value, int? stackFrame);
+		public void SetGlobal(string name, object value, int stackFrame);
+		public void SetLocal(string name, object value, int? stackFrame = null);
+		public void SetUpvalue(string name, object value, int? stackFrame = null);
 		public ScriptSignal<Instance> BreakpointAdded { get; }
 		public ScriptSignal<Instance> BreakpointRemoved { get; }
 		public ScriptSignal<int, Enum.BreakReason> EncounteredBreak { get; }
@@ -1956,21 +1956,21 @@ namespace RobloxRuntime.PluginClasses
 	
 	public partial interface ScriptDocument : ICreatableInstance
 	{
-		public string GetLine(int? lineIndex);
+		public string GetLine(int? lineIndex = null);
 		public int GetLineCount();
 		public LuaSourceContainer GetScript();
 		public string GetSelectedText();
 		public object[] GetSelection();
 		public object[] GetSelectionEnd();
 		public object[] GetSelectionStart();
-		public string GetText(int? startLine, int? startCharacter, int? endLine, int? endCharacter);
+		public string GetText(int? startLine = null, int? startCharacter = null, int? endLine = null, int? endCharacter = null);
 		public object[] GetViewport();
 		public bool HasSelectedText();
 		public bool IsCommandBar();
 		public object[] CloseAsync();
 		public object[] EditTextAsync(string newText, int startLine, int startCharacter, int endLine, int endCharacter);
-		public object[] ForceSetSelectionAsync(int cursorLine, int cursorCharacter, int? anchorLine, int? anchorCharacter);
-		public object[] RequestSetSelectionAsync(int cursorLine, int cursorCharacter, int? anchorLine, int? anchorCharacter);
+		public object[] ForceSetSelectionAsync(int cursorLine, int cursorCharacter, int? anchorLine = null, int? anchorCharacter = null);
+		public object[] RequestSetSelectionAsync(int cursorLine, int cursorCharacter, int? anchorLine = null, int? anchorCharacter = null);
 		public ScriptSignal<long, long, long, long> SelectionChanged { get; }
 		public ScriptSignal<long, long> ViewportChanged { get; }
 	}
@@ -1986,7 +1986,7 @@ namespace RobloxRuntime.PluginClasses
 		public void RegisterScriptAnalysisCallback(string name, int priority, Action callbackFunction);
 		public object[] OpenScriptDocumentAsync(LuaSourceContainer script);
 		public void UpdateSourceAsync(LuaSourceContainer script, Action callback);
-		public ScriptSignal<ScriptDocument, object?> TextDocumentDidChange { get; }
+		public ScriptSignal<ScriptDocument, object> TextDocumentDidChange { get; }
 		public ScriptSignal<ScriptDocument> TextDocumentDidClose { get; }
 		public ScriptSignal<ScriptDocument> TextDocumentDidOpen { get; }
 	}
@@ -1994,11 +1994,11 @@ namespace RobloxRuntime.PluginClasses
 	public partial interface ScriptProfilerService : ICreatableInstance
 	{
 		public void ClientRequestData(Player player);
-		public void ClientStart(Player player, int? frequency);
+		public void ClientStart(Player player, int? frequency = null);
 		public void ClientStop(Player player);
-		public object DeserializeJSON(string? jsonString);
+		public object DeserializeJSON(string? jsonString = null);
 		public void ServerRequestData();
-		public void ServerStart(int? frequency);
+		public void ServerStart(int? frequency = null);
 		public void ServerStop();
 		public ScriptSignal<Player, string> OnNewData { get; }
 	}
@@ -2238,14 +2238,14 @@ namespace RobloxRuntime.PluginClasses
 		public bool UseLocalSpace { get; set; }
 		public object GetClassIcon(string className);
 		public long GetUserId();
-		public RaycastResult GizmoRaycast(Vector3 origin, Vector3 direction, RaycastParams? raycastParams);
-		public Instance PromptImportFile(object[]? fileTypeFilter);
-		public Instance[] PromptImportFiles(object[]? fileTypeFilter);
+		public RaycastResult GizmoRaycast(Vector3 origin, Vector3 direction, RaycastParams? raycastParams = null);
+		public Instance PromptImportFile(object[]? fileTypeFilter = null);
+		public Instance[] PromptImportFiles(object[]? fileTypeFilter = null);
 	}
 	
 	public interface StudioTheme : ICreatableInstance
 	{
-		public Color3 GetColor(Enum.StudioStyleGuideColor styleguideitem, Enum.StudioStyleGuideModifier? modifier);
+		public Color3 GetColor(Enum.StudioStyleGuideColor styleguideitem, Enum.StudioStyleGuideModifier? modifier = null);
 	}
 	
 	public interface StudioWidgetsService : ICreatableInstance
@@ -2346,15 +2346,15 @@ namespace RobloxRuntime.PluginClasses
 		public int TestCount { get; }
 		public double Timeout { get; set; }
 		public int WarnCount { get; }
-		public void Check(bool condition, string description, Instance? source, int? line);
-		public void Checkpoint(string text, Instance? source, int? line);
+		public void Check(bool condition, string description, Instance? source = null, int? line = null);
+		public void Checkpoint(string text, Instance? source = null, int? line = null);
 		public void Done();
-		public void Error(string description, Instance? source, int? line);
-		public void Fail(string description, Instance? source, int? line);
-		public void Message(string text, Instance? source, int? line);
-		public void Require(bool condition, string description, Instance? source, int? line);
+		public void Error(string description, Instance? source = null, int? line = null);
+		public void Fail(string description, Instance? source = null, int? line = null);
+		public void Message(string text, Instance? source = null, int? line = null);
+		public void Require(bool condition, string description, Instance? source = null, int? line = null);
 		public object ScopeTime();
-		public void Warn(bool condition, string description, Instance? source, int? line);
+		public void Warn(bool condition, string description, Instance? source = null, int? line = null);
 		public bool isFeatureEnabled(string name);
 		public void Run();
 		public ScriptSignal<bool, string, Instance, int> ServerCollectConditionalResult { get; }
