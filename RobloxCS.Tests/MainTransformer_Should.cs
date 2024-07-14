@@ -1,12 +1,12 @@
 namespace RobloxCS.Tests
 {
-    public class MainTransformer_GetRootShould
+    public class MainTransformer_Should
     {
         [Theory]
         [InlineData("obj?.Name;")]
         [InlineData("hello?.World;")]
         [InlineData("a.b?.c;")]
-        public void GetRoot_SafeNavigation_TransformsWhenNotNull(string source)
+        public void SafeNavigation_TransformsWhenNotNull(string source)
         {
             var cleanTree = TranspilerUtility.ParseTree(source);
             var transformedTree = TranspilerUtility.TransformTree(cleanTree, [TransformFactory.Main()]);
