@@ -860,7 +860,7 @@ namespace RobloxCS
         {
             var parentNamespace = FindFirstAncestor<NamespaceDeclarationSyntax>(node);
             var className = GetName(node);
-            WriteLine($"namespace:class(\"{className}\", function(namespace)");
+            WriteLine($"{(parentNamespace != null ? "namespace:" : "CS.")}class(\"{className}\", function(namespace)");
             _indent++;
 
             WriteLine("local class = {}");

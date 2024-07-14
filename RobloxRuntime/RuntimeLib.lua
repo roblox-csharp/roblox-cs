@@ -50,8 +50,7 @@ local CSNamespace = {} do
 	end
 
 	function CSNamespace:class(name, create)
-		local class = create(self)
-		self.members[name] = class
+		CS.class(name, create, self)
 	end
 
 	function CSNamespace:namespace(name, registerMembers)
@@ -59,12 +58,24 @@ local CSNamespace = {} do
 	end
 end
 
+function CS.class(name, create, namespace)
+	local location
+	if namespace ~= nil then
+		location = namespace.members
+	else
+		location = assemblyGlobal
+	end
+
+	local class = create(namespace)
+	location[name] = class
+end
+
 function CS.namespace(name, registerMembers, location)
 	if location == nil then
 		location = assemblyGlobal
 	end
 
-	local namespaceDefinition = CSNamespace.new(name)
+	local namespaceDefinition = assemblyGlobal[name] or CSNamespace.new(name)
 	registerMembers(namespaceDefinition)
 	for _, callback in pairs(namespaceDefinition["$loadCallbacks"]) do
 		callback()
@@ -73,6 +84,7 @@ function CS.namespace(name, registerMembers, location)
 	location[name] = namespaceDefinition
 	return namespaceDefinition
 end
+
 
 function CS.getAssemblyType(name)
 	local env
