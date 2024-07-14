@@ -6,11 +6,17 @@ Roblox CSharp to Lua compiler
 # To-do
 - Imports
 - Inheritance chains 🤮
+- Append ` = null` to generated nullable properties
 - Copy `RuntimeLib.lua` into `<project-dir>/include` on compile
 - Default values (via `default` keyword)
 - Macro `IEnumerable<T>` (or just `List<T>`) methods
 - Classes/structs/interfaces nested in classes/structs/interfaces
-- Restrict `volatile`, `unsafe`, and `partial` usage (`partial` maybe supported in the future)
-- `using name = value` expressions (equivalent to `:=` operator in other languages) (MAYBE)
 - Polyfills:
 	- The rest of the `Math` library
+
+# Will maybe be supported
+- `partial` keyword
+
+# Will not be supported
+- `using name = value` expressions (equivalent to `:=` operator in other languages)
+- `volatile` and `unsafe` keywords

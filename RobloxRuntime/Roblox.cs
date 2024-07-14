@@ -6,6 +6,14 @@
     public static class Globals
     {
         public static DataModel game { get; } = null!;
+
+        public static void warn(string message)
+        {
+        }
+
+        public static void error(string message, int? level = null)
+        {
+        }
     }
 
     namespace Classes
