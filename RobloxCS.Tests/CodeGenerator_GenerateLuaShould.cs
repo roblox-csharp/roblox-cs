@@ -58,7 +58,7 @@
         [Theory]
         [InlineData("var x = 5;", "local x = 5")]
         [InlineData("char f = 'f'", "local f = \"f\"")]
-        [InlineData("int[] nums = [1, 2, 3]", "local nums = {1, 2, 3}")]
+        [InlineData("object a = 123", "local a = 123")]
         public void VariableDeclaration_GeneratesLocal(string input, string expected)
         {
             var cleanedLua = GetCleanLua(input);
@@ -173,6 +173,13 @@
             Assert.Equal("tuple[1]", lines[0]);
             Assert.Equal("tuple[2]", lines[1]);
             Assert.Equal("tuple[3]", lines[2]);
+        }
+
+        [Fact]
+        public void CollectionInitializer_GeneratesTable()
+        {
+            var cleanedLua = GetCleanLua("int[] nums = [1, 2, 3]");
+            Assert.Equal("local nums = {1, 2, 3}", cleanedLua);
         }
 
         private static void AssertEqualLines(List<string> lines, List<string> expectedLines)
