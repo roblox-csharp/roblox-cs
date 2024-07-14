@@ -4,6 +4,8 @@ public static class Game
 {
     public static void Main()
     {
-        warn("hello baby");
+        int[] nums = [1, 2, 3];
+        int i = 4;
+        Console.WriteLine(nums[i]);
     }
 }

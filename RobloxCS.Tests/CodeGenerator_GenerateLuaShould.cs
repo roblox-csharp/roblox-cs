@@ -182,6 +182,15 @@
             Assert.Equal("local nums = {1, 2, 3}", cleanedLua);
         }
 
+        [Theory]
+        [InlineData("int[] nums = [1, 2, 3]; nums[0]", "nums[1]", 1)]
+        [InlineData("int[] nums = [1, 2, 3]; int i = 4; nums[i]", "nums[i + 1]", 2)]
+        public void CollectionIndexing_AddsOneToNumericalIndices(string input, string expected, int removeLines = 0)
+        {
+            var cleanedLua = GetCleanLua(input, removeLines);
+            Assert.Equal(expected, cleanedLua);
+        }
+
         private static void AssertEqualLines(List<string> lines, List<string> expectedLines)
         {
             foreach (var line in lines)

@@ -30,7 +30,17 @@
             "int",
             "uint",
             "long",
-            "ulong"
+            "ulong",
+            "SByte",
+            "Byte",
+            "Int16",
+            "Int32",
+            "Int64",
+            "Int128",
+            "UInt16",
+            "UInt32",
+            "UInt64",
+            "UInt128",
         };
     }
 }

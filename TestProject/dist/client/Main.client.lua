@@ -5,7 +5,9 @@ CS.class("Game", function(namespace)
     class.__index = class
     
     function class.Main()
-        print("[TestProject/Client/Main.client.cs:5:9]:", 420)
+        local nums = {1, 2, 3}
+        local i = 4
+        print("[TestProject/Client/Main.client.cs:9:9]:", nums[i + 1])
     end
     
     if namespace == nil then

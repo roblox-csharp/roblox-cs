@@ -4,6 +4,7 @@
 Roblox CSharp to Lua compiler
 
 # To-do
+- Test `DebugTransformer`
 - Imports
 - Inheritance chains 🤮
 - Append ` = null` to generated nullable properties

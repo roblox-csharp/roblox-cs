@@ -252,10 +252,8 @@ namespace RobloxCS
                 {
                     Visit(argument);
 
-                    var argumentSymbol = _semanticModel.GetSymbolInfo(argument.Expression).Symbol;
-                    var definitionSymbol = argumentSymbol?.OriginalDefinition;
-                    var indexSymbol = definitionSymbol ?? argumentSymbol;
-                    var isNumericalIndex = indexSymbol is ITypeSymbol typeSymbol && Constants.INTEGER_TYPES.Contains(typeSymbol.Name);
+                    var typeSymbol = _semanticModel.GetTypeInfo(argument.Expression).Type;
+                    var isNumericalIndex = typeSymbol != null && Constants.INTEGER_TYPES.Contains(typeSymbol.Name);
                     if (isNumericalIndex)
                     {
                         Write(" + 1");
@@ -306,17 +304,15 @@ namespace RobloxCS
         public override void VisitBinaryExpression(BinaryExpressionSyntax node)
         {
             var operatorText = node.OperatorToken.Text;
-            var leftSymbolInfo = _semanticModel.GetSymbolInfo(node.Left);
-            var rightSymbolInfo = _semanticModel.GetSymbolInfo(node.Right);
-            var leftSymbol = leftSymbolInfo.Symbol?.OriginalDefinition ?? leftSymbolInfo.Symbol ?? _semanticModel.GetTypeInfo(node.Left).Type;
-            var rightSymbol = rightSymbolInfo.Symbol?.OriginalDefinition ?? rightSymbolInfo.Symbol ?? _semanticModel.GetTypeInfo(node.Right).Type;
+            var leftType = _semanticModel.GetTypeInfo(node.Left).Type;
+            var rightType = _semanticModel.GetTypeInfo(node.Right).Type;
             var perTypeOperators = Constants.PER_TYPE_BINARY_OPERATOR_MAP;
             if (
-                (leftSymbol != null && perTypeOperators.Any(pair => pair.Key.Contains(leftSymbol.Name)))
-                || (rightSymbol != null && perTypeOperators.Any(pair => pair.Key.Contains(rightSymbol.Name)))
+                (leftType != null && perTypeOperators.Any(pair => pair.Key.Contains(leftType.Name)))
+                || (rightType != null && perTypeOperators.Any(pair => pair.Key.Contains(rightType.Name)))
             )
             {
-                var typeList = perTypeOperators.FirstOrDefault(pair => pair.Key.Contains(leftSymbol!.Name) || pair.Key.Contains(rightSymbol!.Name)).Key;
+                var typeList = perTypeOperators.FirstOrDefault(pair => pair.Key.Contains(leftType!.Name) || pair.Key.Contains(rightType!.Name)).Key;
                 var operatorMap = perTypeOperators[typeList];
                 if (operatorText == operatorMap.Item1)
                 {
@@ -447,9 +443,8 @@ namespace RobloxCS
                     case "Write":
                     case "WriteLine":
                         {
-                            var objectSymbolInfo = _semanticModel.GetSymbolInfo(memberAccess.Expression);
-                            var objectDefinitionSymbol = (ITypeSymbol)objectSymbolInfo.Symbol!;
-                            if (objectDefinitionSymbol.Name != "Console") break;
+                            var objectType = _semanticModel.GetTypeInfo(memberAccess.Expression).Type;
+                            if (objectType == null || objectType.Name != "Console") break;
 
                             Write("print");
                             Visit(node.ArgumentList);
