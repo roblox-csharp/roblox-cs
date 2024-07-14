@@ -56,6 +56,16 @@
         }
 
         [Theory]
+        [InlineData("var x = 5;", "local x = 5")]
+        [InlineData("char f = 'f'", "local f = \"f\"")]
+        [InlineData("int[] nums = [1, 2, 3]", "local nums = {1, 2, 3}")]
+        public void VariableDeclaration_GeneratesLocal(string input, string expected)
+        {
+            var cleanedLua = GetCleanLua(input);
+            Assert.Equal(expected.Trim(), cleanedLua);
+        }
+
+        [Theory]
         [InlineData("69", "69")]
         [InlineData("420.0f", "420")]
         [InlineData("'h'", "\"h\"")]
