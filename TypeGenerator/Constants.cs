@@ -210,7 +210,7 @@
             { "Workspace", ["FilteringEnabled"] },
             { "Players", ["FilteringEnabled", "LocalPlayer"] }, // defined in Roblox.cs
             { "CollectionService", ["GetCollection"] },
-            { "Instance", ["children", "Remove", "IsA", "Clone", "IsAncestorOf", "IsDescendantOf", "GetAttribute", "GetAttributes", "GetDescendants", "GetTags", "WaitForChild", "clone", "isDescendantOf", "AncestryChanged", "AttributeChanged", "Changed", "ChildAdded", "ChildRemoved", "DescendantAdded", "DescendantRemoving", "Destroying", "childAdded"] }, // defined in Roblox.cs
+            { "Instance", ["children", "Remove", "IsA", "FindFirstChildOfClass", "FindFirstChildWhichIsA", "FindFirstAncestorOfClass", "FindFirstAncestorWhichIsA", "Clone", "IsAncestorOf", "IsDescendantOf", "GetAttribute", "GetAttributes", "GetDescendants", "GetTags", "WaitForChild", "clone", "isDescendantOf", "AncestryChanged", "AttributeChanged", "Changed", "ChildAdded", "ChildRemoved", "DescendantAdded", "DescendantRemoving", "Destroying", "childAdded"] }, // defined in Roblox.cs
             { "BodyGyro", ["cframe"] },
             { "BodyAngularVelocity", ["FilteringEnabled"] },
             { "BodyPosition", ["FilteringEnabled"] },
@@ -220,7 +220,7 @@
             { "GuiBase3d", ["FilteringEnabled"] },
             { "Model", ["FilteringEnabled"] },
             { "ServiceProvider", ["FilteringEnabled"] },
-            { "DataModel", ["FilteringEnabled"] }
+            { "DataModel", ["FilteringEnabled", "Workspace", "lighting"] }
         };
 
         public static readonly Dictionary<string, List<string>> EXPECTED_EXTRA_MEMBERS = new Dictionary<string, List<string>>

@@ -82,6 +82,12 @@
             public Vector3 Orientation { get; set; }
         }
 
+        public partial interface DataModel : Instance
+        {
+            public Workspace Workspace { get; }
+            public Lighting Lighting { get; }
+        }
+
         public interface ICreatableInstance : Instance
         { 
         }
@@ -100,6 +106,10 @@
             public object? GetAttribute(string attribute);
             public Dictionary<string, object> GetAttributes();
             public Instance[] GetDescendants();
+            public T? FindFirstAncestorOfClass<T>() where T : Instance;
+            public T? FindFirstAncestorWhichIsA<T>() where T : Instance;
+            public T? FindFirstChildOfClass<T>() where T : Instance;
+            public T? FindFirstChildWhichIsA<T>(bool? recursive) where T : Instance;
             public string[] GetTags();
             public Instance WaitForChild(string name);
             public Instance? WaitForChild(string name, float timeout);

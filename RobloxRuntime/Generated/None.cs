@@ -208,14 +208,10 @@ namespace RobloxRuntime.Classes
 		public void AddTag(string tag);
 		public void ClearAllChildren();
 		public void Destroy();
-		public Instance? FindFirstAncestor(string name);
-		public Instance? FindFirstAncestorOfClass(string className);
-		public Instance? FindFirstAncestorWhichIsA(string className);
-		public Instance? FindFirstChild(string name, bool? recursive);
-		public Instance? FindFirstChildOfClass(string className);
-		public Instance? FindFirstChildWhichIsA(string className, bool? recursive);
-		public Instance? FindFirstDescendant(string name);
-		public Actor GetActor();
+        public Instance? FindFirstChild(string name, bool? recursive);
+        public Instance? FindFirstAncestor(string name);
+        public Instance? FindFirstDescendant(string name);
+        public Actor GetActor();
 		public ScriptSignal GetAttributeChangedSignal(string attribute);
 		public Instance[] GetChildren();
 		public string GetFullName();
@@ -4363,8 +4359,6 @@ namespace RobloxRuntime.Classes
 		public int PlaceVersion { get; }
 		public string PrivateServerId { get; }
 		public long PrivateServerOwnerId { get; }
-		public Workspace? Workspace { get; }
-		public Instance? lighting { get; }
 		public void BindToClose(Action function);
 		public string GetMessage();
 		public bool GetRemoteBuildMode();

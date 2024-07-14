@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Collections.Immutable;
 using System.Text;
 
 namespace RobloxCS
@@ -479,22 +480,25 @@ namespace RobloxCS
                             Write(')');
                             return;
                         }
+                    case "FindFirstChildOfClass":
+                    case "FindFirstChildWhichIsA":
+                    case "FindFirstAncestorOfClass":
+                    case "FindFirstAncestorWhichIsA":
                     case "IsA":
                         {
+                            var objectType = _semanticModel.GetTypeInfo(memberAccess.Expression).Type;
+                            var superclasses = objectType != null ? objectType.AllInterfaces.ToList() : null;
+                            if (objectType != null && objectType.Name != "Instance" && !superclasses!.Select(@interface => @interface.Name).Contains("Instance")) return;
+
                             var symbolInfo = _semanticModel.GetSymbolInfo(node);
                             var methodSymbol = (IMethodSymbol)symbolInfo.Symbol!;
                             if (!methodSymbol.IsGenericMethod)
-                                throw new Exception("Attempt to macro Instance.IsA<T>() but it is not generic?");
-
-                            var objectSymbolInfo = _semanticModel.GetSymbolInfo(memberAccess.Expression);
-                            var objectDefinitionSymbol = (ILocalSymbol)objectSymbolInfo.Symbol?.OriginalDefinition!;
-                            var superclasses = objectDefinitionSymbol.Type.AllInterfaces;
-                            if (objectDefinitionSymbol.Name != "Instance" && !superclasses.Select(@interface => @interface.Name).Contains("Instance")) return;
+                                throw new Exception($"Attempt to macro Instance.{name}<T>() but it is not generic?");
 
                             var arguments = node.ArgumentList.Arguments;
                             var instanceType = methodSymbol.TypeArguments.First();
                             Visit(memberAccess.Expression);
-                            Write($":IsA(\"{instanceType.Name}\"");
+                            Write($":{name}(\"{instanceType.Name}\"");
                             if (arguments.Count > 0)
                             {
                                 Write(", ");

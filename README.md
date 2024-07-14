@@ -4,7 +4,7 @@
 Roblox CSharp to Lua compiler
 
 # To-do
-- Macro any method that takes an instance name and returns that instance (`FindFirstChild`, etc.)
+- Macro `ServiceProvider.GetService<T>()` to `ServiceProvider:GetService("T")`
 - Imports
 - Inheritance chains 🤮
 - Append ` = null` to generated nullable properties

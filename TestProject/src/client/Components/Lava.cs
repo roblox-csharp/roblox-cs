@@ -17,8 +17,8 @@ namespace TestGame.Client
         {
             Instance.Touched.Connect(hit =>
             {
-                var model = (Model?)hit.FindFirstAncestorOfClass("Model");
-                var humanoid = (Humanoid?)model?.FindFirstChildOfClass("Humanoid");
+                var model = hit.FindFirstAncestorOfClass<Model>();
+                var humanoid = model?.FindFirstChildOfClass<Humanoid>();
                 if (humanoid == null) return;
 
                 humanoid.TakeDamage(10);
