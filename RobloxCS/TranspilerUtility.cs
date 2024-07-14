@@ -49,7 +49,7 @@ namespace RobloxCS
             return tree;
         }
 
-        public static SyntaxTree ParseTree(string source, string sourceFile = "TransformerTestFile.cs")
+        public static SyntaxTree ParseTree(string source, string sourceFile = "TestFile.cs")
         {
             var cleanTree = CSharpSyntaxTree.ParseText(source);
             var compilationUnit = (CompilationUnitSyntax)cleanTree.GetRoot();

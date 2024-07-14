@@ -5,6 +5,7 @@ Roblox CSharp to Lua compiler
 
 # To-do
 - Test `DebugTransformer`
+- Macro any method that takes an instance name and returns that instance (`FindFirstChild`, etc.)
 - Imports
 - Inheritance chains 🤮
 - Append ` = null` to generated nullable properties
