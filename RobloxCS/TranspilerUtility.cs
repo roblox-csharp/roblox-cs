@@ -41,7 +41,14 @@ namespace RobloxCS
         {
             config ??= ConfigReader.UnitTestingConfig;
             var transformer = new MainTransformer(cleanTree, config);
-            return cleanTree.WithRootAndOptions(transformer.GetRoot(), cleanTree.Options);
+            return cleanTree.WithRootAndOptions(transformer.TransformRoot(), cleanTree.Options);
+        }
+
+        public static SyntaxTree DebugTransformTree(SyntaxTree cleanTree, ConfigData? config = null)
+        {
+            config ??= ConfigReader.UnitTestingConfig;
+            var transformer = new DebugTransformer(cleanTree, config);
+            return cleanTree.WithRootAndOptions(transformer.TransformRoot(), cleanTree.Options);
         }
 
         public static SyntaxTree ParseTree(string source, string sourceFile = "TransformerTestFile.cs")

@@ -432,9 +432,8 @@ namespace RobloxCS
 
         public override void VisitInvocationExpression(InvocationExpressionSyntax node)
         {
-            if (node.Expression is MemberAccessExpressionSyntax)
+            if (node.Expression is MemberAccessExpressionSyntax memberAccess)
             {
-                var memberAccess = (MemberAccessExpressionSyntax)node.Expression;
                 var objectName = GetName(memberAccess.Expression);
                 var name = GetName(memberAccess.Name);
 
@@ -450,7 +449,7 @@ namespace RobloxCS
                         {
                             var objectSymbolInfo = _semanticModel.GetSymbolInfo(memberAccess.Expression);
                             var objectDefinitionSymbol = (ITypeSymbol)objectSymbolInfo.Symbol!;
-                            if (objectDefinitionSymbol.Name != "Console") return;
+                            if (objectDefinitionSymbol.Name != "Console") break;
 
                             Write("print");
                             Visit(node.ArgumentList);
@@ -705,7 +704,7 @@ namespace RobloxCS
                     // TODO: check for inherited members
                     var parentNamespace = FindFirstAncestor<NamespaceDeclarationSyntax>(node);
                     var namespaceIncludesIdentifier = parentNamespace != null && parentNamespace.Members
-                        .Where(member => GetNames(member).Contains(identifierName))
+                        .Where(member => Utility.GetNamesFromNode(member).Contains(identifierName))
                         .Count() > 0;
 
                     var parentClass = FindFirstAncestor<ClassDeclarationSyntax>(node);
@@ -821,7 +820,7 @@ namespace RobloxCS
         public override void VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
         {
             var isWithinNamespace = IsDescendantOf<NamespaceDeclarationSyntax>(node);
-            var allNames = GetNames(node);
+            var allNames = Utility.GetNamesFromNode(node);
             var firstName = allNames.First();
             allNames.Remove(firstName);
 
@@ -1130,43 +1129,7 @@ namespace RobloxCS
 
         private string GetName(SyntaxNode node)
         {
-            return GetNames(node).First();
-        }
-
-        private List<string> GetNames(SyntaxNode? node)
-        {
-            var names = new List<string>();
-            if (node == null) return names;
-
-            var identifierProperty = node.GetType().GetProperty("Identifier");
-            var identifierValue = identifierProperty?.GetValue(node);
-            if (identifierProperty != null && identifierValue != null && identifierValue is SyntaxToken)
-            {
-                names.Add(((SyntaxToken)identifierValue).Text.Trim());
-                return names;
-            }
-
-            var childNodes = node.ChildNodes();
-            var qualifiedNameNodes = node.IsKind(SyntaxKind.QualifiedName) ? [(QualifiedNameSyntax)node] : childNodes.OfType<QualifiedNameSyntax>();
-            var identifierNameNodes = node.IsKind(SyntaxKind.IdentifierName) ? [(IdentifierNameSyntax)node] : childNodes.OfType<IdentifierNameSyntax>();
-            foreach (var qualifiedNameNode in qualifiedNameNodes)
-            {
-                foreach (var name in GetNames(qualifiedNameNode.Left))
-                {
-                    names.Add(name.Trim());
-                }
-                foreach (var name in GetNames(qualifiedNameNode.Right))
-                {
-                    names.Add(name.Trim());
-                }
-            }
-
-            foreach (var identifierNameNode in identifierNameNodes)
-            {
-                names.Add(identifierNameNode.Identifier.Text.Trim());
-            }
-
-            return names;
+            return Utility.GetNamesFromNode(node).First();
         }
 
         private bool MatchLastCharacter(char character)

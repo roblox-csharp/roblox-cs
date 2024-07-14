@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace RobloxCS
 {
@@ -11,7 +12,43 @@ namespace RobloxCS
         public static string FormatLocation(FileLinePositionSpan lineSpan)
         {
             var filePath = lineSpan.Path;
-            return $"- {(filePath == "" ? "<anonymous>" : filePath)}:{lineSpan.StartLinePosition.Line + 1}:{lineSpan.StartLinePosition.Character + 1}";
+            return $"{(filePath == "" ? "<anonymous>" : filePath)}:{lineSpan.StartLinePosition.Line + 1}:{lineSpan.StartLinePosition.Character + 1}";
+        }
+
+        public static List<string> GetNamesFromNode(SyntaxNode? node)
+        {
+            var names = new List<string>();
+            if (node == null) return names;
+
+            var identifierProperty = node.GetType().GetProperty("Identifier");
+            var identifierValue = identifierProperty?.GetValue(node);
+            if (identifierProperty != null && identifierValue != null && identifierValue is SyntaxToken)
+            {
+                names.Add(((SyntaxToken)identifierValue).Text.Trim());
+                return names;
+            }
+
+            var childNodes = node.ChildNodes();
+            var qualifiedNameNodes = node.IsKind(SyntaxKind.QualifiedName) ? [(QualifiedNameSyntax)node] : childNodes.OfType<QualifiedNameSyntax>();
+            var identifierNameNodes = node.IsKind(SyntaxKind.IdentifierName) ? [(IdentifierNameSyntax)node] : childNodes.OfType<IdentifierNameSyntax>();
+            foreach (var qualifiedNameNode in qualifiedNameNodes)
+            {
+                foreach (var name in GetNamesFromNode(qualifiedNameNode.Left))
+                {
+                    names.Add(name.Trim());
+                }
+                foreach (var name in GetNamesFromNode(qualifiedNameNode.Right))
+                {
+                    names.Add(name.Trim());
+                }
+            }
+
+            foreach (var identifierNameNode in identifierNameNodes)
+            {
+                names.Add(identifierNameNode.Identifier.Text.Trim());
+            }
+
+            return names;
         }
 
         public static string GetMappedOperator(string op)

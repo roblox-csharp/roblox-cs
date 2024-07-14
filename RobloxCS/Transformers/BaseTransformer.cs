@@ -16,9 +16,14 @@ namespace RobloxCS
             _config = config;
         }
 
-        public SyntaxNode GetRoot()
+        public SyntaxNode TransformRoot()
         {
             return Visit(_root);
+        }
+
+        protected string GetName(SyntaxNode node)
+        {
+            return Utility.GetNamesFromNode(node).First();
         }
     }
 }
