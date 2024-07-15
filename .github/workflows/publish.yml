@@ -25,4 +25,4 @@ jobs:
       run: dotnet pack --configuration Release
 
     - name: Publish the package
-      run: dotnet nuget push "bin/Release/RobloxCS.1.0.0.nupkg" --api-key ${{ secrets.GITHUB_TOKEN }} --source "github"
+      run: dotnet nuget push "RobloxCS/bin/Release/roblox-cs.1.0.0.nupkg" --api-key ${{ secrets.GITHUB_TOKEN }} --source "github"
