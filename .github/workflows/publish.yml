@@ -18,6 +18,9 @@ jobs:
       with:
         dotnet-version: '8.0.x'
 
+    - name: Add GitHub source to NuGet
+      run: dotnet nuget add source --username R-unic --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/R-unic/index.json"
+
     - name: Package the project
       run: dotnet pack --configuration Release
 
