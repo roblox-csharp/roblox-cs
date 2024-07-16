@@ -140,7 +140,7 @@ namespace RobloxCS
                 Utility.FilterDuplicates(globalNamespaceSymbols, SymbolEqualityComparer.Default)
                     .OfType<INamedTypeSymbol>()
                     .Select(namespaceSymbol => KeyValuePair.Create(namespaceSymbol.Name, GetPathsForSymbolDeclarations(namespaceSymbol)))
-                    .Where(pair => !pair.Value.Contains(_tree.FilePath))
+                    .Where(pair => !string.IsNullOrEmpty(pair.Key) && !pair.Value.Contains(_tree.FilePath))
             );
         }
 

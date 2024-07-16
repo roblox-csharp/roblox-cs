@@ -26,8 +26,8 @@ namespace RobloxCS
             var debugExtraLines = Utility.IsDebug() ? 1 : 0;
             var lines = luaSource.Split('\n').ToList();
             lines.RemoveRange(0, 2 + (extraLines ?? 0) + debugExtraLines);
-            return string.Join('\n', lines)
-                .Replace("\r", "");
+
+            return string.Join('\n', lines).Replace("\r", "");
         }
 
         public static string GenerateLua(
@@ -70,7 +70,7 @@ namespace RobloxCS
             return tree;
         }
 
-        public static SyntaxTree ParseTree(string source, string sourceFile = "TestFile.cs")
+        public static SyntaxTree ParseTree(string source, string sourceFile = "TestFile.client.cs")
         {
             var cleanTree = CSharpSyntaxTree.ParseText(source);
             var compilationUnit = (CompilationUnitSyntax)cleanTree.GetRoot();

@@ -2,6 +2,8 @@ namespace RobloxCS.Tests
 {
     public class DebugTransformer_Should
     {
+        private const string _testFileName = "TestFile.client.cs";
+
         [Theory]
         [InlineData("Console.WriteLine(\"hello baby\")")]
         [InlineData("Console.Write(\"hello baby\")")]
@@ -22,7 +24,7 @@ namespace RobloxCS.Tests
             Assert.NotNull(fileInfoArg);
 
             var fileInfoLiteral = (LiteralExpressionSyntax)fileInfoArg.Expression;
-            Assert.Equal($"[TestFile.cs:1:13]:", fileInfoLiteral.Token.ValueText);
+            Assert.Equal($"[{_testFileName}:1:13]:", fileInfoLiteral.Token.ValueText);
         }
 
         [Theory]
@@ -44,7 +46,7 @@ namespace RobloxCS.Tests
 
             var fullMessageBinary= (BinaryExpressionSyntax)fullMessageArg.Expression;
             var fileInfoLiteral = (LiteralExpressionSyntax)fullMessageBinary.Left;
-            Assert.Equal("[TestFile.cs:1:13]: ", fileInfoLiteral.Token.ValueText);
+            Assert.Equal($"[{_testFileName}:1:13]: ", fileInfoLiteral.Token.ValueText);
         }
     }
 }
