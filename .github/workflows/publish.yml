@@ -1,4 +1,4 @@
-name: Publish to NuGet
+name: Publish
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
       - master
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
 
     steps:
