@@ -7,12 +7,14 @@ namespace RobloxCS
     {
     
         private List<SyntaxTree> _fileTrees = new List<SyntaxTree>();
+        private readonly string _inputDirectory;
         private readonly ConfigData _config;
         private readonly string _sourceDirectory;
         private readonly string _outDirectory;
 
         public Transpiler(string inputDirectory)
         {
+            _inputDirectory = inputDirectory;
             _config = ConfigReader.Read(inputDirectory);
             _sourceDirectory = inputDirectory + "/" + _config.SourceFolder;
             _outDirectory = inputDirectory + "/" + _config.OutputFolder;
@@ -63,9 +65,11 @@ namespace RobloxCS
         private void WriteLuaOutput(CSharpCompilation compiler)
         {
             var compiledFiles = new List<CompiledFile>();
+            var memberCollector = new MemberCollector(_fileTrees);
+            var members = memberCollector.Collect();
             foreach (var tree in _fileTrees)
             {
-                var luaSource = TranspilerUtility.GenerateLua(tree, compiler, _config);
+                var luaSource = TranspilerUtility.GenerateLua(tree, compiler, members, _inputDirectory, _config);
                 var targetPath = tree.FilePath.Replace(_config.SourceFolder, _config.OutputFolder).Replace(".cs", ".lua");
                 compiledFiles.Add(new CompiledFile(targetPath, luaSource));
             }

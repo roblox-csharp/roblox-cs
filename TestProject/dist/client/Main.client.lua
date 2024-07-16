@@ -1,17 +1,29 @@
 local CS = require(game:GetService("ReplicatedStorage").rbxcs_include.RuntimeLib)
 
-CS.class("Game", function(namespace)
-    local class = {}
-    class.__index = class
-    
-    function class.Main()
-        game.Workspace:FindFirstChildOfClass("Camera")
-    end
-    
-    if namespace == nil then
-        class.Main()
-    else
-        namespace["$onLoaded"](namespace, class.Main)
-    end
-    return class
+-- Imports for "ComponentRunner"
+require(game:GetService("ReplicatedStorage")["C#"]["Components"])
+
+-- Imports for "LavaComponent"
+require(game:GetService("Players").LocalPlayer["PlayerScripts"]["C#"]["Components"]["Lava"])
+
+CS.namespace("TestGame", function(namespace)
+    namespace:namespace("Client", function(namespace)
+        namespace:class("Game", function(namespace)
+            local class = {}
+            class.__index = class
+            
+            function class.Main()
+                CS.getAssemblyType("Components").ComponentRunner.AttachTag("Lava", function(instance)
+                    return namespace["$getMember"](namespace, "LavaComponent").new(instance)
+                end)
+            end
+            
+            if namespace == nil then
+                class.Main()
+            else
+                namespace["$onLoaded"](namespace, class.Main)
+            end
+            return class
+        end)
+    end)
 end)

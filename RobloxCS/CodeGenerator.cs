@@ -2,10 +2,17 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
+using System.Linq;
 using System.Text;
+using System.Xml.Linq;
 
 namespace RobloxCS
 {
+    enum CodeGenFlag
+    {
+        ShouldCallGetAssemblyType
+    }
+
     internal sealed class CodeGenerator : CSharpSyntaxWalker
     {
         private readonly List<SyntaxKind> _memberParentSyntaxes = new List<SyntaxKind>([
@@ -17,23 +24,42 @@ namespace RobloxCS
 
         private readonly SyntaxTree _tree;
         private readonly ConfigData _config;
+        private readonly MemberCollectionResult _members;
+        private readonly string _inputDirectory;
         private readonly CSharpCompilation _compiler;
         private readonly SemanticModel _semanticModel;
         private readonly INamespaceSymbol _globalNamespace;
         private readonly INamespaceSymbol _runtimeLibNamespace;
+        private readonly RojoProject _rojoProject; // make sure you check that it is not in debug mode before using this field!
         private readonly int _indentSize;
+        private readonly Dictionary<CodeGenFlag, bool> _flags = new Dictionary<CodeGenFlag, bool>
+        {
+            [CodeGenFlag.ShouldCallGetAssemblyType] = true
+        };
 
         private readonly StringBuilder _output = new StringBuilder();
         private int _indent = 0;
 
-        public CodeGenerator(SyntaxTree tree, CSharpCompilation compiler, ConfigData config, int indentSize = 4)
+
+        public CodeGenerator(
+            SyntaxTree tree,
+            CSharpCompilation compiler,
+            RojoProject? rojoProject,
+            MemberCollectionResult members,
+            ConfigData config,
+            string inputDirectory,
+            int indentSize = 4
+        )
         {
             _tree = tree;
             _config = config;
+            _members = members;
+            _inputDirectory = inputDirectory;
             _compiler = compiler;
             _semanticModel = compiler.GetSemanticModel(tree);
             _globalNamespace = compiler.GlobalNamespace;
             _runtimeLibNamespace = _globalNamespace.GetNamespaceMembers().FirstOrDefault(ns => ns.Name == Utility.RuntimeAssemblyName)!;
+            _rojoProject = rojoProject!;
             _indentSize = indentSize;
         }
 
@@ -41,6 +67,7 @@ namespace RobloxCS
         {
             WriteHeader();
             Visit(_tree.GetRoot());
+            WriteFooter();
             return _output.ToString().Trim();
         }
 
@@ -50,8 +77,28 @@ namespace RobloxCS
             {
                 WriteLine($"package.path = \"{Utility.GetRbxcsDirectory()}/{Utility.RuntimeAssemblyName}/?.lua;\" .. package.path");
             }
-            WriteLine($"local CS = require({GetLuaRuntimeLibPath()})");
+            Write($"local CS = ");
+            WriteRequire(GetLuaRuntimeLibPath());
             WriteLine();
+
+            foreach (var (namespaceName, declaringFiles) in GetNamespaceFilePaths())
+            {
+                WriteLine($"-- Imports for \"{namespaceName}\"");
+                foreach (var csharpFilePath in declaringFiles)
+                {
+                    WriteLine($"require({GetRequirePath(csharpFilePath)})");
+                }
+                WriteLine();
+            }
+        }
+
+        private void WriteFooter()
+        {
+            if (!_tree.FilePath.EndsWith(".client.cs") && !_tree.FilePath.EndsWith(".server.cs"))
+            {
+                WriteLine();
+                WriteLine("return {}");
+            }
         }
 
         private string GetLuaRuntimeLibPath()
@@ -65,6 +112,52 @@ namespace RobloxCS
                 // TODO: read rojo project file and locate rbxcs_include
                 return "game:GetService(\"ReplicatedStorage\").rbxcs_include.RuntimeLib";
             }
+        }
+
+        private string GetRequirePath(string longCSharpFilePath)
+        {
+            var inputDirectory = Path.Combine(_inputDirectory);
+            var csharpFilePath = longCSharpFilePath.Replace(inputDirectory, "").Replace(_config.SourceFolder, _config.OutputFolder);
+            if (Utility.IsDebug())
+            {
+                return "\"./" + csharpFilePath.Replace(".cs", "") + '"';
+            }
+            else
+            {
+                return RojoReader.ResolveInstancePath(_rojoProject, csharpFilePath)!;
+            }
+        }
+
+        private Dictionary<string, HashSet<string>> GetNamespaceFilePaths()
+        {
+            var globalNamespaceSymbols = _tree.GetRoot()
+                .DescendantNodes()
+                .Select(node => _semanticModel.GetTypeInfo(node).Type)
+                .OfType<INamedTypeSymbol>()
+                .Where(namespaceSymbol => namespaceSymbol.ContainingAssembly.Name == _config.CSharpOptions.AssemblyName);
+
+            return new Dictionary<string, HashSet<string>>(
+                Utility.FilterDuplicates(globalNamespaceSymbols, SymbolEqualityComparer.Default)
+                    .OfType<INamedTypeSymbol>()
+                    .Select(namespaceSymbol => KeyValuePair.Create(namespaceSymbol.Name, GetPathsForSymbolDeclarations(namespaceSymbol)))
+                    .Where(pair => !pair.Value.Contains(_tree.FilePath))
+            );
+        }
+
+        private HashSet<string> GetPathsForSymbolDeclarations(ISymbol symbol)
+        {
+            var filePaths = new HashSet<string>();
+            foreach (var syntaxReference in symbol.DeclaringSyntaxReferences)
+            {
+                var syntaxTree = syntaxReference.SyntaxTree;
+                var filePath = syntaxTree.FilePath;
+                if (!string.IsNullOrEmpty(filePath))
+                {
+                    filePaths.Add(filePath);
+                }
+            }
+
+            return filePaths;
         }
 
         public override void VisitCastExpression(CastExpressionSyntax node)
@@ -540,7 +633,8 @@ namespace RobloxCS
         public override void VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
         {
             var objectSymbolInfo = _semanticModel.GetSymbolInfo(node.Expression);
-            if (objectSymbolInfo.Symbol?.OriginalDefinition is INamedTypeSymbol objectDefinitionSymbol)
+            var objectType = _semanticModel.GetTypeInfo(node.Expression).Type;
+            if (objectType != null && objectType.OriginalDefinition is INamedTypeSymbol objectDefinitionSymbol)
             {
                 var superclasses = objectDefinitionSymbol.AllInterfaces;
                 if (objectDefinitionSymbol.Name == "Services" || superclasses.Select(@interface => @interface.Name).Contains("Services"))
@@ -552,34 +646,17 @@ namespace RobloxCS
                 }
             }
 
+            var usings = GetUsings();
             if (objectSymbolInfo.Symbol != null && (objectSymbolInfo.Symbol.Kind == SymbolKind.Namespace || (objectSymbolInfo.Symbol.Kind == SymbolKind.NamedType && objectSymbolInfo.Symbol.IsStatic)))
             {
-                var fullyQualifiedName = objectSymbolInfo.Symbol.ToDisplayString();
-                var root = node.SyntaxTree.GetRoot();
-                var compilationUnit = root as CompilationUnitSyntax;
-                var usings = root.DescendantNodes().OfType<UsingDirectiveSyntax>().ToList();
+                var namespaceName = objectSymbolInfo.Symbol.ToDisplayString();
                 var filePathsContainingType = objectSymbolInfo.Symbol.Locations
-                    .Where(location => location.SourceTree != null)
-                    .Select(location => location.SourceTree!.FilePath)
-                    .FirstOrDefault();
+                    .Where(location => location.SourceTree != null && location.SourceTree.FilePath != _tree.FilePath)
+                    .Select(location => location.SourceTree!.FilePath);
 
-                if (compilationUnit != null)
-                {
-                    foreach (var usingDirective in compilationUnit.Usings)
-                    {
-                        usings.Add(usingDirective);
-                    }
-                }
-
-                var noFullQualification = Constants.NO_FULL_QUALIFICATION_TYPES.Contains(fullyQualifiedName);
-                var typeIsImported = usings.Any(usingDirective => usingDirective.Name != null && fullyQualifiedName.StartsWith(GetName(usingDirective)));
-                var cannotAccess = filePathsContainingType != null && filePathsContainingType != node.SyntaxTree.FilePath && typeIsImported;
-                if (cannotAccess)
-                {
-                    Logger.Debug("Attempt to fully qualify member of un-imported namespace.");
-                    return;
-                }
-                else if (noFullQualification && fullyQualifiedName != "System")
+                var noFullQualification = Constants.NO_FULL_QUALIFICATION_TYPES.Contains(namespaceName);
+                var typeIsImported = usings.Any(usingDirective => usingDirective.Name != null && Utility.GetNamesFromNode(usingDirective).Any(name => namespaceName.StartsWith(name)));
+                if (noFullQualification && namespaceName != "System")
                 {
                     if (node.Expression is IdentifierNameSyntax identifier)
                     {
@@ -587,7 +664,7 @@ namespace RobloxCS
                     }
                     else if (node.Expression is MemberAccessExpressionSyntax memberAccess)
                     {
-                        if (fullyQualifiedName == "RobloxRuntime" && GetName(memberAccess) != "Globals")
+                        if (namespaceName == Utility.RuntimeAssemblyName && GetName(memberAccess) != "Globals")
                         {
                             Visit(memberAccess.Name);
                             Write(".");
@@ -596,7 +673,7 @@ namespace RobloxCS
                     }
                     else
                     {
-                        throw new NotSupportedException("Unsupported node.Expression type for a NO_FULL_QUALIFICATION_NAMESPACES member");
+                        throw new NotSupportedException("Unsupported node.Expression type for a NO_FULL_QUALIFICATION_TYPES member");
                     }
                     return;
                 }
@@ -622,6 +699,32 @@ namespace RobloxCS
             Visit(node.Expression);
             Write(".");
             Visit(node.Name);
+        }
+
+        private List<UsingDirectiveSyntax> GetUsings()
+        {
+            var root = _tree.GetRoot();
+            var usings = root.DescendantNodes().OfType<UsingDirectiveSyntax>().ToList();
+            var compilationUnit = root as CompilationUnitSyntax;
+            if (compilationUnit != null)
+            {
+                foreach (var usingDirective in compilationUnit.Usings)
+                {
+                    usings.Add(usingDirective);
+                }
+            }
+
+            return usings;
+        }
+
+        private void FullyQualifyMemberAccess(INamespaceSymbol? namespaceType, List<UsingDirectiveSyntax> usings)
+        {
+            if (namespaceType == null) return;
+
+            var typeIsImported = usings.Any(usingDirective => usingDirective.Name != null && Utility.GetNamesFromNode(usingDirective).Contains(namespaceType.ContainingNamespace.Name));
+            Write($"CS.getAssemblyType(\"{namespaceType.Name}\")");
+            Write(".");
+            _flags[CodeGenFlag.ShouldCallGetAssemblyType] = false;
         }
 
         public override void VisitVariableDeclarator(VariableDeclaratorSyntax node)
@@ -674,11 +777,28 @@ namespace RobloxCS
             if (prefix == "")
             {
                 var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
+                var parentNamespace = FindFirstAncestor<NamespaceDeclarationSyntax>(node);
+                var parentNamespaceSymbol = parentNamespace != null ? _semanticModel.GetSymbolInfo(parentNamespace).Symbol : null;
                 var robloxClassesNamespace = _runtimeLibNamespace.GetNamespaceMembers().FirstOrDefault(ns => ns.Name == "Classes");
                 var runtimeNamespaceIncludesIdentifier = symbol != null ? (
                     IsDescendantOfNamespaceSymbol(symbol, _runtimeLibNamespace)
                     || (robloxClassesNamespace != null && IsDescendantOfNamespaceSymbol(symbol, robloxClassesNamespace))
                 ) : false;
+
+                List<SyntaxKind> fullyQualifiedParentKinds = [SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ObjectCreationExpression];
+                if (
+                    symbol != null
+                        && symbol is ITypeSymbol typeSymbol
+                        && node.Parent != null
+                        && fullyQualifiedParentKinds.Contains(node.Parent.Kind())
+                        && typeSymbol.ContainingNamespace != null
+                        && (parentNamespace != null && Utility.GetNamesFromNode(parentNamespace.Name).LastOrDefault() != typeSymbol.ContainingNamespace.Name)
+                        && !Constants.NO_FULL_QUALIFICATION_TYPES.Contains(typeSymbol.ContainingNamespace.Name)
+                )
+                {
+                    var usings = GetUsings();
+                    FullyQualifyMemberAccess(typeSymbol.ContainingNamespace, usings);
+                }
 
                 var parentAccessExpression = FindFirstAncestor<MemberAccessExpressionSyntax>(node);
                 var isLeftSide = parentAccessExpression == null ? true : node == parentAccessExpression.Expression;
@@ -701,9 +821,9 @@ namespace RobloxCS
                 if (isLeftSide && !localScopeIncludesIdentifier && !runtimeNamespaceIncludesIdentifier)
                 {
                     // TODO: check for inherited members
-                    var parentNamespace = FindFirstAncestor<NamespaceDeclarationSyntax>(node);
-                    var namespaceIncludesIdentifier = parentNamespace != null && parentNamespace.Members
-                        .Where(member => Utility.GetNamesFromNode(member).Contains(identifierName))
+                    var namespaceSymbol = parentNamespace != null ? _semanticModel.GetDeclaredSymbol(parentNamespace) : null;
+                    var namespaceIncludesIdentifier = namespaceSymbol != null && namespaceSymbol.GetMembers()
+                        .Where(member => member.Name == identifierName)
                         .Count() > 0;
 
                     var parentClass = FindFirstAncestor<ClassDeclarationSyntax>(node);
@@ -721,7 +841,15 @@ namespace RobloxCS
                     }
                     else
                     {
-                        Write($"CS.getAssemblyType(\"{identifierName}\")");
+                        if (_flags[CodeGenFlag.ShouldCallGetAssemblyType])
+                        {
+                            Write($"CS.getAssemblyType(\"{identifierName}\")");
+                        }
+                        else
+                        {
+                            Write(identifierName);
+                            _flags[CodeGenFlag.ShouldCallGetAssemblyType] = true;
+                        }
                     }
                 }
                 else
@@ -1047,6 +1175,11 @@ namespace RobloxCS
                 }
             }
             Write('}');
+        }
+
+        private void WriteRequire(string path)
+        {
+            WriteLine($"require({path})");
         }
 
         private void WriteLine()

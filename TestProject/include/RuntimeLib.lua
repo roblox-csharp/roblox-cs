@@ -29,10 +29,16 @@ end
 local CSNamespace = {} do
 	CSNamespace.__index = CSNamespace
 
-	function CSNamespace.new(name)
+	function CSNamespace.new(name, parent)
 		local self = {}
 		self.name = name
+		self.parent = parent
 		self.members = {}
+		self.members.__index = self.members
+		if self.parent ~= nil then
+			self.members = setmetatable(self.members, self.parent.members)
+		end
+
 		self["$loadCallbacks"] = {}
 		return setmetatable(self, CSNamespace)
 	end
@@ -54,7 +60,7 @@ local CSNamespace = {} do
 	end
 
 	function CSNamespace:namespace(name, registerMembers)
-		CS.namespace(name, registerMembers, self.members)
+		CS.namespace(name, registerMembers, self.members, self)
 	end
 end
 
@@ -70,12 +76,12 @@ function CS.class(name, create, namespace)
 	location[name] = class
 end
 
-function CS.namespace(name, registerMembers, location)
+function CS.namespace(name, registerMembers, location, parent)
 	if location == nil then
 		location = assemblyGlobal
 	end
 
-	local namespaceDefinition = assemblyGlobal[name] or CSNamespace.new(name)
+	local namespaceDefinition = location[name] or CSNamespace.new(name, parent)
 	registerMembers(namespaceDefinition)
 	for _, callback in pairs(namespaceDefinition["$loadCallbacks"]) do
 		callback()

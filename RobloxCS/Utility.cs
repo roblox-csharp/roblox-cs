@@ -74,7 +74,7 @@ namespace RobloxCS
 
         public static string FixPathSep(string path)
         {
-            return path.Replace('\\', '/').Replace("//", "/");
+            return path.Replace("\\\\", "/").Replace('\\', '/').Replace("//", "/");
         }
 
         public static bool IsDebug()
@@ -88,7 +88,7 @@ namespace RobloxCS
 
         public static string? GetRbxcsDirectory()
         {
-            var directoryName = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Utility.GetAssemblyDirectory()))));
+            var directoryName = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(GetAssemblyDirectory()))));
             return directoryName == null ? null : FixPathSep(directoryName); // pretend like this isn't here lol
         }
 
@@ -108,6 +108,22 @@ namespace RobloxCS
             }
 
             return assemblyDirectory!.Split('/').Last();
+        }
+
+        public static List<T> FilterDuplicates<T>(IEnumerable<T> items, IEqualityComparer<T> comparer)
+        {
+            var seen = new Dictionary<T, bool>(comparer);
+            var result = new List<T>();
+            foreach (var item in items)
+            {
+                if (!seen.ContainsKey(item))
+                {
+                    seen[item] = true;
+                    result.Add(item);
+                }
+            }
+
+            return result;
         }
 
         public static void PrintChildNodes(SyntaxNode node)

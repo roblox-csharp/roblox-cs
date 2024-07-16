@@ -1,9 +1,11 @@
 ﻿# RobloxCS
+This project includes the compiler and transformers.
 
 ## To-do
-- Macro `ServiceProvider.GetService<T>()` to `ServiceProvider:GetService("T")`
-- Imports
 - Inheritance chains 🤮
+- Omit `require` if only types are used from the import
+- Add definitions for the rest of the Roblox globals
+- Macro `ServiceProvider.GetService<T>()` to `ServiceProvider:GetService("T")`
 - Copy `RuntimeLib.lua` into `<project-dir>/include` on compile
 - Default values (via `default` keyword)
 - Macro `IEnumerable<T>` methods

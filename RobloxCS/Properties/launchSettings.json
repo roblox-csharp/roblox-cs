@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "roblox-cs": {
+      "commandName": "Project",
+      "commandLineArgs": "./TestProject"
+    }
+  }
+}

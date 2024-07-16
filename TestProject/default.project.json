@@ -13,7 +13,7 @@
 			"rbxcs_include": {
 				"$path": "./include"
 			},
-			"shared": {
+			"C#": {
 				"$path": "dist/Shared"
 			}
 		},

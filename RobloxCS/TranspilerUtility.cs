@@ -7,6 +7,20 @@ namespace RobloxCS
 {
     public static class TranspilerUtility
     {
+        public static RojoProject? GetRojoProject(string inputDirectory, string projectName)
+        {
+            if (Utility.IsDebug()) return null;
+
+            var path = RojoReader.FindProjectPath(inputDirectory, projectName);
+            if (path == null)
+            {
+                Logger.Error($"Failed to find Rojo project file \"{projectName}.project.json\"!");
+                return null!;
+            }
+
+            return RojoReader.Read(path);
+        }
+
         public static string CleanUpLuaForTests(string luaSource, int? extraLines)
         {
             var debugExtraLines = Utility.IsDebug() ? 1 : 0;
@@ -16,10 +30,17 @@ namespace RobloxCS
                 .Replace("\r", "");
         }
 
-        public static string GenerateLua(SyntaxTree tree, CSharpCompilation compiler, ConfigData? config = null)
+        public static string GenerateLua(
+            SyntaxTree tree,
+            CSharpCompilation compiler,
+            MemberCollectionResult members,
+            string inputDirectory = "",
+            ConfigData? config = null
+        )
         {
             config ??= ConfigReader.UnitTestingConfig;
-            var codeGenerator = new CodeGenerator(tree, compiler, config);
+            var rojoProject = GetRojoProject(inputDirectory, config.RojoProjectName);
+            var codeGenerator = new CodeGenerator(tree, compiler, rojoProject, members, config, Utility.FixPathSep(inputDirectory));
             return codeGenerator.GenerateLua();
         }
 

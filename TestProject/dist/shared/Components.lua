@@ -67,3 +67,6 @@ CS.namespace("Components", function(namespace)
         return setmetatable({}, class)
     end)
 end)
+
+
+return {}

@@ -210,7 +210,8 @@
             var cleanTree = TranspilerUtility.ParseTree(source);
             var transformedTree = TranspilerUtility.TransformTree(cleanTree, [TransformFactory.Main()]);
             var compiler = TranspilerUtility.GetCompiler([transformedTree]);
-            var generatedLua = TranspilerUtility.GenerateLua(transformedTree, compiler);
+            var memberCollector = new MemberCollector([cleanTree]);
+            var generatedLua = TranspilerUtility.GenerateLua(transformedTree, compiler, memberCollector.Collect());
             return TranspilerUtility.CleanUpLuaForTests(generatedLua, extraLines);
         }
     }

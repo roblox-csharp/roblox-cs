@@ -1,6 +1,7 @@
-﻿using System.Text.Json;
+﻿using Microsoft.CodeAnalysis;
+using System.Text;
+using System.Text.Json;
 using System.Text.Json.Serialization;
-using System.Runtime.Serialization;
 
 #pragma warning disable CS8618
 public sealed class RojoProject
@@ -51,14 +52,15 @@ public sealed class InstanceDescription
     public Dictionary<string, InstanceDescription> Instances { get; set; } = new Dictionary<string, InstanceDescription>();
 
     [JsonExtensionData]
-    private IDictionary<string, JsonElement> _additionalData = new Dictionary<string, JsonElement>();
+    public IDictionary<string, JsonElement> AdditionalData { get; set; } = new Dictionary<string, JsonElement>();
 
-    [OnDeserialized]
-    private void OnDeserialized(StreamingContext context)
+    public void OnDeserialized()
     {
-        foreach (var kvp in _additionalData)
+        foreach (var kvp in AdditionalData)
         {
-            Instances[kvp.Key] = kvp.Value.Deserialize<InstanceDescription>()!;
+            var childInstance = kvp.Value.Deserialize<InstanceDescription>()!;
+            Instances[kvp.Key] = childInstance;
+            childInstance.OnDeserialized();
         }
     }
 }
@@ -68,6 +70,13 @@ namespace RobloxCS
 {
     public static class RojoReader
     {
+        private static readonly List<string> _services = ["ReplicatedStorage", "ReplicatedFirst", "ServerStorage", "ServerScriptService", "StarterPlayer", "StarterPlayerScripts"]; // things that will be converted into game:GetService("XXX")
+        private static readonly Dictionary<string, string> _instanceNameMap = new Dictionary<string, string>
+        {
+            { "StarterPlayer", "game:GetService(\"Players\").LocalPlayer" },
+            { "StarterPlayerScripts", "PlayerScripts" }
+        };
+
         public static RojoProject Read(string configPath)
         {
             var jsonContent = "";
@@ -96,16 +105,76 @@ namespace RobloxCS
                 FailToRead(configPath, "Invalid Rojo project! Make sure it has all required fields ('name' and 'tree').");
             }
 
+            UpdateInstances(project!.Tree);
             return project!;
         }
 
-        public static string? FindProjectPath(string directoryPath)
+        public static string? FindProjectPath(string directoryPath, string projectName)
         {
-            foreach (var descendant in Directory.EnumerateFiles(directoryPath, "**/*.default.json"))
+            return Directory.GetFiles(directoryPath).FirstOrDefault(file => Path.GetFileName(file) == $"{projectName}.project.json");
+        }
+
+        public static string? ResolveInstancePath(RojoProject project, string filePath)
+        {
+            var path = TraverseInstanceTree(project.Tree, Utility.FixPathSep(filePath));
+            return path == null ? null : FormatInstancePath(Path.TrimEndingDirectorySeparator(path));
+        }
+
+        private static string? TraverseInstanceTree(InstanceDescription instance, string filePath)
+        {
+            if (instance.Path != null && filePath.StartsWith(Utility.FixPathSep(instance.Path)))
             {
-                return descendant;
+                var remainingPath = filePath.Substring(instance.Path.Length + 1); // +1 to remove '/'
+                return Path.ChangeExtension(remainingPath, null);
             }
+
+            foreach (var childInstance in instance.Instances)
+            {
+                var result = TraverseInstanceTree(childInstance.Value, filePath);
+                var leftName = childInstance.Key;
+                if (_instanceNameMap.TryGetValue(leftName, out var mappedName))
+                {
+                    leftName = mappedName;
+                }
+
+                if (result != null)
+                {
+                    return $"{leftName}/{result}";
+                }
+            }
+
             return null;
+        }
+
+        private static string FormatInstancePath(string path)
+        {
+            var segments = path.Split('/');
+            var formattedPath = new StringBuilder();
+            foreach (var segment in segments)
+            {
+                var isServiceIdentifier = _services.Contains(segment);
+                if (segment == segments.First())
+                {
+                    formattedPath.Append(isServiceIdentifier ? $"game:GetService(\"{segment}\")" : segment);
+                }
+                else
+                {
+                    formattedPath.Append(formattedPath.Length > 0 ? "[\"" : "");
+                    formattedPath.Append(segment);
+                    formattedPath.Append("\"]");
+                }
+            }
+
+            return formattedPath.ToString();
+        }
+
+        private static void UpdateInstances(InstanceDescription instance)
+        {
+            instance.OnDeserialized();
+            foreach (var childInstance in instance.Instances.Values)
+            {
+                UpdateInstances(childInstance);
+            }
         }
 
         private static void FailToRead(string configPath, string message)

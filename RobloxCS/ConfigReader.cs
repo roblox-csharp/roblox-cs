@@ -20,6 +20,7 @@ public sealed class ConfigData
 {
     public string SourceFolder { get; set; }
     public string OutputFolder { get; set; }
+    public string RojoProjectName { get; set; } = "default";
     public CSharpOptions CSharpOptions { get; set; }
 
     public bool IsValid()

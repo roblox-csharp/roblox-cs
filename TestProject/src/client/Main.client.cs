@@ -1,10 +1,14 @@
 using RobloxRuntime.Classes;
-using static RobloxRuntime.Globals;
 
-public static class Game
+using Components;
+
+namespace TestGame.Client
 {
-    public static void Main()
+    public static class Game
     {
-        var child = game.Workspace.FindFirstChild("ChildName");
+        public static void Main()
+        {
+            ComponentRunner.AttachTag("Lava", instance => new LavaComponent((Part)instance));
+        }
     }
 }
