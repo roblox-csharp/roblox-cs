@@ -24,7 +24,26 @@ jobs:
     - name: Package the project
       run: dotnet pack --configuration Release
 
-    - name: Find and publish the package
+    - name: Get version from Git tag
+      id: get_version
+      run: echo "::set-output name=VERSION::${GITHUB_REF#refs/tags/v}"
+
+    - name: Check if version is already published
+      id: check_version
+      run: |
+        PACKAGE_VERSION=${{ steps.get_version.outputs.VERSION }}
+        if dotnet nuget list source --source "github" | grep -q "${PACKAGE_VERSION}"; then
+          echo "::set-output name=VERSION_EXISTS::true"
+        else
+          echo "::set-output name=VERSION_EXISTS::false"
+        fi
+
+    - name: Find and publish the latest package
+      if: steps.check_version.outputs.VERSION_EXISTS == 'false'
       run: |
         PACKAGE_PATH=$(find ./RobloxCS/bin/Release -name "*.nupkg" -type f -print0 | xargs -0 ls -1t | head -n 1)
         dotnet nuget push "$PACKAGE_PATH" --api-key ${{ secrets.GITHUB_TOKEN }} --source "github"
+
+    - name: Version already published
+      if: steps.check_version.outputs.VERSION_EXISTS == 'true'
+      run: echo "The version is already published. Skipping publish step."
