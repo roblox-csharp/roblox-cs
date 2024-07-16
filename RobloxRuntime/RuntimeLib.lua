@@ -17,15 +17,6 @@ if split == nil then
 	end
 end
 
-do
-	local Math = {} do
-		Math.PI = math.pi
-		Math.Pow = math.pow
-	end
-
-	assemblyGlobal.Math = math;
-end
-
 local CSNamespace = {} do
 	CSNamespace.__index = CSNamespace
 
@@ -88,7 +79,6 @@ function CS.namespace(name, registerMembers, location, parent)
 	location[name] = namespaceDefinition
 	return namespaceDefinition
 end
-
 
 function CS.getAssemblyType(name)
 	local env

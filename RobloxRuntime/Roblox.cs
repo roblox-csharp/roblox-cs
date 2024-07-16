@@ -1,11 +1,19 @@
-﻿namespace RobloxRuntime
+﻿using RobloxRuntime.Classes;
+
+namespace RobloxRuntime
 {
-    using RobloxRuntime.Classes;
     using HttpHeaders = IDictionary<string, string>;
 
     public static class Globals
     {
+        public static MathLib math = null!;
+        public static OsLib os = null!;
+        public static CoroutineLib coroutine = null!;
+        public static TaskLib task = null!;
+
         public static DataModel game { get; } = null!;
+        public static LuaSourceContainer script { get; } = null!;
+        public static PluginClasses.Plugin plugin { get; } = null!;
 
         public static void warn(params string[] messages)
         {
@@ -13,6 +21,89 @@
 
         public static void error(string message, int? level = null)
         {
+        }
+
+        public static object require(ModuleScript module)
+        {
+            return null!;
+        }
+
+        public static float tick()
+        {
+            return default;
+        }
+
+        public static string typeOf(object obj)
+        {
+            return null!;
+        }
+
+        public static IEnumerable<(TKey, TValue)> pairs<TKey, TValue>(Dictionary<TKey, TValue> table) where TKey : notnull
+        {
+            return null!;
+        }
+
+        public static object getmetatable(object obj)
+        {
+            return null!;
+        }
+
+        public static void setmetatable(object obj, object meta)
+        {
+        }
+
+        public static object rawget(object obj, object index)
+        {
+            return null!;
+        }
+
+        public static object rawset(object obj, object index, object value)
+        {
+            return null!;
+        }
+
+        public static uint rawlen(object obj)
+        {
+            return default;
+        }
+
+        public static bool raweq(object a, object b)
+        {
+            return default;
+        }
+
+        public static void assert(object obj, string? errorMessage = null)
+        { 
+        }
+
+        public static object newproxy(bool addMetatable)
+        {
+            return null!;
+        }
+
+        public static object loadstring(string str, string? chunkName = null)
+        {
+            return null!;
+        }
+
+        public static string version()
+        {
+            return null!;
+        }
+
+        public static UserSettings UserSettings()
+        {
+            return null!;
+        }
+
+        public static PluginClasses.GlobalSettings settings()
+        {
+            return null!;
+        }
+
+        public static uint gcinfo()
+        {
+            return default;
         }
     }
 
@@ -1288,6 +1379,19 @@
         {
             return null!;
         }
+    }
+
+    public interface time_t
+    {
+        public uint year { get; }
+        public uint month { get; }
+        public uint day { get; }
+        public uint wday { get; }
+        public uint yday { get; }
+        public uint hour { get; }
+        public uint min { get; }
+        public uint sec { get; }
+        public bool isdst { get; }
     }
 
     public interface TimeTable

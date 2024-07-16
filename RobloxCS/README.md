@@ -3,8 +3,10 @@ This project includes the compiler and transformers.
 
 ## To-do
 - Inheritance chains 🤮
+- Destructuring
 - Omit `require` if only types are used from the import
 - Add definitions for the rest of the Roblox globals
+- Macro number `Parse()` methods to `tonumber()`
 - Macro `ServiceProvider.GetService<T>()` to `ServiceProvider:GetService("T")`
 - Copy `RuntimeLib.lua` into `<project-dir>/include` on compile
 - Default values (via `default` keyword)

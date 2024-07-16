@@ -623,6 +623,16 @@ namespace RobloxCS
                         return;
                     }
                 }
+            } else if (node.Expression is IdentifierNameSyntax identifier)
+            {
+                var name = GetName(identifier);
+                switch (name)
+                {
+                    case "typeOf":
+                        Write("typeof");
+                        Visit(node.ArgumentList);
+                        return;
+                }
             }
 
             Visit(node.Expression);
