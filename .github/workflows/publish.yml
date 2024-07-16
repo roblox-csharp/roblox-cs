@@ -26,5 +26,5 @@ jobs:
 
     - name: Find and publish the package
       run: |
-        PACKAGE_PATH=$(find . -name "*.nupkg" | head -n 1)
+        PACKAGE_PATH=$(find ./RobloxCS/bin/Release -name "*.nupkg" -type f -print0 | xargs -0 ls -1t | head -n 1)
         dotnet nuget push "$PACKAGE_PATH" --api-key ${{ secrets.GITHUB_TOKEN }} --source "github"
