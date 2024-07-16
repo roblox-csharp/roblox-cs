@@ -96,7 +96,6 @@ namespace RobloxCS
         {
             if (!_tree.FilePath.EndsWith(".client.cs") && !_tree.FilePath.EndsWith(".server.cs"))
             {
-                WriteLine();
                 WriteLine("return {}");
             }
         }
