@@ -44,6 +44,7 @@ namespace RobloxCS
                 {
                     SourceFolder = "test-src",
                     OutputFolder = "test-dist",
+                    RojoProjectName = "UNIT_TESTING",
                     CSharpOptions = new CSharpOptions()
                     {
                         EntryPointName = "UnitTest",

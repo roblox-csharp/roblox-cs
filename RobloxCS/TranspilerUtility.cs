@@ -9,7 +9,7 @@ namespace RobloxCS
     {
         public static RojoProject? GetRojoProject(string inputDirectory, string projectName)
         {
-            if (Utility.IsDebug()) return null;
+            if (Utility.IsDebug() || projectName == "UNIT_TESTING") return null;
 
             var path = RojoReader.FindProjectPath(inputDirectory, projectName);
             if (path == null)
