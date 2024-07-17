@@ -5,10 +5,9 @@
         public static readonly HashSet<string> NO_FULL_QUALIFICATION_TYPES = new HashSet<string>
         {
             "System",
-            "RobloxRuntime",
-            "RobloxRuntime.Classes",
-            "RobloxRuntime.PluginClasses",
-            "RobloxRuntime.Globals"
+            "Roblox",
+            "Roblox.Globals",
+            "Roblox.PluginClasses"
         };
 
         public static readonly HashSet<string> IGNORED_BINARY_OPERATORS = new HashSet<string>

@@ -521,6 +521,7 @@ namespace RobloxCS
         {
             if (node.Expression is MemberAccessExpressionSyntax memberAccess)
             {
+                var objectType = _semanticModel.GetTypeInfo(memberAccess.Expression).Type;
                 var objectName = GetName(memberAccess.Expression);
                 var name = GetName(memberAccess.Name);
 
@@ -534,7 +535,6 @@ namespace RobloxCS
                     case "Write":
                     case "WriteLine":
                         {
-                            var objectType = _semanticModel.GetTypeInfo(memberAccess.Expression).Type;
                             if (objectType == null || objectType.Name != "Console") break;
 
                             Write("print");
@@ -543,32 +543,35 @@ namespace RobloxCS
                         }
                     case "Create":
                         {
-                            if (objectName != "Instance") break;
+                            if (objectType == null || objectType.Name != "Instance") break;
 
-                            var symbolInfo = _semanticModel.GetSymbolInfo(node);
-                            var methodSymbol = (IMethodSymbol)symbolInfo.Symbol!;
-                            if (!methodSymbol.IsGenericMethod)
-                                throw new Exception("Attempt to macro Instance.Create<T>() but it is not generic?");
-
-                            var arguments = node.ArgumentList.Arguments;
-                            var instanceType = methodSymbol.TypeArguments.First();
-                            Visit(memberAccess.Expression);
-                            Write($".new(\"{instanceType.Name}\"");
-                            if (arguments.Count > 0)
+                            var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
+                            if (symbol is IMethodSymbol methodSymbol)
                             {
-                                Write(", ");
-                                foreach (var argument in arguments)
+                                if (!methodSymbol.IsGenericMethod)
+                                    Logger.CompilerError("Attempt to macro Instance.Create<T>() but it is not generic");
+
+                                var arguments = node.ArgumentList.Arguments;
+                                var instanceType = methodSymbol.TypeArguments.First();
+                                Visit(memberAccess.Expression);
+                                Write($".new(\"{instanceType.Name}\"");
+                                if (arguments.Count > 0)
                                 {
-                                    Visit(argument.Expression);
-                                    if (argument != arguments.Last())
+                                    Write(", ");
+                                    foreach (var argument in arguments)
                                     {
-                                        Write(", ");
+                                        Visit(argument.Expression);
+                                        if (argument != arguments.Last())
+                                        {
+                                            Write(", ");
+                                        }
                                     }
                                 }
-                            }
 
-                            Write(')');
-                            return;
+                                Write(')');
+                                return;
+                            }
+                            break;
                         }
                     case "GetService":
                     case "FindFirstChildOfClass":
@@ -577,14 +580,13 @@ namespace RobloxCS
                     case "FindFirstAncestorWhichIsA":
                     case "IsA":
                         {
-                            var objectType = _semanticModel.GetTypeInfo(memberAccess.Expression).Type;
                             if (objectType == null) return;
 
                             var superclasses = objectType.AllInterfaces.ToList();
                             if (objectType.Name != "Instance" && !superclasses.Select(@interface => @interface.Name).Contains("Instance")) return;
 
-                            var symbolInfo = _semanticModel.GetSymbolInfo(node);
-                            var methodSymbol = (IMethodSymbol)symbolInfo.Symbol!;
+                            var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
+                            var methodSymbol = (IMethodSymbol)symbol!;
                             if (!methodSymbol.IsGenericMethod)
                                 Logger.CompilerError($"Attempt to macro {objectType.Name}.{name}<T>() but it is not generic");
 
@@ -789,10 +791,10 @@ namespace RobloxCS
                 var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
                 var parentNamespace = FindFirstAncestor<NamespaceDeclarationSyntax>(node);
                 var parentNamespaceSymbol = parentNamespace != null ? _semanticModel.GetSymbolInfo(parentNamespace).Symbol : null;
-                var robloxClassesNamespace = _runtimeLibNamespace.GetNamespaceMembers().FirstOrDefault(ns => ns.Name == "Classes");
+                var pluginClassesNamespace = _runtimeLibNamespace.GetNamespaceMembers().FirstOrDefault(ns => ns.Name == "PluginClasses");
                 var runtimeNamespaceIncludesIdentifier = symbol != null ? (
                     IsDescendantOfNamespaceSymbol(symbol, _runtimeLibNamespace)
-                    || (robloxClassesNamespace != null && IsDescendantOfNamespaceSymbol(symbol, robloxClassesNamespace))
+                    || (pluginClassesNamespace != null && IsDescendantOfNamespaceSymbol(symbol, pluginClassesNamespace))
                 ) : false;
 
                 List<SyntaxKind> fullyQualifiedParentKinds = [SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ObjectCreationExpression];

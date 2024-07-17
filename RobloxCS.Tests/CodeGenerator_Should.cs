@@ -95,23 +95,23 @@
         public void RobloxType_DoesNotGenerateGetAssemblyTypeCall(string robloxType)
         {
 
-            var cleanedLua = GetCleanLua($"using RobloxRuntime; using RobloxRuntime.Classes; {robloxType}.a;");
+            var cleanedLua = GetCleanLua($"using {Utility.RuntimeAssemblyName}; {robloxType}.a;");
             Assert.Equal(robloxType + ".a", cleanedLua);
         }
 
         [Theory]
         [InlineData("Instance")]
-        [InlineData("RobloxRuntime.Classes.Instance")]
+        [InlineData($"{Utility.RuntimeAssemblyName}.Instance")]
         public void InstanceCreate_Macros(string instanceClassPath)
         {
-            var cleanedLua = GetCleanLua($"using RobloxRuntime.Classes; var part = {instanceClassPath}.Create<Part>()");
+            var cleanedLua = GetCleanLua($"using {Utility.RuntimeAssemblyName}; var part = {instanceClassPath}.Create<Part>()");
             Assert.Equal("local part = Instance.new(\"Part\")", cleanedLua);
         }
 
         [Fact]
         public void InstanceIsA_Macros()
         {
-            var cleanedLua = GetCleanLua("using RobloxRuntime.Classes; var part = Instance.Create<Part>(); part.IsA<Frame>();", 1);
+            var cleanedLua = GetCleanLua($"using {Utility.RuntimeAssemblyName}; var part = Instance.Create<Part>(); part.IsA<Frame>();", 1);
             Assert.Equal("part:IsA(\"Frame\")", cleanedLua);
         }
 
@@ -126,11 +126,15 @@
             Assert.Equal("print(\"hello world\")", cleanedLua);
         }
 
-        [Fact]
-        public void StaticClass_NoFullQualification()
+        [Theory]
+        [InlineData("game")]
+        [InlineData("script")]
+        [InlineData("os")]
+        [InlineData("task")]
+        public void StaticClass_NoFullQualification(string memberName)
         {
-            var cleanedLua = GetCleanLua($"RobloxRuntime.Globals.game");
-            Assert.Equal("game", cleanedLua);
+            var cleanedLua = GetCleanLua($"{Utility.RuntimeAssemblyName}.Globals.{memberName}");
+            Assert.Equal(memberName, cleanedLua);
         }
 
         [Theory]
