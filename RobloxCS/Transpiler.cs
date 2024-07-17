@@ -5,7 +5,8 @@ namespace RobloxCS
 {
     public sealed class Transpiler
     {
-    
+        private const string _includeFolderName = "Include";
+
         private List<SyntaxTree> _fileTrees = new List<SyntaxTree>();
         private readonly string _inputDirectory;
         private readonly ConfigData _config;
@@ -24,6 +25,7 @@ namespace RobloxCS
         {
             ParseSource();
             var compiler = CompileASTs();
+            CopyIncludedLua();
             WriteLuaOutput(compiler);
         }
 
@@ -60,6 +62,30 @@ namespace RobloxCS
             }
 
             return compiler;
+        }
+
+        private void CopyIncludedLua()
+        {
+            var runtimeDirectory = Utility.GetRuntimeDirectory();
+            if (runtimeDirectory == null)
+            {
+                Logger.CompilerError("Failed to find Roblox runtime library");
+                return;
+            }
+
+            var includeDirectory = Utility.FixPathSep(Path.Combine(runtimeDirectory, _includeFolderName));
+            var destinationIncludeDirectory = includeDirectory
+                .Replace(runtimeDirectory, _inputDirectory)
+                .Replace(_includeFolderName, _includeFolderName.ToLower());
+
+            try
+            {
+                FileManager.CopyDirectory(includeDirectory, destinationIncludeDirectory);
+            }
+            catch (Exception e)
+            {
+                Logger.Error($"Failed to copy included Lua files: {e.Message}");
+            }
         }
 
         private void WriteLuaOutput(CSharpCompilation compiler)

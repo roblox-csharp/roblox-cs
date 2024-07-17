@@ -13,12 +13,11 @@ CS.namespace("TestGame", function(namespace)
             class.__index = class
             
             function class.Main()
-                Instance.new("Part")
                 local x = 5
-                print("[TestProject/Client/Main.client.cs:14:13]:", x)
+                print("[TestProject/Client/Main.client.cs:13:13]:", x)
                 task.wait(2)
-                print("[TestProject/Client/Main.client.cs:16:13]:", math.pow(x, 2))
-                print("[TestProject/Client/Main.client.cs:17:13]:", game:GetService("Players"))
+                print("[TestProject/Client/Main.client.cs:15:13]:", math.pow(x, 2))
+                print("[TestProject/Client/Main.client.cs:16:13]:", game:GetService("Players"))
                 CS.getAssemblyType("Components").ComponentRunner.AttachTag("Lava", function(instance)
                     return namespace["$getMember"](namespace, "LavaComponent").new(instance)
                 end)

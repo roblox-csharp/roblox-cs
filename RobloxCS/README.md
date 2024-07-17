@@ -7,13 +7,10 @@ This project includes the compiler and transformers.
 - The rest of the built-in libraries
 - Omit `require` if only types are used from the import
 - Macro number `Parse()` methods to `tonumber()`
-- Copy `RuntimeLib.lua` into `<project-dir>/include` on compile
 - Default values (via `default` keyword)
 - Macro `IEnumerable<T>` (or `Array`?) methods
 - Classes/structs/interfaces nested in classes/structs/interfaces
 - Transform operator methods into a RuntimeLib method call
-- Polyfills:
-	- The rest of the `Math` library
 
 ## Will maybe be supported
 - `partial` keyword

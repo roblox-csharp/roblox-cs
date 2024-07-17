@@ -15,6 +15,36 @@
             }
         }
 
+        public static void CopyDirectory(string sourceDirectory, string destinationDirectory)
+        {
+            var directory = new DirectoryInfo(sourceDirectory);
+            if (!directory.Exists)
+            {
+                throw new DirectoryNotFoundException(
+                    "Source directory does not exist or could not be found: "
+                    + sourceDirectory);
+            }
+
+            if (!Directory.Exists(destinationDirectory))
+            {
+                Directory.CreateDirectory(destinationDirectory);
+            }
+
+            var files = directory.GetFiles();
+            foreach (var file in files)
+            {
+                var tempPath = Path.Combine(destinationDirectory, file.Name);
+                file.CopyTo(tempPath, true);
+            }
+
+            var directories = directory.GetDirectories();
+            foreach (var subdirectory in directories)
+            {
+                var tempPath = Path.Combine(destinationDirectory, subdirectory.Name);
+                CopyDirectory(subdirectory.FullName, tempPath);
+            }
+        }
+
         public static void WriteCompiledFiles(string outDirectory, List<CompiledFile> compiledFiles)
         {
             Logger.Info($"Compiling {compiledFiles.Count} files...");

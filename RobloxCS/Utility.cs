@@ -86,17 +86,23 @@ namespace RobloxCS
 #endif
         }
 
-        public static string? GetRbxcsDirectory()
+        public static string? GetRuntimeDirectory()
         {
-            var directoryName = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(GetAssemblyDirectory()))));
-            return directoryName == null ? null : FixPathSep(directoryName); // pretend like this isn't here lol
+            var repoDirectory = GetRbxcsDirectory();
+            return repoDirectory == null ? null : FixPathSep(Path.Combine(repoDirectory, RuntimeAssemblyName));
         }
 
-        public static string? GetAssemblyDirectory()
+        public static string? GetRbxcsDirectory()
+        {
+            var directoryName = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(GetAssemblyDirectory())))); // pretend like this isn't here lol
+            return directoryName == null ? null : FixPathSep(directoryName);
+        }
+
+        public static string GetAssemblyDirectory()
         {
             var location = FixPathSep(Assembly.GetExecutingAssembly().Location);
-            var directoryName = Path.GetDirectoryName(location);
-            return directoryName == null ? null : FixPathSep(directoryName);
+            var directoryName = Path.GetDirectoryName(location)!;
+            return FixPathSep(directoryName);
         }
 
         public static string GetTargetFramework()
