@@ -1,6 +1,4 @@
-﻿using Roblox.Classes;
-
-namespace Roblox
+﻿namespace Roblox
 {
     using HttpHeaders = IDictionary<string, string>;
 
@@ -102,115 +100,112 @@ namespace Roblox
         }
     }
 
-    namespace Classes
+    public interface ClipEvaluator : Instance
     {
-        public interface ClipEvaluator : Instance
+    }
+
+    public interface SystemAddress : Instance
+    {
+    }
+
+    public interface OpenCloudModel : Instance
+    {
+    }
+
+    public interface HSRDataContentProvider : Instance
+    {
+    }
+
+    public interface MeshContentProvider : Instance
+    {
+    }
+
+    public interface SolidModelContentProvider : Instance
+    {
+    }
+
+    public interface CSGDictionaryService : Instance
+    {
+    }
+
+    public interface NonReplicatedCSGDictionaryService : Instance
+    {
+    }
+
+    public interface AppStorageService : Instance
+    {
+    }
+
+    public interface UserStorageService : Instance
+    {
+    }
+
+    public partial interface NetworkPeer : Instance
+    {
+        public void SetOutgoingKBPSLimit(int limit);
+    }
+
+    public partial interface NetworkClient : NetworkPeer
+    {
+    }
+
+    public partial interface NetworkServer : NetworkPeer
+    {
+    }
+
+    public partial interface Players
+    {
+        public Player LocalPlayer { get; }
+    }
+
+    public partial interface BasePart
+    {
+        public Vector3 Position { get; set; }
+        public Vector3 Orientation { get; set; }
+    }
+
+    public partial interface DataModel : Instance
+    {
+        public Workspace Workspace { get; }
+        public Lighting Lighting { get; }
+    }
+
+    public interface ICreatableInstance : Instance
+    {
+    }
+
+    public partial interface Instance
+    {
+        public static sealed T Create<T>(Instance? parent = null) where T : ICreatableInstance
         {
+            return default!;
         }
 
-        public interface SystemAddress : Instance
-        {
-        }
-
-        public interface OpenCloudModel : Instance
-        {
-        }
-
-        public interface HSRDataContentProvider : Instance
-        {
-        }
-
-        public interface MeshContentProvider : Instance
-        {
-        }
-
-        public interface SolidModelContentProvider : Instance
-        {
-        }
-
-        public interface CSGDictionaryService : Instance
-        {
-        }
-
-        public interface NonReplicatedCSGDictionaryService : Instance
-        {
-        }
-
-        public interface AppStorageService : Instance
-        {
-        }
-
-        public interface UserStorageService : Instance
-        {
-        }
-
-        public partial interface NetworkPeer : Instance
-        {
-            public void SetOutgoingKBPSLimit(int limit);
-        }
-
-        public partial interface NetworkClient : NetworkPeer
-        {
-        }
-
-        public partial interface NetworkServer : NetworkPeer
-        {
-        }
-
-        public partial interface Players
-        {
-            public Player LocalPlayer { get; }
-        }
-
-        public partial interface BasePart
-        {
-            public Vector3 Position { get; set; }
-            public Vector3 Orientation { get; set; }
-        }
-
-        public partial interface DataModel : Instance
-        {
-            public Workspace Workspace { get; }
-            public Lighting Lighting { get; }
-        }
-
-        public interface ICreatableInstance : Instance
-        { 
-        }
-
-        public partial interface Instance
-        {
-            public static sealed T Create<T>(Instance? parent = null) where T : ICreatableInstance
-            {
-                return default!;
-            }
-
-            public Instance Clone();
-            public bool IsA<T>() where T : Instance;
-            public bool IsAncestorOf(Instance descendant);
-            public bool IsDescendantOf(Instance ancestor);
-            public object? GetAttribute(string attribute);
-            public Dictionary<string, object> GetAttributes();
-            public Instance[] GetDescendants();
-            public T? FindFirstAncestorOfClass<T>() where T : Instance;
-            public T? FindFirstAncestorWhichIsA<T>() where T : Instance;
-            public T? FindFirstChildOfClass<T>() where T : Instance;
-            public T? FindFirstChildWhichIsA<T>(bool? recursive) where T : Instance;
-            public string[] GetTags();
-            public Instance WaitForChild(string name);
-            public Instance? WaitForChild(string name, float timeout);
-            public Instance clone();
-            public bool isDescendantOf(Instance ancestor);
-            public ScriptSignal<Instance, Instance> AncestryChanged { get; }
-            public ScriptSignal<string> AttributeChanged { get; }
-            public ScriptSignal<string> Changed { get; }
-            public ScriptSignal<Instance> ChildAdded { get; }
-            public ScriptSignal<Instance> ChildRemoved { get; }
-            public ScriptSignal<Instance> DescendantAdded { get; }
-            public ScriptSignal<Instance> DescendantRemoving { get; }
-            public ScriptSignal Destroying { get; }
-            public ScriptSignal<Instance> childAdded { get; }
-        }
+        public Instance Clone();
+        public bool IsA<T>() where T : Instance;
+        public bool IsAncestorOf(Instance descendant);
+        public bool IsDescendantOf(Instance ancestor);
+        public object? GetAttribute(string attribute);
+        public Dictionary<string, object> GetAttributes();
+        public Instance[] GetDescendants();
+        public T? FindFirstAncestorOfClass<T>() where T : Instance;
+        public T? FindFirstAncestorWhichIsA<T>() where T : Instance;
+        public T? FindFirstChildOfClass<T>() where T : Instance;
+        public T? FindFirstChildWhichIsA<T>(bool? recursive) where T : Instance;
+        public string[] GetTags();
+        public Instance WaitForChild(string name);
+        public Instance? WaitForChild(string name, float timeout);
+        public Instance clone();
+        public bool isDescendantOf(Instance ancestor);
+        public ScriptSignal<Instance, Instance> AncestryChanged { get; }
+        public ScriptSignal<string> AttributeChanged { get; }
+        public ScriptSignal<string> Changed { get; }
+        public ScriptSignal<Instance> ChildAdded { get; }
+        public ScriptSignal<Instance> ChildRemoved { get; }
+        public ScriptSignal<Instance> DescendantAdded { get; }
+        public ScriptSignal<Instance> DescendantRemoving { get; }
+        public ScriptSignal Destroying { get; }
+        public ScriptSignal<Instance> childAdded { get; }
     }
 
     /// <summary>The <see cref="EnumItem"/> data type represents an individual item in a Roblox enum.</summary>
