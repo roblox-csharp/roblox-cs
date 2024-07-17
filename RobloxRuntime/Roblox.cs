@@ -4,13 +4,8 @@ namespace RobloxRuntime
 {
     using HttpHeaders = IDictionary<string, string>;
 
-    public static class Globals
+    public static partial class Globals
     {
-        public static MathLib math = null!;
-        public static OsLib os = null!;
-        public static CoroutineLib coroutine = null!;
-        public static TaskLib task = null!;
-
         public static DataModel game { get; } = null!;
         public static LuaSourceContainer script { get; } = null!;
         public static PluginClasses.Plugin plugin { get; } = null!;
