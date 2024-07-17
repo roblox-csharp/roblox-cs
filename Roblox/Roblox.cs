@@ -168,6 +168,11 @@
     {
         public Workspace Workspace { get; }
         public Lighting Lighting { get; }
+        public T GetService<T>() where T : IServiceInstance;
+    }
+
+    public interface IServiceInstance : Instance
+    {
     }
 
     public interface ICreatableInstance : Instance

@@ -7,7 +7,6 @@ This project includes the compiler and transformers.
 - The rest of the built-in libraries
 - Omit `require` if only types are used from the import
 - Macro number `Parse()` methods to `tonumber()`
-- Macro `ServiceProvider.GetService<T>()` to `ServiceProvider:GetService("T")`
 - Copy `RuntimeLib.lua` into `<project-dir>/include` on compile
 - Default values (via `default` keyword)
 - Macro `IEnumerable<T>` (or `Array`?) methods

@@ -1,10 +1,8 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Text;
+using System.Collections.Immutable;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Collections.Immutable;
-using System.Linq;
-using System.Text;
-using System.Xml.Linq;
 
 namespace RobloxCS
 {
@@ -572,6 +570,7 @@ namespace RobloxCS
                             Write(')');
                             return;
                         }
+                    case "GetService":
                     case "FindFirstChildOfClass":
                     case "FindFirstChildWhichIsA":
                     case "FindFirstAncestorOfClass":
@@ -579,13 +578,15 @@ namespace RobloxCS
                     case "IsA":
                         {
                             var objectType = _semanticModel.GetTypeInfo(memberAccess.Expression).Type;
-                            var superclasses = objectType != null ? objectType.AllInterfaces.ToList() : null;
-                            if (objectType != null && objectType.Name != "Instance" && !superclasses!.Select(@interface => @interface.Name).Contains("Instance")) return;
+                            if (objectType == null) return;
+
+                            var superclasses = objectType.AllInterfaces.ToList();
+                            if (objectType.Name != "Instance" && !superclasses.Select(@interface => @interface.Name).Contains("Instance")) return;
 
                             var symbolInfo = _semanticModel.GetSymbolInfo(node);
                             var methodSymbol = (IMethodSymbol)symbolInfo.Symbol!;
                             if (!methodSymbol.IsGenericMethod)
-                                throw new Exception($"Attempt to macro Instance.{name}<T>() but it is not generic?");
+                                Logger.CompilerError($"Attempt to macro {objectType.Name}.{name}<T>() but it is not generic");
 
                             var arguments = node.ArgumentList.Arguments;
                             var instanceType = methodSymbol.TypeArguments.First();

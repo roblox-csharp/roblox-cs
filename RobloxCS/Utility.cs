@@ -7,7 +7,7 @@ namespace RobloxCS
 {
     public static class Utility
     {
-        public const string RuntimeAssemblyName = "RobloxRuntime";
+        public const string RuntimeAssemblyName = "Roblox";
 
         public static string FormatLocation(FileLinePositionSpan lineSpan)
         {

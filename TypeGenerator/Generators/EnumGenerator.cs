@@ -11,7 +11,7 @@
             Write("// GENERATED ROBLOX ENUMS");
             Write();
 
-            Write("namespace RobloxRuntime.Enum");
+            Write("namespace Roblox.Enum");
             Write("{");
             PushIndent();
             foreach (var rbxEnum in rbxEnums)

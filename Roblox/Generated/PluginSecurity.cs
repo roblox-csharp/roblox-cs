@@ -32,7 +32,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface AccountService : ICreatableInstance
+	public interface AccountService : IServiceInstance
 	{
 	}
 	
@@ -44,11 +44,11 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface AchievementService : ICreatableInstance
+	public interface AchievementService : IServiceInstance
 	{
 	}
 	
-	public interface ActivityHistoryService : ICreatableInstance
+	public interface ActivityHistoryService : IServiceInstance
 	{
 	}
 	
@@ -56,7 +56,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface AnalyticsService : ICreatableInstance
+	public interface AnalyticsService : IServiceInstance
 	{
 	}
 	
@@ -64,7 +64,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface AnimationClip : ICreatableInstance
+	public interface AnimationClip : Instance
 	{
 	}
 	
@@ -72,7 +72,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public partial interface AnimationClipProvider : ICreatableInstance
+	public partial interface AnimationClipProvider : IServiceInstance
 	{
 		public AnimationClip GetAnimationClip(string assetId);
 		public AnimationClip GetAnimationClipById(long assetId, bool useCache);
@@ -82,11 +82,11 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface AnimationFromVideoCreatorService : ICreatableInstance
+	public interface AnimationFromVideoCreatorService : IServiceInstance
 	{
 	}
 	
-	public interface AnimationFromVideoCreatorStudioService : ICreatableInstance
+	public interface AnimationFromVideoCreatorStudioService : IServiceInstance
 	{
 	}
 	
@@ -94,11 +94,11 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface AnimationStreamTrack : ICreatableInstance
+	public interface AnimationStreamTrack : Instance
 	{
 	}
 	
-	public interface AnimationTrack : ICreatableInstance
+	public interface AnimationTrack : Instance
 	{
 	}
 	
@@ -107,35 +107,35 @@ namespace Roblox.PluginClasses
 		public void StepAnimations(float deltaTime);
 	}
 	
-	public interface AppLifecycleObserverService : ICreatableInstance
+	public interface AppLifecycleObserverService : IServiceInstance
 	{
 	}
 	
-	public interface AppUpdateService : ICreatableInstance
+	public interface AppUpdateService : IServiceInstance
 	{
 	}
 	
-	public interface AssetDeliveryProxy : ICreatableInstance
+	public interface AssetDeliveryProxy : IServiceInstance
 	{
 	}
 	
-	public interface AssetImportService : ICreatableInstance
+	public interface AssetImportService : IServiceInstance
 	{
 	}
 	
-	public interface AssetImportSession : ICreatableInstance
+	public interface AssetImportSession : Instance
 	{
 	}
 	
-	public interface AssetManagerService : ICreatableInstance
+	public interface AssetManagerService : IServiceInstance
 	{
 	}
 	
-	public interface AssetPatchSettings : ICreatableInstance
+	public interface AssetPatchSettings : Instance
 	{
 	}
 	
-	public partial interface AssetService : ICreatableInstance
+	public partial interface AssetService : IServiceInstance
 	{
 		public MeshPart CreateMeshPartAsync(string meshId, object? options = null);
 	}
@@ -220,76 +220,76 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface AvatarChatService : ICreatableInstance
+	public interface AvatarChatService : IServiceInstance
 	{
 	}
 	
-	public interface AvatarCreationService : ICreatableInstance
+	public interface AvatarCreationService : IServiceInstance
 	{
 	}
 	
-	public interface AvatarEditorService : ICreatableInstance
+	public interface AvatarEditorService : IServiceInstance
 	{
 	}
 	
-	public interface AvatarGenerationJob : ICreatableInstance
+	public interface AvatarGenerationJob : Instance
 	{
 	}
 	
-	public interface Avatar2DGenerationJob : AvatarGenerationJob, ICreatableInstance
+	public interface Avatar2DGenerationJob : AvatarGenerationJob
 	{
 	}
 	
-	public interface Avatar3DGenerationJob : AvatarGenerationJob, ICreatableInstance
+	public interface Avatar3DGenerationJob : AvatarGenerationJob
 	{
 	}
 	
-	public interface AvatarGenerationSession : ICreatableInstance
+	public interface AvatarGenerationSession : Instance
 	{
 	}
 	
-	public interface AvatarImportService : ICreatableInstance
+	public interface AvatarImportService : IServiceInstance
 	{
 	}
 	
-	public interface BadgeService : ICreatableInstance
+	public interface BadgeService : IServiceInstance
 	{
 	}
 	
-	public interface BaseImportData : ICreatableInstance
+	public interface BaseImportData : Instance
 	{
 	}
 	
-	public interface GroupImportData : BaseImportData, ICreatableInstance
+	public interface GroupImportData : BaseImportData
 	{
 	}
 	
-	public interface MaterialImportData : BaseImportData, ICreatableInstance
+	public interface MaterialImportData : BaseImportData
 	{
 	}
 	
-	public interface MeshImportData : BaseImportData, ICreatableInstance
+	public interface MeshImportData : BaseImportData
 	{
 	}
 	
-	public interface RootImportData : BaseImportData, ICreatableInstance
+	public interface RootImportData : BaseImportData
 	{
 	}
 	
-	public interface BasePlayerGui : ICreatableInstance
+	public interface BasePlayerGui : Instance
 	{
 	}
 	
-	public interface CoreGui : BasePlayerGui, ICreatableInstance
+	public interface CoreGui : BasePlayerGui, IServiceInstance
 	{
 		public int Version { get; }
 	}
 	
-	public interface PlayerGui : BasePlayerGui, ICreatableInstance
+	public interface PlayerGui : BasePlayerGui
 	{
 	}
 	
-	public partial interface StarterGui : BasePlayerGui, ICreatableInstance
+	public partial interface StarterGui : BasePlayerGui, IServiceInstance
 	{
 		public bool ShowDevelopmentGui { get; set; }
 	}
@@ -302,7 +302,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface BaseWrap : ICreatableInstance
+	public interface BaseWrap : Instance
 	{
 	}
 	
@@ -366,11 +366,11 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface BulkImportService : ICreatableInstance
+	public interface BulkImportService : IServiceInstance
 	{
 	}
 	
-	public interface CalloutService : ICreatableInstance
+	public interface CalloutService : IServiceInstance
 	{
 	}
 	
@@ -378,11 +378,11 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface CaptureService : ICreatableInstance
+	public interface CaptureService : IServiceInstance
 	{
 	}
 	
-	public interface ChangeHistoryService : ICreatableInstance
+	public interface ChangeHistoryService : IServiceInstance
 	{
 		public void FinishRecording(string identifier, Enum.FinishRecordingOperation operation, object? finalOptions = null);
 		public object[] GetCanRedo();
@@ -408,7 +408,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface Clothing : CharacterAppearance, ICreatableInstance
+	public interface Clothing : CharacterAppearance
 	{
 	}
 	
@@ -424,11 +424,11 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface Chat : ICreatableInstance
+	public interface Chat : IServiceInstance
 	{
 	}
 	
-	public interface ChatbotUIService : ICreatableInstance
+	public interface ChatbotUIService : IServiceInstance
 	{
 	}
 	
@@ -444,35 +444,35 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface Collaborator : ICreatableInstance
+	public interface Collaborator : Instance
 	{
 	}
 	
-	public interface CollaboratorsService : ICreatableInstance
+	public interface CollaboratorsService : IServiceInstance
 	{
 	}
 	
-	public interface CollectionService : ICreatableInstance
+	public interface CollectionService : IServiceInstance
 	{
 	}
 	
-	public interface CommandInstance : ICreatableInstance
+	public interface CommandInstance : Instance
 	{
 	}
 	
-	public interface CommandService : ICreatableInstance
+	public interface CommandService : IServiceInstance
 	{
 	}
 	
-	public interface CommerceService : ICreatableInstance
+	public interface CommerceService : IServiceInstance
 	{
 	}
 	
-	public interface ConnectivityService : ICreatableInstance
+	public interface ConnectivityService : IServiceInstance
 	{
 	}
 	
-	public interface Constraint : ICreatableInstance
+	public interface Constraint : Instance
 	{
 	}
 	
@@ -516,7 +516,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface SlidingBallConstraint : Constraint, ICreatableInstance
+	public interface SlidingBallConstraint : Constraint
 	{
 	}
 	
@@ -544,15 +544,15 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface ContentProvider : ICreatableInstance
+	public interface ContentProvider : IServiceInstance
 	{
 	}
 	
-	public interface ContextActionService : ICreatableInstance
+	public interface ContextActionService : IServiceInstance
 	{
 	}
 	
-	public interface Controller : ICreatableInstance
+	public interface Controller : Instance
 	{
 	}
 	
@@ -560,7 +560,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface ControllerBase : ICreatableInstance
+	public interface ControllerBase : Instance
 	{
 	}
 	
@@ -584,19 +584,19 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface ConversationalAIAcceptanceService : ICreatableInstance
+	public interface ConversationalAIAcceptanceService : IServiceInstance
 	{
 	}
 	
-	public interface CrossDMScriptChangeListener : ICreatableInstance
+	public interface CrossDMScriptChangeListener : IServiceInstance
 	{
 	}
 	
-	public interface DataModelMesh : ICreatableInstance
+	public interface DataModelMesh : Instance
 	{
 	}
 	
-	public interface BevelMesh : DataModelMesh, ICreatableInstance
+	public interface BevelMesh : DataModelMesh
 	{
 	}
 	
@@ -616,11 +616,11 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface DataModelPatchService : ICreatableInstance
+	public interface DataModelPatchService : IServiceInstance
 	{
 	}
 	
-	public interface DataModelSession : ICreatableInstance
+	public interface DataModelSession : Instance
 	{
 	}
 	
@@ -632,19 +632,19 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface DataStoreInfo : ICreatableInstance
+	public interface DataStoreInfo : Instance
 	{
 	}
 	
-	public interface DataStoreKey : ICreatableInstance
+	public interface DataStoreKey : Instance
 	{
 	}
 	
-	public interface DataStoreKeyInfo : ICreatableInstance
+	public interface DataStoreKeyInfo : Instance
 	{
 	}
 	
-	public interface DataStoreObjectVersionInfo : ICreatableInstance
+	public interface DataStoreObjectVersionInfo : Instance
 	{
 	}
 	
@@ -652,7 +652,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface DataStoreService : ICreatableInstance
+	public interface DataStoreService : IServiceInstance
 	{
 	}
 	
@@ -660,11 +660,11 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface Debris : ICreatableInstance
+	public interface Debris : IServiceInstance
 	{
 	}
 	
-	public interface DebugSettings : ICreatableInstance
+	public interface DebugSettings : Instance
 	{
 		public int DataModel { get; }
 		public int InstanceCount { get; }
@@ -676,7 +676,7 @@ namespace Roblox.PluginClasses
 		public Enum.TickCountSampleMethod TickCountPreciseOverride { get; set; }
 	}
 	
-	public interface DebuggerBreakpoint : ICreatableInstance
+	public interface DebuggerBreakpoint : Instance
 	{
 		public string Condition { get; set; }
 		public bool ContinueExecution { get; set; }
@@ -686,19 +686,19 @@ namespace Roblox.PluginClasses
 		public bool isContextDependentBreakpoint { get; set; }
 	}
 	
-	public interface DebuggerConnection : ICreatableInstance
+	public interface DebuggerConnection : Instance
 	{
 	}
 	
-	public interface DebuggerConnectionManager : ICreatableInstance
+	public interface DebuggerConnectionManager : IServiceInstance
 	{
 	}
 	
-	public interface DebuggerLuaResponse : ICreatableInstance
+	public interface DebuggerLuaResponse : Instance
 	{
 	}
 	
-	public interface DebuggerManager : ICreatableInstance
+	public interface DebuggerManager : IServiceInstance
 	{
 		public bool DebuggingEnabled { get; }
 		public Instance AddDebugger(LuaSourceContainer script);
@@ -711,20 +711,20 @@ namespace Roblox.PluginClasses
 		public ScriptSignal<Instance> DebuggerRemoved { get; }
 	}
 	
-	public interface DebuggerUIService : ICreatableInstance
+	public interface DebuggerUIService : IServiceInstance
 	{
 	}
 	
-	public interface DebuggerVariable : ICreatableInstance
+	public interface DebuggerVariable : Instance
 	{
 	}
 	
-	public interface DebuggerWatch : ICreatableInstance
+	public interface DebuggerWatch : Instance
 	{
 		public string Expression { get; set; }
 	}
 	
-	public interface DeviceIdService : ICreatableInstance
+	public interface DeviceIdService : IServiceInstance
 	{
 	}
 	
@@ -740,7 +740,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface DraggerService : ICreatableInstance
+	public interface DraggerService : IServiceInstance
 	{
 	}
 	
@@ -756,15 +756,15 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface EventIngestService : ICreatableInstance
+	public interface EventIngestService : IServiceInstance
 	{
 	}
 	
-	public interface ExampleService : ICreatableInstance
+	public interface ExampleService : IServiceInstance
 	{
 	}
 	
-	public interface ExperienceAuthService : ICreatableInstance
+	public interface ExperienceAuthService : IServiceInstance
 	{
 	}
 	
@@ -772,15 +772,15 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface ExperienceNotificationService : ICreatableInstance
+	public interface ExperienceNotificationService : IServiceInstance
 	{
 	}
 	
-	public interface ExperienceService : ICreatableInstance
+	public interface ExperienceService : IServiceInstance
 	{
 	}
 	
-	public interface ExperienceStateCaptureService : ICreatableInstance
+	public interface ExperienceStateCaptureService : IServiceInstance
 	{
 	}
 	
@@ -788,7 +788,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface FaceAnimatorService : ICreatableInstance
+	public interface FaceAnimatorService : IServiceInstance
 	{
 	}
 	
@@ -846,7 +846,7 @@ namespace Roblox.PluginClasses
 		public float UpperLipSuck { get; set; }
 	}
 	
-	public interface FaceInstance : ICreatableInstance
+	public interface FaceInstance : Instance
 	{
 	}
 	
@@ -858,23 +858,23 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface FacialAnimationRecordingService : ICreatableInstance
+	public interface FacialAnimationRecordingService : IServiceInstance
 	{
 	}
 	
-	public interface FacialAnimationStreamingServiceStats : ICreatableInstance
+	public interface FacialAnimationStreamingServiceStats : Instance
 	{
 	}
 	
-	public interface FacialAnimationStreamingServiceV2 : ICreatableInstance
+	public interface FacialAnimationStreamingServiceV2 : IServiceInstance
 	{
 	}
 	
-	public interface Feature : ICreatableInstance
+	public interface Feature : Instance
 	{
 	}
 	
-	public interface File : ICreatableInstance
+	public interface File : Instance
 	{
 		public string GetBinaryContents();
 		public string GetTemporaryId();
@@ -896,24 +896,24 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface GamePassService : ICreatableInstance
+	public interface GamePassService : IServiceInstance
 	{
 	}
 	
-	public partial interface GameSettings : ICreatableInstance
+	public partial interface GameSettings : Instance
 	{
 		public bool VideoCaptureEnabled { get; set; }
 	}
 	
-	public interface GamepadService : ICreatableInstance
+	public interface GamepadService : IServiceInstance
 	{
 	}
 	
-	public interface GenericChallengeService : ICreatableInstance
+	public interface GenericChallengeService : IServiceInstance
 	{
 	}
 	
-	public interface GeometryService : ICreatableInstance
+	public interface GeometryService : IServiceInstance
 	{
 	}
 	
@@ -921,27 +921,27 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface GlobalDataStore : ICreatableInstance
+	public interface GlobalDataStore : Instance
 	{
 	}
 	
-	public interface DataStore : GlobalDataStore, ICreatableInstance
+	public interface DataStore : GlobalDataStore
 	{
 	}
 	
-	public interface OrderedDataStore : GlobalDataStore, ICreatableInstance
+	public interface OrderedDataStore : GlobalDataStore
 	{
 	}
 	
-	public interface GroupService : ICreatableInstance
+	public interface GroupService : IServiceInstance
 	{
 	}
 	
-	public interface GuiBase2d : GuiBase, ICreatableInstance
+	public interface GuiBase2d : GuiBase
 	{
 	}
 	
-	public interface GuiObject : GuiBase2d, ICreatableInstance
+	public interface GuiObject : GuiBase2d
 	{
 	}
 	
@@ -953,7 +953,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface GuiButton : GuiObject, ICreatableInstance
+	public interface GuiButton : GuiObject
 	{
 	}
 	
@@ -989,7 +989,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface LayerCollector : GuiBase2d, ICreatableInstance
+	public interface LayerCollector : GuiBase2d
 	{
 	}
 	
@@ -997,7 +997,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface PluginGui : LayerCollector, ICreatableInstance
+	public interface PluginGui : LayerCollector
 	{
 		public string Title { get; set; }
 		public void BindToClose(Action? function = null);
@@ -1010,11 +1010,11 @@ namespace Roblox.PluginClasses
 		public ScriptSignal WindowFocused { get; }
 	}
 	
-	public interface DockWidgetPluginGui : PluginGui, ICreatableInstance
+	public interface DockWidgetPluginGui : PluginGui
 	{
 	}
 	
-	public interface QWidgetPluginGui : PluginGui, ICreatableInstance
+	public interface QWidgetPluginGui : PluginGui
 	{
 	}
 	
@@ -1022,7 +1022,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface SurfaceGuiBase : LayerCollector, ICreatableInstance
+	public interface SurfaceGuiBase : LayerCollector
 	{
 	}
 	
@@ -1034,7 +1034,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface GuiBase3d : GuiBase, ICreatableInstance
+	public interface GuiBase3d : GuiBase
 	{
 	}
 	
@@ -1042,7 +1042,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface InstanceAdornment : GuiBase3d, ICreatableInstance
+	public interface InstanceAdornment : GuiBase3d
 	{
 	}
 	
@@ -1050,11 +1050,11 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface PVAdornment : GuiBase3d, ICreatableInstance
+	public interface PVAdornment : GuiBase3d
 	{
 	}
 	
-	public interface HandleAdornment : PVAdornment, ICreatableInstance
+	public interface HandleAdornment : PVAdornment
 	{
 	}
 	
@@ -1086,7 +1086,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface ParabolaAdornment : PVAdornment, ICreatableInstance
+	public interface ParabolaAdornment : PVAdornment
 	{
 	}
 	
@@ -1094,7 +1094,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface PartAdornment : GuiBase3d, ICreatableInstance
+	public interface PartAdornment : GuiBase3d
 	{
 	}
 	
@@ -1110,7 +1110,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface SelectionLasso : GuiBase3d, ICreatableInstance
+	public interface SelectionLasso : GuiBase3d
 	{
 	}
 	
@@ -1126,15 +1126,15 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface GuiService : ICreatableInstance
+	public interface GuiService : IServiceInstance
 	{
 	}
 	
-	public interface HapticService : ICreatableInstance
+	public interface HapticService : IServiceInstance
 	{
 	}
 	
-	public interface HeightmapImporterService : ICreatableInstance
+	public interface HeightmapImporterService : IServiceInstance
 	{
 	}
 	
@@ -1146,7 +1146,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface HttpService : ICreatableInstance
+	public interface HttpService : IServiceInstance
 	{
 	}
 	
@@ -1162,19 +1162,19 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface IXPService : ICreatableInstance
+	public interface IXPService : IServiceInstance
 	{
 	}
 	
-	public interface IncrementalPatchBuilder : ICreatableInstance
+	public interface IncrementalPatchBuilder : IServiceInstance
 	{
 	}
 	
-	public interface InputObject : ICreatableInstance
+	public interface InputObject : Instance
 	{
 	}
 	
-	public interface InsertService : ICreatableInstance
+	public interface InsertService : IServiceInstance
 	{
 	}
 	
@@ -1182,11 +1182,11 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface JointInstance : ICreatableInstance
+	public interface JointInstance : Instance
 	{
 	}
 	
-	public interface DynamicRotate : JointInstance, ICreatableInstance
+	public interface DynamicRotate : JointInstance
 	{
 	}
 	
@@ -1206,7 +1206,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface JointsService : ICreatableInstance
+	public interface JointsService : IServiceInstance
 	{
 	}
 	
@@ -1218,13 +1218,13 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public partial interface KeyframeSequenceProvider : ICreatableInstance
+	public partial interface KeyframeSequenceProvider : IServiceInstance
 	{
 		public Instance GetKeyframeSequence(string assetId);
 		public Instance GetKeyframeSequenceById(long assetId, bool useCache);
 	}
 	
-	public interface Light : ICreatableInstance
+	public interface Light : Instance
 	{
 	}
 	
@@ -1240,19 +1240,19 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface Lighting : ICreatableInstance
+	public interface Lighting : IServiceInstance
 	{
 	}
 	
-	public interface LinkingService : ICreatableInstance
+	public interface LinkingService : IServiceInstance
 	{
 	}
 	
-	public interface LiveScriptingService : ICreatableInstance
+	public interface LiveScriptingService : IServiceInstance
 	{
 	}
 	
-	public interface LocalizationService : ICreatableInstance
+	public interface LocalizationService : IServiceInstance
 	{
 	}
 	
@@ -1260,27 +1260,27 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface LodDataEntity : ICreatableInstance
+	public interface LodDataEntity : Instance
 	{
 	}
 	
-	public interface LogReporterService : ICreatableInstance
+	public interface LogReporterService : IServiceInstance
 	{
 	}
 	
-	public interface LogService : ICreatableInstance
+	public interface LogService : IServiceInstance
 	{
 	}
 	
-	public interface LuaSettings : ICreatableInstance
+	public interface LuaSettings : Instance
 	{
 	}
 	
-	public interface LuaSourceContainer : ICreatableInstance
+	public interface LuaSourceContainer : Instance
 	{
 	}
 	
-	public interface BaseScript : LuaSourceContainer, ICreatableInstance
+	public interface BaseScript : LuaSourceContainer
 	{
 	}
 	
@@ -1298,19 +1298,19 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface MarketplaceService : ICreatableInstance
+	public interface MarketplaceService : IServiceInstance
 	{
 	}
 	
-	public interface MaterialGenerationService : ICreatableInstance
+	public interface MaterialGenerationService : IServiceInstance
 	{
 	}
 	
-	public interface MaterialGenerationSession : ICreatableInstance
+	public interface MaterialGenerationSession : Instance
 	{
 	}
 	
-	public interface MaterialService : ICreatableInstance
+	public interface MaterialService : IServiceInstance
 	{
 	}
 	
@@ -1322,95 +1322,95 @@ namespace Roblox.PluginClasses
 		public string RoughnessMap { get; set; }
 	}
 	
-	public interface MemStorageConnection : ICreatableInstance
+	public interface MemStorageConnection : Instance
 	{
 		public void Disconnect();
 	}
 	
-	public interface MemoryStoreHashMap : ICreatableInstance
+	public interface MemoryStoreHashMap : Instance
 	{
 	}
 	
-	public interface MemoryStoreQueue : ICreatableInstance
+	public interface MemoryStoreQueue : Instance
 	{
 	}
 	
-	public interface MemoryStoreService : ICreatableInstance
+	public interface MemoryStoreService : IServiceInstance
 	{
 	}
 	
-	public interface MemoryStoreSortedMap : ICreatableInstance
+	public interface MemoryStoreSortedMap : Instance
 	{
 	}
 	
-	public interface MessageBusConnection : ICreatableInstance
+	public interface MessageBusConnection : Instance
 	{
 	}
 	
-	public interface MessageBusService : ICreatableInstance
+	public interface MessageBusService : IServiceInstance
 	{
 	}
 	
-	public interface MessagingService : ICreatableInstance
+	public interface MessagingService : IServiceInstance
 	{
 	}
 	
-	public interface MetaBreakpoint : ICreatableInstance
+	public interface MetaBreakpoint : Instance
 	{
 	}
 	
-	public interface MetaBreakpointContext : ICreatableInstance
+	public interface MetaBreakpointContext : Instance
 	{
 	}
 	
-	public interface MetaBreakpointManager : ICreatableInstance
+	public interface MetaBreakpointManager : IServiceInstance
 	{
 	}
 	
-	public interface Mouse : ICreatableInstance
+	public interface Mouse : Instance
 	{
 	}
 	
-	public interface PluginMouse : Mouse, ICreatableInstance
+	public interface PluginMouse : Mouse
 	{
 		public ScriptSignal<Instance[]> DragEnter { get; }
 	}
 	
-	public interface MultipleDocumentInterfaceInstance : ICreatableInstance
+	public interface MultipleDocumentInterfaceInstance : Instance
 	{
 	}
 	
-	public interface NetworkMarker : ICreatableInstance
+	public interface NetworkMarker : Instance
 	{
 	}
 	
-	public partial interface NetworkPeer : ICreatableInstance
+	public partial interface NetworkPeer : Instance
 	{
 		public void SetOutgoingKBPSLimit(int limit);
 	}
 	
-	public partial interface NetworkClient : NetworkPeer, ICreatableInstance
+	public partial interface NetworkClient : NetworkPeer, IServiceInstance
 	{
 	}
 	
-	public partial interface NetworkServer : NetworkPeer, ICreatableInstance
+	public partial interface NetworkServer : NetworkPeer, IServiceInstance
 	{
 	}
 	
-	public interface NetworkReplicator : ICreatableInstance
+	public interface NetworkReplicator : Instance
 	{
 		public Instance GetPlayer();
 	}
 	
-	public interface ClientReplicator : NetworkReplicator, ICreatableInstance
+	public interface ClientReplicator : NetworkReplicator
 	{
 	}
 	
-	public interface ServerReplicator : NetworkReplicator, ICreatableInstance
+	public interface ServerReplicator : NetworkReplicator
 	{
 	}
 	
-	public interface NetworkSettings : ICreatableInstance
+	public interface NetworkSettings : IServiceInstance
 	{
 		public bool HttpProxyEnabled { get; }
 		public string HttpProxyURL { get; }
@@ -1431,27 +1431,27 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface OmniRecommendationsService : ICreatableInstance
+	public interface OmniRecommendationsService : IServiceInstance
 	{
 	}
 	
-	public interface OpenCloudApiV1 : ICreatableInstance
+	public interface OpenCloudApiV1 : Instance
 	{
 	}
 	
-	public interface OpenCloudService : ICreatableInstance
+	public interface OpenCloudService : IServiceInstance
 	{
 	}
 	
-	public interface PVInstance : ICreatableInstance
+	public interface PVInstance : Instance
 	{
 	}
 	
-	public partial interface BasePart : PVInstance, ICreatableInstance
+	public partial interface BasePart : PVInstance
 	{
 	}
 	
-	public interface FormFactorPart : BasePart, ICreatableInstance
+	public interface FormFactorPart : BasePart
 	{
 	}
 	
@@ -1459,7 +1459,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface Platform : Part, ICreatableInstance
+	public interface Platform : Part
 	{
 	}
 	
@@ -1475,12 +1475,12 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public partial interface Terrain : BasePart, ICreatableInstance
+	public partial interface Terrain : BasePart
 	{
 		public void ConvertToSmooth();
 	}
 	
-	public interface TriangleMeshPart : BasePart, ICreatableInstance
+	public interface TriangleMeshPart : BasePart
 	{
 	}
 	
@@ -1509,7 +1509,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface BackpackItem : Model, ICreatableInstance
+	public interface BackpackItem : Model
 	{
 	}
 	
@@ -1517,40 +1517,40 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public partial interface WorldRoot : Model, ICreatableInstance
+	public partial interface WorldRoot : Model
 	{
 		public void IKMoveTo(BasePart part, CFrame target, float? translateStiffness = null, float? rotateStiffness = null, Enum.IKCollisionsMode? collisionsMode = null);
 		public void StepPhysics(float dt, Instance[]? parts = null);
 	}
 	
-	public partial interface Workspace : WorldRoot, ICreatableInstance
+	public partial interface Workspace : WorldRoot, IServiceInstance
 	{
 		public void BreakJoints(Instance[] objects);
 		public void MakeJoints(Instance[] objects);
 		public void ZoomToExtents();
 	}
 	
-	public interface PackageLink : ICreatableInstance
+	public interface PackageLink : Instance
 	{
 	}
 	
-	public interface PackageService : ICreatableInstance
+	public interface PackageService : IServiceInstance
 	{
 	}
 	
-	public interface PackageUIService : ICreatableInstance
+	public interface PackageUIService : IServiceInstance
 	{
 	}
 	
-	public interface Pages : ICreatableInstance
+	public interface Pages : Instance
 	{
 	}
 	
-	public interface DataStoreKeyPages : Pages, ICreatableInstance
+	public interface DataStoreKeyPages : Pages
 	{
 	}
 	
-	public interface DataStoreListingPages : Pages, ICreatableInstance
+	public interface DataStoreListingPages : Pages
 	{
 	}
 	
@@ -1558,11 +1558,11 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface PatchMapping : ICreatableInstance
+	public interface PatchMapping : Instance
 	{
 	}
 	
-	public interface Path : ICreatableInstance
+	public interface Path : Instance
 	{
 	}
 	
@@ -1574,27 +1574,27 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface PathfindingService : ICreatableInstance
+	public interface PathfindingService : IServiceInstance
 	{
 	}
 	
-	public interface PausedState : ICreatableInstance
+	public interface PausedState : Instance
 	{
 	}
 	
-	public interface PausedStateBreakpoint : PausedState, ICreatableInstance
+	public interface PausedStateBreakpoint : PausedState
 	{
 	}
 	
-	public interface PausedStateException : PausedState, ICreatableInstance
+	public interface PausedStateException : PausedState
 	{
 	}
 	
-	public interface PhysicsService : ICreatableInstance
+	public interface PhysicsService : IServiceInstance
 	{
 	}
 	
-	public interface PhysicsSettings : ICreatableInstance
+	public interface PhysicsSettings : Instance
 	{
 		public bool AllowSleep { get; set; }
 		public bool AreAnchorsShown { get; set; }
@@ -1624,44 +1624,44 @@ namespace Roblox.PluginClasses
 		public bool UseCSGv2 { get; set; }
 	}
 	
-	public interface PlacesService : ICreatableInstance
+	public interface PlacesService : IServiceInstance
 	{
 	}
 	
-	public interface PlatformCloudStorageService : ICreatableInstance
+	public interface PlatformCloudStorageService : IServiceInstance
 	{
 	}
 	
-	public interface PlatformFriendsService : ICreatableInstance
+	public interface PlatformFriendsService : IServiceInstance
 	{
 	}
 	
-	public partial interface Player : ICreatableInstance
+	public partial interface Player : Instance
 	{
 		public void SetAccountAge(int accountAge);
 		public void SetSuperSafeChat(bool value);
 	}
 	
-	public interface PlayerHydrationService : ICreatableInstance
+	public interface PlayerHydrationService : IServiceInstance
 	{
 	}
 	
-	public interface PlayerScripts : ICreatableInstance
+	public interface PlayerScripts : Instance
 	{
 	}
 	
-	public interface PlayerViewService : ICreatableInstance
+	public interface PlayerViewService : IServiceInstance
 	{
 	}
 	
-	public partial interface Players : ICreatableInstance
+	public partial interface Players : IServiceInstance
 	{
 		public void Chat(string message);
 		public void SetChatStyle(Enum.ChatStyle? style = null);
 		public void TeamChat(string message);
 	}
 	
-	public interface Plugin : ICreatableInstance
+	public interface Plugin : Instance
 	{
 		public bool CollisionEnabled { get; }
 		public float GridSize { get; }
@@ -1709,11 +1709,11 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface PluginDebugService : ICreatableInstance
+	public interface PluginDebugService : IServiceInstance
 	{
 	}
 	
-	public interface PluginDragEvent : ICreatableInstance
+	public interface PluginDragEvent : Instance
 	{
 		public string Data { get; }
 		public string MimeType { get; }
@@ -1721,22 +1721,22 @@ namespace Roblox.PluginClasses
 		public string Sender { get; }
 	}
 	
-	public interface PluginGuiService : ICreatableInstance
+	public interface PluginGuiService : IServiceInstance
 	{
 	}
 	
-	public interface PluginManagementService : ICreatableInstance
+	public interface PluginManagementService : IServiceInstance
 	{
 	}
 	
-	public partial interface PluginManagerInterface : ICreatableInstance
+	public partial interface PluginManagerInterface : Instance
 	{
 		public Instance CreatePlugin();
 		public void ExportPlace(string filePath);
 		public void ExportSelection(string filePath);
 	}
 	
-	public interface PluginMenu : ICreatableInstance
+	public interface PluginMenu : Instance
 	{
 		public string Icon { get; set; }
 		public string Title { get; set; }
@@ -1748,16 +1748,16 @@ namespace Roblox.PluginClasses
 		public Instance ShowAsync();
 	}
 	
-	public interface PluginPolicyService : ICreatableInstance
+	public interface PluginPolicyService : IServiceInstance
 	{
 	}
 	
-	public interface PluginToolbar : ICreatableInstance
+	public interface PluginToolbar : Instance
 	{
 		public PluginToolbarButton CreateButton(string buttonId, string tooltip, string iconname, string text);
 	}
 	
-	public interface PluginToolbarButton : ICreatableInstance
+	public interface PluginToolbarButton : Instance
 	{
 		public bool ClickableWhenViewportHidden { get; set; }
 		public bool Enabled { get; set; }
@@ -1766,11 +1766,11 @@ namespace Roblox.PluginClasses
 		public ScriptSignal Click { get; }
 	}
 	
-	public interface PolicyService : ICreatableInstance
+	public interface PolicyService : IServiceInstance
 	{
 	}
 	
-	public interface PoseBase : ICreatableInstance
+	public interface PoseBase : Instance
 	{
 	}
 	
@@ -1782,7 +1782,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface PostEffect : ICreatableInstance
+	public interface PostEffect : Instance
 	{
 	}
 	
@@ -1806,7 +1806,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface ProjectFolderService : ICreatableInstance
+	public interface ProjectFolderService : IServiceInstance
 	{
 	}
 	
@@ -1814,11 +1814,11 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface ProximityPromptService : ICreatableInstance
+	public interface ProximityPromptService : IServiceInstance
 	{
 	}
 	
-	public interface PublishService : ICreatableInstance
+	public interface PublishService : IServiceInstance
 	{
 	}
 	
@@ -1826,11 +1826,11 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface ReflectionService : ICreatableInstance
+	public interface ReflectionService : IServiceInstance
 	{
 	}
 	
-	public interface RemoteCursorService : ICreatableInstance
+	public interface RemoteCursorService : IServiceInstance
 	{
 	}
 	
@@ -1838,7 +1838,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface RenderSettings : ICreatableInstance
+	public interface RenderSettings : IServiceInstance
 	{
 		public int AutoFRMLevel { get; set; }
 		public bool EagerBulkExecution { get; set; }
@@ -1875,19 +1875,19 @@ namespace Roblox.PluginClasses
 		public void RenderdocTriggerCapture();
 	}
 	
-	public interface ReplicatedFirst : ICreatableInstance
+	public interface ReplicatedFirst : IServiceInstance
 	{
 	}
 	
-	public interface RibbonNotificationService : ICreatableInstance
+	public interface RibbonNotificationService : IServiceInstance
 	{
 	}
 	
-	public interface RobloxPluginGuiService : ICreatableInstance
+	public interface RobloxPluginGuiService : IServiceInstance
 	{
 	}
 	
-	public interface RomarkService : ICreatableInstance
+	public interface RomarkService : IServiceInstance
 	{
 	}
 	
@@ -1895,7 +1895,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public partial interface RunService : ICreatableInstance
+	public partial interface RunService : IServiceInstance
 	{
 		public Enum.RunState RunState { get; set; }
 		public bool IsEdit();
@@ -1905,28 +1905,28 @@ namespace Roblox.PluginClasses
 		public void Stop();
 	}
 	
-	public interface SafetyService : ICreatableInstance
+	public interface SafetyService : IServiceInstance
 	{
 	}
 	
-	public interface ScreenshotHud : ICreatableInstance
+	public interface ScreenshotHud : Instance
 	{
 	}
 	
-	public interface SyncScriptBuilder : ScriptBuilder, ICreatableInstance
+	public interface SyncScriptBuilder : ScriptBuilder
 	{
 	}
 	
-	public interface ScriptChangeService : ICreatableInstance
+	public interface ScriptChangeService : IServiceInstance
 	{
 	}
 	
-	public partial interface ScriptContext : ICreatableInstance
+	public partial interface ScriptContext : IServiceInstance
 	{
 		public void SetTimeout(double seconds);
 	}
 	
-	public interface ScriptDebugger : ICreatableInstance
+	public interface ScriptDebugger : Instance
 	{
 		public int CurrentLine { get; }
 		public bool IsDebugging { get; }
@@ -1952,7 +1952,7 @@ namespace Roblox.PluginClasses
 		public ScriptSignal<Instance> WatchRemoved { get; }
 	}
 	
-	public partial interface ScriptDocument : ICreatableInstance
+	public partial interface ScriptDocument : Instance
 	{
 		public string GetLine(int? lineIndex = null);
 		public int GetLineCount();
@@ -1973,7 +1973,7 @@ namespace Roblox.PluginClasses
 		public ScriptSignal<long, long> ViewportChanged { get; }
 	}
 	
-	public partial interface ScriptEditorService : ICreatableInstance
+	public partial interface ScriptEditorService : IServiceInstance
 	{
 		public void DeregisterAutocompleteCallback(string name);
 		public void DeregisterScriptAnalysisCallback(string name);
@@ -1989,7 +1989,7 @@ namespace Roblox.PluginClasses
 		public ScriptSignal<ScriptDocument> TextDocumentDidOpen { get; }
 	}
 	
-	public partial interface ScriptProfilerService : ICreatableInstance
+	public partial interface ScriptProfilerService : IServiceInstance
 	{
 		public void ClientRequestData(Player player);
 		public void ClientStart(Player player, int? frequency = null);
@@ -2001,11 +2001,11 @@ namespace Roblox.PluginClasses
 		public ScriptSignal<Player, string> OnNewData { get; }
 	}
 	
-	public interface ScriptRegistrationService : ICreatableInstance
+	public interface ScriptRegistrationService : IServiceInstance
 	{
 	}
 	
-	public interface Selection : ICreatableInstance
+	public interface Selection : IServiceInstance
 	{
 		public float SelectionThickness { get; }
 		public void Add(Instance[] instancesToAdd);
@@ -2015,7 +2015,7 @@ namespace Roblox.PluginClasses
 		public ScriptSignal SelectionChanged { get; }
 	}
 	
-	public interface SensorBase : ICreatableInstance
+	public interface SensorBase : Instance
 	{
 	}
 	
@@ -2031,15 +2031,15 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface ServerScriptService : ICreatableInstance
+	public interface ServerScriptService : IServiceInstance
 	{
 	}
 	
-	public interface ServiceProvider : ICreatableInstance
+	public partial interface ServiceProvider : Instance
 	{
 	}
 	
-	public partial interface DataModel : ServiceProvider, ICreatableInstance
+	public partial interface DataModel : ServiceProvider
 	{
 		public object[] GetJobsInfo();
 		public Instance[] GetObjects(string url);
@@ -2047,29 +2047,29 @@ namespace Roblox.PluginClasses
 		public void SetUniverseId(long universeId);
 	}
 	
-	public interface GlobalSettings : GenericSettings, ICreatableInstance
+	public interface GlobalSettings : GenericSettings
 	{
 		public bool GetFFlag(string name);
 		public string GetFVariable(string name);
 	}
 	
-	public interface UserSettings : GenericSettings, ICreatableInstance
+	public interface UserSettings : GenericSettings
 	{
 	}
 	
-	public interface ServiceVisibilityService : ICreatableInstance
+	public interface ServiceVisibilityService : IServiceInstance
 	{
 	}
 	
-	public interface SessionService : ICreatableInstance
+	public interface SessionService : IServiceInstance
 	{
 	}
 	
-	public interface SharedTableRegistry : ICreatableInstance
+	public interface SharedTableRegistry : IServiceInstance
 	{
 	}
 	
-	public interface ShorelineUpgraderService : ICreatableInstance
+	public interface ShorelineUpgraderService : IServiceInstance
 	{
 	}
 	
@@ -2081,11 +2081,11 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface SmoothVoxelsUpgraderService : ICreatableInstance
+	public interface SmoothVoxelsUpgraderService : IServiceInstance
 	{
 	}
 	
-	public interface SocialService : ICreatableInstance
+	public interface SocialService : IServiceInstance
 	{
 	}
 	
@@ -2093,7 +2093,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface SoundEffect : ICreatableInstance
+	public interface SoundEffect : Instance
 	{
 	}
 	
@@ -2105,7 +2105,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface ChannelSelectorSoundEffect : CustomSoundEffect, ICreatableInstance
+	public interface ChannelSelectorSoundEffect : CustomSoundEffect
 	{
 	}
 	
@@ -2141,7 +2141,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public partial interface SoundService : ICreatableInstance
+	public partial interface SoundService : IServiceInstance
 	{
 		public void OpenAttenuationCurveEditor(Instance[] selectedCurveObjects);
 	}
@@ -2150,49 +2150,49 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface StackFrame : ICreatableInstance
+	public interface StackFrame : Instance
 	{
 	}
 	
-	public interface StarterPlayer : ICreatableInstance
+	public interface StarterPlayer : IServiceInstance
 	{
 	}
 	
-	public interface StartupMessageService : ICreatableInstance
+	public interface StartupMessageService : IServiceInstance
 	{
 	}
 	
-	public interface Stats : ICreatableInstance
+	public interface Stats : IServiceInstance
 	{
 	}
 	
-	public interface StatsItem : ICreatableInstance
+	public interface StatsItem : Instance
 	{
 		public double GetValue();
 		public string GetValueString();
 	}
 	
-	public interface RunningAverageItemDouble : StatsItem, ICreatableInstance
+	public interface RunningAverageItemDouble : StatsItem
 	{
 	}
 	
-	public interface RunningAverageItemInt : StatsItem, ICreatableInstance
+	public interface RunningAverageItemInt : StatsItem
 	{
 	}
 	
-	public interface RunningAverageTimeIntervalItem : StatsItem, ICreatableInstance
+	public interface RunningAverageTimeIntervalItem : StatsItem
 	{
 	}
 	
-	public interface TotalCountTimeIntervalItem : StatsItem, ICreatableInstance
+	public interface TotalCountTimeIntervalItem : StatsItem
 	{
 	}
 	
-	public interface StreamingService : ICreatableInstance
+	public interface StreamingService : IServiceInstance
 	{
 	}
 	
-	public interface StudioAssetService : ICreatableInstance
+	public interface StudioAssetService : IServiceInstance
 	{
 	}
 	
@@ -2204,27 +2204,27 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface StudioData : ICreatableInstance
+	public interface StudioData : IServiceInstance
 	{
 	}
 	
-	public interface StudioDeviceEmulatorService : ICreatableInstance
+	public interface StudioDeviceEmulatorService : IServiceInstance
 	{
 	}
 	
-	public interface StudioWidget : StudioObjectBase, ICreatableInstance
+	public interface StudioWidget : StudioObjectBase
 	{
 	}
 	
-	public interface StudioPublishService : ICreatableInstance
+	public interface StudioPublishService : IServiceInstance
 	{
 	}
 	
-	public interface StudioSdkService : ICreatableInstance
+	public interface StudioSdkService : IServiceInstance
 	{
 	}
 	
-	public interface StudioService : ICreatableInstance
+	public interface StudioService : IServiceInstance
 	{
 		public Instance? ActiveScript { get; }
 		public bool DraggerSolveConstraints { get; }
@@ -2241,16 +2241,16 @@ namespace Roblox.PluginClasses
 		public Instance[] PromptImportFiles(object[]? fileTypeFilter = null);
 	}
 	
-	public interface StudioTheme : ICreatableInstance
+	public interface StudioTheme : Instance
 	{
 		public Color3 GetColor(Enum.StudioStyleGuideColor styleguideitem, Enum.StudioStyleGuideModifier? modifier = null);
 	}
 	
-	public interface StudioWidgetsService : ICreatableInstance
+	public interface StudioWidgetsService : IServiceInstance
 	{
 	}
 	
-	public interface StyleBase : ICreatableInstance
+	public interface StyleBase : Instance
 	{
 	}
 	
@@ -2270,7 +2270,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface StylingService : ICreatableInstance
+	public interface StylingService : IServiceInstance
 	{
 	}
 	
@@ -2283,7 +2283,7 @@ namespace Roblox.PluginClasses
 		public string RoughnessMap { get; set; }
 	}
 	
-	public interface TaskScheduler : ICreatableInstance
+	public interface TaskScheduler : IServiceInstance
 	{
 		public double SchedulerDutyCycle { get; }
 		public double SchedulerRate { get; }
@@ -2295,19 +2295,19 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface TeamCreateData : ICreatableInstance
+	public interface TeamCreateData : IServiceInstance
 	{
 	}
 	
-	public interface TeamCreateService : ICreatableInstance
+	public interface TeamCreateService : IServiceInstance
 	{
 	}
 	
-	public interface Teams : ICreatableInstance
+	public interface Teams : IServiceInstance
 	{
 	}
 	
-	public interface TeleportAsyncResult : ICreatableInstance
+	public interface TeleportAsyncResult : Instance
 	{
 	}
 	
@@ -2315,7 +2315,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface TeleportService : ICreatableInstance
+	public interface TeleportService : IServiceInstance
 	{
 	}
 	
@@ -2332,7 +2332,7 @@ namespace Roblox.PluginClasses
 		public void ConvertToSmooth();
 	}
 	
-	public interface TestService : ICreatableInstance
+	public interface TestService : IServiceInstance
 	{
 		public bool AutoRuns { get; set; }
 		public string Description { get; set; }
@@ -2367,19 +2367,19 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface BubbleChatConfiguration : TextChatConfigurations, ICreatableInstance
+	public interface BubbleChatConfiguration : TextChatConfigurations
 	{
 	}
 	
-	public interface ChatInputBarConfiguration : TextChatConfigurations, ICreatableInstance
+	public interface ChatInputBarConfiguration : TextChatConfigurations
 	{
 	}
 	
-	public interface ChatWindowConfiguration : TextChatConfigurations, ICreatableInstance
+	public interface ChatWindowConfiguration : TextChatConfigurations
 	{
 	}
 	
-	public interface TextChatMessage : ICreatableInstance
+	public interface TextChatMessage : Instance
 	{
 	}
 	
@@ -2387,51 +2387,51 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface TextChatService : ICreatableInstance
+	public interface TextChatService : IServiceInstance
 	{
 	}
 	
-	public interface TextFilterResult : ICreatableInstance
+	public interface TextFilterResult : Instance
 	{
 	}
 	
-	public interface TextFilterTranslatedResult : ICreatableInstance
+	public interface TextFilterTranslatedResult : Instance
 	{
 	}
 	
-	public interface TextService : ICreatableInstance
+	public interface TextService : IServiceInstance
 	{
 	}
 	
-	public interface TextSource : ICreatableInstance
+	public interface TextSource : Instance
 	{
 	}
 	
-	public interface TextureGenerationPartGroup : ICreatableInstance
+	public interface TextureGenerationPartGroup : Instance
 	{
 	}
 	
-	public interface TextureGenerationService : ICreatableInstance
+	public interface TextureGenerationService : IServiceInstance
 	{
 	}
 	
-	public interface TextureGenerationUnwrappingRequest : ICreatableInstance
+	public interface TextureGenerationUnwrappingRequest : Instance
 	{
 	}
 	
-	public interface ThreadState : ICreatableInstance
+	public interface ThreadState : Instance
 	{
 	}
 	
-	public interface ToastNotificationService : ICreatableInstance
+	public interface ToastNotificationService : IServiceInstance
 	{
 	}
 	
-	public interface TracerService : ICreatableInstance
+	public interface TracerService : IServiceInstance
 	{
 	}
 	
-	public interface TrackerLodController : ICreatableInstance
+	public interface TrackerLodController : Instance
 	{
 	}
 	
@@ -2439,23 +2439,23 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface Translator : ICreatableInstance
+	public interface Translator : Instance
 	{
 	}
 	
-	public interface TutorialService : ICreatableInstance
+	public interface TutorialService : IServiceInstance
 	{
 	}
 	
-	public interface TweenBase : ICreatableInstance
+	public interface TweenBase : Instance
 	{
 	}
 	
-	public interface Tween : TweenBase, ICreatableInstance
+	public interface Tween : TweenBase
 	{
 	}
 	
-	public interface TweenService : ICreatableInstance
+	public interface TweenService : IServiceInstance
 	{
 	}
 	
@@ -2487,7 +2487,7 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface UIGridStyleLayout : UILayout, ICreatableInstance
+	public interface UIGridStyleLayout : UILayout
 	{
 	}
 	
@@ -2519,23 +2519,23 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface UnvalidatedAssetService : ICreatableInstance
+	public interface UnvalidatedAssetService : IServiceInstance
 	{
 	}
 	
-	public interface UserGameSettings : ICreatableInstance
+	public interface UserGameSettings : Instance
 	{
 	}
 	
-	public interface UserInputService : ICreatableInstance
+	public interface UserInputService : IServiceInstance
 	{
 	}
 	
-	public interface UserService : ICreatableInstance
+	public interface UserService : IServiceInstance
 	{
 	}
 	
-	public interface VRService : ICreatableInstance
+	public interface VRService : IServiceInstance
 	{
 	}
 	
@@ -2591,11 +2591,11 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface VersionControlService : ICreatableInstance
+	public interface VersionControlService : IServiceInstance
 	{
 	}
 	
-	public interface VideoCaptureService : ICreatableInstance
+	public interface VideoCaptureService : IServiceInstance
 	{
 	}
 	
@@ -2611,11 +2611,11 @@ namespace Roblox.PluginClasses
 	{
 	}
 	
-	public interface VoiceChatInternal : ICreatableInstance
+	public interface VoiceChatInternal : IServiceInstance
 	{
 	}
 	
-	public interface VoiceChatService : ICreatableInstance
+	public interface VoiceChatService : IServiceInstance
 	{
 		public bool EnableDefaultVoice { get; set; }
 		public Enum.AudioApiRollout UseAudioApi { get; set; }

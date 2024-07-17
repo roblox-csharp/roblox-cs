@@ -237,7 +237,7 @@ namespace Roblox
 		public Instance GetAppliedInstance();
 	}
 	
-	public interface AccountService : ICreatableInstance
+	public interface AccountService : IServiceInstance
 	{
 	}
 	
@@ -255,11 +255,11 @@ namespace Roblox
 	{
 	}
 	
-	public interface AchievementService : ICreatableInstance
+	public interface AchievementService : IServiceInstance
 	{
 	}
 	
-	public interface ActivityHistoryService : ICreatableInstance
+	public interface ActivityHistoryService : IServiceInstance
 	{
 		public ScriptSignal EventNotificationReceived { get; }
 	}
@@ -269,7 +269,7 @@ namespace Roblox
 		public Enum.AdUnitStatus Status { get; }
 	}
 	
-	public interface AnalyticsService : ICreatableInstance
+	public interface AnalyticsService : IServiceInstance
 	{
 		public void FireCustomEvent(Player player, string eventCategory, object customData);
 		public void FireEvent(string category, object value);
@@ -290,7 +290,7 @@ namespace Roblox
 		public string AnimationId { get; set; }
 	}
 	
-	public interface AnimationClip : ICreatableInstance
+	public interface AnimationClip : Instance
 	{
 		public bool Loop { get; set; }
 		public Enum.AnimationPriority Priority { get; set; }
@@ -307,7 +307,7 @@ namespace Roblox
 		public void RemoveKeyframe(Keyframe keyframe);
 	}
 	
-	public partial interface AnimationClipProvider : ICreatableInstance
+	public partial interface AnimationClipProvider : IServiceInstance
 	{
 		public string RegisterActiveAnimationClip(AnimationClip animationClip);
 		public string RegisterAnimationClip(AnimationClip animationClip);
@@ -323,11 +323,11 @@ namespace Roblox
 		public ScriptSignal<AnimationTrack> AnimationPlayed { get; }
 	}
 	
-	public interface AnimationFromVideoCreatorService : ICreatableInstance
+	public interface AnimationFromVideoCreatorService : IServiceInstance
 	{
 	}
 	
-	public interface AnimationFromVideoCreatorStudioService : ICreatableInstance
+	public interface AnimationFromVideoCreatorStudioService : IServiceInstance
 	{
 	}
 	
@@ -335,11 +335,11 @@ namespace Roblox
 	{
 	}
 	
-	public interface AnimationStreamTrack : ICreatableInstance
+	public interface AnimationStreamTrack : Instance
 	{
 	}
 	
-	public interface AnimationTrack : ICreatableInstance
+	public interface AnimationTrack : Instance
 	{
 		public Animation? Animation { get; }
 		public bool IsPlaying { get; }
@@ -375,51 +375,51 @@ namespace Roblox
 		public ScriptSignal<AnimationTrack> AnimationPlayed { get; }
 	}
 	
-	public interface AnnotationsService : ICreatableInstance
+	public interface AnnotationsService : IServiceInstance
 	{
 	}
 	
-	public interface AppLifecycleObserverService : ICreatableInstance
+	public interface AppLifecycleObserverService : IServiceInstance
 	{
 	}
 	
-	public interface AppUpdateService : ICreatableInstance
+	public interface AppUpdateService : IServiceInstance
 	{
 	}
 	
-	public interface AssetCounterService : ICreatableInstance
+	public interface AssetCounterService : IServiceInstance
 	{
 	}
 	
-	public interface AssetDeliveryProxy : ICreatableInstance
+	public interface AssetDeliveryProxy : IServiceInstance
 	{
 		public string Interface { get; set; }
 		public int Port { get; set; }
 		public bool StartServer { get; set; }
 	}
 	
-	public interface AssetImportService : ICreatableInstance
+	public interface AssetImportService : IServiceInstance
 	{
 	}
 	
-	public interface AssetImportSession : ICreatableInstance
+	public interface AssetImportSession : Instance
 	{
 		public ScriptSignal<object> UploadComplete { get; }
 		public ScriptSignal<float> UploadProgress { get; }
 	}
 	
-	public interface AssetManagerService : ICreatableInstance
+	public interface AssetManagerService : IServiceInstance
 	{
 	}
 	
-	public interface AssetPatchSettings : ICreatableInstance
+	public interface AssetPatchSettings : Instance
 	{
 		public string ContentId { get; set; }
 		public string OutputPath { get; set; }
 		public string PatchId { get; set; }
 	}
 	
-	public partial interface AssetService : ICreatableInstance
+	public partial interface AssetService : IServiceInstance
 	{
 		public EditableImage CreateEditableImageAsync(string textureId);
 		public EditableMesh CreateEditableMeshAsync(string meshId);
@@ -641,11 +641,11 @@ namespace Roblox
 		public string Title { get; set; }
 	}
 	
-	public interface AvatarChatService : ICreatableInstance
+	public interface AvatarChatService : IServiceInstance
 	{
 	}
 	
-	public interface AvatarCreationService : ICreatableInstance
+	public interface AvatarCreationService : IServiceInstance
 	{
 		public void SendAnalyticsEvent(string eventName, object parameters);
 		public AvatarGenerationSession CreateAvatarGenerationSessionAsync(Player player);
@@ -658,7 +658,7 @@ namespace Roblox
 		public object[] ValidateUGCFullBodyAsync(Player player, HumanoidDescription humanoidDescription);
 	}
 	
-	public interface AvatarEditorService : ICreatableInstance
+	public interface AvatarEditorService : IServiceInstance
 	{
 		public Enum.AccessoryType GetAccessoryType(Enum.AvatarAssetType avatarAssetType);
 		public void PromptAllowInventoryReadAccess();
@@ -689,7 +689,7 @@ namespace Roblox
 		public ScriptSignal<Enum.AvatarPromptResult> PromptUpdateOutfitCompleted { get; }
 	}
 	
-	public interface AvatarGenerationJob : ICreatableInstance
+	public interface AvatarGenerationJob : Instance
 	{
 		public Enum.AvatarGenerationError Error { get; set; }
 		public string ErrorMessage { get; set; }
@@ -700,23 +700,23 @@ namespace Roblox
 		public void Wait();
 	}
 	
-	public interface Avatar2DGenerationJob : AvatarGenerationJob, ICreatableInstance
+	public interface Avatar2DGenerationJob : AvatarGenerationJob
 	{
 		public string Result { get; set; }
 	}
 	
-	public interface Avatar3DGenerationJob : AvatarGenerationJob, ICreatableInstance
+	public interface Avatar3DGenerationJob : AvatarGenerationJob
 	{
 		public string Result { get; set; }
 	}
 	
-	public interface AvatarGenerationSession : ICreatableInstance
+	public interface AvatarGenerationSession : Instance
 	{
 		public Avatar3DGenerationJob GenerateAvatarModel(Avatar2DGenerationJob previewJob, object options);
 		public Avatar2DGenerationJob GenerateAvatarPreview(string textPrompt, object options);
 	}
 	
-	public interface AvatarImportService : ICreatableInstance
+	public interface AvatarImportService : IServiceInstance
 	{
 	}
 	
@@ -724,7 +724,7 @@ namespace Roblox
 	{
 	}
 	
-	public interface BadgeService : ICreatableInstance
+	public interface BadgeService : IServiceInstance
 	{
 		public bool AwardBadge(long userId, long badgeId);
 		public object[] CheckUserBadgesAsync(long userId, object[] badgeIds);
@@ -735,7 +735,7 @@ namespace Roblox
 		public bool UserHasBadgeAsync(long userId, long badgeId);
 	}
 	
-	public interface BaseImportData : ICreatableInstance
+	public interface BaseImportData : Instance
 	{
 		public string Id { get; }
 		public string ImportName { get; set; }
@@ -744,26 +744,26 @@ namespace Roblox
 		public ScriptSignal<object> StatusReported { get; }
 	}
 	
-	public interface AnimationImportData : BaseImportData, ICreatableInstance
+	public interface AnimationImportData : BaseImportData
 	{
 	}
 	
-	public interface FacsImportData : BaseImportData, ICreatableInstance
+	public interface FacsImportData : BaseImportData
 	{
 	}
 	
-	public interface GroupImportData : BaseImportData, ICreatableInstance
+	public interface GroupImportData : BaseImportData
 	{
 		public bool Anchored { get; set; }
 		public bool ImportAsModelAsset { get; set; }
 		public bool InsertInWorkspace { get; set; }
 	}
 	
-	public interface JointImportData : BaseImportData, ICreatableInstance
+	public interface JointImportData : BaseImportData
 	{
 	}
 	
-	public interface MaterialImportData : BaseImportData, ICreatableInstance
+	public interface MaterialImportData : BaseImportData
 	{
 		public string DiffuseFilePath { get; set; }
 		public bool IsPbr { get; }
@@ -772,7 +772,7 @@ namespace Roblox
 		public string RoughnessFilePath { get; set; }
 	}
 	
-	public interface MeshImportData : BaseImportData, ICreatableInstance
+	public interface MeshImportData : BaseImportData
 	{
 		public bool Anchored { get; set; }
 		public bool CageManifold { get; }
@@ -796,7 +796,7 @@ namespace Roblox
 		public bool UseImportedPivot { get; set; }
 	}
 	
-	public interface RootImportData : BaseImportData, ICreatableInstance
+	public interface RootImportData : BaseImportData
 	{
 		public bool AddModelToInventory { get; set; }
 		public bool Anchored { get; set; }
@@ -825,12 +825,12 @@ namespace Roblox
 		public Enum.NormalId WorldUp { get; set; }
 	}
 	
-	public interface BasePlayerGui : ICreatableInstance
+	public interface BasePlayerGui : Instance
 	{
 		public Instance[] GetGuiObjectsAtPosition(int x, int y);
 	}
 	
-	public interface PlayerGui : BasePlayerGui, ICreatableInstance
+	public interface PlayerGui : BasePlayerGui
 	{
 		public Enum.ScreenOrientation CurrentScreenOrientation { get; }
 		public Enum.ScreenOrientation ScreenOrientation { get; set; }
@@ -840,7 +840,7 @@ namespace Roblox
 		public ScriptSignal<float> TopbarTransparencyChangedSignal { get; }
 	}
 	
-	public partial interface StarterGui : BasePlayerGui, ICreatableInstance
+	public partial interface StarterGui : BasePlayerGui, IServiceInstance
 	{
 		public bool ResetPlayerGuiOnSpawn { get; set; }
 		public Enum.ScreenOrientation ScreenOrientation { get; set; }
@@ -850,7 +850,7 @@ namespace Roblox
 		public object GetCore(string parameterName);
 	}
 	
-	public interface BaseRemoteEvent : ICreatableInstance
+	public interface BaseRemoteEvent : Instance
 	{
 	}
 	
@@ -872,7 +872,7 @@ namespace Roblox
 		public ScriptSignal<Player, object[]> OnServerEvent { get; }
 	}
 	
-	public interface BaseWrap : ICreatableInstance
+	public interface BaseWrap : Instance
 	{
 		public string CageMeshId { get; set; }
 		public CFrame CageOrigin { get; set; }
@@ -934,7 +934,7 @@ namespace Roblox
 		public object[] Invoke(object[] arguments);
 	}
 	
-	public interface BodyMover : ICreatableInstance
+	public interface BodyMover : Instance
 	{
 	}
 	
@@ -1025,11 +1025,11 @@ namespace Roblox
 		public long TextSize { get; set; }
 	}
 	
-	public interface BulkImportService : ICreatableInstance
+	public interface BulkImportService : IServiceInstance
 	{
 	}
 	
-	public interface CalloutService : ICreatableInstance
+	public interface CalloutService : IServiceInstance
 	{
 	}
 	
@@ -1067,7 +1067,7 @@ namespace Roblox
 		public ScriptSignal InterpolationFinished { get; }
 	}
 	
-	public interface CaptureService : ICreatableInstance
+	public interface CaptureService : IServiceInstance
 	{
 		public void CaptureScreenshot(Action onCaptureReady);
 		public void PromptSaveCapturesToGallery(object[] contentIds, Action resultCallback);
@@ -1078,7 +1078,7 @@ namespace Roblox
 		public ScriptSignal<string> UserCaptureSaved { get; }
 	}
 	
-	public interface CharacterAppearance : ICreatableInstance
+	public interface CharacterAppearance : Instance
 	{
 	}
 	
@@ -1106,7 +1106,7 @@ namespace Roblox
 		public long OverlayTextureId { get; set; }
 	}
 	
-	public interface Clothing : CharacterAppearance, ICreatableInstance
+	public interface Clothing : CharacterAppearance
 	{
 		public Color3 Color3 { get; set; }
 	}
@@ -1127,7 +1127,7 @@ namespace Roblox
 		public string Graphic { get; set; }
 	}
 	
-	public interface Chat : ICreatableInstance
+	public interface Chat : IServiceInstance
 	{
 		public bool BubbleChatEnabled { get; set; }
 		public bool LoadDefaultChat { get; }
@@ -1143,7 +1143,7 @@ namespace Roblox
 		public ScriptSignal<Instance, string, Enum.ChatColor> Chatted { get; }
 	}
 	
-	public interface ChatbotUIService : ICreatableInstance
+	public interface ChatbotUIService : IServiceInstance
 	{
 	}
 	
@@ -1203,15 +1203,15 @@ namespace Roblox
 		public bool Enabled { get; set; }
 	}
 	
-	public interface Collaborator : ICreatableInstance
+	public interface Collaborator : Instance
 	{
 	}
 	
-	public interface CollaboratorsService : ICreatableInstance
+	public interface CollaboratorsService : IServiceInstance
 	{
 	}
 	
-	public interface CollectionService : ICreatableInstance
+	public interface CollectionService : IServiceInstance
 	{
 		public void AddTag(Instance instance, string tag);
 		public object[] GetAllTags();
@@ -1227,18 +1227,18 @@ namespace Roblox
 		public ScriptSignal<string> TagRemoved { get; }
 	}
 	
-	public interface CommandInstance : ICreatableInstance
+	public interface CommandInstance : Instance
 	{
 		public bool AllowGUIAccessPoints { get; }
 		public string DisplayName { get; set; }
 		public string Name { get; }
 	}
 	
-	public interface CommandService : ICreatableInstance
+	public interface CommandService : IServiceInstance
 	{
 	}
 	
-	public interface CommerceService : ICreatableInstance
+	public interface CommerceService : IServiceInstance
 	{
 		public void PromptRealWorldCommerceBrowser(Player player, string url);
 		public bool UserEligibleForRealWorldCommerceAsync();
@@ -1248,15 +1248,15 @@ namespace Roblox
 	{
 	}
 	
-	public interface ConfigureServerService : ICreatableInstance
+	public interface ConfigureServerService : IServiceInstance
 	{
 	}
 	
-	public interface ConnectivityService : ICreatableInstance
+	public interface ConnectivityService : IServiceInstance
 	{
 	}
 	
-	public interface Constraint : ICreatableInstance
+	public interface Constraint : Instance
 	{
 		public bool Active { get; }
 		public Attachment? Attachment0 { get; set; }
@@ -1407,7 +1407,7 @@ namespace Roblox
 		public float WinchTarget { get; set; }
 	}
 	
-	public interface SlidingBallConstraint : Constraint, ICreatableInstance
+	public interface SlidingBallConstraint : Constraint
 	{
 		public Enum.ActuatorType ActuatorType { get; set; }
 		public float CurrentPosition { get; }
@@ -1500,7 +1500,7 @@ namespace Roblox
 		public Enum.ActuatorRelativeTo RelativeTo { get; set; }
 	}
 	
-	public interface ContentProvider : ICreatableInstance
+	public interface ContentProvider : IServiceInstance
 	{
 		public string BaseUrl { get; }
 		public int RequestQueueSize { get; }
@@ -1518,7 +1518,7 @@ namespace Roblox
 		public ScriptSignal<string> AssetFetchFailed { get; }
 	}
 	
-	public interface ContextActionService : ICreatableInstance
+	public interface ContextActionService : IServiceInstance
 	{
 		public void BindAction(string actionName, Action functionToBind, bool createTouchButton, object[] inputTypes);
 		public void BindActionAtPriority(string actionName, Action functionToBind, bool createTouchButton, int priorityLevel, object[] inputTypes);
@@ -1539,7 +1539,7 @@ namespace Roblox
 		public ScriptSignal<Instance> LocalToolUnequipped { get; }
 	}
 	
-	public interface Controller : ICreatableInstance
+	public interface Controller : Instance
 	{
 		public void BindButton(Enum.Button button, string caption);
 		public bool GetButton(Enum.Button button);
@@ -1562,7 +1562,7 @@ namespace Roblox
 	{
 	}
 	
-	public interface ControllerBase : ICreatableInstance
+	public interface ControllerBase : Instance
 	{
 		public bool Active { get; }
 		public bool BalanceRigidityEnabled { get; set; }
@@ -1625,34 +1625,34 @@ namespace Roblox
 		public Vector3 UpDirection { get; set; }
 	}
 	
-	public interface ControllerService : ICreatableInstance
+	public interface ControllerService : IServiceInstance
 	{
 	}
 	
-	public interface ConversationalAIAcceptanceService : ICreatableInstance
+	public interface ConversationalAIAcceptanceService : IServiceInstance
 	{
 	}
 	
-	public interface CoreScriptDebuggingManagerHelper : ICreatableInstance
+	public interface CoreScriptDebuggingManagerHelper : IServiceInstance
 	{
 	}
 	
-	public interface CreationDBService : ICreatableInstance
+	public interface CreationDBService : IServiceInstance
 	{
 	}
 	
-	public interface CrossDMScriptChangeListener : ICreatableInstance
+	public interface CrossDMScriptChangeListener : IServiceInstance
 	{
 	}
 	
-	public interface DataModelMesh : ICreatableInstance
+	public interface DataModelMesh : Instance
 	{
 		public Vector3 Offset { get; set; }
 		public Vector3 Scale { get; set; }
 		public Vector3 VertexColor { get; set; }
 	}
 	
-	public interface BevelMesh : DataModelMesh, ICreatableInstance
+	public interface BevelMesh : DataModelMesh
 	{
 	}
 	
@@ -1708,7 +1708,7 @@ namespace Roblox
 		public Enum.MeshType MeshType { get; set; }
 	}
 	
-	public interface DataModelPatchService : ICreatableInstance
+	public interface DataModelPatchService : IServiceInstance
 	{
 	}
 	
@@ -1723,19 +1723,19 @@ namespace Roblox
 		public void SetMetadata(object attributes);
 	}
 	
-	public interface DataStoreInfo : ICreatableInstance
+	public interface DataStoreInfo : Instance
 	{
 		public long CreatedTime { get; }
 		public string DataStoreName { get; }
 		public long UpdatedTime { get; }
 	}
 	
-	public interface DataStoreKey : ICreatableInstance
+	public interface DataStoreKey : Instance
 	{
 		public string KeyName { get; }
 	}
 	
-	public interface DataStoreKeyInfo : ICreatableInstance
+	public interface DataStoreKeyInfo : Instance
 	{
 		public long CreatedTime { get; }
 		public long UpdatedTime { get; }
@@ -1744,7 +1744,7 @@ namespace Roblox
 		public object[] GetUserIds();
 	}
 	
-	public interface DataStoreObjectVersionInfo : ICreatableInstance
+	public interface DataStoreObjectVersionInfo : Instance
 	{
 		public long CreatedTime { get; }
 		public bool IsDeleted { get; }
@@ -1757,7 +1757,7 @@ namespace Roblox
 		public void SetExperimentalFeatures(object experimentalFeatures);
 	}
 	
-	public interface DataStoreService : ICreatableInstance
+	public interface DataStoreService : IServiceInstance
 	{
 		public GlobalDataStore GetDataStore(string name, string? scope = null, Instance? options = null);
 		public GlobalDataStore GetGlobalDataStore();
@@ -1772,41 +1772,41 @@ namespace Roblox
 		public void SetMetadata(object attributes);
 	}
 	
-	public interface Debris : ICreatableInstance
+	public interface Debris : IServiceInstance
 	{
 		public int MaxItems { get; set; }
 		public void AddItem(Instance item, double? lifetime = null);
 	}
 	
-	public interface DebuggablePluginWatcher : ICreatableInstance
+	public interface DebuggablePluginWatcher : IServiceInstance
 	{
 	}
 	
-	public interface DebuggerConnection : ICreatableInstance
+	public interface DebuggerConnection : Instance
 	{
 	}
 	
-	public interface LocalDebuggerConnection : DebuggerConnection, ICreatableInstance
+	public interface LocalDebuggerConnection : DebuggerConnection
 	{
 	}
 	
-	public interface DebuggerConnectionManager : ICreatableInstance
+	public interface DebuggerConnectionManager : IServiceInstance
 	{
 	}
 	
-	public interface DebuggerLuaResponse : ICreatableInstance
+	public interface DebuggerLuaResponse : Instance
 	{
 	}
 	
-	public interface DebuggerUIService : ICreatableInstance
+	public interface DebuggerUIService : IServiceInstance
 	{
 	}
 	
-	public interface DebuggerVariable : ICreatableInstance
+	public interface DebuggerVariable : Instance
 	{
 	}
 	
-	public interface DeviceIdService : ICreatableInstance
+	public interface DeviceIdService : IServiceInstance
 	{
 	}
 	
@@ -1842,7 +1842,7 @@ namespace Roblox
 		public void MouseUp();
 	}
 	
-	public interface DraggerService : ICreatableInstance
+	public interface DraggerService : IServiceInstance
 	{
 		public bool AlignDraggedObjects { get; }
 		public bool AngleSnapEnabled { get; }
@@ -1881,7 +1881,7 @@ namespace Roblox
 	{
 	}
 	
-	public interface EngineAPICloudProcessingService : ICreatableInstance
+	public interface EngineAPICloudProcessingService : IServiceInstance
 	{
 	}
 	
@@ -1895,15 +1895,15 @@ namespace Roblox
 		public FloatCurve Z();
 	}
 	
-	public interface EventIngestService : ICreatableInstance
+	public interface EventIngestService : IServiceInstance
 	{
 	}
 	
-	public interface ExampleService : ICreatableInstance
+	public interface ExampleService : IServiceInstance
 	{
 	}
 	
-	public interface ExperienceAuthService : ICreatableInstance
+	public interface ExperienceAuthService : IServiceInstance
 	{
 	}
 	
@@ -1915,18 +1915,18 @@ namespace Roblox
 		public string PromptMessage { get; set; }
 	}
 	
-	public interface ExperienceNotificationService : ICreatableInstance
+	public interface ExperienceNotificationService : IServiceInstance
 	{
 		public void PromptOptIn();
 		public bool CanPromptOptInAsync();
 		public ScriptSignal OptInPromptClosed { get; }
 	}
 	
-	public interface ExperienceService : ICreatableInstance
+	public interface ExperienceService : IServiceInstance
 	{
 	}
 	
-	public interface ExperienceStateCaptureService : ICreatableInstance
+	public interface ExperienceStateCaptureService : IServiceInstance
 	{
 	}
 	
@@ -1942,7 +1942,7 @@ namespace Roblox
 		public ScriptSignal<BasePart, float> Hit { get; }
 	}
 	
-	public interface FaceAnimatorService : ICreatableInstance
+	public interface FaceAnimatorService : IServiceInstance
 	{
 	}
 	
@@ -1950,7 +1950,7 @@ namespace Roblox
 	{
 	}
 	
-	public interface FaceInstance : ICreatableInstance
+	public interface FaceInstance : Instance
 	{
 		public Enum.NormalId Face { get; set; }
 	}
@@ -1973,23 +1973,23 @@ namespace Roblox
 		public float StudsPerTileV { get; set; }
 	}
 	
-	public interface FacialAnimationRecordingService : ICreatableInstance
+	public interface FacialAnimationRecordingService : IServiceInstance
 	{
 	}
 	
-	public interface FacialAnimationStreamingServiceStats : ICreatableInstance
+	public interface FacialAnimationStreamingServiceStats : Instance
 	{
 	}
 	
-	public interface FacialAnimationStreamingServiceV2 : ICreatableInstance
+	public interface FacialAnimationStreamingServiceV2 : IServiceInstance
 	{
 	}
 	
-	public interface FacialAnimationStreamingSubsessionStats : ICreatableInstance
+	public interface FacialAnimationStreamingSubsessionStats : Instance
 	{
 	}
 	
-	public interface Feature : ICreatableInstance
+	public interface Feature : Instance
 	{
 		public Enum.NormalId FaceId { get; set; }
 		public Enum.InOut InOut { get; set; }
@@ -2036,23 +2036,23 @@ namespace Roblox
 		public bool Visible { get; set; }
 	}
 	
-	public interface GamePassService : ICreatableInstance
+	public interface GamePassService : IServiceInstance
 	{
 		public bool PlayerHasPass(Player player, long gamePassId);
 	}
 	
-	public interface GamepadService : ICreatableInstance
+	public interface GamepadService : IServiceInstance
 	{
 		public bool GamepadCursorEnabled { get; }
 		public void DisableGamepadCursor();
 		public void EnableGamepadCursor(GuiObject guiObject);
 	}
 	
-	public interface GenericChallengeService : ICreatableInstance
+	public interface GenericChallengeService : IServiceInstance
 	{
 	}
 	
-	public interface GeometryService : ICreatableInstance
+	public interface GeometryService : IServiceInstance
 	{
 		public object[] CalculateConstraintsToPreserve(Instance source, object[] destination, object? options = null);
 		public object[] IntersectAsync(BasePart part, object[] parts, object? options = null);
@@ -2069,7 +2069,7 @@ namespace Roblox
 		public float Width { get; set; }
 	}
 	
-	public interface GlobalDataStore : ICreatableInstance
+	public interface GlobalDataStore : Instance
 	{
 		public ScriptConnection OnUpdate(string key, Action callback);
 		public object[] GetAsync(string key, DataStoreGetOptions? options = null);
@@ -2079,7 +2079,7 @@ namespace Roblox
 		public object[] UpdateAsync(string key, Action transformFunction);
 	}
 	
-	public interface DataStore : GlobalDataStore, ICreatableInstance
+	public interface DataStore : GlobalDataStore
 	{
 		public object[] GetVersionAsync(string key, string version);
 		public DataStoreKeyPages ListKeysAsync(string prefix, int? pageSize = null, string? cursor = null, bool? excludeDeleted = null);
@@ -2087,12 +2087,12 @@ namespace Roblox
 		public void RemoveVersionAsync(string key, string version);
 	}
 	
-	public interface OrderedDataStore : GlobalDataStore, ICreatableInstance
+	public interface OrderedDataStore : GlobalDataStore
 	{
 		public Instance GetSortedAsync(bool ascending, int pagesize, object minValue, object maxValue);
 	}
 	
-	public interface GroupService : ICreatableInstance
+	public interface GroupService : IServiceInstance
 	{
 		public StandardPages GetAlliesAsync(long groupId);
 		public StandardPages GetEnemiesAsync(long groupId);
@@ -2100,11 +2100,11 @@ namespace Roblox
 		public object[] GetGroupsAsync(long userId);
 	}
 	
-	public interface GuiBase : ICreatableInstance
+	public interface GuiBase : Instance
 	{
 	}
 	
-	public interface GuiBase2d : GuiBase, ICreatableInstance
+	public interface GuiBase2d : GuiBase
 	{
 		public Vector2 AbsolutePosition { get; }
 		public float AbsoluteRotation { get; }
@@ -2119,7 +2119,7 @@ namespace Roblox
 		public ScriptSignal<bool, GuiObject, GuiObject> SelectionChanged { get; }
 	}
 	
-	public interface GuiObject : GuiBase2d, ICreatableInstance
+	public interface GuiObject : GuiBase2d
 	{
 		public bool Active { get; set; }
 		public Vector2 AnchorPoint { get; set; }
@@ -2181,7 +2181,7 @@ namespace Roblox
 		public Enum.FrameStyle Style { get; set; }
 	}
 	
-	public interface GuiButton : GuiObject, ICreatableInstance
+	public interface GuiButton : GuiObject
 	{
 		public bool AutoButtonColor { get; set; }
 		public bool Modal { get; set; }
@@ -2240,7 +2240,7 @@ namespace Roblox
 		public Enum.TextYAlignment TextYAlignment { get; set; }
 	}
 	
-	public interface GuiLabel : GuiObject, ICreatableInstance
+	public interface GuiLabel : GuiObject
 	{
 	}
 	
@@ -2377,7 +2377,7 @@ namespace Roblox
 		public Vector3 LightDirection { get; set; }
 	}
 	
-	public interface LayerCollector : GuiBase2d, ICreatableInstance
+	public interface LayerCollector : GuiBase2d
 	{
 		public bool Enabled { get; set; }
 		public bool ResetOnSpawn { get; set; }
@@ -2416,7 +2416,7 @@ namespace Roblox
 		public Enum.ScreenInsets ScreenInsets { get; set; }
 	}
 	
-	public interface SurfaceGuiBase : LayerCollector, ICreatableInstance
+	public interface SurfaceGuiBase : LayerCollector
 	{
 		public bool Active { get; set; }
 		public Instance? Adornee { get; set; }
@@ -2445,7 +2445,7 @@ namespace Roblox
 		public float ZOffset { get; set; }
 	}
 	
-	public interface GuiBase3d : GuiBase, ICreatableInstance
+	public interface GuiBase3d : GuiBase
 	{
 		public Color3 Color3 { get; set; }
 		public float Transparency { get; set; }
@@ -2464,7 +2464,7 @@ namespace Roblox
 		public float WireRadius { get; set; }
 	}
 	
-	public interface InstanceAdornment : GuiBase3d, ICreatableInstance
+	public interface InstanceAdornment : GuiBase3d
 	{
 		public Instance? Adornee { get; set; }
 	}
@@ -2476,12 +2476,12 @@ namespace Roblox
 		public float SurfaceTransparency { get; set; }
 	}
 	
-	public interface PVAdornment : GuiBase3d, ICreatableInstance
+	public interface PVAdornment : GuiBase3d
 	{
 		public PVInstance? Adornee { get; set; }
 	}
 	
-	public interface HandleAdornment : PVAdornment, ICreatableInstance
+	public interface HandleAdornment : PVAdornment
 	{
 		public Enum.AdornCullingMode AdornCullingMode { get; set; }
 		public bool AlwaysOnTop { get; set; }
@@ -2540,7 +2540,7 @@ namespace Roblox
 		public void Clear();
 	}
 	
-	public interface ParabolaAdornment : PVAdornment, ICreatableInstance
+	public interface ParabolaAdornment : PVAdornment
 	{
 	}
 	
@@ -2550,12 +2550,12 @@ namespace Roblox
 		public float SurfaceTransparency { get; set; }
 	}
 	
-	public interface PartAdornment : GuiBase3d, ICreatableInstance
+	public interface PartAdornment : GuiBase3d
 	{
 		public BasePart? Adornee { get; set; }
 	}
 	
-	public interface HandlesBase : PartAdornment, ICreatableInstance
+	public interface HandlesBase : PartAdornment
 	{
 	}
 	
@@ -2585,7 +2585,7 @@ namespace Roblox
 		public Enum.NormalId TargetSurface { get; set; }
 	}
 	
-	public interface SelectionLasso : GuiBase3d, ICreatableInstance
+	public interface SelectionLasso : GuiBase3d
 	{
 		public Humanoid? Humanoid { get; set; }
 	}
@@ -2619,7 +2619,7 @@ namespace Roblox
 		public void UpdateControlPoint(int index, Path2DControlPoint point);
 	}
 	
-	public interface GuiService : ICreatableInstance
+	public interface GuiService : IServiceInstance
 	{
 		public bool AutoSelectGuiEnabled { get; set; }
 		public bool GuiNavigationEnabled { get; set; }
@@ -2648,7 +2648,7 @@ namespace Roblox
 		public ScriptSignal MenuOpened { get; }
 	}
 	
-	public interface HapticService : ICreatableInstance
+	public interface HapticService : IServiceInstance
 	{
 		public object[] GetMotor(Enum.UserInputType inputType, Enum.VibrationMotor vibrationMotor);
 		public bool IsMotorSupported(Enum.UserInputType inputType, Enum.VibrationMotor vibrationMotor);
@@ -2656,7 +2656,7 @@ namespace Roblox
 		public void SetMotor(Enum.UserInputType inputType, Enum.VibrationMotor vibrationMotor, object[] vibrationValues);
 	}
 	
-	public interface HeightmapImporterService : ICreatableInstance
+	public interface HeightmapImporterService : IServiceInstance
 	{
 	}
 	
@@ -2675,7 +2675,7 @@ namespace Roblox
 		public float OutlineTransparency { get; set; }
 	}
 	
-	public interface HttpService : ICreatableInstance
+	public interface HttpService : IServiceInstance
 	{
 		public bool HttpEnabled { get; }
 		public string GenerateGUID(bool? wrapInCurlyBraces = null);
@@ -2851,19 +2851,19 @@ namespace Roblox
 		public CFrame GetSmoothedFinalTarget();
 	}
 	
-	public interface ILegacyStudioBridge : ICreatableInstance
+	public interface ILegacyStudioBridge : IServiceInstance
 	{
 	}
 	
-	public interface LegacyStudioBridge : ILegacyStudioBridge, ICreatableInstance
+	public interface LegacyStudioBridge : ILegacyStudioBridge, IServiceInstance
 	{
 	}
 	
-	public interface IXPService : ICreatableInstance
+	public interface IXPService : IServiceInstance
 	{
 	}
 	
-	public interface IncrementalPatchBuilder : ICreatableInstance
+	public interface IncrementalPatchBuilder : IServiceInstance
 	{
 		public bool AddPathsToBundle { get; set; }
 		public double BuildDebouncePeriod { get; set; }
@@ -2872,7 +2872,7 @@ namespace Roblox
 		public bool ZstdCompression { get; set; }
 	}
 	
-	public interface InputObject : ICreatableInstance
+	public interface InputObject : Instance
 	{
 		public Vector3 Delta { get; set; }
 		public Enum.KeyCode KeyCode { get; set; }
@@ -2882,7 +2882,7 @@ namespace Roblox
 		public bool IsModifierKeyDown(Enum.ModifierKey modifierKey);
 	}
 	
-	public interface InsertService : ICreatableInstance
+	public interface InsertService : IServiceInstance
 	{
 		public bool AllowInsertFreeModels { get; set; }
 		public void ApproveAssetId(long assetId);
@@ -2905,11 +2905,11 @@ namespace Roblox
 	{
 	}
 	
-	public interface InternalSyncService : ICreatableInstance
+	public interface InternalSyncService : IServiceInstance
 	{
 	}
 	
-	public interface JointInstance : ICreatableInstance
+	public interface JointInstance : Instance
 	{
 		public bool Active { get; }
 		public CFrame C0 { get; set; }
@@ -2919,7 +2919,7 @@ namespace Roblox
 		public BasePart? Part1 { get; set; }
 	}
 	
-	public interface DynamicRotate : JointInstance, ICreatableInstance
+	public interface DynamicRotate : JointInstance
 	{
 		public float BaseAngle { get; set; }
 	}
@@ -2940,7 +2940,7 @@ namespace Roblox
 		public Vector3 F3 { get; set; }
 	}
 	
-	public interface ManualSurfaceJointInstance : JointInstance, ICreatableInstance
+	public interface ManualSurfaceJointInstance : JointInstance
 	{
 	}
 	
@@ -2984,7 +2984,7 @@ namespace Roblox
 	{
 	}
 	
-	public interface JointsService : ICreatableInstance
+	public interface JointsService : IServiceInstance
 	{
 		public void ClearJoinAfterMoveJoints();
 		public void CreateJoinAfterMoveJoints();
@@ -3009,7 +3009,7 @@ namespace Roblox
 		public string Value { get; set; }
 	}
 	
-	public partial interface KeyframeSequenceProvider : ICreatableInstance
+	public partial interface KeyframeSequenceProvider : IServiceInstance
 	{
 		public string RegisterActiveKeyframeSequence(KeyframeSequence keyframeSequence);
 		public string RegisterKeyframeSequence(KeyframeSequence keyframeSequence);
@@ -3017,15 +3017,15 @@ namespace Roblox
 		public Instance GetKeyframeSequenceAsync(string assetId);
 	}
 	
-	public interface LSPFileSyncService : ICreatableInstance
+	public interface LSPFileSyncService : IServiceInstance
 	{
 	}
 	
-	public interface LanguageService : ICreatableInstance
+	public interface LanguageService : IServiceInstance
 	{
 	}
 	
-	public interface Light : ICreatableInstance
+	public interface Light : Instance
 	{
 		public float Brightness { get; set; }
 		public Color3 Color { get; set; }
@@ -3052,7 +3052,7 @@ namespace Roblox
 		public float Range { get; set; }
 	}
 	
-	public interface Lighting : ICreatableInstance
+	public interface Lighting : IServiceInstance
 	{
 		public Color3 Ambient { get; set; }
 		public float Brightness { get; set; }
@@ -3080,15 +3080,15 @@ namespace Roblox
 		public ScriptSignal<bool> LightingChanged { get; }
 	}
 	
-	public interface LinkingService : ICreatableInstance
+	public interface LinkingService : IServiceInstance
 	{
 	}
 	
-	public interface LiveScriptingService : ICreatableInstance
+	public interface LiveScriptingService : IServiceInstance
 	{
 	}
 	
-	public interface LocalizationService : ICreatableInstance
+	public interface LocalizationService : IServiceInstance
 	{
 		public string RobloxLocaleId { get; }
 		public string SystemLocaleId { get; }
@@ -3121,34 +3121,34 @@ namespace Roblox
 		public void SetEntryValue(string key, string source, string context, string localeId, string text);
 	}
 	
-	public interface CloudLocalizationTable : LocalizationTable, ICreatableInstance
+	public interface CloudLocalizationTable : LocalizationTable
 	{
 	}
 	
-	public interface LodDataEntity : ICreatableInstance
+	public interface LodDataEntity : Instance
 	{
 	}
 	
-	public interface LodDataService : ICreatableInstance
+	public interface LodDataService : IServiceInstance
 	{
 	}
 	
-	public interface LogReporterService : ICreatableInstance
+	public interface LogReporterService : IServiceInstance
 	{
 	}
 	
-	public interface LogService : ICreatableInstance
+	public interface LogService : IServiceInstance
 	{
 		public void ClearOutput();
 		public object[] GetLogHistory();
 		public ScriptSignal<string, Enum.MessageType> MessageOut { get; }
 	}
 	
-	public interface LuaSourceContainer : ICreatableInstance
+	public interface LuaSourceContainer : Instance
 	{
 	}
 	
-	public interface BaseScript : LuaSourceContainer, ICreatableInstance
+	public interface BaseScript : LuaSourceContainer
 	{
 		public bool Disabled { get; set; }
 		public bool Enabled { get; set; }
@@ -3169,7 +3169,7 @@ namespace Roblox
 		public string LinkedSource { get; set; }
 	}
 	
-	public interface LuauScriptAnalyzerService : ICreatableInstance
+	public interface LuauScriptAnalyzerService : IServiceInstance
 	{
 	}
 	
@@ -3182,7 +3182,7 @@ namespace Roblox
 		public int RemoveMarkerAtIndex(int startingIndex, int? count = null);
 	}
 	
-	public interface MarketplaceService : ICreatableInstance
+	public interface MarketplaceService : IServiceInstance
 	{
 		public void PromptBulkPurchase(Player player, object[] lineItems, object options);
 		public void PromptBundlePurchase(Player player, long bundleId);
@@ -3209,15 +3209,15 @@ namespace Roblox
 		public ScriptSignal<Player, string, bool> PromptSubscriptionPurchaseFinished { get; }
 	}
 	
-	public interface MaterialGenerationService : ICreatableInstance
+	public interface MaterialGenerationService : IServiceInstance
 	{
 	}
 	
-	public interface MaterialGenerationSession : ICreatableInstance
+	public interface MaterialGenerationSession : Instance
 	{
 	}
 	
-	public interface MaterialService : ICreatableInstance
+	public interface MaterialService : IServiceInstance
 	{
 		public string GetBaseMaterialOverride(Enum.Material material);
 		public MaterialVariant GetMaterialVariant(Enum.Material material, string name);
@@ -3232,7 +3232,7 @@ namespace Roblox
 		public float StudsPerTile { get; set; }
 	}
 	
-	public interface MemoryStoreHashMap : ICreatableInstance
+	public interface MemoryStoreHashMap : Instance
 	{
 		public object GetAsync(string key);
 		public MemoryStoreHashMapPages ListItemsAsync(int count);
@@ -3241,21 +3241,21 @@ namespace Roblox
 		public object UpdateAsync(string key, Action transformFunction, long expiration);
 	}
 	
-	public interface MemoryStoreQueue : ICreatableInstance
+	public interface MemoryStoreQueue : Instance
 	{
 		public void AddAsync(object value, long expiration, double? priority = null);
 		public object[] ReadAsync(int count, bool? allOrNothing = null, double? waitTimeout = null);
 		public void RemoveAsync(string id);
 	}
 	
-	public interface MemoryStoreService : ICreatableInstance
+	public interface MemoryStoreService : IServiceInstance
 	{
 		public MemoryStoreHashMap GetHashMap(string name);
 		public MemoryStoreQueue GetQueue(string name, int? invisibilityTimeout = null);
 		public MemoryStoreSortedMap GetSortedMap(string name);
 	}
 	
-	public interface MemoryStoreSortedMap : ICreatableInstance
+	public interface MemoryStoreSortedMap : Instance
 	{
 		public object[] GetAsync(string key);
 		public object[] GetRangeAsync(Enum.SortDirection direction, int count, object exclusiveLowerBound, object exclusiveUpperBound);
@@ -3264,33 +3264,33 @@ namespace Roblox
 		public object[] UpdateAsync(string key, Action transformFunction, long expiration);
 	}
 	
-	public interface MessageBusConnection : ICreatableInstance
+	public interface MessageBusConnection : Instance
 	{
 	}
 	
-	public interface MessageBusService : ICreatableInstance
+	public interface MessageBusService : IServiceInstance
 	{
 	}
 	
-	public interface MessagingService : ICreatableInstance
+	public interface MessagingService : IServiceInstance
 	{
 		public void PublishAsync(string topic, object message);
 		public ScriptConnection SubscribeAsync(string topic, Action callback);
 	}
 	
-	public interface MetaBreakpoint : ICreatableInstance
+	public interface MetaBreakpoint : Instance
 	{
 	}
 	
-	public interface MetaBreakpointContext : ICreatableInstance
+	public interface MetaBreakpointContext : Instance
 	{
 	}
 	
-	public interface MetaBreakpointManager : ICreatableInstance
+	public interface MetaBreakpointManager : IServiceInstance
 	{
 	}
 	
-	public interface Mouse : ICreatableInstance
+	public interface Mouse : Instance
 	{
 		public CFrame Hit { get; }
 		public string Icon { get; set; }
@@ -3315,11 +3315,11 @@ namespace Roblox
 		public ScriptSignal WheelForward { get; }
 	}
 	
-	public interface PlayerMouse : Mouse, ICreatableInstance
+	public interface PlayerMouse : Mouse
 	{
 	}
 	
-	public interface NetworkMarker : ICreatableInstance
+	public interface NetworkMarker : Instance
 	{
 		public ScriptSignal Received { get; }
 	}
@@ -3335,17 +3335,17 @@ namespace Roblox
 	{
 	}
 	
-	public interface OmniRecommendationsService : ICreatableInstance
+	public interface OmniRecommendationsService : IServiceInstance
 	{
 	}
 	
-	public interface OpenCloudApiV1 : ICreatableInstance
+	public interface OpenCloudApiV1 : Instance
 	{
 		public OpenCloudModel CreateModel(string name);
 		public OpenCloudModel CreateUserNotificationAsync(string user, OpenCloudModel userNotification);
 	}
 	
-	public interface OpenCloudService : ICreatableInstance
+	public interface OpenCloudService : IServiceInstance
 	{
 		public OpenCloudApiV1 GetApiV1();
 		public object InvokeAsync(string version, string methodName, object arguments);
@@ -3355,13 +3355,13 @@ namespace Roblox
 	{
 	}
 	
-	public interface PVInstance : ICreatableInstance
+	public interface PVInstance : Instance
 	{
 		public CFrame GetPivot();
 		public void PivotTo(CFrame targetCFrame);
 	}
 	
-	public partial interface BasePart : PVInstance, ICreatableInstance
+	public partial interface BasePart : PVInstance
 	{
 		public bool Anchored { get; set; }
 		public Vector3 AssemblyAngularVelocity { get; set; }
@@ -3442,7 +3442,7 @@ namespace Roblox
 	{
 	}
 	
-	public interface FormFactorPart : BasePart, ICreatableInstance
+	public interface FormFactorPart : BasePart
 	{
 		public Enum.FormFactor FormFactor { get; set; }
 	}
@@ -3452,7 +3452,7 @@ namespace Roblox
 		public Enum.PartType Shape { get; set; }
 	}
 	
-	public interface Platform : Part, ICreatableInstance
+	public interface Platform : Part
 	{
 	}
 	
@@ -3489,7 +3489,7 @@ namespace Roblox
 	{
 	}
 	
-	public partial interface Terrain : BasePart, ICreatableInstance
+	public partial interface Terrain : BasePart
 	{
 		public bool IsSmooth { get; }
 		public Region3int16 MaxExtents { get; }
@@ -3528,7 +3528,7 @@ namespace Roblox
 		public void WriteVoxels(Region3 region, float resolution, object[] materials, object[] occupancy);
 	}
 	
-	public interface TriangleMeshPart : BasePart, ICreatableInstance
+	public interface TriangleMeshPart : BasePart
 	{
 		public Enum.CollisionFidelity CollisionFidelity { get; set; }
 		public Enum.FluidFidelity FluidFidelity { get; set; }
@@ -3618,7 +3618,7 @@ namespace Roblox
 		public void SendMessage(string topic, object[] message);
 	}
 	
-	public interface BackpackItem : Model, ICreatableInstance
+	public interface BackpackItem : Model
 	{
 		public string TextureId { get; set; }
 	}
@@ -3639,7 +3639,7 @@ namespace Roblox
 		public ScriptSignal Unequipped { get; }
 	}
 	
-	public partial interface WorldRoot : Model, ICreatableInstance
+	public partial interface WorldRoot : Model
 	{
 		public bool ArePartsTouchingOthers(Instance[] partList, float? overlapIgnored = null);
 		public RaycastResult Blockcast(CFrame cframe, Vector3 size, Vector3 direction, RaycastParams? parameters = null);
@@ -3660,7 +3660,7 @@ namespace Roblox
 		public RaycastResult Spherecast(Vector3 position, float radius, Vector3 direction, RaycastParams? parameters = null);
 	}
 	
-	public partial interface Workspace : WorldRoot, ICreatableInstance
+	public partial interface Workspace : WorldRoot, IServiceInstance
 	{
 		public float AirDensity { get; set; }
 		public bool AllowThirdPartySales { get; set; }
@@ -3688,7 +3688,7 @@ namespace Roblox
 	{
 	}
 	
-	public interface PackageLink : ICreatableInstance
+	public interface PackageLink : Instance
 	{
 		public string DefaultName { get; }
 		public string PackageId { get; }
@@ -3696,68 +3696,68 @@ namespace Roblox
 		public long VersionNumber { get; }
 	}
 	
-	public interface PackageUIService : ICreatableInstance
+	public interface PackageUIService : IServiceInstance
 	{
 	}
 	
-	public interface Pages : ICreatableInstance
+	public interface Pages : Instance
 	{
 		public bool IsFinished { get; }
 		public object[] GetCurrentPage();
 		public void AdvanceToNextPageAsync();
 	}
 	
-	public interface AudioPages : Pages, ICreatableInstance
+	public interface AudioPages : Pages
 	{
 	}
 	
-	public interface BanHistoryPages : Pages, ICreatableInstance
+	public interface BanHistoryPages : Pages
 	{
 	}
 	
-	public interface CatalogPages : Pages, ICreatableInstance
+	public interface CatalogPages : Pages
 	{
 	}
 	
-	public interface DataStoreKeyPages : Pages, ICreatableInstance
-	{
-		public string Cursor { get; }
-	}
-	
-	public interface DataStoreListingPages : Pages, ICreatableInstance
+	public interface DataStoreKeyPages : Pages
 	{
 		public string Cursor { get; }
 	}
 	
-	public interface DataStorePages : Pages, ICreatableInstance
+	public interface DataStoreListingPages : Pages
+	{
+		public string Cursor { get; }
+	}
+	
+	public interface DataStorePages : Pages
 	{
 	}
 	
-	public interface DataStoreVersionPages : Pages, ICreatableInstance
+	public interface DataStoreVersionPages : Pages
 	{
 	}
 	
-	public interface FriendPages : Pages, ICreatableInstance
+	public interface FriendPages : Pages
 	{
 	}
 	
-	public interface InventoryPages : Pages, ICreatableInstance
+	public interface InventoryPages : Pages
 	{
 	}
 	
-	public interface EmotesPages : InventoryPages, ICreatableInstance
+	public interface EmotesPages : InventoryPages
 	{
 	}
 	
-	public interface MemoryStoreHashMapPages : Pages, ICreatableInstance
+	public interface MemoryStoreHashMapPages : Pages
 	{
 	}
 	
-	public interface OutfitPages : Pages, ICreatableInstance
+	public interface OutfitPages : Pages
 	{
 	}
 	
-	public interface StandardPages : Pages, ICreatableInstance
+	public interface StandardPages : Pages
 	{
 	}
 	
@@ -3801,18 +3801,18 @@ namespace Roblox
 		public void Emit(int? particleCount = null);
 	}
 	
-	public interface PatchBundlerFileWatch : ICreatableInstance
+	public interface PatchBundlerFileWatch : IServiceInstance
 	{
 	}
 	
-	public interface PatchMapping : ICreatableInstance
+	public interface PatchMapping : Instance
 	{
 		public bool FlattenTree { get; set; }
 		public string PatchId { get; set; }
 		public string TargetPath { get; set; }
 	}
 	
-	public interface Path : ICreatableInstance
+	public interface Path : Instance
 	{
 		public Enum.PathStatus Status { get; }
 		public object[] GetPointCoordinates();
@@ -3837,7 +3837,7 @@ namespace Roblox
 		public bool PassThrough { get; set; }
 	}
 	
-	public interface PathfindingService : ICreatableInstance
+	public interface PathfindingService : IServiceInstance
 	{
 		public float EmptyCutoff { get; set; }
 		public Instance CreatePath(object? agentParameters = null);
@@ -3846,19 +3846,19 @@ namespace Roblox
 		public Instance FindPathAsync(Vector3 start, Vector3 finish);
 	}
 	
-	public interface PausedState : ICreatableInstance
+	public interface PausedState : Instance
 	{
 	}
 	
-	public interface PausedStateBreakpoint : PausedState, ICreatableInstance
+	public interface PausedStateBreakpoint : PausedState
 	{
 	}
 	
-	public interface PausedStateException : PausedState, ICreatableInstance
+	public interface PausedStateException : PausedState
 	{
 	}
 	
-	public interface PhysicsService : ICreatableInstance
+	public interface PhysicsService : IServiceInstance
 	{
 		public bool CollisionGroupContainsPart(string name, BasePart part);
 		public void CollisionGroupSetCollidable(string name1, string name2, bool collidable);
@@ -3877,23 +3877,23 @@ namespace Roblox
 		public void UnregisterCollisionGroup(string name);
 	}
 	
-	public interface PlaceStatsService : ICreatableInstance
+	public interface PlaceStatsService : IServiceInstance
 	{
 	}
 	
-	public interface PlacesService : ICreatableInstance
+	public interface PlacesService : IServiceInstance
 	{
 	}
 	
-	public interface PlatformCloudStorageService : ICreatableInstance
+	public interface PlatformCloudStorageService : IServiceInstance
 	{
 	}
 	
-	public interface PlatformFriendsService : ICreatableInstance
+	public interface PlatformFriendsService : IServiceInstance
 	{
 	}
 	
-	public partial interface Player : ICreatableInstance
+	public partial interface Player : Instance
 	{
 		public int AccountAge { get; }
 		public bool AutoJumpEnabled { get; set; }
@@ -3959,11 +3959,11 @@ namespace Roblox
 		public ScriptSignal<Enum.TeleportState, long, string> OnTeleport { get; }
 	}
 	
-	public interface PlayerHydrationService : ICreatableInstance
+	public interface PlayerHydrationService : IServiceInstance
 	{
 	}
 	
-	public interface PlayerScripts : ICreatableInstance
+	public interface PlayerScripts : Instance
 	{
 		public void ClearComputerCameraMovementModes();
 		public void ClearComputerMovementModes();
@@ -3975,12 +3975,12 @@ namespace Roblox
 		public void RegisterTouchMovementMode(Enum.TouchMovementMode movementMode);
 	}
 	
-	public interface PlayerViewService : ICreatableInstance
+	public interface PlayerViewService : IServiceInstance
 	{
 		public CFrame GetDeviceCameraCFrame(Player? player = null);
 	}
 	
-	public partial interface Players : ICreatableInstance
+	public partial interface Players : IServiceInstance
 	{
 		public bool BubbleChat { get; }
 		public bool CharacterAutoLoads { get; set; }
@@ -4017,24 +4017,24 @@ namespace Roblox
 	{
 	}
 	
-	public interface PluginManagementService : ICreatableInstance
+	public interface PluginManagementService : IServiceInstance
 	{
 	}
 	
-	public partial interface PluginManagerInterface : ICreatableInstance
+	public partial interface PluginManagerInterface : Instance
 	{
 	}
 	
-	public interface PluginPolicyService : ICreatableInstance
+	public interface PluginPolicyService : IServiceInstance
 	{
 	}
 	
-	public interface PolicyService : ICreatableInstance
+	public interface PolicyService : IServiceInstance
 	{
 		public object GetPolicyInfoForPlayerAsync(Player player);
 	}
 	
-	public interface PoseBase : ICreatableInstance
+	public interface PoseBase : Instance
 	{
 		public Enum.PoseEasingDirection EasingDirection { get; set; }
 		public Enum.PoseEasingStyle EasingStyle { get; set; }
@@ -4055,7 +4055,7 @@ namespace Roblox
 		public void RemoveSubPose(Pose pose);
 	}
 	
-	public interface PostEffect : ICreatableInstance
+	public interface PostEffect : Instance
 	{
 		public bool Enabled { get; set; }
 	}
@@ -4094,11 +4094,11 @@ namespace Roblox
 		public float Spread { get; set; }
 	}
 	
-	public interface ProcessInstancePhysicsService : ICreatableInstance
+	public interface ProcessInstancePhysicsService : IServiceInstance
 	{
 	}
 	
-	public interface ProjectFolderService : ICreatableInstance
+	public interface ProjectFolderService : IServiceInstance
 	{
 	}
 	
@@ -4128,7 +4128,7 @@ namespace Roblox
 		public ScriptSignal<Player> Triggered { get; }
 	}
 	
-	public interface ProximityPromptService : ICreatableInstance
+	public interface ProximityPromptService : IServiceInstance
 	{
 		public bool Enabled { get; set; }
 		public int MaxPromptsVisible { get; set; }
@@ -4140,7 +4140,7 @@ namespace Roblox
 		public ScriptSignal<ProximityPrompt, Player> PromptTriggered { get; }
 	}
 	
-	public interface PublishService : ICreatableInstance
+	public interface PublishService : IServiceInstance
 	{
 	}
 	
@@ -4150,15 +4150,15 @@ namespace Roblox
 		public ScriptSignal<Enum.TrackerPromptEvent> TrackerPrompt { get; }
 	}
 	
-	public interface ReflectionService : ICreatableInstance
+	public interface ReflectionService : IServiceInstance
 	{
 	}
 	
-	public interface RemoteCursorService : ICreatableInstance
+	public interface RemoteCursorService : IServiceInstance
 	{
 	}
 	
-	public interface RemoteDebuggerServer : ICreatableInstance
+	public interface RemoteDebuggerServer : IServiceInstance
 	{
 	}
 	
@@ -4168,24 +4168,24 @@ namespace Roblox
 		public object[] InvokeServer(object[] arguments);
 	}
 	
-	public interface ReplicatedFirst : ICreatableInstance
+	public interface ReplicatedFirst : IServiceInstance
 	{
 		public void RemoveDefaultLoadingScreen();
 	}
 	
-	public interface ReplicatedStorage : ICreatableInstance
+	public interface ReplicatedStorage : IServiceInstance
 	{
 	}
 	
-	public interface RibbonNotificationService : ICreatableInstance
+	public interface RibbonNotificationService : IServiceInstance
 	{
 	}
 	
-	public interface RobloxServerStorage : ICreatableInstance
+	public interface RobloxServerStorage : IServiceInstance
 	{
 	}
 	
-	public interface RomarkService : ICreatableInstance
+	public interface RomarkService : IServiceInstance
 	{
 		public void EndRemoteRomarkTest();
 	}
@@ -4202,11 +4202,11 @@ namespace Roblox
 		public int SetKeys(object[] keys);
 	}
 	
-	public interface RtMessagingService : ICreatableInstance
+	public interface RtMessagingService : IServiceInstance
 	{
 	}
 	
-	public partial interface RunService : ICreatableInstance
+	public partial interface RunService : IServiceInstance
 	{
 		public void BindToRenderStep(string name, int priority, Action function);
 		public bool IsClient();
@@ -4224,11 +4224,11 @@ namespace Roblox
 		public ScriptSignal<double, double> Stepped { get; }
 	}
 	
-	public interface SafetyService : ICreatableInstance
+	public interface SafetyService : IServiceInstance
 	{
 	}
 	
-	public interface ScreenshotHud : ICreatableInstance
+	public interface ScreenshotHud : Instance
 	{
 		public string CameraButtonIcon { get; set; }
 		public UDim2 CameraButtonPosition { get; set; }
@@ -4239,11 +4239,11 @@ namespace Roblox
 		public bool Visible { get; set; }
 	}
 	
-	public interface ScriptBuilder : ICreatableInstance
+	public interface ScriptBuilder : Instance
 	{
 	}
 	
-	public interface SyncScriptBuilder : ScriptBuilder, ICreatableInstance
+	public interface SyncScriptBuilder : ScriptBuilder
 	{
 		public Enum.CompileTarget CompileTarget { get; set; }
 		public bool CoverageInfo { get; set; }
@@ -4252,52 +4252,52 @@ namespace Roblox
 		public bool RawBytecode { get; set; }
 	}
 	
-	public interface ScriptChangeService : ICreatableInstance
+	public interface ScriptChangeService : IServiceInstance
 	{
 	}
 	
-	public interface ScriptCloneWatcher : ICreatableInstance
+	public interface ScriptCloneWatcher : IServiceInstance
 	{
 	}
 	
-	public interface ScriptCloneWatcherHelper : ICreatableInstance
+	public interface ScriptCloneWatcherHelper : IServiceInstance
 	{
 	}
 	
-	public interface ScriptCommitService : ICreatableInstance
+	public interface ScriptCommitService : IServiceInstance
 	{
 	}
 	
-	public partial interface ScriptContext : ICreatableInstance
+	public partial interface ScriptContext : IServiceInstance
 	{
 		public ScriptSignal<string, string, Instance> Error { get; }
 	}
 	
-	public partial interface ScriptDocument : ICreatableInstance
+	public partial interface ScriptDocument : Instance
 	{
 	}
 	
-	public partial interface ScriptEditorService : ICreatableInstance
+	public partial interface ScriptEditorService : IServiceInstance
 	{
 	}
 	
-	public partial interface ScriptProfilerService : ICreatableInstance
+	public partial interface ScriptProfilerService : IServiceInstance
 	{
 	}
 	
-	public interface ScriptRegistrationService : ICreatableInstance
+	public interface ScriptRegistrationService : IServiceInstance
 	{
 	}
 	
-	public interface ScriptRuntime : ICreatableInstance
+	public interface ScriptRuntime : Instance
 	{
 	}
 	
-	public interface SelectionHighlightManager : ICreatableInstance
+	public interface SelectionHighlightManager : IServiceInstance
 	{
 	}
 	
-	public interface SensorBase : ICreatableInstance
+	public interface SensorBase : Instance
 	{
 		public Enum.SensorUpdateType UpdateType { get; set; }
 		public void Sense();
@@ -4316,7 +4316,7 @@ namespace Roblox
 		public bool TouchingSurface { get; set; }
 	}
 	
-	public interface ControllerSensor : SensorBase, ICreatableInstance
+	public interface ControllerSensor : SensorBase
 	{
 	}
 	
@@ -4329,25 +4329,22 @@ namespace Roblox
 		public Enum.SensorMode SensorMode { get; set; }
 	}
 	
-	public interface ServerScriptService : ICreatableInstance
+	public interface ServerScriptService : IServiceInstance
 	{
 	}
 	
-	public interface ServerStorage : ICreatableInstance
+	public interface ServerStorage : IServiceInstance
 	{
 	}
 	
-	public interface ServiceProvider : ICreatableInstance
+	public partial interface ServiceProvider : Instance
 	{
-		public Instance FindService(string className);
-		public Instance GetService(string className);
-		public Instance service(string className);
 		public ScriptSignal Close { get; }
 		public ScriptSignal<Instance> ServiceAdded { get; }
 		public ScriptSignal<Instance> ServiceRemoving { get; }
 	}
 	
-	public partial interface DataModel : ServiceProvider, ICreatableInstance
+	public partial interface DataModel : ServiceProvider
 	{
 		public long CreatorId { get; }
 		public Enum.CreatorType CreatorType { get; }
@@ -4371,31 +4368,31 @@ namespace Roblox
 		public ScriptSignal Loaded { get; }
 	}
 	
-	public interface GenericSettings : ServiceProvider, ICreatableInstance
+	public interface GenericSettings : ServiceProvider
 	{
 	}
 	
-	public interface UserSettings : GenericSettings, ICreatableInstance
+	public interface UserSettings : GenericSettings
 	{
 		public bool IsUserFeatureEnabled(string name);
 		public void Reset();
 	}
 	
-	public interface ServiceVisibilityService : ICreatableInstance
+	public interface ServiceVisibilityService : IServiceInstance
 	{
 	}
 	
-	public interface SessionService : ICreatableInstance
+	public interface SessionService : IServiceInstance
 	{
 	}
 	
-	public interface SharedTableRegistry : ICreatableInstance
+	public interface SharedTableRegistry : IServiceInstance
 	{
 		public SharedTable GetSharedTable(string name);
 		public void SetSharedTable(string name, SharedTable? st = null);
 	}
 	
-	public interface ShorelineUpgraderService : ICreatableInstance
+	public interface ShorelineUpgraderService : IServiceInstance
 	{
 	}
 	
@@ -4425,15 +4422,15 @@ namespace Roblox
 		public float TimeScale { get; set; }
 	}
 	
-	public interface SmoothVoxelsUpgraderService : ICreatableInstance
+	public interface SmoothVoxelsUpgraderService : IServiceInstance
 	{
 	}
 	
-	public interface SnippetService : ICreatableInstance
+	public interface SnippetService : IServiceInstance
 	{
 	}
 	
-	public interface SocialService : ICreatableInstance
+	public interface SocialService : IServiceInstance
 	{
 		public void HideSelfView();
 		public void PromptGameInvite(Player player, ExperienceInviteOptions? experienceInviteOptions = null);
@@ -4482,7 +4479,7 @@ namespace Roblox
 		public ScriptSignal<string> Stopped { get; }
 	}
 	
-	public interface SoundEffect : ICreatableInstance
+	public interface SoundEffect : Instance
 	{
 		public bool Enabled { get; set; }
 		public int Priority { get; set; }
@@ -4505,15 +4502,15 @@ namespace Roblox
 		public float Threshold { get; set; }
 	}
 	
-	public interface CustomSoundEffect : SoundEffect, ICreatableInstance
+	public interface CustomSoundEffect : SoundEffect
 	{
 	}
 	
-	public interface AssetSoundEffect : CustomSoundEffect, ICreatableInstance
+	public interface AssetSoundEffect : CustomSoundEffect
 	{
 	}
 	
-	public interface ChannelSelectorSoundEffect : CustomSoundEffect, ICreatableInstance
+	public interface ChannelSelectorSoundEffect : CustomSoundEffect
 	{
 		public int Channel { get; set; }
 	}
@@ -4571,7 +4568,7 @@ namespace Roblox
 		public float Volume { get; set; }
 	}
 	
-	public partial interface SoundService : ICreatableInstance
+	public partial interface SoundService : IServiceInstance
 	{
 		public Enum.ReverbType AmbientReverb { get; set; }
 		public float DistanceFactor { get; set; }
@@ -4590,7 +4587,7 @@ namespace Roblox
 		public float TimeScale { get; set; }
 	}
 	
-	public interface StackFrame : ICreatableInstance
+	public interface StackFrame : Instance
 	{
 	}
 	
@@ -4598,11 +4595,11 @@ namespace Roblox
 	{
 	}
 	
-	public interface StarterPack : ICreatableInstance
+	public interface StarterPack : IServiceInstance
 	{
 	}
 	
-	public interface StarterPlayer : ICreatableInstance
+	public interface StarterPlayer : IServiceInstance
 	{
 		public bool AutoJumpEnabled { get; set; }
 		public Enum.AvatarJointUpgrade AvatarJointUpgrade { get; set; }
@@ -4627,19 +4624,19 @@ namespace Roblox
 		public bool UserEmotesEnabled { get; set; }
 	}
 	
-	public interface StarterPlayerScripts : ICreatableInstance
+	public interface StarterPlayerScripts : Instance
 	{
 	}
 	
-	public interface StarterCharacterScripts : StarterPlayerScripts, ICreatableInstance
+	public interface StarterCharacterScripts : StarterPlayerScripts
 	{
 	}
 	
-	public interface StartupMessageService : ICreatableInstance
+	public interface StartupMessageService : IServiceInstance
 	{
 	}
 	
-	public interface Stats : ICreatableInstance
+	public interface Stats : IServiceInstance
 	{
 		public int ContactsCount { get; }
 		public float DataReceiveKbps { get; }
@@ -4655,11 +4652,11 @@ namespace Roblox
 		public float GetTotalMemoryUsageMb();
 	}
 	
-	public interface StreamingService : ICreatableInstance
+	public interface StreamingService : IServiceInstance
 	{
 	}
 	
-	public interface StudioAssetService : ICreatableInstance
+	public interface StudioAssetService : IServiceInstance
 	{
 	}
 	
@@ -4676,35 +4673,35 @@ namespace Roblox
 	{
 	}
 	
-	public interface StudioDeviceEmulatorService : ICreatableInstance
+	public interface StudioDeviceEmulatorService : IServiceInstance
 	{
 	}
 	
-	public interface StudioObjectBase : ICreatableInstance
+	public interface StudioObjectBase : Instance
 	{
 	}
 	
-	public interface StudioWidget : StudioObjectBase, ICreatableInstance
+	public interface StudioWidget : StudioObjectBase
 	{
 	}
 	
-	public interface StudioPublishService : ICreatableInstance
+	public interface StudioPublishService : IServiceInstance
 	{
 	}
 	
-	public interface StudioScriptDebugEventListener : ICreatableInstance
+	public interface StudioScriptDebugEventListener : IServiceInstance
 	{
 	}
 	
-	public interface StudioSdkService : ICreatableInstance
+	public interface StudioSdkService : IServiceInstance
 	{
 	}
 	
-	public interface StudioWidgetsService : ICreatableInstance
+	public interface StudioWidgetsService : IServiceInstance
 	{
 	}
 	
-	public interface StyleBase : ICreatableInstance
+	public interface StyleBase : Instance
 	{
 		public Instance[] GetStyleRules();
 		public void InsertStyleRule(StyleRule rule, int? index = null);
@@ -4738,7 +4735,7 @@ namespace Roblox
 		public StyleSheet? StyleSheet { get; set; }
 	}
 	
-	public interface StylingService : ICreatableInstance
+	public interface StylingService : IServiceInstance
 	{
 	}
 	
@@ -4758,25 +4755,25 @@ namespace Roblox
 		public ScriptSignal<Player> PlayerRemoved { get; }
 	}
 	
-	public interface TeamCreateData : ICreatableInstance
+	public interface TeamCreateData : IServiceInstance
 	{
 	}
 	
-	public interface TeamCreatePublishService : ICreatableInstance
+	public interface TeamCreatePublishService : IServiceInstance
 	{
 	}
 	
-	public interface TeamCreateService : ICreatableInstance
+	public interface TeamCreateService : IServiceInstance
 	{
 	}
 	
-	public interface Teams : ICreatableInstance
+	public interface Teams : IServiceInstance
 	{
 		public Instance[] GetTeams();
 		public void RebalanceTeams();
 	}
 	
-	public interface TeleportAsyncResult : ICreatableInstance
+	public interface TeleportAsyncResult : Instance
 	{
 		public string PrivateServerId { get; }
 		public string ReservedServerAccessCode { get; }
@@ -4791,7 +4788,7 @@ namespace Roblox
 		public void SetTeleportData(object teleportData);
 	}
 	
-	public interface TeleportService : ICreatableInstance
+	public interface TeleportService : IServiceInstance
 	{
 		public bool CustomizedTeleportUI { get; set; }
 		public Instance GetArrivingTeleportGui();
@@ -4811,11 +4808,11 @@ namespace Roblox
 		public ScriptSignal<Instance, Enum.TeleportResult, string, long, Instance> TeleportInitFailed { get; }
 	}
 	
-	public interface TemporaryCageMeshProvider : ICreatableInstance
+	public interface TemporaryCageMeshProvider : IServiceInstance
 	{
 	}
 	
-	public interface TemporaryScriptService : ICreatableInstance
+	public interface TemporaryScriptService : IServiceInstance
 	{
 	}
 	
@@ -4832,7 +4829,7 @@ namespace Roblox
 		public Vector3 SizeInCells { get; }
 	}
 	
-	public interface TextBoxService : ICreatableInstance
+	public interface TextBoxService : IServiceInstance
 	{
 	}
 	
@@ -4853,11 +4850,11 @@ namespace Roblox
 		public ScriptSignal<TextSource, string> Triggered { get; }
 	}
 	
-	public interface TextChatConfigurations : ICreatableInstance
+	public interface TextChatConfigurations : Instance
 	{
 	}
 	
-	public interface BubbleChatConfiguration : TextChatConfigurations, ICreatableInstance
+	public interface BubbleChatConfiguration : TextChatConfigurations
 	{
 		public string AdorneeName { get; set; }
 		public Color3 BackgroundColor3 { get; set; }
@@ -4876,7 +4873,7 @@ namespace Roblox
 		public float VerticalStudsOffset { get; set; }
 	}
 	
-	public interface ChatInputBarConfiguration : TextChatConfigurations, ICreatableInstance
+	public interface ChatInputBarConfiguration : TextChatConfigurations
 	{
 		public Vector2 AbsolutePosition { get; }
 		public Vector2 AbsoluteSize { get; }
@@ -4896,7 +4893,7 @@ namespace Roblox
 		public double TextStrokeTransparency { get; set; }
 	}
 	
-	public interface ChatWindowConfiguration : TextChatConfigurations, ICreatableInstance
+	public interface ChatWindowConfiguration : TextChatConfigurations
 	{
 		public Vector2 AbsolutePosition { get; }
 		public Vector2 AbsoluteSize { get; }
@@ -4914,7 +4911,7 @@ namespace Roblox
 		public float WidthScale { get; set; }
 	}
 	
-	public interface TextChatMessage : ICreatableInstance
+	public interface TextChatMessage : Instance
 	{
 		public BubbleChatMessageProperties? BubbleChatMessageProperties { get; set; }
 		public string MessageId { get; set; }
@@ -4935,7 +4932,7 @@ namespace Roblox
 		public string Translation { get; set; }
 	}
 	
-	public interface TextChatService : ICreatableInstance
+	public interface TextChatService : IServiceInstance
 	{
 		public bool ChatTranslationEnabled { get; }
 		public Enum.ChatVersion ChatVersion { get; }
@@ -4949,14 +4946,14 @@ namespace Roblox
 		public ScriptSignal<TextChatMessage> SendingMessage { get; }
 	}
 	
-	public interface TextFilterResult : ICreatableInstance
+	public interface TextFilterResult : Instance
 	{
 		public string GetChatForUserAsync(long toUserId);
 		public string GetNonChatStringForBroadcastAsync();
 		public string GetNonChatStringForUserAsync(long toUserId);
 	}
 	
-	public interface TextFilterTranslatedResult : ICreatableInstance
+	public interface TextFilterTranslatedResult : Instance
 	{
 		public string SourceLanguage { get; }
 		public TextFilterResult? SourceText { get; }
@@ -4964,7 +4961,7 @@ namespace Roblox
 		public object GetTranslations();
 	}
 	
-	public interface TextService : ICreatableInstance
+	public interface TextService : IServiceInstance
 	{
 		public Vector2 GetTextSize(string str, int fontSize, Enum.Font font, Vector2 frameSize);
 		public TextFilterTranslatedResult FilterAndTranslateStringAsync(string stringToFilter, long fromUserId, object[] targetLocales, Enum.TextFilterContext? textContext = null);
@@ -4973,41 +4970,41 @@ namespace Roblox
 		public Vector2 GetTextBoundsAsync(GetTextBoundsParams parameters);
 	}
 	
-	public interface TextSource : ICreatableInstance
+	public interface TextSource : Instance
 	{
 		public bool CanSend { get; set; }
 		public long UserId { get; }
 	}
 	
-	public interface TextureGenerationPartGroup : ICreatableInstance
+	public interface TextureGenerationPartGroup : Instance
 	{
 	}
 	
-	public interface TextureGenerationService : ICreatableInstance
+	public interface TextureGenerationService : IServiceInstance
 	{
 	}
 	
-	public interface TextureGenerationUnwrappingRequest : ICreatableInstance
+	public interface TextureGenerationUnwrappingRequest : Instance
 	{
 	}
 	
-	public interface ThreadState : ICreatableInstance
+	public interface ThreadState : Instance
 	{
 	}
 	
-	public interface ToastNotificationService : ICreatableInstance
+	public interface ToastNotificationService : IServiceInstance
 	{
 	}
 	
-	public interface TouchTransmitter : ICreatableInstance
+	public interface TouchTransmitter : Instance
 	{
 	}
 	
-	public interface TracerService : ICreatableInstance
+	public interface TracerService : IServiceInstance
 	{
 	}
 	
-	public interface TrackerLodController : ICreatableInstance
+	public interface TrackerLodController : Instance
 	{
 		public Enum.TrackerLodFlagMode AudioMode { get; set; }
 		public Enum.TrackerExtrapolationFlagMode VideoExtrapolationMode { get; set; }
@@ -5040,18 +5037,18 @@ namespace Roblox
 		public void Clear();
 	}
 	
-	public interface Translator : ICreatableInstance
+	public interface Translator : Instance
 	{
 		public string LocaleId { get; }
 		public string FormatByKey(string key, object args);
 		public string Translate(Instance context, string text);
 	}
 	
-	public interface TutorialService : ICreatableInstance
+	public interface TutorialService : IServiceInstance
 	{
 	}
 	
-	public interface TweenBase : ICreatableInstance
+	public interface TweenBase : Instance
 	{
 		public Enum.PlaybackState PlaybackState { get; }
 		public void Cancel();
@@ -5060,31 +5057,31 @@ namespace Roblox
 		public ScriptSignal<Enum.PlaybackState> Completed { get; }
 	}
 	
-	public interface Tween : TweenBase, ICreatableInstance
+	public interface Tween : TweenBase
 	{
 		public Instance? Instance { get; }
 		public TweenInfo TweenInfo { get; }
 	}
 	
-	public interface TweenService : ICreatableInstance
+	public interface TweenService : IServiceInstance
 	{
 		public Tween Create(Instance instance, TweenInfo tweenInfo, object propertyTable);
 		public float GetValue(float alpha, Enum.EasingStyle easingStyle, Enum.EasingDirection easingDirection);
 	}
 	
-	public interface UGCAvatarService : ICreatableInstance
+	public interface UGCAvatarService : IServiceInstance
 	{
 	}
 	
-	public interface UIBase : ICreatableInstance
+	public interface UIBase : Instance
 	{
 	}
 	
-	public interface UIComponent : UIBase, ICreatableInstance
+	public interface UIComponent : UIBase
 	{
 	}
 	
-	public interface UIConstraint : UIComponent, ICreatableInstance
+	public interface UIConstraint : UIComponent
 	{
 	}
 	
@@ -5156,11 +5153,11 @@ namespace Roblox
 		public NumberSequence Transparency { get; set; }
 	}
 	
-	public interface UILayout : UIComponent, ICreatableInstance
+	public interface UILayout : UIComponent
 	{
 	}
 	
-	public interface UIGridStyleLayout : UILayout, ICreatableInstance
+	public interface UIGridStyleLayout : UILayout
 	{
 		public Vector2 AbsoluteContentSize { get; }
 		public Enum.FillDirection FillDirection { get; set; }
@@ -5242,15 +5239,15 @@ namespace Roblox
 		public float Transparency { get; set; }
 	}
 	
-	public interface UIDragDetectorService : ICreatableInstance
+	public interface UIDragDetectorService : IServiceInstance
 	{
 	}
 	
-	public interface UnvalidatedAssetService : ICreatableInstance
+	public interface UnvalidatedAssetService : IServiceInstance
 	{
 	}
 	
-	public interface UserGameSettings : ICreatableInstance
+	public interface UserGameSettings : Instance
 	{
 		public Enum.ComputerCameraMovementMode ComputerCameraMovementMode { get; set; }
 		public Enum.ComputerMovementMode ComputerMovementMode { get; set; }
@@ -5276,7 +5273,7 @@ namespace Roblox
 		public ScriptSignal<bool> StudioModeChanged { get; }
 	}
 	
-	public interface UserInputService : ICreatableInstance
+	public interface UserInputService : IServiceInstance
 	{
 		public bool AccelerometerEnabled { get; }
 		public bool GamepadEnabled { get; }
@@ -5346,12 +5343,12 @@ namespace Roblox
 		public ScriptSignal WindowFocused { get; }
 	}
 	
-	public interface UserService : ICreatableInstance
+	public interface UserService : IServiceInstance
 	{
 		public object[] GetUserInfosByUserIdsAsync(object[] userIds);
 	}
 	
-	public interface VRService : ICreatableInstance
+	public interface VRService : IServiceInstance
 	{
 		public Enum.VRScaling AutomaticScaling { get; set; }
 		public bool AvatarGestures { get; set; }
@@ -5371,11 +5368,11 @@ namespace Roblox
 		public ScriptSignal<Enum.UserCFrame, bool> UserCFrameEnabled { get; }
 	}
 	
-	public interface VRStatusService : ICreatableInstance
+	public interface VRStatusService : IServiceInstance
 	{
 	}
 	
-	public interface ValueBase : ICreatableInstance
+	public interface ValueBase : Instance
 	{
 	}
 	
@@ -5463,7 +5460,7 @@ namespace Roblox
 		public FloatCurve Z();
 	}
 	
-	public interface VideoCaptureService : ICreatableInstance
+	public interface VideoCaptureService : IServiceInstance
 	{
 	}
 	
@@ -5475,11 +5472,11 @@ namespace Roblox
 		public bool IsReady { get; }
 	}
 	
-	public interface VideoService : ICreatableInstance
+	public interface VideoService : IServiceInstance
 	{
 	}
 	
-	public interface VisibilityCheckDispatcher : ICreatableInstance
+	public interface VisibilityCheckDispatcher : IServiceInstance
 	{
 	}
 	
@@ -5491,11 +5488,11 @@ namespace Roblox
 	{
 	}
 	
-	public interface VisualizationModeService : ICreatableInstance
+	public interface VisualizationModeService : IServiceInstance
 	{
 	}
 	
-	public interface VoiceChatInternal : ICreatableInstance
+	public interface VoiceChatInternal : IServiceInstance
 	{
 		public object[] GetAudioProcessingSettings();
 		public object[] GetMicDevices();
@@ -5517,7 +5514,7 @@ namespace Roblox
 		public ScriptSignal<Enum.VoiceChatState, Enum.VoiceChatState> StateChanged { get; }
 	}
 	
-	public interface VoiceChatService : ICreatableInstance
+	public interface VoiceChatService : IServiceInstance
 	{
 		public bool IsVoiceEnabledForUserIdAsync(long userId);
 	}

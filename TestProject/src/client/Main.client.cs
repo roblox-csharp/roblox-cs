@@ -13,6 +13,7 @@ namespace TestGame.Client
             Console.WriteLine(x);
             task.wait(2);
             Console.WriteLine(math.pow(x, 2));
+            Console.WriteLine(game.GetService<Players>());
             ComponentRunner.AttachTag("Lava", instance => new LavaComponent((Part)instance));
         }
     }

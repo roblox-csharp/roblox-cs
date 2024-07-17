@@ -14,6 +14,11 @@ namespace RobloxCS
             Log(message, ConsoleColor.Cyan, "INFO");
         }
 
+        public static void CompilerError(string message)
+        {
+            Error($"{message} (compiler error)");
+        }
+
         public static void Error(string message)
         {
             Log(message, ConsoleColor.Red, "ERROR");

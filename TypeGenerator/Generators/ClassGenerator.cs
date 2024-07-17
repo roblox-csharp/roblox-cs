@@ -167,7 +167,7 @@ namespace TypeGenerator.Generators
 
             var classesToGenerate = rbxClasses.Where(ShouldGenerateClass).ToList();
             GenerateHeader();
-            Write($"namespace RobloxRuntime{(_security == "PluginSecurity" ? ".PluginClasses" : "")}");
+            Write($"namespace Roblox{(_security == "PluginSecurity" ? ".PluginClasses" : "")}");
             Write("{");
             PushIndent();
 
@@ -312,15 +312,33 @@ namespace TypeGenerator.Generators
                 }
             }
 
-            if (!noSecurity && members.Count == 0)
-                return;
+            if (!noSecurity && members.Count == 0) return;
+            if (className == "Studio") return;
 
-            if (className == "Studio")
-                return;
+            var superclasses = new List<string>();
+            if (Utility.IsCreatable(rbxClass))
+            {
+                if (rbxClass.Superclass != "Instance")
+                {
+                    superclasses.Add(rbxClass.Superclass);
+                }
+                superclasses.Add("ICreatableInstance");
+            }
+            else if (Utility.HasTag(rbxClass, "Service"))
+            {
+                if (rbxClass.Superclass != "Instance")
+                {
+                    superclasses.Add(rbxClass.Superclass);
+                }
+                superclasses.Add("IServiceInstance");
+            }
+            else
+            {
+                superclasses.Add(rbxClass.Superclass);
+            }
 
             var isPartial = Constants.PARTIAL_INTERFACES.Contains(className);
-            var superclasses = rbxClass.Superclass == "Instance" ? "ICreatableInstance" : $"{rbxClass.Superclass}, ICreatableInstance";
-            Write($"public{(isPartial ? " partial" : "")} interface {className}{(rbxClass.Superclass != Constants.ROOT_CLASS_NAME ? $" : {superclasses}" : "")}");
+            Write($"public{(isPartial ? " partial" : "")} interface {className}{(rbxClass.Superclass != Constants.ROOT_CLASS_NAME ? $" : {string.Join(", ", superclasses)}" : "")}");
             Write("{");
             PushIndent();
 

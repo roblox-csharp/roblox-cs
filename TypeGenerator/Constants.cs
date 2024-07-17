@@ -45,7 +45,8 @@
             "NetworkPeer",
             "NetworkClient",
             "NetworkServer",
-            "BasePart"
+            "BasePart",
+            "ServiceProvider"
         };
 
         public static readonly HashSet<string> CREATABLE_BLACKLIST = new HashSet<string>
@@ -215,11 +216,11 @@
             { "BodyAngularVelocity", ["FilteringEnabled"] },
             { "BodyPosition", ["FilteringEnabled"] },
             { "DataStoreService", ["FilteringEnabled"] },
-            { "Debris", ["FilteringEnabled" ] },
+            { "Debris", ["FilteringEnabled"] },
             { "LayerCollector", ["FilteringEnabled"] },
             { "GuiBase3d", ["FilteringEnabled"] },
             { "Model", ["FilteringEnabled"] },
-            { "ServiceProvider", ["FilteringEnabled"] },
+            { "ServiceProvider", ["FilteringEnabled", "GetService", "FindService", "service"] },
             { "DataModel", ["FilteringEnabled", "Workspace", "lighting"] }
         };
 
