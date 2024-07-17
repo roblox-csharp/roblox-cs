@@ -1,6 +1,6 @@
-﻿using RobloxRuntime.Classes;
+﻿using Roblox.Classes;
 
-namespace RobloxRuntime
+namespace Roblox
 {
     using HttpHeaders = IDictionary<string, string>;
 

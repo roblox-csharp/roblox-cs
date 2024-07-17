@@ -1,4 +1,4 @@
-﻿namespace RobloxRuntime
+﻿namespace Roblox
 {
     public sealed class Coroutine
     { 

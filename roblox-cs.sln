@@ -5,7 +5,7 @@ VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "roblox-cs", "RobloxCS\roblox-cs.csproj", "{B61F0F15-38BF-4A07-A08C-DD309F4EFF33}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RobloxRuntime", "RobloxRuntime\RobloxRuntime.csproj", "{674D3169-F1FA-45A6-850E-B5F90515C414}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Roblox", "RobloxRuntime\Roblox.csproj", "{674D3169-F1FA-45A6-850E-B5F90515C414}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{3F25D38D-D965-4675-B51F-80A39A5259F2}"
 	ProjectSection(SolutionItems) = preProject
@@ -16,7 +16,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypeGenerator", "TypeGenera
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestProject", "TestProject\TestProject.csproj", "{5498A28C-A846-4C93-B23A-E724F9458CC7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RobloxCS.Tests", "RobloxCS.Tests\RobloxCS.Tests.csproj", "{ECEF0FD6-BADA-4AA9-B55F-EB9D0BE18A5F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RobloxCS.Tests", "RobloxCS.Tests\RobloxCS.Tests.csproj", "{ECEF0FD6-BADA-4AA9-B55F-EB9D0BE18A5F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

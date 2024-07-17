@@ -1,5 +1,5 @@
-using RobloxRuntime.Classes;
-using static RobloxRuntime.Globals;
+using Roblox.Classes;
+using static Roblox.Globals;
 
 using Components;
 

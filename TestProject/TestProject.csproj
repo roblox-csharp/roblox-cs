@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RobloxRuntime\RobloxRuntime.csproj" />
+    <ProjectReference Include="..\RobloxRuntime\Roblox.csproj" />
   </ItemGroup>
 
   <ItemGroup>
