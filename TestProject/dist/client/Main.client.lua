@@ -8,7 +8,9 @@ CS.namespace("TestGame", function(namespace)
             
             function class.Main()
                 local s = utf8.char(16, 2, 24, 86)
-                print("[TestProject/Client/Main.client.cs:13:13]:", s)
+                local n = tonumber("0xE16D")
+                print("[TestProject/Client/Main.client.cs:14:13]:", s)
+                print("[TestProject/Client/Main.client.cs:15:13]:", n)
             end
             
             if namespace == nil then

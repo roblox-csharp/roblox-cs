@@ -641,8 +641,20 @@ namespace RobloxCS
                 var name = GetName(identifier);
                 switch (name)
                 {
-                    case "typeOf":
+                    case "TypeOf":
                         Write("typeof");
+                        Visit(node.ArgumentList);
+                        return;
+
+                    case "ToNumber":
+                    case "ToFloat":
+                    case "ToDouble":
+                    case "ToInt":
+                    case "ToUInt":
+                    case "ToShort":
+                    case "ToUShort":
+                    case "ToByte":
+                        Write("tonumber");
                         Visit(node.ArgumentList);
                         return;
                 }

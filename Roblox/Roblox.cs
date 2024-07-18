@@ -26,7 +26,52 @@
             return default;
         }
 
-        public static string typeOf(object obj)
+        public static float ToNumber(string str)
+        {
+            return default;
+        }
+
+        public static float ToFloat(string str)
+        {
+            return default;
+        }
+
+        public static double ToDouble(string str)
+        {
+            return default;
+        }
+
+        public static int ToInt(string str)
+        {
+            return default;
+        }
+
+        public static uint ToUInt(string str)
+        {
+            return default;
+        }
+
+        public static short ToShort(string str)
+        {
+            return default;
+        }
+
+        public static ushort ToUShort(string str)
+        {
+            return default;
+        }
+
+        public static byte ToByte(string str)
+        {
+            return default;
+        }
+
+        public static sbyte ToSByte(string str)
+        {
+            return default;
+        }
+
+        public static string TypeOf(object obj)
         {
             return null!;
         }
