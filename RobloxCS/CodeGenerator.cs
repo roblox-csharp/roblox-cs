@@ -20,6 +20,7 @@ namespace RobloxCS
         private readonly string _inputDirectory;
         private readonly CSharpCompilation _compiler;
         private readonly SemanticModel _semanticModel;
+        private readonly SymbolAnalyzerResults _symbolAnalysis;
         private readonly INamespaceSymbol _globalNamespace;
         private readonly INamespaceSymbol _runtimeLibNamespace;
         private readonly RojoProject _rojoProject; // make sure you check that it is not in debug mode before using this field!
@@ -48,6 +49,9 @@ namespace RobloxCS
             _inputDirectory = inputDirectory;
             _compiler = compiler;
             _semanticModel = compiler.GetSemanticModel(tree);
+
+            var symbolAnalyzer = new SymbolAnalyzer(tree, _semanticModel);
+            _symbolAnalysis = symbolAnalyzer.Analyze();
             _globalNamespace = compiler.GlobalNamespace;
             _runtimeLibNamespace = _globalNamespace.GetNamespaceMembers().FirstOrDefault(ns => ns.Name == Utility.RuntimeAssemblyName)!;
             _rojoProject = rojoProject!;
@@ -74,7 +78,20 @@ namespace RobloxCS
 
             foreach (var (namespaceName, declaringFiles) in GetNamespaceFilePaths())
             {
-                WriteLine($"-- Imports for \"{namespaceName}\"");
+                var symbol = _tree.GetRoot()
+                    .DescendantNodes()
+                    .Select(node => _semanticModel.GetTypeInfo(node).Type)
+                    .OfType<INamespaceOrTypeSymbol>()
+                    .Where(namespaceSymbol => namespaceSymbol.ContainingAssembly != null && namespaceSymbol.ContainingAssembly.Name == _config.CSharpOptions.AssemblyName)
+                    .FirstOrDefault(symbol => symbol.Name == namespaceName);
+
+                var namespaceSymbol = symbol == null ? null : (symbol.IsNamespace ? symbol : symbol.ContainingNamespace);
+                if (namespaceSymbol == null || !_symbolAnalysis.TypeHasMemberUsedAsValue(namespaceSymbol))
+                {
+                    continue;
+                }
+
+                WriteLine($"-- using {namespaceName};");
                 foreach (var csharpFilePath in declaringFiles)
                 {
                     WriteLine($"require({GetRequirePath(csharpFilePath)})");
@@ -124,7 +141,7 @@ namespace RobloxCS
                 .DescendantNodes()
                 .Select(node => _semanticModel.GetTypeInfo(node).Type)
                 .OfType<INamedTypeSymbol>()
-                .Where(namespaceSymbol => namespaceSymbol.ContainingAssembly.Name == _config.CSharpOptions.AssemblyName);
+                .Where(namespaceSymbol => namespaceSymbol.ContainingAssembly != null && namespaceSymbol.ContainingAssembly.Name == _config.CSharpOptions.AssemblyName);
 
             return new Dictionary<string, HashSet<string>>(
                 Utility.FilterDuplicates(globalNamespaceSymbols, SymbolEqualityComparer.Default)

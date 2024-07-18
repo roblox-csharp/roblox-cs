@@ -1,8 +1,5 @@
 local CS = require(game:GetService("ReplicatedStorage").rbxcs_include.RuntimeLib)
 
--- Imports for "GameComponent"
-require(game:GetService("ReplicatedStorage")["C#"]["Components"])
-
 CS.namespace("TestGame", function(namespace)
     namespace:namespace("Client", function(namespace)
         namespace:class("LavaComponent", function(namespace)

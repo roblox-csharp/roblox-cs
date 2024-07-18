@@ -1,11 +1,5 @@
 local CS = require(game:GetService("ReplicatedStorage").rbxcs_include.RuntimeLib)
 
--- Imports for "ComponentRunner"
-require(game:GetService("ReplicatedStorage")["C#"]["Components"])
-
--- Imports for "LavaComponent"
-require(game:GetService("Players").LocalPlayer["PlayerScripts"]["C#"]["Components"]["Lava"])
-
 CS.namespace("TestGame", function(namespace)
     namespace:namespace("Client", function(namespace)
         namespace:class("Game", function(namespace)
@@ -13,10 +7,7 @@ CS.namespace("TestGame", function(namespace)
             class.__index = class
             
             function class.Main()
-                local x = false
-                CS.getAssemblyType("Components").ComponentRunner.AttachTag("Lava", function(instance)
-                    return namespace["$getMember"](namespace, "LavaComponent").new(instance)
-                end)
+                CS.getAssemblyType("GameComponent")local x
             end
             
             if namespace == nil then

@@ -9,7 +9,6 @@ namespace TestGame.Client
     {
         public static void Main()
         {
-            bool x = default;
             ComponentRunner.AttachTag("Lava", instance => new LavaComponent((Part)instance));
         }
     }
