@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "roblox-cs", "RobloxCS\roblox-cs.csproj", "{B61F0F15-38BF-4A07-A08C-DD309F4EFF33}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RobloxCS", "RobloxCS\RobloxCS.csproj", "{B61F0F15-38BF-4A07-A08C-DD309F4EFF33}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Roblox", "Roblox\Roblox.csproj", "{674D3169-F1FA-45A6-850E-B5F90515C414}"
 EndProject
@@ -14,11 +14,13 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		.github\workflows\tests.yml = .github\workflows\tests.yml
 	EndProjectSection
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TypeGenerator", "TypeGenerator\TypeGenerator.csproj", "{862B957E-3897-4294-AF88-157489FE4C62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RobloxCS.TypeGenerator", "RobloxCS.TypeGenerator\RobloxCS.TypeGenerator.csproj", "{862B957E-3897-4294-AF88-157489FE4C62}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestProject", "TestProject\TestProject.csproj", "{5498A28C-A846-4C93-B23A-E724F9458CC7}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RobloxCS.Tests", "RobloxCS.Tests\RobloxCS.Tests.csproj", "{ECEF0FD6-BADA-4AA9-B55F-EB9D0BE18A5F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RobloxCS.CLI", "RobloxCS.CLI\RobloxCS.CLI.csproj", "{DCB5D69F-7AE3-4F15-85AA-CE9490529A71}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -46,6 +48,10 @@ Global
 		{ECEF0FD6-BADA-4AA9-B55F-EB9D0BE18A5F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{ECEF0FD6-BADA-4AA9-B55F-EB9D0BE18A5F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{ECEF0FD6-BADA-4AA9-B55F-EB9D0BE18A5F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DCB5D69F-7AE3-4F15-85AA-CE9490529A71}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DCB5D69F-7AE3-4F15-85AA-CE9490529A71}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DCB5D69F-7AE3-4F15-85AA-CE9490529A71}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DCB5D69F-7AE3-4F15-85AA-CE9490529A71}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

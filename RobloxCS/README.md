@@ -7,8 +7,10 @@ This project includes the compiler and transformers.
 - Macro bitwise operators to `bit32` library methods
 - Macro `IEnumerable<T>` (or `Array`?) methods
 - Classes/structs/interfaces nested in classes/structs/interfaces
-- Transform operator methods into a RuntimeLib method call
 - Some sort of `LuaTuple` object
+- Compile `ToString()` method declarations as `__tostring` metamethod declarations
+- Transform operator methods into a RuntimeLib method call
+- Transform parameterized class declarations (i.e `class Vector4(float x = 0, float y = 0, float z = 0, float w = 0)`) into regular class declarations with a constructor
 
 ## Will maybe be supported
 - `out` keyword

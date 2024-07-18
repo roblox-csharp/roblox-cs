@@ -27,7 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RobloxCS\roblox-cs.csproj" />
+    <ProjectReference Include="..\RobloxCS\RobloxCS.csproj" />
   </ItemGroup>
 
 </Project>

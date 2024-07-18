@@ -1073,7 +1073,10 @@ namespace RobloxCS
             );
 
             var isStatic = HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
-            var constructor = node.Members.OfType<ConstructorDeclarationSyntax>().FirstOrDefault();
+            var constructors = node.Members.OfType<ConstructorDeclarationSyntax>().ToList();
+            constructors.Sort((a, b) => a.ParameterList.Parameters.Count - b.ParameterList.Parameters.Count);
+
+            var constructor = constructors.FirstOrDefault();
             if (!isStatic)
             {
                 if (constructor == null)

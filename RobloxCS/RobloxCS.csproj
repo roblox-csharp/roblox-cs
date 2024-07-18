@@ -1,14 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
-    <RootNamespace>RobloxCS</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <Title>RobloxCS</Title>
     <Version>1.0.2</Version>
-    <StartupObject>RobloxCS.Program</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>

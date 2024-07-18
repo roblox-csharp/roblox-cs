@@ -1,4 +1,4 @@
-﻿namespace RobloxCS
+﻿namespace RobloxCS.CLI
 {
     public static class Program
     {

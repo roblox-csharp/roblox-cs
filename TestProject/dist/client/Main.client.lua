@@ -7,10 +7,8 @@ CS.namespace("TestGame", function(namespace)
             class.__index = class
             
             function class.Main()
-                local s = utf8.char(16, 2, 24, 86)
-                local n = tonumber("0xE16D")
-                print("[TestProject/Client/Main.client.cs:14:13]:", s)
-                print("[TestProject/Client/Main.client.cs:15:13]:", n)
+                local vec1 = namespace["$getMember"](namespace, "Vector4").new(3, 0, 6, 0)
+                local vec2 = namespace["$getMember"](namespace, "Vector4").new(0, 2, 0, 9)
             end
             
             if namespace == nil then
@@ -19,6 +17,20 @@ CS.namespace("TestGame", function(namespace)
                 namespace["$onLoaded"](namespace, class.Main)
             end
             return class
+        end)
+        namespace:class("Vector4", function(namespace)
+            local class = {}
+            class.__index = class
+            
+            function class.new(x)
+                local self = setmetatable({}, class)
+                
+                
+                
+                return self
+            end
+            
+            return setmetatable({}, class)
         end)
     end)
 end)
