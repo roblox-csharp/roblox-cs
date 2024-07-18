@@ -53,6 +53,34 @@ local CSNamespace = {} do
 	end
 end
 
+local CSClass = {} do
+	CSClass.__index = CSClass
+
+	function CSClass.new(name, superclass)
+		local self = {}
+		self.name = name
+		self.superclass = superclass
+		self.members = {}
+		return setmetatable(self, CSClass)
+	end
+
+	function CSClass:super()
+		setmetatable(self, self.superclass)
+	end
+
+	function CSClass:__index(index)
+		return self.members[index] or CSClass[index]
+	end
+
+	CSClass["$getMember"] = function(self, name)
+		return self.members[name]
+	end
+
+	function CSClass:class(name, create)
+		CS.class(name, create, self)
+	end
+end
+
 function CS.class(name, create, namespace)
 	local location
 	if namespace ~= nil then
