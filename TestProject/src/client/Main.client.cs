@@ -7,6 +7,8 @@ namespace TestGame.Client
     {
         public static void Main()
         {
+            var @abc = 5;
+            Console.WriteLine(@abc);
             // var vec1 = new Vector4(3, 0, 6, 0);
             // var vec2 = new Vector4(0, 2, 0, 9);
             // var vec3 = vec1 + vec2;

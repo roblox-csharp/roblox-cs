@@ -654,6 +654,7 @@ namespace RobloxCS
                     case "ToShort":
                     case "ToUShort":
                     case "ToByte":
+                    case "ToSByte":
                         Write("tonumber");
                         Visit(node.ArgumentList);
                         return;
@@ -789,9 +790,8 @@ namespace RobloxCS
 
         public override void VisitIdentifierName(IdentifierNameSyntax node)
         {
+            if (node.Identifier.ValueText == "var") return;
             var identifierName = node.Identifier.ValueText.Replace("@", "");
-            if (identifierName == "var") return;
-
 
             var isWithinClass = IsDescendantOf<ClassDeclarationSyntax>(node);
             var prefix = "";
