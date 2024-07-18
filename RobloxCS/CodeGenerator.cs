@@ -777,7 +777,7 @@ namespace RobloxCS
 
         public override void VisitIdentifierName(IdentifierNameSyntax node)
         {
-            var identifierName = node.Identifier.ValueText;
+            var identifierName = node.Identifier.ValueText.Replace("@", "");
             if (identifierName == "var") return;
 
 

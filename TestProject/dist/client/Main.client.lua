@@ -7,7 +7,8 @@ CS.namespace("TestGame", function(namespace)
             class.__index = class
             
             function class.Main()
-                local x
+                local s = utf8.char(16, 2, 24, 86)
+                print("[TestProject/Client/Main.client.cs:13:13]:", s)
             end
             
             if namespace == nil then

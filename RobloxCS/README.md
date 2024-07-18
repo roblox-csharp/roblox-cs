@@ -4,7 +4,6 @@ This project includes the compiler and transformers.
 ## To-do
 - Inheritance chains 🤮
 - The rest of the built-in libraries
-- Compile identifiers starting with `@` without the `@` (i.e. `@char` -> `char`)
 - Macro bitwise operators to `bit32` library methods
 - Macro number `Parse()` methods to `tonumber()`
 - Macro `IEnumerable<T>` (or `Array`?) methods
