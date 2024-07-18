@@ -9,11 +9,7 @@ namespace TestGame.Client
     {
         public static void Main()
         {
-            var x = 5;
-            Console.WriteLine(x);
-            task.wait(2);
-            Console.WriteLine(math.pow(x, 2));
-            Console.WriteLine(game.GetService<Players>());
+            bool x = default;
             ComponentRunner.AttachTag("Lava", instance => new LavaComponent((Part)instance));
         }
     }

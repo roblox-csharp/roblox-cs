@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Text.Unicode;
 
 namespace RobloxCS
 {
@@ -13,13 +14,6 @@ namespace RobloxCS
 
     internal sealed class CodeGenerator : CSharpSyntaxWalker
     {
-        private readonly List<SyntaxKind> _memberParentSyntaxes = new List<SyntaxKind>([
-            SyntaxKind.NamespaceDeclaration,
-            SyntaxKind.ClassDeclaration,
-            SyntaxKind.InterfaceDeclaration,
-            SyntaxKind.StructDeclaration
-        ]);
-
         private readonly SyntaxTree _tree;
         private readonly ConfigData _config;
         private readonly MemberCollectionResult _members;
@@ -37,7 +31,6 @@ namespace RobloxCS
 
         private readonly StringBuilder _output = new StringBuilder();
         private int _indent = 0;
-
 
         public CodeGenerator(
             SyntaxTree tree,
@@ -914,6 +907,32 @@ namespace RobloxCS
                     break;
 
                 case SyntaxKind.DefaultLiteralExpression:
+                    var typeSymbol = _semanticModel.GetTypeInfo(node).Type;
+                    if (typeSymbol == null) break;
+
+                    if (Constants.INTEGER_TYPES.Contains(typeSymbol.Name) || Constants.DECIMAL_TYPES.Contains(typeSymbol.Name))
+                    {
+                        Write("0");
+                        break;
+                    }
+
+                    switch (typeSymbol.Name)
+                    {
+                        case "char":
+                        case "Char":
+                        case "string":
+                        case "String":
+                            Write("\"\"");
+                            break;
+                        case "bool":
+                        case "Boolean":
+                            Write("false");
+                            break;
+                        default:
+                            Write("nil");
+                            break;
+                    }
+                    break;
                 case SyntaxKind.NullLiteralExpression:
                     Write("nil");
                     break;

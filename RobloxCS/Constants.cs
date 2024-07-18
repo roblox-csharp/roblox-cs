@@ -1,7 +1,16 @@
-﻿namespace RobloxCS
+﻿using Microsoft.CodeAnalysis.CSharp;
+
+namespace RobloxCS
 {
     internal static class Constants
     {
+        public static readonly List<SyntaxKind> _memberParentSyntaxes = new List<SyntaxKind>([
+            SyntaxKind.NamespaceDeclaration,
+            SyntaxKind.ClassDeclaration,
+            SyntaxKind.InterfaceDeclaration,
+            SyntaxKind.StructDeclaration
+        ]);
+
         public static readonly HashSet<string> NO_FULL_QUALIFICATION_TYPES = new HashSet<string>
         {
             "System",
@@ -18,6 +27,14 @@
         public static readonly Dictionary<List<string>, (string, string)> PER_TYPE_BINARY_OPERATOR_MAP = new Dictionary<List<string>, (string, string)>
         {
             { ["String", "string"], ("+", "..") }
+        };
+
+        public static readonly HashSet<string> DECIMAL_TYPES = new HashSet<string>
+        {
+            "float",
+            "double",
+            "Single",
+            "Double"
         };
 
         public static readonly HashSet<string> INTEGER_TYPES = new HashSet<string>
