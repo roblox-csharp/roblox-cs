@@ -12,6 +12,23 @@
             Assert.Equal(cleanedLua, identifier.Replace("@", ""));
         }
 
+        [Theory]
+        [InlineData("ToNumber(\"69\")")]
+        [InlineData("ToFloat(\"69\")")]
+        [InlineData("ToDouble(\"69\")")]
+        [InlineData("ToInt(\"69\")")]
+        [InlineData("ToUInt(\"69\")")]
+        [InlineData("ToShort(\"69\")")]
+        [InlineData("ToUShort(\"69\")")]
+        [InlineData("ToByte(\"69\")")]
+        [InlineData("ToSByte(\"69\")")]
+        public void NumberParsingMethods_MacroToToNumber(string methodCall)
+        {
+            var cleanedLua = GetCleanLua(methodCall);
+            Assert.Equal("tonumber(\"69\")", cleanedLua);
+        }
+
+
         [Fact]
         public void NamespaceDeclaration_GeneratesRuntimeCalls()
         {
