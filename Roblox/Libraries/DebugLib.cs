@@ -28,7 +28,7 @@
             /// <para>Allows programmatic inspection of the call stack. This function differs from debug.traceback() in that it guarantees the format of the data it returns.</para>
             /// <para>This is useful for general logging and filtering purposes as well as for sending the data to systems expecting structured input, such as crash aggregation.</para>
             /// </summary>
-            public static object[] info(int level, string options)
+            public static object[] info(int level, string options) // TODO: use LuaTuple type?
             {
                 return null!;
             }
