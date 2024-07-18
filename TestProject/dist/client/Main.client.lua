@@ -7,7 +7,7 @@ CS.namespace("TestGame", function(namespace)
             class.__index = class
             
             function class.Main()
-                CS.getAssemblyType("GameComponent")local x
+                local x
             end
             
             if namespace == nil then

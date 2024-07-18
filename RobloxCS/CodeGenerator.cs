@@ -749,6 +749,14 @@ namespace RobloxCS
             _flags[CodeGenFlag.ShouldCallGetAssemblyType] = false;
         }
 
+        public override void VisitVariableDeclaration(VariableDeclarationSyntax node)
+        {
+            foreach (var declarator in node.Variables)
+            {
+                Visit(declarator);
+            }
+        }
+
         public override void VisitVariableDeclarator(VariableDeclaratorSyntax node)
         {
             Write($"local {node.Identifier.ValueText}");
@@ -772,12 +780,12 @@ namespace RobloxCS
             var identifierName = node.Identifier.ValueText;
             if (identifierName == "var") return;
 
+
             var isWithinClass = IsDescendantOf<ClassDeclarationSyntax>(node);
             var prefix = "";
             if (isWithinClass)
             {
-                // Check the fields in classes that this node
-                // is a descendant of for the identifier name
+                // Check the fields in classes that this node is a descendant of for the identifier name
                 var ancestorClasses = GetAncestors<ClassDeclarationSyntax>(node);
                 for (int i = 0; i < ancestorClasses.Length; i++)
                 {
