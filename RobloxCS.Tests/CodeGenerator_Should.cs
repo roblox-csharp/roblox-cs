@@ -2,13 +2,23 @@
 {
     public class CodeGenerator_Should
     {
+        [Theory]
+        [InlineData("@abc")]
+        [InlineData("@hello_brah")]
+        [InlineData("@SIGMA")]
+        public void IdentifierWithAtSymbol_HasAtSymbolRemoved(string identifier)
+        {
+            var cleanedLua = GetCleanLua(identifier);
+            Assert.Equal(cleanedLua, identifier.Replace("@", ""));
+        }
+
         [Fact]
         public void NamespaceDeclaration_GeneratesRuntimeCalls()
         {
 
             var cleanedLua = GetCleanLua("namespace Test { }");
             var expectedLua = "CS.namespace(\"Test\", function(namespace)\nend)";
-            Assert.Equal(expectedLua.Trim(), cleanedLua);
+            Assert.Equal(expectedLua, cleanedLua);
         }
 
         [Fact]
@@ -62,7 +72,7 @@
         public void VariableDeclaration_GeneratesLocal(string input, string expected)
         {
             var cleanedLua = GetCleanLua(input);
-            Assert.Equal(expected.Trim(), cleanedLua);
+            Assert.Equal(expected, cleanedLua);
         }
 
         [Theory]
@@ -76,7 +86,7 @@
         public void Literal_GeneratesLiteral(string input, string expected)
         {
             var cleanedLua = GetCleanLua(input);
-            Assert.Equal(expected.Trim(), cleanedLua);
+            Assert.Equal(expected, cleanedLua);
         }
 
         [Fact]
@@ -84,7 +94,7 @@
         {
             var cleanedLua = GetCleanLua("int count = 6; $\"count: {count}\"", 1);
             var expectedLua = "`count: {count}`";
-            Assert.Equal(expectedLua.Trim(), cleanedLua);
+            Assert.Equal(expectedLua, cleanedLua);
         }
 
         [Theory]

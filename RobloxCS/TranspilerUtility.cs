@@ -27,7 +27,7 @@ namespace RobloxCS
             var lines = luaSource.Split('\n').ToList();
             lines.RemoveRange(0, 2 + (extraLines ?? 0) + debugExtraLines);
 
-            return string.Join('\n', lines).Replace("\r", "");
+            return string.Join('\n', lines).Replace("\r", "").Trim();
         }
 
         public static string GenerateLua(
