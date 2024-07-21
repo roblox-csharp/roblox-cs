@@ -36,7 +36,7 @@ jobs:
     - name: Check if version is already published
       id: check_version
       run: |
-        VERSION_EXISTS=$(dotnet nuget search roblox-cs --source "github" | grep -c "${{ env.PACKAGE_VERSION }}")
+        VERSION_EXISTS=$(dotnet nuget search roblox-cs --source "github" | grep -c "${{ env.PACKAGE_VERSION }}" || true)
         echo "VERSION_EXISTS=$VERSION_EXISTS" >> $GITHUB_ENV
 
     - name: Find and publish the latest package
