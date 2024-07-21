@@ -19,7 +19,7 @@ namespace TestGame.Client
         public float Z { get; } = 0;
         public float W { get; } = 0;
 
-        public string __tostring()
+        public string ToString()
         {
             return $"{X}, {Y}, {Z}, {W}";
         }

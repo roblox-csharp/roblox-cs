@@ -24,7 +24,7 @@ namespace RobloxCS
             var identifierValue = identifierProperty?.GetValue(node);
             if (identifierProperty != null && identifierValue != null && identifierValue is SyntaxToken)
             {
-                names.Add(((SyntaxToken)identifierValue).Text.Trim());
+                names.Add(((SyntaxToken)identifierValue).ValueText.Trim());
                 return names;
             }
 
@@ -45,7 +45,7 @@ namespace RobloxCS
 
             foreach (var identifierNameNode in identifierNameNodes)
             {
-                names.Add(identifierNameNode.Identifier.Text.Trim());
+                names.Add(identifierNameNode.Identifier.ValueText.Trim());
             }
 
             return names;

@@ -856,7 +856,7 @@ namespace RobloxCS
                         var forEachStatements = descendants.OfType<ForEachStatementSyntax>();
                         var forStatements = descendants.OfType<ForStatementSyntax>();
                         var parameters = descendants.OfType<ParameterSyntax>();
-                        var checkNamePredicate = (SyntaxNode node) => GetName(node) == originalIdentifierName;
+                        var checkNamePredicate = (SyntaxNode node) => GetName(node) == identifierText;
                         return variableDeclarators.Where(checkNamePredicate).Count() > 0
                             || parameters.Where(checkNamePredicate).Count() > 0
                             || forEachStatements.Where(checkNamePredicate).Count() > 0
@@ -873,7 +873,7 @@ namespace RobloxCS
 
                     var parentClass = FindFirstAncestor<ClassDeclarationSyntax>(node);
                     var classMember = parentClass?.Members
-                        .Where(member => GetName(member) == originalIdentifierName)
+                        .Where(member => GetName(member) == identifierText)
                         .FirstOrDefault();
 
                     if (namespaceIncludesIdentifier)
@@ -1200,7 +1200,6 @@ namespace RobloxCS
             {
                 WriteLine();
             }
-
             if (block != null)
             {
                 Visit(block);

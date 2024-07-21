@@ -11,6 +11,16 @@ namespace RobloxCS
         {
         }
 
+        public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
+        {
+            var newNode = node.Identifier.ValueText switch
+            {
+                "ToString" => node.WithIdentifier(CreateIdentifierToken("__tostring")),
+                _ => node
+            };
+            return base.VisitMethodDeclaration(newNode);
+        }
+
         public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
         {
             var identifierText = node.Identifier.Text;
@@ -20,9 +30,14 @@ namespace RobloxCS
             }
 
             var fixedIdentifierText = identifierText.Replace("@", "");
-            var emptyTrivia = SyntaxFactory.TriviaList();
-            var newToken = SyntaxFactory.VerbatimIdentifier(emptyTrivia, fixedIdentifierText, fixedIdentifierText, emptyTrivia);
+            var newToken = CreateIdentifierToken(fixedIdentifierText);
             return base.VisitIdentifierName(node.WithIdentifier(newToken));
+        }
+
+        private static SyntaxToken CreateIdentifierToken(string text, string? valueText = null, SyntaxTriviaList? trivia = null)
+        {
+            var triviaList = trivia ??= SyntaxFactory.TriviaList();
+            return SyntaxFactory.VerbatimIdentifier(triviaList, text, valueText ?? text, triviaList);
         }
 
         public override SyntaxNode? VisitArgument(ArgumentSyntax node)
