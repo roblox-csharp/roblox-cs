@@ -1138,8 +1138,19 @@ namespace RobloxCS
         public override void VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
             var isStatic = HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
+            var isMetamethod = Constants.METAMETHODS.Contains(GetName(node));
+            var objectName = "self";
+            if (isStatic)
+            {
+                objectName = "class";
+            }
+            else if (isMetamethod)
+            {
+                objectName += ".mt";
+            }
+
             var name = GetName(node);
-            Write($"function {(isStatic ? "class" : "self")}.{name}");
+            Write($"function {objectName}.{name}");
             Visit(node.ParameterList);
             _indent++;
 
@@ -1165,6 +1176,7 @@ namespace RobloxCS
         private void VisitConstructorBody(ClassDeclarationSyntax parentClass, BlockSyntax? block)
         {
             WriteLine("local self = setmetatable({}, class)");
+            WriteLine("self.mt = {}");
             WriteLine();
 
             var isNotStatic = (MemberDeclarationSyntax member) => !HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword);
@@ -1184,6 +1196,11 @@ namespace RobloxCS
 
             InitializeFields(nonStaticFields);
             InitializeProperties(nonStaticProperties);
+            if (nonStaticMethods.Count() > 0)
+            {
+                WriteLine();
+            }
+
             if (block != null)
             {
                 Visit(block);
@@ -1195,7 +1212,7 @@ namespace RobloxCS
             }
 
             WriteLine();
-            WriteLine("return self");
+            WriteLine("return setmetatable(self, self.mt)");
         }
 
         private void CreateDefaultConstructor(ClassDeclarationSyntax node)

@@ -4,6 +4,29 @@ namespace RobloxCS
 {
     internal static class Constants
     {
+        public static readonly List<string> METAMETHODS = [
+            "__tostring",
+            "__add",
+            "__sub",
+            "__mul",
+            "__div",
+            "__idiv",
+            "__mod",
+            "__pow",
+            "__unm",
+            "__eq",
+            "__le",
+            "__lte",
+            "__len",
+            "__iter",
+            "__call",
+            "__concat",
+            "__mode",
+            "__index",
+            "__newindex",
+            "__metatable",
+        ];
+
         public static readonly List<string> LUAU_KEYWORDS = [
             "local",
             "and",

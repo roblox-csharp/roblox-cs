@@ -8,6 +8,8 @@ CS.namespace("TestGame", function(namespace)
             
             function class.new(instance)
                 local self = setmetatable({}, class)
+                self.mt = {}
+                
                 
                 self.Instance = instance
                 
@@ -24,7 +26,7 @@ CS.namespace("TestGame", function(namespace)
                 function self.Destroy()
                 end
                 
-                return self
+                return setmetatable(self, self.mt)
             end
             
             return setmetatable({}, class)

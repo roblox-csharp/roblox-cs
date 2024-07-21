@@ -7,8 +7,8 @@ CS.namespace("TestGame", function(namespace)
             class.__index = class
             
             function class.Main()
-                local abc = "hello world"
-                print("[TestProject/Client/Main.client.cs:11:13]:", abc)
+                local vector = namespace["$getMember"](namespace, "Vector4").new()
+                print("[TestProject/Client/Main.client.cs:11:13]:", vector)
             end
             
             if namespace == nil then
@@ -17,6 +17,28 @@ CS.namespace("TestGame", function(namespace)
                 namespace["$onLoaded"](namespace, class.Main)
             end
             return class
+        end)
+        namespace:class("Vector4", function(namespace)
+            local class = {}
+            class.__index = class
+            
+            function class.new()
+                local self = setmetatable({}, class)
+                self.mt = {}
+                
+                self.X = 0
+                self.Y = 0
+                self.Z = 0
+                self.W = 0
+                
+                function self.mt.__tostring()
+                    return `{self.X}, {self.Y}, {self.Z}, {self.W}`
+                end
+                
+                return setmetatable(self, self.mt)
+            end
+            
+            return setmetatable({}, class)
         end)
     end)
 end)

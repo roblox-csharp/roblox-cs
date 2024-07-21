@@ -43,10 +43,11 @@ CS.namespace("Components", function(namespace)
         
         function class.new()
             local self = setmetatable({}, class)
+            self.mt = {}
             
             self.UpdateMethod = if game:GetService("RunService"):IsClient() then "RenderStepped" else "Heartbeat"
             
-            return self
+            return setmetatable(self, self.mt)
         end
         
         return setmetatable({}, class)
@@ -57,11 +58,12 @@ CS.namespace("Components", function(namespace)
         
         function class.new(instance)
             local self = setmetatable({}, class)
+            self.mt = {}
             
             self.Instance = instance
             
             
-            return self
+            return setmetatable(self, self.mt)
         end
         
         return setmetatable({}, class)
