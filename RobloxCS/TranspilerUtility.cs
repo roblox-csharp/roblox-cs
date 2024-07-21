@@ -83,10 +83,7 @@ namespace RobloxCS
 
         private static List<PortableExecutableReference> GetCompilationReferences()
         {
-            var rbxcsDirectory = Utility.GetRbxcsDirectory();
-            var tfm = Utility.GetTargetFramework();
-            var runtimeLibPath = Utility.FixPathSep(string.Join('/', rbxcsDirectory, Utility.RuntimeAssemblyName));
-            var runtimeLibAssemblyPath = string.Join('/', runtimeLibPath, "bin", "Release", tfm, Utility.RuntimeAssemblyName + ".dll");
+            var runtimeLibAssemblyPath = string.Join('/', Utility.GetAssemblyDirectory(), Utility.RuntimeAssemblyName + ".dll");
             if (!File.Exists(runtimeLibAssemblyPath))
             {
                 var directoryName = Path.GetDirectoryName(runtimeLibAssemblyPath);

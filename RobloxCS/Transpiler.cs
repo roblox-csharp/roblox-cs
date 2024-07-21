@@ -66,16 +66,16 @@ namespace RobloxCS
 
         private void CopyIncludedLua()
         {
-            var runtimeDirectory = Utility.GetRuntimeDirectory();
-            if (runtimeDirectory == null)
+            var rbxcsDirectory = Utility.GetRbxcsDirectory();
+            if (rbxcsDirectory == null)
             {
-                Logger.CompilerError("Failed to find Roblox runtime library");
+                Logger.CompilerError("Failed to find RobloxCS directory");
                 return;
             }
 
-            var includeDirectory = Utility.FixPathSep(Path.Combine(runtimeDirectory, _includeFolderName));
+            var includeDirectory = Utility.FixPathSep(Path.Combine(rbxcsDirectory, _includeFolderName));
             var destinationIncludeDirectory = includeDirectory
-                .Replace(runtimeDirectory, _inputDirectory)
+                .Replace(rbxcsDirectory, _inputDirectory)
                 .Replace(_includeFolderName, _includeFolderName.ToLower());
 
             try
