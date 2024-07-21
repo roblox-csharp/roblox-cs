@@ -8,7 +8,8 @@ CS.namespace("TestGame", function(namespace)
             
             function class.Main()
                 local vector = namespace["$getMember"](namespace, "Vector4").new()
-                print("[TestProject/Client/Main.client.cs:11:13]:", vector)
+                local x = bit32.band(5, 2)
+                print("[TestProject/Client/Main.client.cs:12:13]:", vector)
             end
             
             if namespace == nil then

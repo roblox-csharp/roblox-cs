@@ -51,6 +51,35 @@ namespace RobloxCS
             return names;
         }
 
+        public static string GetBit32MethodName(string bitOp)
+        {
+            switch (bitOp)
+            {
+                case "&=":
+                case "&":
+                    return "band";
+                case "|=":
+                case "|":
+                    return "bor";
+                case "^=":
+                case "^":
+                    return "bxor";
+                case ">>=":
+                case ">>":
+                    return "rshift";
+                case ">>>=":
+                case ">>>":
+                    return "arshift";
+                case "<<=":
+                case "<<":
+                    return "lshift";
+                case "~":
+                    return "bnot";
+                default:
+                    return bitOp;
+            }
+        }
+
         public static string GetMappedOperator(string op)
         {
             switch (op)

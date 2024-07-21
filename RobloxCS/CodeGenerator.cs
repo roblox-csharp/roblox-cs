@@ -396,7 +396,17 @@ namespace RobloxCS
 
         public override void VisitPrefixUnaryExpression(PrefixUnaryExpressionSyntax node)
         {
-            Write(Utility.GetMappedOperator(node.OperatorToken.Text));
+            var mappedOperator = Utility.GetMappedOperator(node.OperatorToken.Text);
+            var bit32Method = Utility.GetBit32MethodName(mappedOperator);
+            if (bit32Method != mappedOperator)
+            {
+                Write($"bit32.{bit32Method}(");
+                Visit(node.Operand);
+                Write(")");
+                return;
+            }
+
+            Write(mappedOperator);
             Visit(node.Operand);
         }
 
@@ -436,6 +446,17 @@ namespace RobloxCS
                     Write(" else ");
                     Visit(node.Left);
                     return;
+            }
+
+            var bit32Method = Utility.GetBit32MethodName(mappedOperator);
+            if (bit32Method != mappedOperator)
+            {
+                Write($"bit32.{bit32Method}(");
+                Visit(node.Left);
+                Write(", ");
+                Visit(node.Right);
+                Write(")");
+                return;
             }
 
             Visit(node.Left);

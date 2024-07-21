@@ -8,6 +8,7 @@ namespace TestGame.Client
         public static void Main()
         {
             var vector = new Vector4();
+            var x = 5 & 2;
             Console.WriteLine(vector);
         }
     }
