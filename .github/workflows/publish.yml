@@ -43,7 +43,7 @@ jobs:
       if: env.VERSION_EXISTS == '0'
       run: |
         PACKAGE_PATH=$(find ./RobloxCS/bin/Release -name "*.nupkg" -type f -print0 | xargs -0 ls -1t | head -n 1)
-        dotnet nuget push "$PACKAGE_PATH" --api-key ${{ secrets.GITHUB_TOKEN }} --source "github"
+        dotnet nuget push "$PACKAGE_PATH" --api-key ${{ secrets.GITHUB_TOKEN }} --source "github" --skip-duplicate
 
     - name: Version already published
       if: env.VERSION_EXISTS != '0'
