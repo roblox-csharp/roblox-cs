@@ -8,11 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Roblox\Roblox.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="dist\" />
+    <PackageReference Include="RobloxCS.Types" Version="1.0.3" />
   </ItemGroup>
 
 </Project>

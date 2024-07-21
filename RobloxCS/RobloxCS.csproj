@@ -6,6 +6,7 @@
     <Nullable>enable</Nullable>
     <Title>RobloxCS</Title>
     <Version>1.0.3</Version>
+    <PackageId>RobloxCS.Compiler</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
