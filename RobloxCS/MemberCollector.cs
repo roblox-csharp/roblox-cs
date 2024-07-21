@@ -6,12 +6,12 @@ namespace RobloxCS
 {
     public sealed class MemberCollectionResult
     {
-        public Dictionary<NamespaceDeclarationSyntax, List<MemberDeclarationSyntax>> Namespaces { get; set; }
+        public Dictionary<NamespaceDeclarationSyntax, List<MemberDeclarationSyntax>> Namespaces { get; set; } = [];
     }
 
     public sealed class MemberCollector : CSharpSyntaxWalker
     {
-        private readonly Dictionary<NamespaceDeclarationSyntax, List<MemberDeclarationSyntax>> _namespaces = new Dictionary<NamespaceDeclarationSyntax, List<MemberDeclarationSyntax>>();
+        private readonly Dictionary<NamespaceDeclarationSyntax, List<MemberDeclarationSyntax>> _namespaces = [];
         private readonly List<SyntaxTree> _trees;
 
         public MemberCollector(List<SyntaxTree> trees)

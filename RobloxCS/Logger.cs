@@ -14,15 +14,26 @@ namespace RobloxCS
             Log(message, ConsoleColor.Cyan, "INFO");
         }
 
+        public static void Error(string message)
+        {
+            Log(message, ConsoleColor.Red, "ERROR");
+            Environment.Exit(1);
+        }
+
         public static void CompilerError(string message)
         {
             Error($"{message} (compiler error)");
         }
 
-        public static void Error(string message)
+        public static void CodegenError(SyntaxToken token, string message)
         {
-            Log(message, ConsoleColor.Red, "ERROR");
-            Environment.Exit(1);
+            var lineSpan = token.GetLocation().GetLineSpan();
+            Error($"{message}\n\t- {Utility.FormatLocation(lineSpan)}");
+        }
+
+        public static void CodegenError(SyntaxNode node, string message)
+        {
+            CodegenError(node.GetFirstToken(), message);
         }
 
         public static void HandleDiagnostic(Diagnostic diagnostic)
@@ -56,17 +67,6 @@ namespace RobloxCS
                     }
             }
 
-        }
-
-        public static void CodegenError(SyntaxToken token, string message)
-        {
-            var lineSpan = token.GetLocation().GetLineSpan();
-            Error($"{message}\n\t- {Utility.FormatLocation(lineSpan)}");
-        }
-
-        public static void CodegenError(SyntaxNode node, string message)
-        {
-            CodegenError(node.GetFirstToken(), message);
         }
 
         public static void Warn(string message)

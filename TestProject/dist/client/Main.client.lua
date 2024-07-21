@@ -7,8 +7,8 @@ CS.namespace("TestGame", function(namespace)
             class.__index = class
             
             function class.Main()
-                local abc = 5
-                print("[TestProject/Client/Main.client.cs:11:13]:", CS.getAssemblyType("abc"))
+                local abc = "hello world"
+                print("[TestProject/Client/Main.client.cs:11:13]:", abc)
             end
             
             if namespace == nil then

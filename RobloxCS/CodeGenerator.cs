@@ -3,7 +3,6 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Text.Unicode;
 
 namespace RobloxCS
 {
@@ -354,8 +353,7 @@ namespace RobloxCS
                     Visit(argument);
 
                     var typeSymbol = _semanticModel.GetTypeInfo(argument.Expression).Type;
-                    var isNumericalIndex = typeSymbol != null && Constants.INTEGER_TYPES.Contains(typeSymbol.Name);
-                    if (isNumericalIndex)
+                    if (typeSymbol != null && Constants.INTEGER_TYPES.Contains(typeSymbol.Name))
                     {
                         Write(" + 1");
                     }
@@ -790,8 +788,13 @@ namespace RobloxCS
 
         public override void VisitIdentifierName(IdentifierNameSyntax node)
         {
-            if (node.Identifier.ValueText == "var") return;
-            var identifierName = node.Identifier.ValueText.Replace("@", "");
+            var identifierText = node.Identifier.ValueText;
+            var originalIdentifierName = node.Identifier.Text;
+            if (identifierText == "var") return;
+            if (Constants.LUAU_KEYWORDS.Contains(identifierText))
+            {
+                Logger.CodegenError(node, $"Using reserved Luau keywords as identifier names is unsupported!");
+            }
 
             var isWithinClass = IsDescendantOf<ClassDeclarationSyntax>(node);
             var prefix = "";
@@ -809,7 +812,7 @@ namespace RobloxCS
                         foreach (var declarator in field.Declaration.Variables)
                         {
                             var name = GetName(declarator);
-                            if (name != identifierName) continue;
+                            if (name != identifierText) continue;
                             prefix = (isStatic ? GetName(ancestorClass) : "self") + ".";
                         }
                     }
@@ -853,7 +856,7 @@ namespace RobloxCS
                         var forEachStatements = descendants.OfType<ForEachStatementSyntax>();
                         var forStatements = descendants.OfType<ForStatementSyntax>();
                         var parameters = descendants.OfType<ParameterSyntax>();
-                        var checkNamePredicate = (SyntaxNode node) => GetName(node) == identifierName;
+                        var checkNamePredicate = (SyntaxNode node) => GetName(node) == originalIdentifierName;
                         return variableDeclarators.Where(checkNamePredicate).Count() > 0
                             || parameters.Where(checkNamePredicate).Count() > 0
                             || forEachStatements.Where(checkNamePredicate).Count() > 0
@@ -865,43 +868,43 @@ namespace RobloxCS
                     // TODO: check for inherited members
                     var namespaceSymbol = parentNamespace != null ? _semanticModel.GetDeclaredSymbol(parentNamespace) : null;
                     var namespaceIncludesIdentifier = namespaceSymbol != null && namespaceSymbol.GetMembers()
-                        .Where(member => member.Name == identifierName)
+                        .Where(member => member.Name == originalIdentifierName)
                         .Count() > 0;
 
                     var parentClass = FindFirstAncestor<ClassDeclarationSyntax>(node);
-                    var classMember= parentClass?.Members
-                        .Where(member => GetName(member) == identifierName)
+                    var classMember = parentClass?.Members
+                        .Where(member => GetName(member) == originalIdentifierName)
                         .FirstOrDefault();
 
                     if (namespaceIncludesIdentifier)
                     {
-                        Write($"namespace[\"$getMember\"](namespace, \"{identifierName}\")");
+                        Write($"namespace[\"$getMember\"](namespace, \"{identifierText}\")");
                     }
                     else if (classMember != null)
                     {
-                        Write($"{(HasSyntax(classMember.Modifiers, SyntaxKind.StaticKeyword) ? "class" : "self")}.{identifierName}");
+                        Write($"{(HasSyntax(classMember.Modifiers, SyntaxKind.StaticKeyword) ? "class" : "self")}.{identifierText}");
                     }
                     else
                     {
                         if (_flags[CodeGenFlag.ShouldCallGetAssemblyType])
                         {
-                            Write($"CS.getAssemblyType(\"{identifierName}\")");
+                            Write($"CS.getAssemblyType(\"{identifierText}\")");
                         }
                         else
                         {
-                            Write(identifierName);
+                            Write(identifierText);
                             _flags[CodeGenFlag.ShouldCallGetAssemblyType] = true;
                         }
                     }
                 }
                 else
                 {
-                    Write(identifierName);
+                    Write(identifierText);
                 }
             }
             else
             {
-                Write(prefix + identifierName);
+                Write(prefix + identifierText);
             }
         }
 
