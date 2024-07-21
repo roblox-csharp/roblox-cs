@@ -2,15 +2,15 @@
 {
     public class CodeGenerator_Should
     {
-        // [Theory]
-        // [InlineData("@abc")]
-        // [InlineData("@hello_brah")]
-        // [InlineData("@SIGMA")]
-        // public void IdentifierWithAtSymbol_HasAtSymbolRemoved(string identifier)
-        // {
-        //     var cleanedLua = GetCleanLua(identifier);
-        //     Assert.Equal(identifier.Replace("@", ""), cleanedLua);
-        // }
+        [Theory]
+        [InlineData("var @abc = 1")]
+        [InlineData("var @hello_brah = 1")]
+        [InlineData("var @SIGMA = 1")]
+        public void IdentifierWithAtSymbol_HasAtSymbolRemoved(string expression)
+        {
+            var cleanedLua = GetCleanLua(expression);
+            Assert.Equal(expression.Replace("@", "").Replace("var", "local"), cleanedLua);
+        }
 
         [Theory]
         [InlineData("ToNumber(\"69\")")]
