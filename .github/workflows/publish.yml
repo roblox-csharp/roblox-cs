@@ -21,14 +21,19 @@ jobs:
     - name: Add GitHub source to NuGet
       run: dotnet nuget add source --username roblox-csharp --password ${{ secrets.GITHUB_TOKEN }} --store-password-in-clear-text --name github "https://nuget.pkg.github.com/roblox-csharp/index.json"
 
+    - name: Extract version from .csproj
+      id: extract_version
+      run: |
+        VERSION=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" RobloxCS/RobloxCS.csproj)
+        echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
+
     - name: Package the project
       run: dotnet pack --configuration Release
 
     - name: Check if version is already published
       id: check_version
       run: |
-        PACKAGE_VERSION=${{ env.VERSION }}
-        VERSION_EXISTS=$(dotnet nuget search roblox-cs --source "github" | grep -c "${PACKAGE_VERSION}")
+        VERSION_EXISTS=$(dotnet nuget search roblox-cs --source "github" | grep -c "${{ env.PACKAGE_VERSION }}")
         echo "VERSION_EXISTS=$VERSION_EXISTS" >> $GITHUB_ENV
 
     - name: Find and publish the latest package
