@@ -1,5 +1,11 @@
 local CS = require(game:GetService("ReplicatedStorage").rbxcs_include.RuntimeLib)
 
+-- using ComponentRunner;
+require(game:GetService("ReplicatedStorage")["C#"]["Components"])
+
+-- using LavaComponent;
+require(game:GetService("Players").LocalPlayer["PlayerScripts"]["C#"]["Components"]["Lava"])
+
 CS.namespace("TestGame", function(namespace)
     namespace:namespace("Client", function(namespace)
         namespace:class("Game", function(namespace)
@@ -7,7 +13,10 @@ CS.namespace("TestGame", function(namespace)
             
             function class.Main()
                 local square = namespace["$getMember"](namespace, "Square").new(5)
-                print("[TestProject/Client/Main.client.cs:11:13]:", square:GetArea())
+                print("[TestProject/Client/Main.client.cs:12:13]:", square:GetArea())
+                CS.getAssemblyType("Components").ComponentRunner.AttachTag("Lava", function(instance)
+                    return namespace["$getMember"](namespace, "LavaComponent").new(instance)
+                end)
             end
             
             if namespace == nil then
@@ -26,11 +35,6 @@ CS.namespace("TestGame", function(namespace)
                 
                 self["$base"](size, size)
                 
-                
-                function self.GetArea()
-                    print("[TestProject/Client/Main.client.cs:24:13]:", "GetArea() but from Square")
-                    return self["$superclass"]:GetArea()
-                end
                 
                 return self
             end

@@ -28,10 +28,26 @@ namespace RobloxCS
         public SymbolAnalyzerResults Analyze()
         {
             AnalyzeUsings();
+            AnalyzeNamespaces();
             return _results;
         }
 
-        public void AnalyzeUsings()
+        private void AnalyzeNamespaces()
+        {
+            var root = _tree.GetRoot();
+            var namespaceDeclarations = root.DescendantNodes().OfType<NamespaceDeclarationSyntax>();
+
+            foreach (var namespaceDeclaration in namespaceDeclarations)
+            {
+                var symbolInfo = _semanticModel.GetSymbolInfo(namespaceDeclaration.Name);
+                if (symbolInfo.Symbol is INamespaceOrTypeSymbol namespaceOrTypeSymbol && HasMembersUsedAsValues(namespaceOrTypeSymbol, root))
+                {
+                    _results.TypesWithMembersUsedAsValues.Add(namespaceOrTypeSymbol);
+                }
+            }
+        }
+
+        private void AnalyzeUsings()
         {
             var root = _tree.GetRoot();
             var usingDirectives = root.DescendantNodes().OfType<UsingDirectiveSyntax>();

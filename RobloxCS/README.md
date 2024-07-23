@@ -6,7 +6,7 @@ This project includes the compiler and transformers.
 - Macro `IEnumerable<T>` (or `Array`?) methods
 - Classes/structs/interfaces nested in classes/structs/interfaces
 - Some sort of `LuaTuple` object
-- Compile operator methods as regular method declarations but onto `self.mt`
+- Compile operator methods as regular method declarations but onto `mt`
 - Transform parameterized class declarations (i.e `class Vector4(float x = 0, float y = 0, float z = 0, float w = 0)`) into regular class declarations with a constructor
 
 ## Will maybe be supported

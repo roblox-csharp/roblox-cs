@@ -1,3 +1,4 @@
+using Components;
 using Roblox;
 using static Roblox.Globals;
 
@@ -9,6 +10,7 @@ namespace TestGame.Client
         {
             var square = new Square(5);
             Console.WriteLine(square.GetArea());
+            ComponentRunner.AttachTag("Lava", instance => new LavaComponent((Part)instance));
         }
     }
 
@@ -17,12 +19,6 @@ namespace TestGame.Client
         public Square(float size)
             : base(size, size)
         {
-        }
-
-        public new float GetArea()
-        {
-            Console.WriteLine("GetArea() but from Square");
-            return base.GetArea();
         }
     }
 

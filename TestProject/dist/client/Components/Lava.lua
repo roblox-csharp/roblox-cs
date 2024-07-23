@@ -11,10 +11,9 @@ CS.namespace("TestGame", function(namespace)
                 
                 self["$base"](instance)
                 
-                self.Instance = instance
                 
                 function self.Start()
-                    self.Instance.Touched:Connect(function(hit)
+                    CS.getAssemblyType("Instance").Touched:Connect(function(hit)
                         local model = hit:FindFirstAncestorOfClass("Model")
                         local humanoid = if model == nil then nil else model:FindFirstChildOfClass("Humanoid")
                         if humanoid == nil then return end

@@ -5,12 +5,9 @@ namespace TestGame.Client
 {
     public class LavaComponent : GameComponent<Part>
     {
-        public new Part Instance { get; set; }
-
         public LavaComponent(Part instance)
             : base(instance)
         {
-            Instance = instance;
         }
 
         public override void Start()
