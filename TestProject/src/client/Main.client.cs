@@ -18,6 +18,12 @@ namespace TestGame.Client
             : base(size, size)
         {
         }
+
+        public new float GetArea()
+        {
+            Console.WriteLine("GetArea() but from Square");
+            return base.GetArea();
+        }
     }
 
     public class Rectangle

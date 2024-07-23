@@ -63,18 +63,17 @@
             {
                 "CS.namespace(\"Test\", function(namespace)",
                     "namespace:class(\"HelloWorld\", function(namespace)",
-                        "local class = {}",
-                        "class.__index = class",
+                        "local class = CS.classDef(namespace)",
                         "",
                         "function class.new()",
-                            "local self = setmetatable({}, class)",
-                            "self.mt = {}",
+                            "local mt = {}",
+                            "local self = CS.classInstance(class, mt, namespace)",
                             "",
                             "",
-                            "return setmetatable(self, self.mt)",
+                            "return self",
                         "end",
                         "",
-                        "return setmetatable({}, class)",
+                        "return class",
                     "end)",
                 "end)"
             };

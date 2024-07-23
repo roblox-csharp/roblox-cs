@@ -27,6 +27,11 @@ CS.namespace("TestGame", function(namespace)
                 self["$base"](size, size)
                 
                 
+                function self.GetArea()
+                    print("[TestProject/Client/Main.client.cs:24:13]:", "GetArea() but from Square")
+                    return self["$superclass"]:GetArea()
+                end
+                
                 return self
             end
             
