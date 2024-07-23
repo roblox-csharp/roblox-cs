@@ -1223,7 +1223,6 @@ namespace RobloxCS
             {
                 Write("self[\"$base\"]");
                 Visit(initializerArguments);
-                WriteLine();
             }
 
             var isNotStatic = (MemberDeclarationSyntax member) => !HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword);
