@@ -2,7 +2,6 @@
 This project includes the compiler and transformers.
 
 ## To-do
-- Inheritance chains 🤮
 - String & table macros or extensions
 - Macro `IEnumerable<T>` (or `Array`?) methods
 - Classes/structs/interfaces nested in classes/structs/interfaces
@@ -13,6 +12,7 @@ This project includes the compiler and transformers.
 ## Will maybe be supported
 - [Class finalizers (destructors)](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers)
 - Deconstructing (i.e. `var (value1, value2) = tuple`)
+- Custom get/set methods
 - `out` keyword
 - `partial` keyword
 - `using Name = Type` expressions (type aliases)

@@ -3,13 +3,13 @@ local CS = require(game:GetService("ReplicatedStorage").rbxcs_include.RuntimeLib
 CS.namespace("TestGame", function(namespace)
     namespace:namespace("Client", function(namespace)
         namespace:class("LavaComponent", function(namespace)
-            local class = {}
-            class.__index = class
+            local class = CS.classDef(namespace, "GameComponent<Part>")
             
             function class.new(instance)
-                local self = setmetatable({}, class)
-                self.mt = {}
+                local mt = {}
+                local self = CS.classInstance(class, mt, namespace)
                 
+                self["$base"](instance)
                 
                 self.Instance = instance
                 
@@ -26,10 +26,10 @@ CS.namespace("TestGame", function(namespace)
                 function self.Destroy()
                 end
                 
-                return setmetatable(self, self.mt)
+                return self
             end
             
-            return setmetatable({}, class)
+            return class
         end)
     end)
 end)

@@ -3,6 +3,7 @@ using System.Collections.Immutable;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Xml.Linq;
 
 namespace RobloxCS
 {
@@ -1077,13 +1078,21 @@ namespace RobloxCS
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            var parentNamespace = FindFirstAncestor<NamespaceDeclarationSyntax>(node);
+            var isWithinNamespace = IsDescendantOf<NamespaceDeclarationSyntax>(node);
             var className = GetName(node);
-            WriteLine($"{(parentNamespace != null ? "namespace:" : "CS.")}class(\"{className}\", function(namespace)");
+            WriteLine($"{(isWithinNamespace ? "namespace:" : "CS.")}class(\"{className}\", function(namespace)");
             _indent++;
 
-            WriteLine("local class = {}");
-            WriteLine("class.__index = class");
+            Write("local class = CS.classDef(");
+            Write(isWithinNamespace ? "namespace" : "nil");
+
+            var ancestorIdentifiers = (node.BaseList?.Types ?? []).Select(ancestor => $"\"{ancestor.Type}\"");
+            if (ancestorIdentifiers.Count() > 0)
+            {
+                Write(", ");
+            }
+            Write(string.Join(", ", ancestorIdentifiers));
+            WriteLine(')');
             WriteLine();
             InitializeFields(
                 node.Members
@@ -1150,7 +1159,7 @@ namespace RobloxCS
             }
 
             WriteLine();
-            WriteLine($"return {(isStatic ? "class" : "setmetatable({}, class)")}");
+            WriteLine($"return class");
 
             _indent--;
             WriteLine("end)");
@@ -1167,7 +1176,7 @@ namespace RobloxCS
             }
             else if (isMetamethod)
             {
-                objectName += ".mt";
+                objectName = "mt";
             }
 
             var name = GetName(node);
@@ -1181,6 +1190,11 @@ namespace RobloxCS
             WriteLine("end");
         }
 
+        public override void VisitBaseExpression(BaseExpressionSyntax node)
+        {
+            Write("self[\"$superclass\"]");
+        }
+
         public override void VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
         {
             // TODO: struct support?
@@ -1188,17 +1202,29 @@ namespace RobloxCS
             Visit(node.ParameterList);
             _indent++;
 
-            VisitConstructorBody(FindFirstAncestor<ClassDeclarationSyntax>(node)!, node.Body);
+            VisitConstructorBody(FindFirstAncestor<ClassDeclarationSyntax>(node)!, node.Body, node.Initializer?.ArgumentList);
 
             _indent--;
             WriteLine("end");
         }
 
-        private void VisitConstructorBody(ClassDeclarationSyntax parentClass, BlockSyntax? block)
+        private void VisitConstructorBody(ClassDeclarationSyntax parentClass, BlockSyntax? block, ArgumentListSyntax? initializerArguments)
         {
-            WriteLine("local self = setmetatable({}, class)");
-            WriteLine("self.mt = {}");
+            var isWithinNamespace = IsDescendantOf<NamespaceDeclarationSyntax>(parentClass);
+            WriteLine("local mt = {}");
+            Write("local self = CS.classInstance(class, mt");
+            if (isWithinNamespace)
+            {
+                Write(", namespace");
+            }
+            WriteLine(')');
             WriteLine();
+            if (initializerArguments != null)
+            {
+                Write("self[\"$base\"]");
+                Visit(initializerArguments);
+                WriteLine();
+            }
 
             var isNotStatic = (MemberDeclarationSyntax member) => !HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword);
             var isNotAbstract = (MemberDeclarationSyntax member) => !HasSyntax(member.Modifiers, SyntaxKind.AbstractKeyword);
@@ -1232,7 +1258,7 @@ namespace RobloxCS
             }
 
             WriteLine();
-            WriteLine("return setmetatable(self, self.mt)");
+            WriteLine("return self");
         }
 
         private void CreateDefaultConstructor(ClassDeclarationSyntax node)
@@ -1240,7 +1266,7 @@ namespace RobloxCS
             WriteLine($"function class.new()");
             _indent++;
 
-            VisitConstructorBody(node, null);
+            VisitConstructorBody(node, null, null);
 
             _indent--;
             WriteLine("end");

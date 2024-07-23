@@ -7,22 +7,33 @@ namespace TestGame.Client
     {
         public static void Main()
         {
-            var vector = new Vector4();
-            var x = 5 & 2;
-            Console.WriteLine(vector);
+            var square = new Square(5);
+            Console.WriteLine(square.GetArea());
         }
     }
 
-    public sealed class Vector4
+    public sealed class Square : Rectangle
     {
-        public float X { get; } = 0;
-        public float Y { get; } = 0;
-        public float Z { get; } = 0;
-        public float W { get; } = 0;
-
-        public string ToString()
+        public Square(float size)
+            : base(size, size)
         {
-            return $"{X}, {Y}, {Z}, {W}";
+        }
+    }
+
+    public class Rectangle
+    {
+        public float Height { get; } = 0;
+        public float Width { get; } = 0;
+
+        public Rectangle(float height, float width)
+        {
+            Height = height;
+            Width = width;
+        }
+
+        public float GetArea()
+        {
+            return Height * Width;
         }
     }
 }

@@ -17,6 +17,19 @@ if split == nil then
 	end
 end
 
+local function chainIndex(location, ...)
+    local names = {...}
+    return function(t, k)
+        for _, name in pairs(names) do
+			local tbl = location[name]
+            local v = tbl[k]
+            if v ~= nil then
+                return v
+            end
+        end
+    end
+end
+
 local CSNamespace = {} do
 	CSNamespace.__index = CSNamespace
 
@@ -53,42 +66,30 @@ local CSNamespace = {} do
 	end
 end
 
-local CSClass = {} do
-	CSClass.__index = CSClass
+function CS.classInstance(class, mt, namespace)
+	local instance = {}
 
-	function CSClass.new(name, superclass)
-		local self = {}
-		self.name = name
-		self.superclass = superclass
-		self.members = {}
-		return setmetatable(self, CSClass)
+	instance["$base"] = function(...)
+		local Superclass = if namespace ~= nil then namespace["$getMember"](namespace, class.__superclass) else assemblyGlobal[class.__superclass]
+		instance["$superclass"] = Superclass.new(...)
+		instance = setmetatable(instance, { __index = instance["$superclass"] })
 	end
 
-	function CSClass:super()
-		setmetatable(self, self.superclass)
-	end
+	return setmetatable(instance, mt)
+end
 
-	function CSClass:__index(index)
-		return self.members[index] or CSClass[index]
-	end
+function CS.classDef(namespace, superclass, ...)
+	local mixins = {...}
+	local mt = {}
+	mt.__index = chainIndex(if namespace ~= nil then namespace else assemblyGlobal, ...)
 
-	CSClass["$getMember"] = function(self, name)
-		return self.members[name]
-	end
-
-	function CSClass:class(name, create)
-		CS.class(name, create, self)
-	end
+	local class = {}
+	class.__superclass = superclass
+	return setmetatable(class, mt)
 end
 
 function CS.class(name, create, namespace)
-	local location
-	if namespace ~= nil then
-		location = namespace.members
-	else
-		location = assemblyGlobal
-	end
-
+	local location = if namespace ~= nil then namespace.members else assemblyGlobal
 	local class = create(namespace)
 	location[name] = class
 end

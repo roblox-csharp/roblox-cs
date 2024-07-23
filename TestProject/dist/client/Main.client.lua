@@ -3,13 +3,11 @@ local CS = require(game:GetService("ReplicatedStorage").rbxcs_include.RuntimeLib
 CS.namespace("TestGame", function(namespace)
     namespace:namespace("Client", function(namespace)
         namespace:class("Game", function(namespace)
-            local class = {}
-            class.__index = class
+            local class = CS.classDef(namespace)
             
             function class.Main()
-                local vector = namespace["$getMember"](namespace, "Vector4").new()
-                local x = bit32.band(5, 2)
-                print("[TestProject/Client/Main.client.cs:12:13]:", vector)
+                local square = namespace["$getMember"](namespace, "Square").new(5)
+                print("[TestProject/Client/Main.client.cs:11:13]:", square:GetArea())
             end
             
             if namespace == nil then
@@ -19,27 +17,42 @@ CS.namespace("TestGame", function(namespace)
             end
             return class
         end)
-        namespace:class("Vector4", function(namespace)
-            local class = {}
-            class.__index = class
+        namespace:class("Square", function(namespace)
+            local class = CS.classDef(namespace, "Rectangle")
             
-            function class.new()
-                local self = setmetatable({}, class)
-                self.mt = {}
+            function class.new(size)
+                local mt = {}
+                local self = CS.classInstance(class, mt, namespace)
                 
-                self.X = 0
-                self.Y = 0
-                self.Z = 0
-                self.W = 0
+                self["$base"](size, size)
                 
-                function self.mt.__tostring()
-                    return `{self.X}, {self.Y}, {self.Z}, {self.W}`
-                end
                 
-                return setmetatable(self, self.mt)
+                return self
             end
             
-            return setmetatable({}, class)
+            return class
+        end)
+        namespace:class("Rectangle", function(namespace)
+            local class = CS.classDef(namespace)
+            
+            function class.new(height, width)
+                local mt = {}
+                local self = CS.classInstance(class, mt, namespace)
+                
+                self.Height = 0
+                self.Width = 0
+                
+                self.Height = height
+                self.Width = width
+                
+                function self.GetArea()
+                    return self.Height * self.Width
+                end
+                
+                return self
+            end
+            
+            return class
         end)
     end)
 end)

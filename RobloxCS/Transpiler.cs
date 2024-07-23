@@ -73,9 +73,10 @@ namespace RobloxCS
                 return;
             }
 
-            var includeDirectory = Utility.FixPathSep(Path.Combine(rbxcsDirectory, _includeFolderName));
+            var compilerDirectory = Utility.FixPathSep(Path.Combine(rbxcsDirectory, "RobloxCS"));
+            var includeDirectory = Utility.FixPathSep(Path.Combine(compilerDirectory, _includeFolderName));
             var destinationIncludeDirectory = includeDirectory
-                .Replace(rbxcsDirectory, _inputDirectory)
+                .Replace(compilerDirectory, _inputDirectory)
                 .Replace(_includeFolderName, _includeFolderName.ToLower());
 
             try

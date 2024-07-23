@@ -2,8 +2,7 @@ local CS = require(game:GetService("ReplicatedStorage").rbxcs_include.RuntimeLib
 
 CS.namespace("Components", function(namespace)
     namespace:class("ComponentRunner", function(namespace)
-        local class = {}
-        class.__index = class
+        local class = CS.classDef(namespace)
         
         function class.AttachTag(tag, attachComponent)
             local attached = false
@@ -38,35 +37,33 @@ CS.namespace("Components", function(namespace)
         return class
     end)
     namespace:class("GameComponent", function(namespace)
-        local class = {}
-        class.__index = class
+        local class = CS.classDef(namespace)
         
         function class.new()
-            local self = setmetatable({}, class)
-            self.mt = {}
+            local mt = {}
+            local self = CS.classInstance(class, mt, namespace)
             
             self.UpdateMethod = if game:GetService("RunService"):IsClient() then "RenderStepped" else "Heartbeat"
             
-            return setmetatable(self, self.mt)
+            return self
         end
         
-        return setmetatable({}, class)
+        return class
     end)
     namespace:class("GameComponent", function(namespace)
-        local class = {}
-        class.__index = class
+        local class = CS.classDef(namespace, "GameComponent")
         
         function class.new(instance)
-            local self = setmetatable({}, class)
-            self.mt = {}
+            local mt = {}
+            local self = CS.classInstance(class, mt, namespace)
             
             self.Instance = instance
             
             
-            return setmetatable(self, self.mt)
+            return self
         end
         
-        return setmetatable({}, class)
+        return class
     end)
 end)
 

@@ -17,6 +17,11 @@ namespace RobloxCS
 
         public static List<string> GetNamesFromNode(SyntaxNode? node)
         {
+            if (node is BaseExpressionSyntax baseExpression)
+            {
+                return [""];
+            }
+
             var names = new List<string>();
             if (node == null) return names;
 

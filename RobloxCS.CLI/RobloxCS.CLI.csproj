@@ -13,4 +13,8 @@
     <ProjectReference Include="..\RobloxCS\RobloxCS.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <PackageReference Include="RobloxCS.Types" Version="1.0.3" />
+  </ItemGroup>
+
 </Project>
