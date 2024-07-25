@@ -96,9 +96,9 @@ namespace RobloxCS
             var members = memberCollector.Collect();
             foreach (var tree in _fileTrees)
             {
-                var luaSource = TranspilerUtility.GenerateLua(tree, compiler, members, _inputDirectory, _config);
+                var generatedLua = TranspilerUtility.GenerateLua(tree, compiler, members, _inputDirectory, _config);
                 var targetPath = tree.FilePath.Replace(_config.SourceFolder, _config.OutputFolder).Replace(".cs", ".lua");
-                compiledFiles.Add(new CompiledFile(targetPath, luaSource));
+                compiledFiles.Add(new CompiledFile(targetPath, generatedLua));
             }
 
             EnsureDirectoriesExist();

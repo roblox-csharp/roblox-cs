@@ -19,4 +19,5 @@ This project includes the compiler and transformers.
 
 ## Will not be supported
 - `using name = value` expressions (equivalent to `:=` operator in other languages)
-- `volatile` and `unsafe` keywords
+- `volatile`, `fixed`, and `unsafe` keywords
+- Pointers

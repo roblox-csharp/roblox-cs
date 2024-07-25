@@ -123,8 +123,13 @@ namespace RobloxCS
 
         private string GetRequirePath(string longCSharpFilePath)
         {
-            var inputDirectory = Path.Combine(_inputDirectory);
+            var inputDirectory = _inputDirectory.EndsWith('/') ? _inputDirectory : _inputDirectory + '/';
             var csharpFilePath = longCSharpFilePath.Replace(inputDirectory, "").Replace(_config.SourceFolder, _config.OutputFolder);
+            if (csharpFilePath.StartsWith('/'))
+            {
+                csharpFilePath = csharpFilePath.Substring(1);
+            }
+
             if (Utility.IsDebug())
             {
                 return "\"./" + csharpFilePath.Replace(".cs", "") + '"';

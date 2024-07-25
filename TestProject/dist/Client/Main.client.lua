@@ -13,9 +13,7 @@ CS.namespace("TestGame", function(namespace)
             
             function class.Main()
                 CS.getAssemblyType("Components").ComponentRunner.AttachTag("Lava", function(instance)
-                    local lava = namespace["$getMember"](namespace, "LavaComponent").new(instance)
-                    print("[TestProject/Client/Main.client.cs:13:17]:", lava)
-                    return lava
+                    return namespace["$getMember"](namespace, "LavaComponent").new(instance)
                 end)
             end
             
