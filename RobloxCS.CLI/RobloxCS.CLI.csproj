@@ -2,6 +2,8 @@
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
+    <OutputPath>../bin/</OutputPath>
+    <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <AssemblyName>roblox-cs</AssemblyName>
     <RootNamespace>RobloxCS</RootNamespace>
     <TargetFramework>net8.0</TargetFramework>
@@ -14,7 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="RobloxCS.Types" Version="1.0.3" />
+    <PackageReference Include="RobloxCS.Types" Version="1.0.5" />
   </ItemGroup>
 
 </Project>

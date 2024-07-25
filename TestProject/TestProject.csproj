@@ -10,10 +10,5 @@
   <ItemGroup>
     <PackageReference Include="RobloxCS.Types" Version="1.0.3" />
   </ItemGroup>
-
-  <Target Name="CompileWithRobloxCS" AfterTargets="BeforeBuild">
-    <Exec Command="&quot;C:/Users/Riley Peel/dev/c#/roblox-cs/RobloxCS.CLI/bin/Release/net8.0/roblox-cs.exe&quot;" />
-    <Exec Command="echo Successfully compiled with roblox-cs!" />
-  </Target>
-
+  
 </Project>
