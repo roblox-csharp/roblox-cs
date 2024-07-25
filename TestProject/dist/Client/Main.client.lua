@@ -9,11 +9,13 @@ require(game:GetService("Players").LocalPlayer["PlayerScripts"]["C#"]["Component
 CS.namespace("TestGame", function(namespace)
     namespace:namespace("Client", function(namespace)
         namespace:class("Game", function(namespace)
-            local class = CS.classDef(namespace)
+            local class = CS.classDef("Game", namespace)
             
             function class.Main()
                 CS.getAssemblyType("Components").ComponentRunner.AttachTag("Lava", function(instance)
-                    return namespace["$getMember"](namespace, "LavaComponent").new(instance)
+                    local lava = namespace["$getMember"](namespace, "LavaComponent").new(instance)
+                    print("[TestProject/Client/Main.client.cs:13:17]:", lava)
+                    return lava
                 end)
             end
             

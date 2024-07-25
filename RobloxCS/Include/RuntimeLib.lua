@@ -31,8 +31,6 @@ local function chainIndex(location, ...)
 end
 
 local CSNamespace = {} do
-	CSNamespace.__index = CSNamespace
-
 	function CSNamespace.new(name, parent)
 		local self = {}
 		self.name = name
@@ -47,6 +45,10 @@ local CSNamespace = {} do
 
 	function CSNamespace:__index(index)
 		return self.members[index] or CSNamespace[index]
+	end
+
+	function CSNamespace:__tostring(index)
+		return self.name
 	end
 
 	CSNamespace["$getMember"] = function(self, name)
@@ -70,6 +72,7 @@ function CS.classInstance(class, mt, namespace)
 	local instance = {}
 
 	local function getSuperclass()
+		if class.__superclass == nil then return end
 		if class.__superclass:match(".") == nil then
 			return assemblyGlobal[class.__superclass]
 		end
@@ -82,21 +85,32 @@ function CS.classInstance(class, mt, namespace)
 		return result
 	end
 
+	function mt.__tostring()
+		return class.__name
+	end
+
 	instance["$base"] = function(...)
+		if instance["$superclass"] ~= nil then return end
 		local Superclass = getSuperclass()
-		instance["$superclass"] = Superclass.new(...)
-		instance = setmetatable(instance, { __index = instance["$superclass"] })
+		local superclassInstance = Superclass.new(...)
+		instance["$superclass"] = superclassInstance
+		mt.__index = superclassInstance
 	end
 
 	return setmetatable(instance, mt)
 end
 
-function CS.classDef(namespace, superclass, ...)
+function CS.classDef(name, namespace, superclass, ...)
 	local mixins = {...}
 	local mt = {}
 	mt.__index = chainIndex(if namespace ~= nil then namespace else assemblyGlobal, ...)
 
+	function mt.__tostring()
+		return name
+	end
+
 	local class = {}
+	class.__name = name
 	class.__superclass = superclass
 	return setmetatable(class, mt)
 end

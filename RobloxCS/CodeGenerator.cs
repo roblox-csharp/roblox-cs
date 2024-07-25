@@ -1078,7 +1078,7 @@ namespace RobloxCS
             WriteLine($"{(isWithinNamespace ? "namespace:" : "CS.")}class(\"{className}\", function(namespace)");
             _indent++;
 
-            Write("local class = CS.classDef(");
+            Write($"local class = CS.classDef(\"{GetName(node)}\", ");
             Write(isWithinNamespace ? "namespace" : "nil");
 
             // TODO: check if superclass or mixin
@@ -1242,13 +1242,13 @@ namespace RobloxCS
 
             InitializeFields(nonStaticFields);
             InitializeProperties(nonStaticProperties);
-            if (nonStaticMethods.Count() > 0)
-            {
-                WriteLine();
-            }
             if (block != null)
             {
+                WriteLine();
                 Visit(block);
+            }
+            if (nonStaticMethods.Count() > 0)
+            {
                 WriteLine();
             }
             foreach (var method in nonStaticMethods)

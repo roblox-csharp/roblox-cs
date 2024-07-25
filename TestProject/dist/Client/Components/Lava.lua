@@ -3,7 +3,7 @@ local CS = require(game:GetService("ReplicatedStorage").rbxcs_include.RuntimeLib
 CS.namespace("TestGame", function(namespace)
     namespace:namespace("Client", function(namespace)
         namespace:class("LavaComponent", function(namespace)
-            local class = CS.classDef(namespace, "Components.GameComponent")
+            local class = CS.classDef("LavaComponent", namespace, "Components.GameComponent")
             
             function class.new(instance)
                 local mt = {}

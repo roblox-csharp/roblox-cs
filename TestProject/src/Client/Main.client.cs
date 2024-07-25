@@ -7,7 +7,12 @@ namespace TestGame.Client
     {
         public static void Main()
         {
-            ComponentRunner.AttachTag("Lava", instance => new LavaComponent((Part)instance));
+            ComponentRunner.AttachTag("Lava", instance =>
+            {
+                var lava = new LavaComponent((Part)instance);
+                Console.WriteLine(lava);
+                return lava;
+            });
         }
     }
 }
