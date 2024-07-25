@@ -123,7 +123,7 @@ namespace RobloxCS
 
         public static string FixPathSep(string path)
         {
-            return path.Replace("\\\\", "/").Replace('\\', '/').Replace("//", "/");
+            return path.Replace("\\\\", "/").Replace('\\', '/').Replace("//", "/").Replace("./", "");
         }
 
         public static bool IsDebug()

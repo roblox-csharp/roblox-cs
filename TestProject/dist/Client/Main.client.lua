@@ -1,4 +1,4 @@
-local CS = require(game:GetService("ReplicatedStorage").rbxcs_include.RuntimeLib)
+local CS = require(game:GetService("ReplicatedStorage")["rbxcs_include"]["ntimeLib"])
 
 -- using ComponentRunner;
 require(game:GetService("ReplicatedStorage")["C#"]["Components"])

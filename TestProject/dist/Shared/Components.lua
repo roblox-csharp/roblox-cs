@@ -1,4 +1,4 @@
-local CS = require(game:GetService("ReplicatedStorage").rbxcs_include.RuntimeLib)
+local CS = require(game:GetService("ReplicatedStorage")["rbxcs_include"]["ntimeLib"])
 
 CS.namespace("Components", function(namespace)
     namespace:class("ComponentRunner", function(namespace)

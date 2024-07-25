@@ -116,8 +116,7 @@ namespace RobloxCS
             }
             else
             {
-                // TODO: read rojo project file and locate rbxcs_include
-                return "game:GetService(\"ReplicatedStorage\").rbxcs_include.RuntimeLib";
+                return RojoReader.ResolveInstancePath(_rojoProject, "include/RuntimeLib.lua")!;
             }
         }
 
