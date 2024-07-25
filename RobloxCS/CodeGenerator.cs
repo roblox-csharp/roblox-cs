@@ -887,24 +887,19 @@ namespace RobloxCS
 
                 if (isLeftSide && !localScopeIncludesIdentifier && !runtimeNamespaceIncludesIdentifier)
                 {
-                    // TODO: check for inherited members
                     var namespaceSymbol = parentNamespace != null ? _semanticModel.GetDeclaredSymbol(parentNamespace) : null;
-                    var namespaceIncludesIdentifier = namespaceSymbol != null && namespaceSymbol.GetMembers()
-                        .Where(member => member.Name == originalIdentifierName)
-                        .Count() > 0;
-
+                    var namespaceIncludesIdentifier = namespaceSymbol != null && Utility.FindMember(namespaceSymbol, originalIdentifierName) != null;
                     var parentClass = FindFirstAncestor<ClassDeclarationSyntax>(node);
-                    var classMember = parentClass?.Members
-                        .Where(member => GetName(member) == identifierText)
-                        .FirstOrDefault();
+                    var classSymbol = parentClass != null ? _semanticModel.GetDeclaredSymbol(parentClass) : null;
+                    var classMemberSymbol = classSymbol != null ? Utility.FindMemberDeep(classSymbol, originalIdentifierName) : null;
 
                     if (namespaceIncludesIdentifier)
                     {
                         Write($"namespace[\"$getMember\"](namespace, \"{identifierText}\")");
                     }
-                    else if (classMember != null)
+                    else if (classMemberSymbol != null)
                     {
-                        Write($"{(HasSyntax(classMember.Modifiers, SyntaxKind.StaticKeyword) ? "class" : "self")}.{identifierText}");
+                        Write($"{(classMemberSymbol.IsStatic ? "class" : "self")}.{identifierText}");
                     }
                     else
                     {

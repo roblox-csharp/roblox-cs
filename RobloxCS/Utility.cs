@@ -15,6 +15,21 @@ namespace RobloxCS
             return $"{(filePath == "" ? "<anonymous>" : filePath)}:{lineSpan.StartLinePosition.Line + 1}:{lineSpan.StartLinePosition.Character + 1}";
         }
 
+        public static ISymbol? FindMember(INamespaceSymbol namespaceSymbol, string memberName)
+        {
+            return namespaceSymbol.GetMembers().FirstOrDefault(member => member.Name == memberName);
+        }
+
+        public static ISymbol? FindMemberDeep(INamedTypeSymbol namedTypeSymbol, string memberName)
+        {
+            var member = namedTypeSymbol.GetMembers().FirstOrDefault(member => member.Name == memberName);
+            if (namedTypeSymbol.BaseType != null && member == null)
+            {
+                return FindMemberDeep(namedTypeSymbol.BaseType, memberName);
+            }
+            return member;
+        }
+
         public static List<string> GetNamesFromNode(SyntaxNode? node)
         {
             if (node is BaseExpressionSyntax baseExpression)
