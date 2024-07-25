@@ -1,9 +1,9 @@
 ﻿using System.Text;
 using System.Collections.Immutable;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Xml.Linq;
 
 namespace RobloxCS
 {
@@ -1086,7 +1086,12 @@ namespace RobloxCS
             Write("local class = CS.classDef(");
             Write(isWithinNamespace ? "namespace" : "nil");
 
-            var ancestorIdentifiers = (node.BaseList?.Types ?? []).Select(ancestor => $"\"{ancestor.Type}\"");
+            // TODO: check if superclass or mixin
+            var ancestorIdentifiers = (node.BaseList?.Types ?? []).Select(ancestor =>
+            {
+                var typeSymbol = _semanticModel.GetTypeInfo(ancestor.Type).Type;
+                return $"\"{Regex.Replace(typeSymbol?.ToString() ?? ancestor.Type.ToString(), @"<[^>]*>", "")}\"";
+            });
             if (ancestorIdentifiers.Count() > 0)
             {
                 Write(", ");

@@ -51,7 +51,7 @@ CS.namespace("Components", function(namespace)
         return class
     end)
     namespace:class("GameComponent", function(namespace)
-        local class = CS.classDef(namespace, "GameComponent")
+        local class = CS.classDef(namespace, "Components.GameComponent")
         
         function class.new(instance)
             local mt = {}

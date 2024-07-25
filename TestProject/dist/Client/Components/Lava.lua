@@ -3,14 +3,13 @@ local CS = require(game:GetService("ReplicatedStorage").rbxcs_include.RuntimeLib
 CS.namespace("TestGame", function(namespace)
     namespace:namespace("Client", function(namespace)
         namespace:class("LavaComponent", function(namespace)
-            local class = CS.classDef(namespace, "GameComponent<Part>")
+            local class = CS.classDef(namespace, "Components.GameComponent")
             
             function class.new(instance)
                 local mt = {}
                 local self = CS.classInstance(class, mt, namespace)
                 
                 self["$base"](instance)
-                
                 
                 function self.Start()
                     CS.getAssemblyType("Instance").Touched:Connect(function(hit)

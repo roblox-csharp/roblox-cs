@@ -69,8 +69,21 @@ end
 function CS.classInstance(class, mt, namespace)
 	local instance = {}
 
+	local function getSuperclass()
+		if class.__superclass:match(".") == nil then
+			return assemblyGlobal[class.__superclass]
+		end
+
+		local pieces = class.__superclass:split(".");
+		local result
+		for _, piece in pairs(pieces) do
+			result = (result or assemblyGlobal)[piece]
+		end
+		return result
+	end
+
 	instance["$base"] = function(...)
-		local Superclass = if namespace ~= nil then namespace["$getMember"](namespace, class.__superclass) else assemblyGlobal[class.__superclass]
+		local Superclass = getSuperclass()
 		instance["$superclass"] = Superclass.new(...)
 		instance = setmetatable(instance, { __index = instance["$superclass"] })
 	end
@@ -99,7 +112,7 @@ function CS.namespace(name, registerMembers, location, parent)
 		location = assemblyGlobal
 	end
 
-	local namespaceDefinition = assemblyGlobal[name] or CSNamespace.new(name, parent)
+	local namespaceDefinition = location[name] or CSNamespace.new(name, parent)
 	registerMembers(namespaceDefinition)
 	for _, callback in pairs(namespaceDefinition["$loadCallbacks"]) do
 		callback()
