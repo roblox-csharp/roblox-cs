@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Security.AccessControl;
 
 namespace RobloxCS
 {
@@ -169,6 +170,18 @@ namespace RobloxCS
             }
 
             return filePaths;
+        }
+
+        public override void VisitLocalFunctionStatement(LocalFunctionStatementSyntax node)
+        {
+            Write($"local function {GetName(node)}");
+            Visit(node.ParameterList);
+            _indent++;
+
+            Visit(node.Body);
+
+            _indent--;
+            WriteLine("end");
         }
 
         public override void VisitCastExpression(CastExpressionSyntax node)
