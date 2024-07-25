@@ -63,7 +63,7 @@
             {
                 "CS.namespace(\"Test\", function(namespace)",
                     "namespace:class(\"HelloWorld\", function(namespace)",
-                        "local class = CS.classDef(namespace)",
+                        "local class = CS.classDef(\"HelloWorld\", namespace)",
                         "",
                         "function class.new()",
                             "local mt = {}",
