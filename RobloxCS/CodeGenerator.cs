@@ -23,7 +23,7 @@ namespace RobloxCS
         private readonly SymbolAnalyzerResults _symbolAnalysis;
         private readonly INamespaceSymbol _globalNamespace;
         private readonly INamespaceSymbol _runtimeLibNamespace;
-        private readonly RojoProject _rojoProject; // make sure you check that it is not in debug mode before using this field!
+        private readonly RojoProject? _rojoProject;
         private readonly int _indentSize;
         private readonly Dictionary<CodeGenFlag, bool> _flags = new Dictionary<CodeGenFlag, bool>
         {
@@ -54,7 +54,7 @@ namespace RobloxCS
             _symbolAnalysis = symbolAnalyzer.Analyze();
             _globalNamespace = compiler.GlobalNamespace;
             _runtimeLibNamespace = _globalNamespace.GetNamespaceMembers().FirstOrDefault(ns => ns.Name == Utility.RuntimeAssemblyName)!;
-            _rojoProject = rojoProject!;
+            _rojoProject = rojoProject;
             _indentSize = indentSize;
         }
 
@@ -110,7 +110,7 @@ namespace RobloxCS
 
         private string GetLuaRuntimeLibPath()
         {
-            if (Utility.IsDebug())
+            if (Utility.IsDebug() || _rojoProject == null)
             {
                 return "\"RuntimeLib\"";
             }
@@ -129,7 +129,7 @@ namespace RobloxCS
                 csharpFilePath = csharpFilePath.Substring(1);
             }
 
-            if (Utility.IsDebug())
+            if (Utility.IsDebug() || _rojoProject == null)
             {
                 return "\"./" + csharpFilePath.Replace(".cs", "") + '"';
             }
