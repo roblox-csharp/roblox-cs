@@ -7,29 +7,10 @@ namespace TestGame.Client
         [Native]
         public static void Main()
         {
-            DoShit();
-        }
-
-        [Native]
-        public static object DoShit()
-        {
-            var name = "billy";
-            switch (name)
+            for (int i = 0; i < 10; i++)
             {
-                case "joanna":
-                case "milly":
-                case "mary" when name.Length == 4:
-                    var msg = "wtf";
-                    Console.WriteLine(msg);
-                    break;
-                case "bob":
-                    Console.WriteLine("yay!");
-                    break;
-                case string unknownName:
-                    Console.WriteLine($"who is {unknownName}?!");
-                    break;
+                Console.WriteLine(i);
             }
-            return null!;
         }
     }
 }

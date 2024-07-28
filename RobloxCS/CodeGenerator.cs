@@ -233,20 +233,30 @@ namespace RobloxCS
 
         public override void VisitForStatement(ForStatementSyntax node)
         {
-            WriteLine("do");
-            _indent++;
-
-            Visit(node.Declaration);
+            var hasDeclaration = node.Declaration != null;
+            if (hasDeclaration)
+            {
+                WriteLine("do");
+                _indent++;
+                Visit(node.Declaration);
+            }
             foreach (var initializer in node.Initializers)
             {
                 Visit(initializer);
             }
-            WriteLine("while true do");
+            Write("while ");
+            if (node.Condition != null)
+            {
+                Visit(node.Condition);
+            }
+            else
+            {
+                Write("true");
+            }
+            WriteLine(" do");
             _indent++;
 
-            Write("if not (");
-            Visit(node.Condition);
-            WriteLine(") then break end");
+            
             Visit(node.Statement);
             foreach (var incrementor in node.Incrementors)
             {
@@ -256,8 +266,11 @@ namespace RobloxCS
             _indent--;
             WriteLine("end");
 
-            _indent--;
-            WriteLine("end");
+            if (hasDeclaration)
+            {
+                _indent--;
+                WriteLine("end");
+            }
         }
 
         public override void VisitWhileStatement(WhileStatementSyntax node)
