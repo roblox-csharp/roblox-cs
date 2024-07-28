@@ -11,7 +11,7 @@ This project includes the compiler and transformers.
 - Switch expressions
 - Type patterns
 - `do` statement
-- Destructuring/parenthesized var designation (i.e. `var (value1, value2) = tuple`)
+- Destructuring/parenthesized variable designation (i.e. `var (value1, value2) = tuple`)
 
 ## Will maybe be supported
 - [Class finalizers (destructors)](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers)
