@@ -380,6 +380,11 @@ namespace RobloxCS
         public override void VisitBracketedArgumentList(BracketedArgumentListSyntax node)
         {
             Write('[');
+            if (node.Arguments.Count > 1)
+            {
+                Logger.CodegenError(node.Arguments.Last(), "Cannot have more than one argument between brackets.");
+            }
+
             foreach (var argument in node.Arguments)
             {
                 if (argument.Expression is LiteralExpressionSyntax numericLiteral && numericLiteral.IsKind(SyntaxKind.NumericLiteralExpression))
@@ -396,11 +401,6 @@ namespace RobloxCS
                     {
                         Write(" + 1");
                     }
-                }
-
-                if (argument != node.Arguments.Last())
-                {
-                    Write(", ");
                 }
             }
             Write(']');
