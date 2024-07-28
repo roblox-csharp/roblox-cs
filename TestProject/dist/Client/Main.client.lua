@@ -5,8 +5,9 @@ CS.namespace("TestGame", function(namespace: CS.Namespace)
         namespace:class("Game", function(namespace: CS.Namespace)
             local class = CS.classDef("Game", namespace)
             
+            @native
             function class.Main(): nil
-                print("[TestProject/Client/Main.client.cs:9:13]:", ("a.b.c"):split("."))
+                print("[TestProject/Client/Main.client.cs:10:13]:", (1 + 2) * 4)
                 return nil :: any
             end
             

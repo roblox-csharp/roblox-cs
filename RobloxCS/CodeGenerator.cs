@@ -424,6 +424,13 @@ namespace RobloxCS
             Visit(node.WhenFalse);
         }
 
+        public override void VisitParenthesizedExpression(ParenthesizedExpressionSyntax node)
+        {
+            Write('(');
+            Visit(node.Expression);
+            Write(')');
+        }
+
         public override void VisitPostfixUnaryExpression(PostfixUnaryExpressionSyntax node)
         {
             Visit(node.Operand);
@@ -702,7 +709,7 @@ namespace RobloxCS
                 {
                     if (nameSymbolInfo.Symbol is IMethodSymbol methodSymbol)
                     {
-                        var operatorText = methodSymbol.IsStatic ? "." : ":";
+                        var operatorText = methodSymbol.IsStatic ? '.' : ':';
                         Visit(memberAccess.Expression);
                         Write(operatorText);
                         Visit(memberAccess.Name);
@@ -777,7 +784,7 @@ namespace RobloxCS
                         if (namespaceName == Utility.RuntimeAssemblyName && GetName(memberAccess) != "Globals")
                         {
                             Visit(memberAccess.Name);
-                            Write(".");
+                            Write('.');
                         }
                         Visit(node.Name);
                     }
@@ -823,7 +830,7 @@ namespace RobloxCS
             {
                 Write(')');
             }
-            Write(".");
+            Write('.');
             Visit(node.Name);
         }
 
@@ -848,8 +855,7 @@ namespace RobloxCS
             if (namespaceType == null) return;
 
             var typeIsImported = usings.Any(usingDirective => usingDirective.Name != null && Utility.GetNamesFromNode(usingDirective).Contains(namespaceType.ContainingNamespace.Name));
-            Write($"CS.getAssemblyType(\"{namespaceType.Name}\")");
-            Write(".");
+            Write($"CS.getAssemblyType(\"{namespaceType.Name}\").");
             _flags[CodeGenFlag.ShouldCallGetAssemblyType] = false;
         }
 
@@ -912,7 +918,7 @@ namespace RobloxCS
                         {
                             var name = GetName(declarator);
                             if (name != identifierText) continue;
-                            prefix = (isStatic ? GetName(ancestorClass) : "self") + ".";
+                            prefix = (isStatic ? GetName(ancestorClass) : "self") + '.';
                         }
                     }
                 }

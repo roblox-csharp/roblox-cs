@@ -4,9 +4,10 @@ namespace TestGame.Client
 {
     public static class Game
     {
+        [Native]
         public static void Main()
         {
-            Console.WriteLine("a.b.c".Split("."));
+            Console.WriteLine((1 + 2) * 4);
         }
     }
 }
