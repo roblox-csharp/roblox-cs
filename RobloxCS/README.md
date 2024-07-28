@@ -12,6 +12,7 @@ This project includes the compiler and transformers.
 - Type patterns
 - `do` statement
 - Destructuring/parenthesized variable designation (i.e. `var (value1, value2) = tuple`)
+- Add `MainMethodRequired` setting to roblox-cs config
 
 ## Will maybe be supported
 - [Class finalizers (destructors)](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers)

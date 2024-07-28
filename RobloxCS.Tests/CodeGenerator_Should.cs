@@ -3,6 +3,22 @@
     public class CodeGenerator_Should
     {
         [Fact]
+        public void NativeAttribute_GeneratesLuauAttribute()
+        {
+            var cleanedLua = GetCleanLua("using Roblox; [Native] void doSomething() { }");
+            var lines = GetLines(cleanedLua);
+            var expectedLines = new List<string>
+            {
+                "@native",
+                "local function doSomething(): nil",
+                    "return nil :: any",
+                "end"
+            };
+
+            AssertEqualLines(lines, expectedLines);
+        }
+
+        [Fact]
         public void IfStatements_GeneratesIf()
         {
             var cleanedLua = GetCleanLua("var x = 1; if (x == 4) Console.WriteLine(\"x is 4\"); else if (x == \"abc\") Console.WriteLine(\"x is abc\"); else Console.WriteLine(\"x is unknown\");", 1);

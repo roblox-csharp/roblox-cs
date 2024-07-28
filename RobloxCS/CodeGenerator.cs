@@ -4,9 +4,6 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Security.AccessControl;
-using System.Xml.Linq;
-using System.Reflection.Emit;
 
 namespace RobloxCS
 {
