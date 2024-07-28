@@ -1,6 +1,1 @@
-using Roblox;
-
-void doSomething()
-{
-
-}
+Console.WriteLine("hello, world");

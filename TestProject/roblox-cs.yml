@@ -1,6 +1,7 @@
 SourceFolder: src
 OutputFolder: dist
 CSharpOptions:
-  EntryPointName: Game
-  MainMethodName: Main
-  AssemblyName: RobloxCSProject
+    EntryPointRequired: false
+    EntryPointName: Game
+    MainMethodName: Main
+    AssemblyName: RobloxCSProject

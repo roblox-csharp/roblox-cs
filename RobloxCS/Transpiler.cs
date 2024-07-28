@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace RobloxCS
 {
@@ -94,6 +95,11 @@ namespace RobloxCS
             var compiledFiles = new List<CompiledFile>();
             var memberCollector = new MemberCollector(_fileTrees);
             var members = memberCollector.Collect();
+            if (_config.CSharpOptions.EntryPointRequired && _fileTrees.All(tree => !tree.GetRoot().DescendantNodes().Any(node => node is ClassDeclarationSyntax classDeclaration && Utility.GetNamesFromNode(classDeclaration).FirstOrDefault() == _config.CSharpOptions.EntryPointName)))
+            {
+                Logger.Error($"No entry point class \"{_config.CSharpOptions.EntryPointName}\" found!");
+            }
+
             foreach (var tree in _fileTrees)
             {
                 var generatedLua = TranspilerUtility.GenerateLua(tree, compiler, members, _inputDirectory, _config);
