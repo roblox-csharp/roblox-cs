@@ -30,7 +30,8 @@ CS.namespace("TestGame", function(namespace: CS.Namespace)
                         print("[TestProject/Client/Main.client.cs:26:21]:", "yay!")
                         break
                     end
-                    print("[TestProject/Client/Main.client.cs:29:21]:", "who are you?!")
+                    local unknownName: string = name
+                    print("[TestProject/Client/Main.client.cs:29:21]:", `who is {unknownName}?!`)
                 until true
                 return nil :: any
             end

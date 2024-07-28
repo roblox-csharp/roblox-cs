@@ -346,11 +346,21 @@ namespace RobloxCS
             foreach (var section in node.Sections)
             {
                 var statementKinds = section.Statements.Select(stmt => stmt.Kind());
-                var caseLabels = section.Labels.Where(label => !label.IsKind(SyntaxKind.DefaultSwitchLabel));
+                var caseLabels = section.Labels.Where(label =>
+                {
+                    return !label.IsKind(SyntaxKind.DefaultSwitchLabel)
+                        && !(label is CasePatternSwitchLabelSyntax casePattern
+                            && new HashSet<SyntaxKind>
+                            {
+                                SyntaxKind.VarPattern,
+                                SyntaxKind.DeclarationPattern
+                            }.Contains(casePattern.Pattern.Kind()));
+                });
+
                 foreach (var label in caseLabels)
                 {
                     Write("if ");
-                    if (label != caseLabels.First())
+                    if (label != caseLabels.FirstOrDefault())
                     {
                         Write("_fallthrough or ");
                     }
@@ -392,14 +402,33 @@ namespace RobloxCS
                 }
             }
 
-            var defaultLabels = node.Sections.SelectMany(section => section.Labels.Where(label => label.IsKind(SyntaxKind.DefaultSwitchLabel)));
-            foreach (var defaultLabel in defaultLabels)
+            void visitDefaultStatements(SwitchLabelSyntax defaultLabel)
             {
                 var section = (SwitchSectionSyntax)defaultLabel.Parent!;
                 foreach (var statement in section.Statements)
                 {
                     Visit(statement);
                 }
+            }
+
+            var casePatternLabels = node.Sections.SelectMany(section => section.Labels.Where(label => label.IsKind(SyntaxKind.CasePatternSwitchLabel)));
+            foreach (var casePatternLabel in casePatternLabels)
+            {
+                var pattern = casePatternLabel.ChildNodes().FirstOrDefault();
+                if (pattern.IsKind(SyntaxKind.VarPattern) || pattern.IsKind(SyntaxKind.DeclarationPattern))
+                {
+                    Visit(pattern);
+                    Write(" = ");
+                    Visit(condition);
+                    WriteLine();
+                    visitDefaultStatements(casePatternLabel);
+                }
+            }
+
+            var defaultLabel = node.Sections.SelectMany(section => section.Labels.Where(label => label.IsKind(SyntaxKind.DefaultSwitchLabel))).FirstOrDefault();
+            if (defaultLabel != null)
+            {
+                visitDefaultStatements(defaultLabel);
             }
 
             _indent--;
@@ -941,6 +970,22 @@ namespace RobloxCS
             _flags[CodeGenFlag.ShouldCallGetAssemblyType] = false;
         }
 
+        public override void VisitDeclarationPattern(DeclarationPatternSyntax node)
+        {
+            base.VisitDeclarationPattern(node);
+            Write($": {Utility.GetMappedType(node.Type.ToString())}");
+        }
+
+        public override void VisitDiscardDesignation(DiscardDesignationSyntax node)
+        {
+            // do nothing (discard)
+        }
+
+        public override void VisitSingleVariableDesignation(SingleVariableDesignationSyntax node)
+        {
+            Write($"local {GetName(node)}");
+        }
+
         public override void VisitVariableDeclaration(VariableDeclarationSyntax node)
         {
             foreach (var declarator in node.Variables)
@@ -1040,12 +1085,14 @@ namespace RobloxCS
                     {
                         var descendants = block.DescendantNodes();
                         var localFunctions = descendants.OfType<LocalFunctionStatementSyntax>();
+                        var variableDesignations = descendants.OfType<VariableDesignationSyntax>();
                         var variableDeclarators = descendants.OfType<VariableDeclaratorSyntax>();
                         var forEachStatements = descendants.OfType<ForEachStatementSyntax>();
                         var forStatements = descendants.OfType<ForStatementSyntax>();
                         var parameters = descendants.OfType<ParameterSyntax>();
                         var checkNamePredicate = (SyntaxNode node) => GetName(node) == identifierText;
                         return localFunctions.Any(checkNamePredicate)
+                            || variableDesignations.Any(checkNamePredicate)
                             || variableDeclarators.Any(checkNamePredicate)
                             || parameters.Any(checkNamePredicate)
                             || forEachStatements.Any(checkNamePredicate)

@@ -25,8 +25,8 @@ namespace TestGame.Client
                 case "bob":
                     Console.WriteLine("yay!");
                     break;
-                default:
-                    Console.WriteLine("who are you?!");
+                case string unknownName:
+                    Console.WriteLine($"who is {unknownName}?!");
                     break;
             }
             return null!;
