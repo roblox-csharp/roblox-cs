@@ -1566,7 +1566,7 @@ namespace RobloxCS
             {
                 if (isReturnType)
                 {
-                    RemoveLastCharacters(2);
+                    RemoveLastCharacters(1);
                 }
 
                 var mappedType = Utility.GetMappedType(type.ToString());
