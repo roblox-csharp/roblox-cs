@@ -1,5 +1,4 @@
 using Roblox;
-using Components;
 
 namespace TestGame.Client
 {
@@ -7,7 +6,7 @@ namespace TestGame.Client
     {
         public static void Main()
         {
-            ComponentRunner.AttachTag("Lava", instance => new LavaComponent((Part)instance));
+            [Native]
             void test()
             {
                 Console.WriteLine("abc");

@@ -173,8 +173,25 @@ namespace RobloxCS
             return filePaths;
         }
 
+        public override void VisitAttribute(AttributeSyntax node)
+        {
+            if (GetName(node) == "Native")
+            {
+                WriteLine("@native");
+            }
+        }
+
+        public override void VisitAttributeList(AttributeListSyntax node)
+        {
+            base.VisitAttributeList(node);
+        }
+
         public override void VisitLocalFunctionStatement(LocalFunctionStatementSyntax node)
         {
+            foreach (var attributeList in node.AttributeLists)
+            {
+                Visit(attributeList);
+            }
             Write($"local function {GetName(node)}");
             Visit(node.ParameterList);
             WriteTypeAnnotation(node.ReturnType, true);
@@ -1202,6 +1219,11 @@ namespace RobloxCS
 
         public override void VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
+            foreach (var attributeList in node.AttributeLists)
+            {
+                Visit(attributeList);
+            }
+
             var isStatic = HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
             var isMetamethod = Constants.METAMETHODS.Contains(GetName(node));
             var objectName = "self";
@@ -1235,6 +1257,10 @@ namespace RobloxCS
         public override void VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
         {
             // TODO: struct support?
+            foreach (var attributeList in node.AttributeLists)
+            {
+                Visit(attributeList);
+            }
             Write($"function class.new");
             Visit(node.ParameterList);
             _indent++;
