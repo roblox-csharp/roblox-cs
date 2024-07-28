@@ -33,7 +33,7 @@
         {
 
             var cleanedLua = GetCleanLua("namespace Test { }");
-            var expectedLua = "CS.namespace(\"Test\", function(namespace)\nend)";
+            var expectedLua = "CS.namespace(\"Test\", function(namespace: CS.Namespace)\nend)";
             Assert.Equal(expectedLua, cleanedLua);
         }
 
@@ -45,8 +45,8 @@
             var lines = GetLines(cleanedLua);
             var expectedLines = new List<string>
             {
-                "CS.namespace(\"Test\", function(namespace)",
-                    "namespace:namespace(\"Nested\", function(namespace)",
+                "CS.namespace(\"Test\", function(namespace: CS.Namespace)",
+                    "namespace:namespace(\"Nested\", function(namespace: CS.Namespace)",
                     "end)",
                 "end)"
             };
@@ -63,7 +63,7 @@
             {
                 "CS.namespace(\"Test\", function(namespace: CS.Namespace)",
                     "namespace:class(\"HelloWorld\", function(namespace: CS.Namespace)",
-                        "local class = CS.classDef(\"HelloWorld\", namespace: CS.Namespace)",
+                        "local class = CS.classDef(\"HelloWorld\", namespace)",
                         "",
                         "function class.new()",
                             "local mt = {}",
@@ -84,7 +84,7 @@
         [Theory]
         [InlineData("var x = 5;", "local x = 5")]
         [InlineData("char f = 'f'", "local f: string = \"f\"")]
-        [InlineData("object a = 123", "local a = 123")]
+        [InlineData("object a = 123", "local a: any = 123")]
         public void VariableDeclaration_GeneratesLocal(string input, string expected)
         {
             var cleanedLua = GetCleanLua(input);
@@ -209,7 +209,7 @@
         public void CollectionInitializer_GeneratesTable()
         {
             var cleanedLua = GetCleanLua("int[] nums = [1, 2, 3]");
-            Assert.Equal("local nums = {1, 2, 3}", cleanedLua);
+            Assert.Equal("local nums: { number } = {1, 2, 3}", cleanedLua);
         }
 
         [Theory]
