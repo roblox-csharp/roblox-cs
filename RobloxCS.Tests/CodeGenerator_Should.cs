@@ -2,6 +2,25 @@
 {
     public class CodeGenerator_Should
     {
+        [Fact]
+        public void IfStatements_GeneratesIf()
+        {
+            var cleanedLua = GetCleanLua("var x = 1; if (x == 4) Console.WriteLine(\"x is 4\"); else if (x == \"abc\") Console.WriteLine(\"x is abc\"); else Console.WriteLine(\"x is unknown\");", 1);
+            var lines = GetLines(cleanedLua);
+            var expectedLines = new List<string>
+            {
+                "if x == 4 then",
+                    "print(\"x is 4\")",
+                "elseif x == \"abc\" then",
+                    "print(\"x is abc\")",
+                "else",
+                    "print(\"x is unknown\")",
+                "end"
+            };
+
+            AssertEqualLines(lines, expectedLines);
+        }
+
         [Theory]
         [InlineData("var @abc = 1")]
         [InlineData("var @hello_brah = 1")]
@@ -33,7 +52,7 @@
         {
 
             var cleanedLua = GetCleanLua("namespace Test { }");
-            var expectedLua = "CS.namespace(\"Test\", function(namespace: CS.Namespace)\nend)";
+            var expectedLua = "CS.namespace(\"Test\", @native function(namespace: CS.Namespace)\nend)";
             Assert.Equal(expectedLua, cleanedLua);
         }
 
@@ -45,8 +64,8 @@
             var lines = GetLines(cleanedLua);
             var expectedLines = new List<string>
             {
-                "CS.namespace(\"Test\", function(namespace: CS.Namespace)",
-                    "namespace:namespace(\"Nested\", function(namespace: CS.Namespace)",
+                "CS.namespace(\"Test\", @native function(namespace: CS.Namespace)",
+                    "namespace:namespace(\"Nested\", @native function(namespace: CS.Namespace)",
                     "end)",
                 "end)"
             };
@@ -61,8 +80,8 @@
             var lines = GetLines(cleanedLua);
             var expectedLines = new List<string>
             {
-                "CS.namespace(\"Test\", function(namespace: CS.Namespace)",
-                    "namespace:class(\"HelloWorld\", function(namespace: CS.Namespace)",
+                "CS.namespace(\"Test\", @native function(namespace: CS.Namespace)",
+                    "namespace:class(\"HelloWorld\", @native function(namespace: CS.Namespace)",
                         "local class = CS.classDef(\"HelloWorld\", namespace)",
                         "",
                         "function class.new()",
