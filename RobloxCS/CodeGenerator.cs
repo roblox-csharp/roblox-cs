@@ -1517,7 +1517,7 @@ namespace RobloxCS
             return node.Ancestors().OfType<T>().ToArray();
         }
 
-        protected string? TryGetName(SyntaxNode node)
+        private string? TryGetName(SyntaxNode node)
         {
             return Utility.GetNamesFromNode(node).FirstOrDefault();
         }

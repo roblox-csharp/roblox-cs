@@ -61,9 +61,9 @@
             var lines = GetLines(cleanedLua);
             var expectedLines = new List<string>
             {
-                "CS.namespace(\"Test\", function(namespace)",
-                    "namespace:class(\"HelloWorld\", function(namespace)",
-                        "local class = CS.classDef(\"HelloWorld\", namespace)",
+                "CS.namespace(\"Test\", function(namespace: CS.Namespace)",
+                    "namespace:class(\"HelloWorld\", function(namespace: CS.Namespace)",
+                        "local class = CS.classDef(\"HelloWorld\", namespace: CS.Namespace)",
                         "",
                         "function class.new()",
                             "local mt = {}",
@@ -83,7 +83,7 @@
 
         [Theory]
         [InlineData("var x = 5;", "local x = 5")]
-        [InlineData("char f = 'f'", "local f = \"f\"")]
+        [InlineData("char f = 'f'", "local f: string = \"f\"")]
         [InlineData("object a = 123", "local a = 123")]
         public void VariableDeclaration_GeneratesLocal(string input, string expected)
         {

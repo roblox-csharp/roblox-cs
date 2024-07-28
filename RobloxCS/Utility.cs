@@ -12,13 +12,30 @@ namespace RobloxCS
 
         public static string GetMappedType(string csharpType)
         {
+            if (csharpType.EndsWith("[]"))
+            {
+                var arrayType = csharpType.Substring(0, csharpType.Length - 2);
+                return $"{{ {GetMappedType(arrayType)} }}";
+            }
+            if (csharpType.EndsWith('?'))
+            {
+                var nonNullableType = csharpType.Substring(0, csharpType.Length - 1);
+                return $"{GetMappedType(nonNullableType)}?";
+            }
+
             switch (csharpType)
             {
+                case "object":
+                    return "any";
+
                 case "void":
                 case "null":
                     return "nil";
 
-                case "String": return "string";
+                case "char":
+                case "Char":
+                case "String":
+                    return "string";
                 case "double":
                 case "float":
                     return "number";
