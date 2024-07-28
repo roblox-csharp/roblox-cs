@@ -92,6 +92,15 @@
         }
 
         [Theory]
+        [InlineData("(1 + 2) * 4")]
+        [InlineData("(44 / (4 % 6) * 12) - 2")]
+        public void Parentheses_GenerateParentheses(string input)
+        {
+            var cleanedLua = GetCleanLua(input);
+            Assert.Equal(input, cleanedLua);
+        }
+
+        [Theory]
         [InlineData("69", "69")]
         [InlineData("420.0f", "420")]
         [InlineData("'h'", "\"h\"")]
