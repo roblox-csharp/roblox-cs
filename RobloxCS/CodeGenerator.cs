@@ -587,10 +587,9 @@ namespace RobloxCS
 
         public override void VisitInvocationExpression(InvocationExpressionSyntax node)
         {
-            if (node.Expression is MemberAccessExpressionSyntax memberAccess && TryGetName(memberAccess.Expression) != null)
+            if (node.Expression is MemberAccessExpressionSyntax memberAccess)
             {
                 var objectType = _semanticModel.GetTypeInfo(memberAccess.Expression).Type;
-                var objectName = GetName(memberAccess.Expression);
                 var name = GetName(memberAccess.Name);
 
                 switch (name)
@@ -608,7 +607,7 @@ namespace RobloxCS
                         return;
                     case "Length":
                         if (objectType == null || !Constants.LENGTH_READABLE_TYPES.Contains(objectType.Name)) return;
-                        Write("#");
+                        Write('#');
                         Visit(memberAccess.Expression);
                         return;
                     case "ToLower":
@@ -616,8 +615,10 @@ namespace RobloxCS
                     case "Replace":
                     case "Split":
                         if (objectType == null || objectType.Name.ToLower() != "string") return;
+                        Write('(');
                         Visit(memberAccess.Expression);
-                        Write(":");
+                        Write(')');
+                        Write(':');
 
                         var methodName = GetName(memberAccess.Name);
                         var mappedMethodName = Constants.MAPPED_STRING_METHODS.GetValueOrDefault(methodName, methodName);
