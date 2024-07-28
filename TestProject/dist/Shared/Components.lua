@@ -10,19 +10,19 @@ CS.namespace("Components", function(namespace: CS.Namespace)
             game:GetService("CollectionService").TagAdded:Connect(function(tag)
                 if attached then return  end
                 local instance = game:GetService("CollectionService"):GetTagged(tag)[1]
-                Run(attachComponent(instance))
+                class.Run(attachComponent(instance))
                 attached = true
             end)
             for _, instance in instances do
                 if attached then continue end
-                Run(attachComponent(instance))
+                class.Run(attachComponent(instance))
                 attached = true
             end
             return nil :: any
         end
         function class.Run(component: GameComponent): nil
             component:Start()
-            local updateEvent = GetUpdateEvent(component)
+            local updateEvent = class.GetUpdateEvent(component)
             updateEvent:Connect(component.Update)
             return nil :: any
         end

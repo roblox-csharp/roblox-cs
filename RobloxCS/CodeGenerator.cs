@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Security.AccessControl;
 using System.Xml.Linq;
+using System.Reflection.Emit;
 
 namespace RobloxCS
 {
@@ -327,9 +328,82 @@ namespace RobloxCS
             }
         }
 
-        private void RemoveLastCharacters(int amount)
+        public override void VisitSwitchStatement(SwitchStatementSyntax node)
         {
-            _output.Remove(_output.Length - amount, amount);
+            var condition = node.Expression;
+            WriteLine("repeat");
+            _indent++;
+
+            var checkNoFallthrough = (StatementSyntax statement) =>
+                !statement.IsKind(SyntaxKind.BreakStatement)
+                && !statement.IsKind(SyntaxKind.ReturnStatement)
+                && !statement.DescendantNodes().All(descendant => !descendant.IsKind(SyntaxKind.BreakStatement) && !descendant.IsKind(SyntaxKind.ReturnStatement));
+
+            if (node.Sections.Count > 0 && !node.Sections.Any(section => section.Statements.Any(checkNoFallthrough))) // TODO: check for break/return
+            {
+                WriteLine("local _fallthrough = false");
+            }
+            foreach (var section in node.Sections)
+            {
+                var statementKinds = section.Statements.Select(stmt => stmt.Kind());
+                var caseLabels = section.Labels.Where(label => !label.IsKind(SyntaxKind.DefaultSwitchLabel));
+                foreach (var label in caseLabels)
+                {
+                    Write("if ");
+                    if (label != caseLabels.First())
+                    {
+                        Write("_fallthrough or ");
+                    }
+
+                    var expressions = label.ChildNodes();
+                    var expression = expressions.First();
+                    Write('(');
+                    Visit(condition);
+
+                    var op = expression.IsKind(SyntaxKind.NotPattern) ? "~=" : "==";
+                    Write($" {op} ");
+                    Visit(expression);
+                    if (label is CasePatternSwitchLabelSyntax casePattern && casePattern.WhenClause != null)
+                    {
+                        Write(" and ");
+                        Visit(casePattern.WhenClause.Condition);
+                    }
+                    WriteLine(") then");
+                    _indent++;
+
+                    if (label != caseLabels.Last())
+                    {
+                        WriteLine("_fallthrough = true");
+                    }
+                    else
+                    {
+                        foreach (var statement in section.Statements)
+                        {
+                            Visit(statement);
+                            if (statement == section.Statements.Last() && !statement.IsKind(SyntaxKind.ReturnStatement))
+                            {
+                                WriteLine("break");
+                            }
+                        }
+                    }
+
+                    _indent--;
+                    WriteLine("end");
+                }
+            }
+
+            var defaultLabels = node.Sections.SelectMany(section => section.Labels.Where(label => label.IsKind(SyntaxKind.DefaultSwitchLabel)));
+            foreach (var defaultLabel in defaultLabels)
+            {
+                var section = (SwitchSectionSyntax)defaultLabel.Parent!;
+                foreach (var statement in section.Statements)
+                {
+                    Visit(statement);
+                }
+            }
+
+            _indent--;
+            WriteLine("until true");
         }
 
         public override void VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node)
@@ -434,7 +508,15 @@ namespace RobloxCS
         public override void VisitPostfixUnaryExpression(PostfixUnaryExpressionSyntax node)
         {
             Visit(node.Operand);
-            if (node.IsKind(SyntaxKind.SuppressNullableWarningExpression)) return;
+            if (node.IsKind(SyntaxKind.SuppressNullableWarningExpression))
+            {
+                var typeSymbol = _semanticModel.GetTypeInfo(node.Operand).Type;
+                if (typeSymbol == null)
+                {
+                    Write(" :: any");
+                }
+                return;
+            }
 
             var mappedOperator = Utility.GetMappedOperator(node.OperatorToken.Text);
             WriteLine($" {mappedOperator} 1");
@@ -957,15 +1039,13 @@ namespace RobloxCS
                     .Any(block =>
                     {
                         var descendants = block.DescendantNodes();
-                        var methods = descendants.OfType<MethodDeclarationSyntax>();
                         var localFunctions = descendants.OfType<LocalFunctionStatementSyntax>();
                         var variableDeclarators = descendants.OfType<VariableDeclaratorSyntax>();
                         var forEachStatements = descendants.OfType<ForEachStatementSyntax>();
                         var forStatements = descendants.OfType<ForStatementSyntax>();
                         var parameters = descendants.OfType<ParameterSyntax>();
                         var checkNamePredicate = (SyntaxNode node) => GetName(node) == identifierText;
-                        return methods.Any(checkNamePredicate)
-                            || localFunctions.Any(checkNamePredicate)
+                        return localFunctions.Any(checkNamePredicate)
                             || variableDeclarators.Any(checkNamePredicate)
                             || parameters.Any(checkNamePredicate)
                             || forEachStatements.Any(checkNamePredicate)
@@ -1310,11 +1390,6 @@ namespace RobloxCS
             WriteLine("end");
         }
 
-        public override void DefaultVisit(SyntaxNode node)
-        {
-            Logger.CompilerError($"Unhandled AST node kind: {node.Kind()}");
-        }
-
         private void VisitConstructorBody(ClassDeclarationSyntax parentClass, BlockSyntax? block, ArgumentListSyntax? initializerArguments)
         {
             var isWithinNamespace = IsDescendantOf<NamespaceDeclarationSyntax>(parentClass);
@@ -1492,6 +1567,11 @@ namespace RobloxCS
         private string GetTabString()
         {
             return string.Concat(Enumerable.Repeat(" ", _indentSize * _indent));
+        }
+
+        private void RemoveLastCharacters(int amount)
+        {
+            _output.Remove(_output.Length - amount, amount);
         }
 
         private bool HasSyntax(SyntaxTokenList tokens, SyntaxKind syntax)

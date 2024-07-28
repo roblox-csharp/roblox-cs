@@ -7,7 +7,31 @@ CS.namespace("TestGame", function(namespace: CS.Namespace)
             
             @native
             function class.Main(): nil
-                print("[TestProject/Client/Main.client.cs:10:13]:", (1 + 2) * 4)
+                class.DoShit()
+                return nil :: any
+            end
+            @native
+            function class.DoShit(): any
+                local name = "billy"
+                repeat
+                    local _fallthrough = false
+                    if (name == "joanna") then
+                        _fallthrough = true
+                    end
+                    if _fallthrough or (name == "milly") then
+                        _fallthrough = true
+                    end
+                    if _fallthrough or (name == "mary" and name.Length == 4) then
+                        local msg = "wtf"
+                        print("[TestProject/Client/Main.client.cs:23:21]:", msg)
+                        break
+                    end
+                    if (name == "bob") then
+                        print("[TestProject/Client/Main.client.cs:26:21]:", "yay!")
+                        break
+                    end
+                    print("[TestProject/Client/Main.client.cs:29:21]:", "who are you?!")
+                until true
                 return nil :: any
             end
             
