@@ -21,6 +21,11 @@ namespace RobloxCS
             return _tree.WithRootAndOptions(Visit(_root), _tree.Options);
         }
 
+        protected string? TryGetName(SyntaxNode node)
+        {
+            return Utility.GetNamesFromNode(node).FirstOrDefault();
+        }
+
         protected string GetName(SyntaxNode node)
         {
             return Utility.GetNamesFromNode(node).First();

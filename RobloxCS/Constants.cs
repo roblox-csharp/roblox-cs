@@ -4,7 +4,22 @@ namespace RobloxCS
 {
     internal static class Constants
     {
-        public static readonly List<string> METAMETHODS = [
+        public static readonly HashSet<string> LENGTH_READABLE_TYPES = [
+            "String",
+            "string",
+            "Array"
+        ];
+
+        public static readonly Dictionary<string, string> MAPPED_STRING_METHODS = new Dictionary<string, string>
+        {
+            { "Replace", "gsub" },
+            { "Split", "split" },
+            { "ToLower", "lower" },
+            { "ToUpper", "upper" },
+            { "Reverse", "reverse" }
+        };
+
+        public static readonly HashSet<string> METAMETHODS = [
             "__tostring",
             "__add",
             "__sub",
@@ -27,7 +42,7 @@ namespace RobloxCS
             "__metatable",
         ];
 
-        public static readonly List<string> LUAU_KEYWORDS = [
+        public static readonly HashSet<string> LUAU_KEYWORDS = [
             "local",
             "and",
             "or",
@@ -46,7 +61,7 @@ namespace RobloxCS
             "typeof"
         ];
 
-        public static readonly List<SyntaxKind> MEMBER_PARENT_SYNTAXES = [
+        public static readonly HashSet<SyntaxKind> MEMBER_PARENT_SYNTAXES = [
             SyntaxKind.NamespaceDeclaration,
             SyntaxKind.ClassDeclaration,
             SyntaxKind.InterfaceDeclaration,
@@ -69,16 +84,14 @@ namespace RobloxCS
             { ["String", "string"], ("+", "..") }
         };
 
-        public static readonly HashSet<string> DECIMAL_TYPES = new HashSet<string>
-        {
+        public static readonly HashSet<string> DECIMAL_TYPES = [
             "float",
             "double",
             "Single",
             "Double"
-        };
+        ];
 
-        public static readonly HashSet<string> INTEGER_TYPES = new HashSet<string>
-        {
+        public static readonly HashSet<string> INTEGER_TYPES = [
             "sbyte",
             "byte",
             "short",
@@ -97,6 +110,6 @@ namespace RobloxCS
             "UInt32",
             "UInt64",
             "UInt128",
-        };
+        ];
     }
 }

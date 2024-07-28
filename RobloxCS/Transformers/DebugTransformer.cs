@@ -13,7 +13,7 @@ namespace RobloxCS
 
         public override SyntaxNode? VisitInvocationExpression(InvocationExpressionSyntax node)
         {
-            if (node.Expression is MemberAccessExpressionSyntax memberAccess)
+            if (node.Expression is MemberAccessExpressionSyntax memberAccess && TryGetName(memberAccess.Expression) != null)
             {
                 var objectName = GetName(memberAccess.Expression);
                 var name = GetName(memberAccess.Name);

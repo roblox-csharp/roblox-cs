@@ -2,7 +2,7 @@
 This project includes the compiler and transformers.
 
 ## To-do
-- String & table macros or extensions
+- Table & (the rest of) string macros or extensions
 - Macro `IEnumerable<T>` (or `Array`?) methods
 - Classes/structs/interfaces nested in classes/structs/interfaces
 - Some sort of `LuaTuple` object

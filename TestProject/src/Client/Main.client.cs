@@ -6,12 +6,7 @@ namespace TestGame.Client
     {
         public static void Main()
         {
-            [Native]
-            void test()
-            {
-                Console.WriteLine("abc");
-            }
-            test();
+            Console.WriteLine("a.b.c".Split("."));
         }
     }
 }

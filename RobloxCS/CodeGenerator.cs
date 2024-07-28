@@ -587,7 +587,7 @@ namespace RobloxCS
 
         public override void VisitInvocationExpression(InvocationExpressionSyntax node)
         {
-            if (node.Expression is MemberAccessExpressionSyntax memberAccess)
+            if (node.Expression is MemberAccessExpressionSyntax memberAccess && TryGetName(memberAccess.Expression) != null)
             {
                 var objectType = _semanticModel.GetTypeInfo(memberAccess.Expression).Type;
                 var objectName = GetName(memberAccess.Expression);
@@ -602,13 +602,28 @@ namespace RobloxCS
                         return;
                     case "Write":
                     case "WriteLine":
-                        {
-                            if (objectType == null || objectType.Name != "Console") break;
+                        if (objectType == null || objectType.Name != "Console") break;
+                        Write("print");
+                        Visit(node.ArgumentList);
+                        return;
+                    case "Length":
+                        if (objectType == null || !Constants.LENGTH_READABLE_TYPES.Contains(objectType.Name)) return;
+                        Write("#");
+                        Visit(memberAccess.Expression);
+                        return;
+                    case "ToLower":
+                    case "ToUpper":
+                    case "Replace":
+                    case "Split":
+                        if (objectType == null || objectType.Name.ToLower() != "string") return;
+                        Visit(memberAccess.Expression);
+                        Write(":");
 
-                            Write("print");
-                            Visit(node.ArgumentList);
-                            return;
-                        }
+                        var methodName = GetName(memberAccess.Name);
+                        var mappedMethodName = Constants.MAPPED_STRING_METHODS.GetValueOrDefault(methodName, methodName);
+                        Write(mappedMethodName);
+                        Visit(node.ArgumentList);
+                        return;
                     case "Create":
                         {
                             if (objectType == null || objectType.Name != "Instance") break;
@@ -725,6 +740,7 @@ namespace RobloxCS
 
         public override void VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
         {
+            var leftIsLiteral = node.Expression is LiteralExpressionSyntax;
             var objectSymbolInfo = _semanticModel.GetSymbolInfo(node.Expression);
             var objectType = _semanticModel.GetTypeInfo(node.Expression).Type;
             if (objectType != null && objectType.OriginalDefinition is INamedTypeSymbol objectDefinitionSymbol)
@@ -781,7 +797,15 @@ namespace RobloxCS
                         if (name.StartsWith("Item"))
                         {
                             var itemIndex = name.Split("Item").Last();
+                            if (leftIsLiteral)
+                            {
+                                Write('(');
+                            }
                             Visit(node.Expression);
+                            if (leftIsLiteral)
+                            {
+                                Write(')');
+                            }
                             Write($"[{itemIndex}]");
                             return;
                         }
@@ -789,7 +813,15 @@ namespace RobloxCS
                 }
             }
 
+            if (leftIsLiteral)
+            {
+                Write('(');
+            }
             Visit(node.Expression);
+            if (leftIsLiteral)
+            {
+                Write(')');
+            }
             Write(".");
             Visit(node.Name);
         }
@@ -1482,6 +1514,11 @@ namespace RobloxCS
         private T[] GetAncestors<T>(SyntaxNode node) where T : SyntaxNode
         {
             return node.Ancestors().OfType<T>().ToArray();
+        }
+
+        protected string? TryGetName(SyntaxNode node)
+        {
+            return Utility.GetNamesFromNode(node).FirstOrDefault();
         }
 
         private string GetName(SyntaxNode node)
