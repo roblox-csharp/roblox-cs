@@ -22,7 +22,7 @@ namespace RobloxCS
 
         public static void CompilerError(string message)
         {
-            Error($"{message} (compiler error)");
+            Error($"{message} (roblox-cs compiler error)");
         }
 
         public static void CodegenError(SyntaxToken token, string message)

@@ -1310,6 +1310,11 @@ namespace RobloxCS
             WriteLine("end");
         }
 
+        public override void DefaultVisit(SyntaxNode node)
+        {
+            Logger.CompilerError($"Unhandled AST node kind: {node.Kind()}");
+        }
+
         private void VisitConstructorBody(ClassDeclarationSyntax parentClass, BlockSyntax? block, ArgumentListSyntax? initializerArguments)
         {
             var isWithinNamespace = IsDescendantOf<NamespaceDeclarationSyntax>(parentClass);
