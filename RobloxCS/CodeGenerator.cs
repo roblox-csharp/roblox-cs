@@ -1270,14 +1270,14 @@ namespace RobloxCS
             var firstName = allNames.First();
             allNames.Remove(firstName);
 
-            WriteLine($"{(isWithinNamespace ? "namespace:" : "CS.")}namespace(\"{firstName}\", function(namespace: CS.Namespace)");
+            WriteLine($"{(isWithinNamespace ? "namespace:" : "CS.")}namespace(\"{firstName}\", @native function(namespace: CS.Namespace)");
             _indent++;
 
             if (allNames.Count > 0)
             {
                 foreach (var name in allNames)
                 {
-                    WriteLine($"namespace:namespace(\"{name}\", function(namespace: CS.Namespace)");
+                    WriteLine($"namespace:namespace(\"{name}\", @native function(namespace: CS.Namespace)");
                     _indent++;
 
                     foreach (var member in node.Members)
@@ -1306,7 +1306,7 @@ namespace RobloxCS
         {
             var isWithinNamespace = IsDescendantOf<NamespaceDeclarationSyntax>(node);
             var className = GetName(node);
-            WriteLine($"{(isWithinNamespace ? "namespace:" : "CS.")}class(\"{className}\", function(namespace: CS.Namespace)");
+            WriteLine($"{(isWithinNamespace ? "namespace:" : "CS.")}class(\"{className}\", @native function(namespace: CS.Namespace)");
             _indent++;
 
             Write($"local class = CS.classDef(\"{GetName(node)}\", ");

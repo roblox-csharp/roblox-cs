@@ -1,7 +1,7 @@
 local CS = require(game:GetService("ReplicatedStorage")["rbxcs_include"]["RuntimeLib"])
 
-CS.namespace("Components", function(namespace: CS.Namespace)
-    namespace:class("ComponentRunner", function(namespace: CS.Namespace)
+CS.namespace("Components", @native function(namespace: CS.Namespace)
+    namespace:class("ComponentRunner", @native function(namespace: CS.Namespace)
         local class = CS.classDef("ComponentRunner", namespace)
         
         function class.AttachTag(tag: string, attachComponent: Func<Instance, TComponent>): nil
@@ -39,7 +39,7 @@ CS.namespace("Components", function(namespace: CS.Namespace)
         
         return class
     end)
-    namespace:class("GameComponent", function(namespace: CS.Namespace)
+    namespace:class("GameComponent", @native function(namespace: CS.Namespace)
         local class = CS.classDef("GameComponent", namespace)
         
         function class.new()
@@ -53,7 +53,7 @@ CS.namespace("Components", function(namespace: CS.Namespace)
         
         return class
     end)
-    namespace:class("GameComponent", function(namespace: CS.Namespace)
+    namespace:class("GameComponent", @native function(namespace: CS.Namespace)
         local class = CS.classDef("GameComponent", namespace, "Components.GameComponent")
         
         function class.new(instance: TInstance)

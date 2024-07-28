@@ -1,8 +1,8 @@
 local CS = require(game:GetService("ReplicatedStorage")["rbxcs_include"]["RuntimeLib"])
 
-CS.namespace("TestGame", function(namespace: CS.Namespace)
-    namespace:namespace("Client", function(namespace: CS.Namespace)
-        namespace:class("Game", function(namespace: CS.Namespace)
+CS.namespace("TestGame", @native function(namespace: CS.Namespace)
+    namespace:namespace("Client", @native function(namespace: CS.Namespace)
+        namespace:class("Game", @native function(namespace: CS.Namespace)
             local class = CS.classDef("Game", namespace)
             
             @native
