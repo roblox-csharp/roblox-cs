@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Security.AccessControl;
+using System.Xml.Linq;
 
 namespace RobloxCS
 {
@@ -113,11 +114,11 @@ namespace RobloxCS
         {
             if (Utility.IsDebug() || _rojoProject == null)
             {
-                return "\"RuntimeLib\"";
+                return $"\"{Utility.LuaRuntimeModuleName}\"";
             }
             else
             {
-                return RojoReader.ResolveInstancePath(_rojoProject, "include/RuntimeLib.lua")!;
+                return RojoReader.ResolveInstancePath(_rojoProject, $"include/{Utility.LuaRuntimeModuleName}.lua")!;
             }
         }
 
@@ -176,9 +177,11 @@ namespace RobloxCS
         {
             Write($"local function {GetName(node)}");
             Visit(node.ParameterList);
+            WriteTypeAnnotation(node.ReturnType, true);
             _indent++;
 
             Visit(node.Body);
+            WriteDefaultReturn(node.Body);
 
             _indent--;
             WriteLine("end");
@@ -267,7 +270,8 @@ namespace RobloxCS
                 Visit(node.Statement);
                 if (node.Statement is ReturnStatementSyntax)
                 {
-                    RemoveLastCharacters(3);
+                    // minify "if condition then return end"
+                    RemoveLastCharacters(1);
                 }
                 WriteLine(" end");
                 return;
@@ -810,6 +814,12 @@ namespace RobloxCS
         public override void VisitVariableDeclarator(VariableDeclaratorSyntax node)
         {
             Write($"local {node.Identifier.ValueText}");
+            var parent = node.Parent;
+            if (parent is VariableDeclarationSyntax declaration)
+            {
+                WriteTypeAnnotation(declaration.Type);
+            }
+
             if (node.Initializer != null)
             {
                 Write(" = ");
@@ -891,14 +901,18 @@ namespace RobloxCS
                     .Any(block =>
                     {
                         var descendants = block.DescendantNodes();
+                        var methods = descendants.OfType<MethodDeclarationSyntax>();
+                        var localFunctions = descendants.OfType<LocalFunctionStatementSyntax>();
                         var variableDeclarators = descendants.OfType<VariableDeclaratorSyntax>();
                         var forEachStatements = descendants.OfType<ForEachStatementSyntax>();
                         var forStatements = descendants.OfType<ForStatementSyntax>();
                         var parameters = descendants.OfType<ParameterSyntax>();
                         var checkNamePredicate = (SyntaxNode node) => GetName(node) == identifierText;
-                        return variableDeclarators.Where(checkNamePredicate).Count() > 0
-                            || parameters.Where(checkNamePredicate).Count() > 0
-                            || forEachStatements.Where(checkNamePredicate).Count() > 0
+                        return methods.Any(checkNamePredicate)
+                            || localFunctions.Any(checkNamePredicate)
+                            || variableDeclarators.Any(checkNamePredicate)
+                            || parameters.Any(checkNamePredicate)
+                            || forEachStatements.Any(checkNamePredicate)
                             || forStatements.Any(forStatement => forStatement.Initializers.Count() > 0);
                     });
 
@@ -1018,6 +1032,10 @@ namespace RobloxCS
         public override void VisitParameter(ParameterSyntax node)
         {
             Write(GetName(node));
+            if (node.Type != null)
+            {
+                WriteTypeAnnotation(node.Type);
+            }
         }
 
         public override void VisitParameterList(ParameterListSyntax node)
@@ -1056,14 +1074,14 @@ namespace RobloxCS
             var firstName = allNames.First();
             allNames.Remove(firstName);
 
-            WriteLine($"{(isWithinNamespace ? "namespace:" : "CS.")}namespace(\"{firstName}\", function(namespace)");
+            WriteLine($"{(isWithinNamespace ? "namespace:" : "CS.")}namespace(\"{firstName}\", function(namespace: CS.Namespace)");
             _indent++;
 
             if (allNames.Count > 0)
             {
                 foreach (var name in allNames)
                 {
-                    WriteLine($"namespace:namespace(\"{name}\", function(namespace)");
+                    WriteLine($"namespace:namespace(\"{name}\", function(namespace: CS.Namespace)");
                     _indent++;
 
                     foreach (var member in node.Members)
@@ -1092,7 +1110,7 @@ namespace RobloxCS
         {
             var isWithinNamespace = IsDescendantOf<NamespaceDeclarationSyntax>(node);
             var className = GetName(node);
-            WriteLine($"{(isWithinNamespace ? "namespace:" : "CS.")}class(\"{className}\", function(namespace)");
+            WriteLine($"{(isWithinNamespace ? "namespace:" : "CS.")}class(\"{className}\", function(namespace: CS.Namespace)");
             _indent++;
 
             Write($"local class = CS.classDef(\"{GetName(node)}\", ");
@@ -1199,9 +1217,11 @@ namespace RobloxCS
             var name = GetName(node);
             Write($"function {objectName}.{name}");
             Visit(node.ParameterList);
+            WriteTypeAnnotation(node.ReturnType, true);
             _indent++;
 
             Visit(node.Body);
+            WriteDefaultReturn(node.Body);
 
             _indent--;
             WriteLine("end");
@@ -1328,6 +1348,32 @@ namespace RobloxCS
                 }
             }
             Write('}');
+        }
+
+        private void WriteDefaultReturn(BlockSyntax? block)
+        {
+            if (block != null && !block.Statements.Any(stmt => stmt.IsKind(SyntaxKind.ReturnStatement)))
+            {
+                WriteLine("return nil :: any");
+            }
+        }
+
+        private void WriteTypeAnnotation(TypeSyntax type, bool isReturnType = false)
+        {
+            if (!type.IsVar)
+            {
+                if (isReturnType)
+                {
+                    RemoveLastCharacters(2);
+                }
+
+                var mappedType = Utility.GetMappedType(type.ToString());
+                Write($": {mappedType}");
+                if (isReturnType)
+                {
+                    WriteLine();
+                }
+            }
         }
 
         private void WriteRequire(string path)

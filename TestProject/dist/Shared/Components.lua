@@ -1,30 +1,32 @@
-local CS = require(game:GetService("ReplicatedStorage")["rbxcs_include"]["ntimeLib"])
+local CS = require(game:GetService("ReplicatedStorage")["rbxcs_include"]["RuntimeLib"])
 
-CS.namespace("Components", function(namespace)
-    namespace:class("ComponentRunner", function(namespace)
+CS.namespace("Components", function(namespace: CS.Namespace)
+    namespace:class("ComponentRunner", function(namespace: CS.Namespace)
         local class = CS.classDef("ComponentRunner", namespace)
         
-        function class.AttachTag(tag, attachComponent)
+        function class.AttachTag(tag: string, attachComponent: Func<Instance, TComponent>): nil
             local attached = false
             local instances = game:GetService("CollectionService"):GetTagged(tag)
             game:GetService("CollectionService").TagAdded:Connect(function(tag)
-                if attached then return end
+                if attached then return  end
                 local instance = game:GetService("CollectionService"):GetTagged(tag)[1]
-                class.Run(attachComponent(instance))
+                Run(attachComponent(instance))
                 attached = true
             end)
             for _, instance in instances do
                 if attached then continue end
-                class.Run(attachComponent(instance))
+                Run(attachComponent(instance))
                 attached = true
             end
+            return nil :: any
         end
-        function class.Run(component)
+        function class.Run(component: GameComponent): nil
             component:Start()
-            local updateEvent = class.GetUpdateEvent(component)
+            local updateEvent = GetUpdateEvent(component)
             updateEvent:Connect(component.Update)
+            return nil :: any
         end
-        function class.GetUpdateEvent(component)
+        function class.GetUpdateEvent(component: GameComponent): ScriptSignal<double>
             if component.UpdateMethod == "RenderStepped" then
                 return game:GetService("RunService").RenderStepped
             elseif component.UpdateMethod == "Heartbeat" then
@@ -32,11 +34,12 @@ CS.namespace("Components", function(namespace)
             else
                 return game:GetService("RunService").Heartbeat
             end
+            return nil :: any
         end
         
         return class
     end)
-    namespace:class("GameComponent", function(namespace)
+    namespace:class("GameComponent", function(namespace: CS.Namespace)
         local class = CS.classDef("GameComponent", namespace)
         
         function class.new()
@@ -50,10 +53,10 @@ CS.namespace("Components", function(namespace)
         
         return class
     end)
-    namespace:class("GameComponent", function(namespace)
+    namespace:class("GameComponent", function(namespace: CS.Namespace)
         local class = CS.classDef("GameComponent", namespace, "Components.GameComponent")
         
-        function class.new(instance)
+        function class.new(instance: TInstance)
             local mt = {}
             local self = CS.classInstance(class, mt, namespace)
             

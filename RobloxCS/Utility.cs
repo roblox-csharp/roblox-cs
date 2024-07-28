@@ -8,6 +8,31 @@ namespace RobloxCS
     public static class Utility
     {
         public const string RuntimeAssemblyName = "Roblox";
+        public const string LuaRuntimeModuleName = "RuntimeLib";
+
+        public static string GetMappedType(string csharpType)
+        {
+            switch (csharpType)
+            {
+                case "void":
+                case "null":
+                    return "nil";
+
+                case "String": return "string";
+                case "double":
+                case "float":
+                    return "number";
+
+                default:
+                    if (Constants.INTEGER_TYPES.Contains(csharpType))
+                    {
+                        return "number";
+                    }
+                    return csharpType;
+            }
+        }
+
+
 
         public static string FormatLocation(FileLinePositionSpan lineSpan)
         {
@@ -123,7 +148,7 @@ namespace RobloxCS
 
         public static string FixPathSep(string path)
         {
-            return path.Replace("\\\\", "/").Replace('\\', '/').Replace("//", "/").Replace("./", "");
+            return Path.TrimEndingDirectorySeparator(path).Replace("\\\\", "/").Replace('\\', '/').Replace("//", "/").Replace("./", "");
         }
 
         public static bool IsDebug()
@@ -137,7 +162,7 @@ namespace RobloxCS
 
         public static string? GetRbxcsDirectory()
         {
-            var directoryName = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(GetAssemblyDirectory())))); // pretend like this isn't here lol
+            var directoryName = Path.GetDirectoryName(GetAssemblyDirectory()); // pretend like this isn't here lol
             return directoryName == null ? null : FixPathSep(directoryName);
         }
 

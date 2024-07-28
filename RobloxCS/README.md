@@ -13,6 +13,7 @@ This project includes the compiler and transformers.
 - [Class finalizers (destructors)](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers)
 - Deconstructing (i.e. `var (value1, value2) = tuple`)
 - Custom get/set methods
+- `yield` keyword
 - `out` keyword
 - `partial` keyword
 - `using Name = Type` expressions (type aliases)

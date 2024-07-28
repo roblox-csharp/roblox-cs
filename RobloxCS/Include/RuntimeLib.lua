@@ -30,6 +30,14 @@ local function chainIndex(location, ...)
     end
 end
 
+export type Class = table;
+export type Namespace = {
+	name: string;
+	parent: Namespace?;
+	members: { Namespace | Class };
+	class: (self: Namespace, name: string, create: (self: Namespace) -> Class) -> nil;
+}
+
 local CSNamespace = {} do
 	function CSNamespace.new(name, parent)
 		local self = {}

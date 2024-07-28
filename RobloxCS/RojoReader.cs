@@ -105,7 +105,7 @@ namespace RobloxCS
                 FailToRead(configPath, "Invalid Rojo project! Make sure it has all required fields ('name' and 'tree').");
             }
 
-            UpdateInstances(project!.Tree);
+            UpdateChildInstances(project!.Tree);
             return project!;
         }
 
@@ -117,14 +117,15 @@ namespace RobloxCS
         public static string? ResolveInstancePath(RojoProject project, string filePath)
         {
             var path = TraverseInstanceTree(project.Tree, Utility.FixPathSep(filePath));
-            return path == null ? null : FormatInstancePath(Path.TrimEndingDirectorySeparator(path));
+            return path == null ? null : FormatInstancePath(Utility.FixPathSep(path));
         }
 
         private static string? TraverseInstanceTree(InstanceDescription instance, string filePath)
         {
-            if (instance.Path != null && filePath.StartsWith(Utility.FixPathSep(instance.Path)))
+            var instancePath = instance.Path != null ? Utility.FixPathSep(instance.Path) : null;
+            if (instancePath != null && filePath.StartsWith(instancePath))
             {
-                var remainingPath = filePath.Substring(instance.Path.Length + 1); // +1 to remove '/'
+                var remainingPath = filePath.Substring(instancePath.Length + 1); // +1 to omit '/'
                 return Path.ChangeExtension(remainingPath, null);
             }
 
@@ -168,12 +169,12 @@ namespace RobloxCS
             return formattedPath.ToString();
         }
 
-        private static void UpdateInstances(InstanceDescription instance)
+        private static void UpdateChildInstances(InstanceDescription instance)
         {
             instance.OnDeserialized();
             foreach (var childInstance in instance.Instances.Values)
             {
-                UpdateInstances(childInstance);
+                UpdateChildInstances(childInstance);
             }
         }
 
