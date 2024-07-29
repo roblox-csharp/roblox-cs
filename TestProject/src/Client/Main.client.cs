@@ -1,17 +1,12 @@
-namespace TestGame.Client
-{
-    public enum Shape
-    {
-        Circle = 1,
-        Quadrilateral,
-        Triangle
-    }
+using Roblox;
 
-    public static class Game
+foreach (var instance in Services.CollectionService.GetTagged("Lava")) {
+    if (instance is BasePart part)
     {
-        public static void Main()
-        {
-            Console.WriteLine(Shape.Quadrilateral + 5);
-        }
+        part.Touched.Connect(part =>
+            part.Parent?
+                .FindFirstChildOfClass<Humanoid>()?
+                .TakeDamage(100)
+        );
     }
 }

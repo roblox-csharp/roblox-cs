@@ -215,6 +215,34 @@ function CS.enum(name, definition, location)
     return location[name]
 end
 
+function CS.is(object, class)
+    if typeof(class) == "table" and type(class.instanceof) == "function" then
+		return class.instanceof(obj)
+	end
+
+	-- metatable check
+	if typeof(obj) == "table" then
+		obj = getmetatable(obj)
+		while obj ~= nil do
+			if obj == class then
+				return true
+			end
+			local mt = getmetatable(obj)
+			if mt then
+				obj = mt.__index
+			else
+				obj = nil
+			end
+		end
+	end
+
+    if typeof(class) == "string" then
+        return if typeof(obj) == "Instance" then obj:IsA(class) else typeof(obj) == class
+    end
+
+    return false
+end
+
 function CS.getAssemblyType(name)
     local env
     if getfenv == nil then

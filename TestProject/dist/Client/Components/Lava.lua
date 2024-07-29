@@ -15,7 +15,9 @@ CS.namespace("TestGame", @native function(namespace: CS.Namespace)
                     self.Instance.Touched:Connect(function(hit)
                         local model = hit:FindFirstAncestorOfClass("Model")
                         local humanoid = if model == nil then nil else model:FindFirstChildOfClass("Humanoid")
-                        if humanoid == nil then return  end
+                        if humanoid == nil then
+                            return 
+                        end
                         humanoid:TakeDamage(10)
                     end)
                     return nil :: any

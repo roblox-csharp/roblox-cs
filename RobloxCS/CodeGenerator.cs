@@ -5,6 +5,7 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Roblox.Enum.PrivilegeType;
+using YamlDotNet.Core.Events;
 
 namespace RobloxCS
 {
@@ -288,32 +289,30 @@ namespace RobloxCS
             Write("if ");
             Visit(node.Condition);
 
-            if (
-                (node.Statement is ReturnStatementSyntax returnStatement && returnStatement.Expression == null
-                || node.Statement is ContinueStatementSyntax)
-                && node.Else == null
-            )
+            void writePatternDeclarations()
             {
-                Write(" then ");
-                Visit(node.Statement);
-                if (node.Statement is ReturnStatementSyntax)
+                if (node.Condition is IsPatternExpressionSyntax isPattern)
                 {
-                    // minify "if condition then return end"
-                    RemoveLastCharacters(1);
+                    if (isPattern.Pattern is DeclarationPatternSyntax declarationPattern)
+                    {
+                        Visit(declarationPattern.Designation);
+                    }
+                    else if (isPattern.Pattern is VarPatternSyntax varPattern)
+                    {
+                        Visit(varPattern.Designation);
+                    }
+                    Write(" = ");
+                    Visit(isPattern.Expression);
+                    WriteLine();
                 }
-                WriteLine(" end");
-                return;
             }
-            else
-            {
-                WriteLine(" then");
-                _indent++;
+            WriteLine(" then");
+            _indent++;
 
-                Visit(node.Statement);
+            writePatternDeclarations();
+            Visit(node.Statement);
 
-                _indent--;
-            }
-
+            _indent--;
             if (node.Else != null)
             {
                 var isElseIf = node.Else.Statement.IsKind(SyntaxKind.IfStatement);
@@ -980,10 +979,60 @@ namespace RobloxCS
             _flags[CodeGenFlag.ShouldCallGetAssemblyType] = false;
         }
 
+        public override void VisitIsPatternExpression(IsPatternExpressionSyntax node)
+        {
+            var objectType = _semanticModel.GetTypeInfo(node.Expression).Type;
+            var superclasses = objectType == null ? [] : objectType.AllInterfaces.ToList();
+            var pattern = node.Pattern;
+
+            void writeTypePattern(TypeSyntax type)
+            {
+                var typeSymbol = _semanticModel.GetTypeInfo(type).Type;
+                var mappedType = Utility.GetMappedType(type.ToString());
+                HashSet<TypeKind> valueTypes = [TypeKind.Class, TypeKind.Struct, TypeKind.Enum];
+                var isValueType = typeSymbol != null && valueTypes.Contains(typeSymbol.TypeKind);
+                if (!isValueType)
+                {
+                    Write('"');
+                }
+                Write(mappedType);
+                if (!isValueType)
+                {
+                    Write('"');
+                }
+            }
+
+            void handlePattern()
+            {
+                if (pattern is TypePatternSyntax typePattern)
+                {
+                    writeTypePattern(typePattern.Type);
+                }
+                else if (pattern is DeclarationPatternSyntax declarationPattern)
+                {
+                    writeTypePattern(declarationPattern.Type);
+                }
+                else if (pattern is VarPatternSyntax varPattern)
+                {
+                    Write("true");
+                }
+                else
+                {
+                    Visit(pattern);
+                }
+            }
+
+            Write("CS.is(");
+            Visit(node.Expression);
+            Write(", ");
+            handlePattern();
+            Write(')');
+        }
+
         public override void VisitDeclarationPattern(DeclarationPatternSyntax node)
         {
-            base.VisitDeclarationPattern(node);
-            Write($": {Utility.GetMappedType(node.Type.ToString())}");
+            Visit(node.Designation);
+            WriteTypeAnnotation(node.Type);
         }
 
         public override void VisitDiscardDesignation(DiscardDesignationSyntax node)
@@ -1006,7 +1055,7 @@ namespace RobloxCS
 
         public override void VisitVariableDeclarator(VariableDeclaratorSyntax node)
         {
-            Write($"local {node.Identifier.ValueText}");
+            Write($"local {GetName(node)}");
             var parent = node.Parent;
             if (parent is VariableDeclarationSyntax declaration)
             {
@@ -1100,7 +1149,7 @@ namespace RobloxCS
                         var forEachStatements = descendants.OfType<ForEachStatementSyntax>();
                         var forStatements = descendants.OfType<ForStatementSyntax>();
                         var parameters = descendants.OfType<ParameterSyntax>();
-                        var checkNamePredicate = (SyntaxNode node) => GetName(node) == identifierText;
+                        var checkNamePredicate = (SyntaxNode node) => TryGetName(node) == identifierText;
                         return localFunctions.Any(checkNamePredicate)
                             || variableDesignations.Any(checkNamePredicate)
                             || variableDeclarators.Any(checkNamePredicate)

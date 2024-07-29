@@ -14,6 +14,7 @@ This project includes the compiler and transformers.
 - Destructuring/parenthesized variable designation (i.e. `var (value1, value2) = tuple;`)
 - Interfaces to Luau `export type`
 - Anonymous types (e.g. `var x = new { };`)
+- Type hoisting when outside of namespace
 
 ## Will maybe be supported
 - [Class finalizers (destructors)](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers)

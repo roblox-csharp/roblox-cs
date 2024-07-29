@@ -8,13 +8,16 @@ CS.namespace("Components", @native function(namespace: CS.Namespace)
             local attached = false
             local instances = game:GetService("CollectionService"):GetTagged(tag)
             game:GetService("CollectionService").TagAdded:Connect(function(tag)
-                if attached then return  end
+                if attached then
+                    return 
+                end
                 local instance = game:GetService("CollectionService"):GetTagged(tag)[1]
                 class.Run(attachComponent(instance))
                 attached = true
             end)
             for _, instance in instances do
-                if attached then continue end
+                if attached then
+                    continueend
                 class.Run(attachComponent(instance))
                 attached = true
             end
