@@ -11,7 +11,9 @@ This project includes the compiler and transformers.
 - Switch expressions
 - Type patterns
 - `do` statement
-- Destructuring/parenthesized variable designation (i.e. `var (value1, value2) = tuple`)
+- Destructuring/parenthesized variable designation (i.e. `var (value1, value2) = tuple;`)
+- Interfaces to Luau `export type`
+- Anonymous types (e.g. `var x = new { };`)
 
 ## Will maybe be supported
 - [Class finalizers (destructors)](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers)

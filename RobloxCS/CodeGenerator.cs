@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static Roblox.Enum.PrivilegeType;
 
 namespace RobloxCS
 {
@@ -192,7 +193,6 @@ namespace RobloxCS
             }
             Write($"local function {GetName(node)}");
             Visit(node.ParameterList);
-            WriteTypeAnnotation(node.ReturnType, true);
             _indent++;
 
             Visit(node.Body);
@@ -1242,7 +1242,20 @@ namespace RobloxCS
                     Write(", ");
                 }
             }
-            WriteLine(')');
+            Write(')');
+            var callable = node.Parent;
+            switch (callable)
+            {
+                case MethodDeclarationSyntax method:
+                    WriteTypeAnnotation(method.ReturnType, true);
+                    break;
+                case LocalFunctionStatementSyntax localFunction:
+                    WriteTypeAnnotation(localFunction.ReturnType, true);
+                    break;
+                default:
+                    WriteLine();
+                    break;
+            }
             _indent++;
 
             foreach (var parameter in node.Parameters)
@@ -1297,6 +1310,40 @@ namespace RobloxCS
             _indent--;
             WriteLine("end)");
             WriteLine();
+        }
+
+        public override void VisitEnumDeclaration(EnumDeclarationSyntax node)
+        {
+            var isWithinNamespace = IsDescendantOf<NamespaceDeclarationSyntax>(node);
+            Write($"CS.enum(\"{GetName(node)}\", {{");
+            if (node.Members.Count > 0)
+            {
+                WriteLine();
+                _indent++;
+
+                var firstValue = node.Members.FirstOrDefault()?.EqualsValue?.Value;
+                var lastIndex = firstValue != null ? (firstValue as LiteralExpressionSyntax)?.Token.Value as int? ?? -1 : -1;
+                foreach (var enumMember in node.Members)
+                {
+                    Write(GetName(enumMember));
+                    Write(" = ");
+                    if (enumMember.EqualsValue != null)
+                    {
+                        Visit(enumMember.EqualsValue);
+                        lastIndex = (int)((LiteralExpressionSyntax)enumMember.EqualsValue.Value).Token.Value!;
+                    }
+                    else
+                    {
+                        var index = (enumMember.EqualsValue?.Value is LiteralExpressionSyntax literal ? literal.Token.Value as int? : null) ?? lastIndex + 1;
+                        lastIndex = index;
+                        Write(index.ToString());
+                    }
+                    WriteLine(enumMember != node.Members.Last() ? ", " : "");
+                }
+
+                _indent--;
+            }
+            WriteLine($"}}, {(isWithinNamespace ? "namespace" : "nil")})");
         }
 
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
@@ -1415,7 +1462,6 @@ namespace RobloxCS
             var name = GetName(node);
             Write($"function {objectName}.{name}");
             Visit(node.ParameterList);
-            WriteTypeAnnotation(node.ReturnType, true);
             _indent++;
 
             Visit(node.Body);
@@ -1564,11 +1610,6 @@ namespace RobloxCS
         {
             if (!type.IsVar)
             {
-                if (isReturnType)
-                {
-                    RemoveLastCharacters(1);
-                }
-
                 var mappedType = Utility.GetMappedType(type.ToString());
                 Write($": {mappedType}");
                 if (isReturnType)

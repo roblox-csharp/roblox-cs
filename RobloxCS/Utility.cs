@@ -49,7 +49,55 @@ namespace RobloxCS
             }
         }
 
+        public static string GetBit32MethodName(string bitOp)
+        {
+            switch (bitOp)
+            {
+                case "&=":
+                case "&":
+                    return "band";
+                case "|=":
+                case "|":
+                    return "bor";
+                case "^=":
+                case "^":
+                    return "bxor";
+                case ">>=":
+                case ">>":
+                    return "rshift";
+                case ">>>=":
+                case ">>>":
+                    return "arshift";
+                case "<<=":
+                case "<<":
+                    return "lshift";
+                case "~":
+                    return "bnot";
+                default:
+                    return bitOp;
+            }
+        }
 
+        public static string GetMappedOperator(string op)
+        {
+            switch (op)
+            {
+                case "++":
+                    return "+=";
+                case "--":
+                    return "--";
+                case "!":
+                    return "not ";
+                case "!=":
+                    return "~=";
+                case "&&":
+                    return "and";
+                case "||":
+                    return "or";
+                default:
+                    return op;
+            }
+        }
 
         public static string FormatLocation(FileLinePositionSpan lineSpan)
         {
@@ -111,56 +159,6 @@ namespace RobloxCS
             }
 
             return names;
-        }
-
-        public static string GetBit32MethodName(string bitOp)
-        {
-            switch (bitOp)
-            {
-                case "&=":
-                case "&":
-                    return "band";
-                case "|=":
-                case "|":
-                    return "bor";
-                case "^=":
-                case "^":
-                    return "bxor";
-                case ">>=":
-                case ">>":
-                    return "rshift";
-                case ">>>=":
-                case ">>>":
-                    return "arshift";
-                case "<<=":
-                case "<<":
-                    return "lshift";
-                case "~":
-                    return "bnot";
-                default:
-                    return bitOp;
-            }
-        }
-
-        public static string GetMappedOperator(string op)
-        {
-            switch (op)
-            {
-                case "++":
-                    return "+=";
-                case "--":
-                    return "--";
-                case "!":
-                    return "not ";
-                case "!=":
-                    return "~=";
-                case "&&":
-                    return "and";
-                case "||":
-                    return "or";
-                default:
-                    return op;
-            }
         }
 
         public static string FixPathSep(string path)
