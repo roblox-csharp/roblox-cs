@@ -9,7 +9,6 @@ This project includes the compiler and transformers.
 - Compile operator methods as regular method declarations but onto `mt`
 - Transform parameterized class declarations (i.e `class Vector4(float x = 0, float y = 0, float z = 0, float w = 0)`) into regular class declarations with a constructor\
 - Switch expressions
-- Type patterns
 - `do` statement
 - Destructuring/parenthesized variable designation (i.e. `var (value1, value2) = tuple;`)
 - Interfaces to Luau `export type`
