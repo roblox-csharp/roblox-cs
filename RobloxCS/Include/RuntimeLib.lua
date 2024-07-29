@@ -217,27 +217,27 @@ end
 
 function CS.is(object, class)
     if typeof(class) == "table" and type(class.instanceof) == "function" then
-		return class.instanceof(obj)
+		return class.instanceof(object)
 	end
 
 	-- metatable check
-	if typeof(obj) == "table" then
+	if typeof(object) == "table" then
 		obj = getmetatable(obj)
-		while obj ~= nil do
-			if obj == class then
+		while object ~= nil do
+			if object == class then
 				return true
 			end
-			local mt = getmetatable(obj)
+			local mt = getmetatable(object)
 			if mt then
-				obj = mt.__index
+				object = mt.__index
 			else
-				obj = nil
+				object = nil
 			end
 		end
 	end
 
     if typeof(class) == "string" then
-        return if typeof(obj) == "Instance" then obj:IsA(class) else typeof(obj) == class
+        return if typeof(object) == "Instance" then object:IsA(class) else typeof(object) == class
     end
 
     return false
