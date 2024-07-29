@@ -1,12 +1,12 @@
 using Roblox;
 
-foreach (var instance in Services.CollectionService.GetTagged("Lava")) {
-    if (instance is BasePart part)
+namespace TestGame.Client
+{
+    public static class Game
     {
-        part.Touched.Connect(part =>
-            part.Parent?
-                .FindFirstChildOfClass<Humanoid>()?
-                .TakeDamage(100)
-        );
+        public static void Main()
+        {
+            Console.WriteLine("rah");
+        }
     }
 }

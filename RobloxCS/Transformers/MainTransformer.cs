@@ -14,6 +14,16 @@ namespace RobloxCS
         {
         }
 
+        public override SyntaxNode? VisitBinaryExpression(BinaryExpressionSyntax node)
+        {
+            if (node.OperatorToken.Text == "is")
+            {
+                var pattern = SyntaxFactory.TypePattern(SyntaxFactory.ParseTypeName(((IdentifierNameSyntax)node.Right).Identifier.Text));
+                return SyntaxFactory.IsPatternExpression(node.Left, pattern);
+            }
+            return base.VisitBinaryExpression(node);
+        }
+
         public override SyntaxNode? VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
             var newNode = node.Identifier.ValueText switch
