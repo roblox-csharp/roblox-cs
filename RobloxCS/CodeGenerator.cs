@@ -1006,30 +1006,36 @@ namespace RobloxCS
                 }
             }
 
-            void handlePattern()
+            (bool, Action) getPatternWriter()
             {
                 if (pattern is TypePatternSyntax typePattern)
                 {
-                    writeTypePattern(typePattern.Type);
+                    return (true, () => writeTypePattern(typePattern.Type));
                 }
                 else if (pattern is DeclarationPatternSyntax declarationPattern)
                 {
-                    writeTypePattern(declarationPattern.Type);
+                    return (true, () => writeTypePattern(declarationPattern.Type));
                 }
                 else if (pattern is VarPatternSyntax varPattern)
                 {
-                    Write("true");
+                    return (true, () => Write("true"));
                 }
                 else
                 {
-                    Visit(pattern);
+                    return (false, () => Visit(pattern));
                 }
             }
 
+            var (willBeHandled, writePattern) = getPatternWriter();
+
+            if (!willBeHandled && pattern.IsKind(SyntaxKind.NotPattern))
+            {
+                Write("not ");
+            }
             Write("CS.is(");
             Visit(node.Expression);
             Write(", ");
-            handlePattern();
+            writePattern();
             Write(')');
         }
 
