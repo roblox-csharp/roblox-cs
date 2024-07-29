@@ -4,7 +4,7 @@ for _, instance in game:GetService("CollectionService"):GetTagged("Lava") do
     if CS.is(instance, "BasePart") then
         local part = instance
         part.Touched:Connect(function(part)
-            return if part.Parent == nil then nil else if Humanoid() == nil then nil else Humanoid():TakeDamage(100)
+            return if part.Parent == nil then nil else if part.Parent:FindFirstChildOfClass("Humanoid") == nil then nil else part.Parent:FindFirstChildOfClass("Humanoid"):TakeDamage(100)
         end)
     end
 end

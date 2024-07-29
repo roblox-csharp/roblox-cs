@@ -837,9 +837,9 @@ namespace RobloxCS
                         return;
                     }
                 }
-            } else if (node.Expression is IdentifierNameSyntax identifier)
+            } else if (node.Expression is IdentifierNameSyntax || node.Expression is GenericNameSyntax)
             {
-                var name = GetName(identifier);
+                var name = GetName(node.Expression);
                 switch (name)
                 {
                     case "TypeOf":
@@ -898,6 +898,10 @@ namespace RobloxCS
                     if (node.Expression is IdentifierNameSyntax identifier)
                     {
                         Visit(node.Name);
+                    }
+                    else if (node.Expression is GenericNameSyntax genericName)
+                    {
+                        Visit(genericName);
                     }
                     else if (node.Expression is MemberAccessExpressionSyntax memberAccess)
                     {
@@ -1077,125 +1081,14 @@ namespace RobloxCS
             Visit(node.Right);
         }
 
+        public override void VisitGenericName(GenericNameSyntax node)
+        {
+            WriteName(node, node.Identifier);
+        }
+
         public override void VisitIdentifierName(IdentifierNameSyntax node)
         {
-            var identifierText = node.Identifier.ValueText;
-            var originalIdentifierName = node.Identifier.Text;
-            if (identifierText == "var") return;
-            if (Constants.LUAU_KEYWORDS.Contains(identifierText))
-            {
-                Logger.CodegenError(node, $"Using reserved Luau keywords as identifier names is unsupported!");
-            }
-
-            var isWithinClass = IsDescendantOf<ClassDeclarationSyntax>(node);
-            var prefix = "";
-            if (isWithinClass)
-            {
-                // Check the fields in classes that this node is a descendant of for the identifier name
-                var ancestorClasses = GetAncestors<ClassDeclarationSyntax>(node);
-                for (int i = 0; i < ancestorClasses.Length; i++)
-                {
-                    var ancestorClass = ancestorClasses[i];
-                    var fields = ancestorClass.Members.OfType<FieldDeclarationSyntax>();
-                    foreach (var field in fields)
-                    {
-                        var isStatic = HasSyntax(field.Modifiers, SyntaxKind.StaticKeyword);
-                        foreach (var declarator in field.Declaration.Variables)
-                        {
-                            var name = GetName(declarator);
-                            if (name != identifierText) continue;
-                            prefix = (isStatic ? GetName(ancestorClass) : "self") + '.';
-                        }
-                    }
-                }
-            }
-
-            if (prefix == "")
-            {
-                var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
-                var parentNamespace = FindFirstAncestor<NamespaceDeclarationSyntax>(node);
-                var parentNamespaceSymbol = parentNamespace != null ? _semanticModel.GetSymbolInfo(parentNamespace).Symbol : null;
-                var pluginClassesNamespace = _runtimeLibNamespace.GetNamespaceMembers().FirstOrDefault(ns => ns.Name == "PluginClasses");
-                var runtimeNamespaceIncludesIdentifier = symbol != null ? (
-                    IsDescendantOfNamespaceSymbol(symbol, _runtimeLibNamespace)
-                    || (pluginClassesNamespace != null && IsDescendantOfNamespaceSymbol(symbol, pluginClassesNamespace))
-                ) : false;
-
-                List<SyntaxKind> fullyQualifiedParentKinds = [SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ObjectCreationExpression];
-                if (
-                    symbol != null
-                        && symbol is ITypeSymbol typeSymbol
-                        && node.Parent != null
-                        && fullyQualifiedParentKinds.Contains(node.Parent.Kind())
-                        && typeSymbol.ContainingNamespace != null
-                        && (parentNamespace != null && Utility.GetNamesFromNode(parentNamespace.Name).LastOrDefault() != typeSymbol.ContainingNamespace.Name)
-                        && !Constants.NO_FULL_QUALIFICATION_TYPES.Contains(typeSymbol.ContainingNamespace.Name)
-                )
-                {
-                    var usings = GetUsings();
-                    FullyQualifyMemberAccess(typeSymbol.ContainingNamespace, usings);
-                }
-
-                var parentAccessExpression = FindFirstAncestor<MemberAccessExpressionSyntax>(node);
-                var isLeftSide = parentAccessExpression == null ? true : node == parentAccessExpression.Expression;
-                var parentBlocks = GetAncestors<SyntaxNode>(node);
-                var localScopeIncludesIdentifier = parentBlocks
-                    .Any(block =>
-                    {
-                        var descendants = block.DescendantNodes();
-                        var localFunctions = descendants.OfType<LocalFunctionStatementSyntax>();
-                        var variableDesignations = descendants.OfType<VariableDesignationSyntax>();
-                        var variableDeclarators = descendants.OfType<VariableDeclaratorSyntax>();
-                        var forEachStatements = descendants.OfType<ForEachStatementSyntax>();
-                        var forStatements = descendants.OfType<ForStatementSyntax>();
-                        var parameters = descendants.OfType<ParameterSyntax>();
-                        var checkNamePredicate = (SyntaxNode node) => TryGetName(node) == identifierText;
-                        return localFunctions.Any(checkNamePredicate)
-                            || variableDesignations.Any(checkNamePredicate)
-                            || variableDeclarators.Any(checkNamePredicate)
-                            || parameters.Any(checkNamePredicate)
-                            || forEachStatements.Any(checkNamePredicate)
-                            || forStatements.Any(forStatement => forStatement.Initializers.Count() > 0);
-                    });
-
-                if (isLeftSide && !localScopeIncludesIdentifier && !runtimeNamespaceIncludesIdentifier)
-                {
-                    var namespaceSymbol = parentNamespace != null ? _semanticModel.GetDeclaredSymbol(parentNamespace) : null;
-                    var namespaceIncludesIdentifier = namespaceSymbol != null && Utility.FindMember(namespaceSymbol, originalIdentifierName) != null;
-                    var parentClass = FindFirstAncestor<ClassDeclarationSyntax>(node);
-                    var classSymbol = parentClass != null ? _semanticModel.GetDeclaredSymbol(parentClass) : null;
-                    var classMemberSymbol = classSymbol != null ? Utility.FindMemberDeep(classSymbol, originalIdentifierName) : null;
-
-                    if (namespaceIncludesIdentifier)
-                    {
-                        Write($"namespace[\"$getMember\"](namespace, \"{identifierText}\")");
-                    }
-                    else if (classMemberSymbol != null)
-                    {
-                        Write($"{(classMemberSymbol.IsStatic ? "class" : "self")}.{identifierText}");
-                    }
-                    else
-                    {
-                        if (_flags[CodeGenFlag.ShouldCallGetAssemblyType])
-                        {
-                            Write($"CS.getAssemblyType(\"{identifierText}\")");
-                        }
-                        else
-                        {
-                            Write(identifierText);
-                            _flags[CodeGenFlag.ShouldCallGetAssemblyType] = true;
-                        }
-                    }
-                }
-                else
-                {
-                    Write(identifierText);
-                }
-            }
-            else
-            {
-                Write(prefix + identifierText);
-            }
+            WriteName(node, node.Identifier);
         }
 
         public override void VisitInterpolatedStringText(InterpolatedStringTextSyntax node)
@@ -1630,6 +1523,127 @@ namespace RobloxCS
                 Write($"{(isStatic ? "class" : "self")}.{GetName(property)} = ");
                 Visit(property.Initializer);
                 WriteLine();
+            }
+        }
+
+        private void WriteName(SyntaxNode node, SyntaxToken identifier)
+        {
+            var identifierText = identifier.ValueText;
+            var originalIdentifierName = identifier.Text;
+            if (identifierText == "var") return;
+            if (Constants.LUAU_KEYWORDS.Contains(identifierText))
+            {
+                Logger.CodegenError(node, $"Using reserved Luau keywords as identifier names is unsupported!");
+            }
+
+            var isWithinClass = IsDescendantOf<ClassDeclarationSyntax>(node);
+            var prefix = "";
+            if (isWithinClass)
+            {
+                // Check the fields in classes that this node is a descendant of for the identifier name
+                var ancestorClasses = GetAncestors<ClassDeclarationSyntax>(node);
+                for (int i = 0; i < ancestorClasses.Length; i++)
+                {
+                    var ancestorClass = ancestorClasses[i];
+                    var fields = ancestorClass.Members.OfType<FieldDeclarationSyntax>();
+                    foreach (var field in fields)
+                    {
+                        var isStatic = HasSyntax(field.Modifiers, SyntaxKind.StaticKeyword);
+                        foreach (var declarator in field.Declaration.Variables)
+                        {
+                            var name = GetName(declarator);
+                            if (name != identifierText) continue;
+                            prefix = (isStatic ? GetName(ancestorClass) : "self") + '.';
+                        }
+                    }
+                }
+            }
+
+            if (prefix == "")
+            {
+                var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
+                var parentNamespace = FindFirstAncestor<NamespaceDeclarationSyntax>(node);
+                var parentNamespaceSymbol = parentNamespace != null ? _semanticModel.GetSymbolInfo(parentNamespace).Symbol : null;
+                var pluginClassesNamespace = _runtimeLibNamespace.GetNamespaceMembers().FirstOrDefault(ns => ns.Name == "PluginClasses");
+                var runtimeNamespaceIncludesIdentifier = symbol != null ? (
+                    IsDescendantOfNamespaceSymbol(symbol, _runtimeLibNamespace)
+                    || (pluginClassesNamespace != null && IsDescendantOfNamespaceSymbol(symbol, pluginClassesNamespace))
+                ) : false;
+
+                List<SyntaxKind> fullyQualifiedParentKinds = [SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ObjectCreationExpression];
+                if (
+                    symbol != null
+                        && symbol is ITypeSymbol typeSymbol
+                        && node.Parent != null
+                        && fullyQualifiedParentKinds.Contains(node.Parent.Kind())
+                        && typeSymbol.ContainingNamespace != null
+                        && (parentNamespace != null && Utility.GetNamesFromNode(parentNamespace.Name).LastOrDefault() != typeSymbol.ContainingNamespace.Name)
+                        && !Constants.NO_FULL_QUALIFICATION_TYPES.Contains(typeSymbol.ContainingNamespace.Name)
+                )
+                {
+                    var usings = GetUsings();
+                    FullyQualifyMemberAccess(typeSymbol.ContainingNamespace, usings);
+                }
+
+                var parentAccessExpression = FindFirstAncestor<MemberAccessExpressionSyntax>(node);
+                var isLeftSide = parentAccessExpression == null ? true : node == parentAccessExpression.Expression;
+                var parentBlocks = GetAncestors<SyntaxNode>(node);
+                var localScopeIncludesIdentifier = parentBlocks
+                    .Any(block =>
+                    {
+                        var descendants = block.DescendantNodes();
+                        var localFunctions = descendants.OfType<LocalFunctionStatementSyntax>();
+                        var variableDesignations = descendants.OfType<VariableDesignationSyntax>();
+                        var variableDeclarators = descendants.OfType<VariableDeclaratorSyntax>();
+                        var forEachStatements = descendants.OfType<ForEachStatementSyntax>();
+                        var forStatements = descendants.OfType<ForStatementSyntax>();
+                        var parameters = descendants.OfType<ParameterSyntax>();
+                        var checkNamePredicate = (SyntaxNode node) => TryGetName(node) == identifierText;
+                        return localFunctions.Any(checkNamePredicate)
+                            || variableDesignations.Any(checkNamePredicate)
+                            || variableDeclarators.Any(checkNamePredicate)
+                            || parameters.Any(checkNamePredicate)
+                            || forEachStatements.Any(checkNamePredicate)
+                            || forStatements.Any(forStatement => forStatement.Initializers.Count() > 0);
+                    });
+
+                if (isLeftSide && !localScopeIncludesIdentifier && !runtimeNamespaceIncludesIdentifier)
+                {
+                    var namespaceSymbol = parentNamespace != null ? _semanticModel.GetDeclaredSymbol(parentNamespace) : null;
+                    var namespaceIncludesIdentifier = namespaceSymbol != null && Utility.FindMember(namespaceSymbol, originalIdentifierName) != null;
+                    var parentClass = FindFirstAncestor<ClassDeclarationSyntax>(node);
+                    var classSymbol = parentClass != null ? _semanticModel.GetDeclaredSymbol(parentClass) : null;
+                    var classMemberSymbol = classSymbol != null ? Utility.FindMemberDeep(classSymbol, originalIdentifierName) : null;
+
+                    if (namespaceIncludesIdentifier)
+                    {
+                        Write($"namespace[\"$getMember\"](namespace, \"{identifierText}\")");
+                    }
+                    else if (classMemberSymbol != null)
+                    {
+                        Write($"{(classMemberSymbol.IsStatic ? "class" : "self")}.{identifierText}");
+                    }
+                    else
+                    {
+                        if (_flags[CodeGenFlag.ShouldCallGetAssemblyType])
+                        {
+                            Write($"CS.getAssemblyType(\"{identifierText}\")");
+                        }
+                        else
+                        {
+                            Write(identifierText);
+                            _flags[CodeGenFlag.ShouldCallGetAssemblyType] = true;
+                        }
+                    }
+                }
+                else
+                {
+                    Write(identifierText);
+                }
+            }
+            else
+            {
+                Write(prefix + identifierText);
             }
         }
 

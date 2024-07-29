@@ -1,6 +1,9 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.IO;
+using System.Linq.Expressions;
+using System.Text.RegularExpressions;
 
 namespace RobloxCS
 {
@@ -52,20 +55,52 @@ namespace RobloxCS
 
         public override SyntaxNode? VisitConditionalAccessExpression(ConditionalAccessExpressionSyntax node)
         {
-            ExpressionSyntax fullExpression = node.WhenNotNull;
-            if (node.WhenNotNull is InvocationExpressionSyntax invocation)
+            var whenNotNull = ProcessWhenNotNull(node.Expression, node.WhenNotNull);
+            if (whenNotNull != null)
             {
-                var memberBinding = (MemberBindingExpressionSyntax)invocation.Expression;
-                var memberAccess = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, node.Expression, memberBinding.Name);
-                var fullMemberAccess = memberAccess.WithName(invocation.Expression.ChildNodes().OfType<SimpleNameSyntax>().First());
-                fullExpression = invocation.WithExpression(fullMemberAccess);
+                return base.VisitConditionalAccessExpression(node.WithWhenNotNull(whenNotNull));
             }
-            else if (node.WhenNotNull is MemberBindingExpressionSyntax memberBinding)
+            return base.VisitConditionalAccessExpression(node);
+        }
+
+        private ExpressionSyntax? ProcessWhenNotNull(ExpressionSyntax expression, ExpressionSyntax whenNotNull)
+        {
+            if (whenNotNull == null)
             {
-                fullExpression = SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, node.Expression, memberBinding.Name);
+                return null;
             }
 
-            return base.VisitConditionalAccessExpression(node.WithWhenNotNull(fullExpression));
+            switch (whenNotNull)
+            {
+                case MemberBindingExpressionSyntax memberBinding:
+                    return SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, expression, memberBinding.Name);
+                case InvocationExpressionSyntax invocation:
+                    return invocation.WithExpression((invocation.Expression switch
+                    {
+                        MemberAccessExpressionSyntax memberAccess => SyntaxFactory.MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            expression,
+                            memberAccess.Name
+                        ),
+                        ConditionalAccessExpressionSyntax nestedConditional => ProcessWhenNotNull(nestedConditional.WhenNotNull, expression),
+                        MemberBindingExpressionSyntax memberBinding => SyntaxFactory.MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            expression,
+                            memberBinding.Name
+                        ),
+                        _ => SyntaxFactory.MemberAccessExpression(
+                            SyntaxKind.SimpleMemberAccessExpression,
+                            expression,
+                            SyntaxFactory.IdentifierName(invocation.Expression.ToString())
+                        )
+                    })!);
+                case ConditionalAccessExpressionSyntax conditionalAccess:
+                    return conditionalAccess
+                        .WithExpression(ProcessWhenNotNull(expression, conditionalAccess.Expression) ?? conditionalAccess.Expression)
+                        .WithWhenNotNull(ProcessWhenNotNull(expression, conditionalAccess.WhenNotNull) ?? conditionalAccess.WhenNotNull);
+                default:
+                    return null;
+            };
         }
     }
 }

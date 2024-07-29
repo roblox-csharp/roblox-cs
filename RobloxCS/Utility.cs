@@ -1,4 +1,5 @@
 ﻿using System.Reflection;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -97,6 +98,28 @@ namespace RobloxCS
                 default:
                     return op;
             }
+        }
+
+        public static List<string> ExtractTypeArguments(string input)
+        {
+            var typeArguments = new List<string>();
+            var regex = new Regex(@"<(?<args>[^<>]+)>");
+            var match = regex.Match(input);
+            if (match.Success)
+            {
+                // Get the matched group containing the type arguments
+                var args = match.Groups["args"].Value;
+
+                // Split the arguments by comma and trim whitespace
+                var argsArray = args.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
+
+                foreach (var arg in argsArray)
+                {
+                    typeArguments.Add(arg.Trim());
+                }
+            }
+
+            return typeArguments;
         }
 
         public static string FormatLocation(FileLinePositionSpan lineSpan)
