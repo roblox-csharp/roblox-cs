@@ -287,6 +287,19 @@ namespace RobloxCS
             }
         }
 
+        public override void VisitDoStatement(DoStatementSyntax node)
+        {
+            WriteLine("repeat");
+            _indent++;
+
+            Visit(node.Statement);
+
+            _indent--;
+            Write("until ");
+            Visit(node.Condition);
+            WriteLine();
+        }
+
         public override void VisitWhileStatement(WhileStatementSyntax node)
         {
             Write("while ");

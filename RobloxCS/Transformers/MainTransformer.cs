@@ -11,6 +11,12 @@ namespace RobloxCS
         {
         }
 
+        public override SyntaxNode? VisitDoStatement(DoStatementSyntax node)
+        {
+            // invert condition
+            return base.VisitDoStatement(node.WithCondition(SyntaxFactory.PrefixUnaryExpression(SyntaxKind.LogicalNotExpression, node.Condition)));
+        }
+
         public override SyntaxNode? VisitBinaryExpression(BinaryExpressionSyntax node)
         {
             if (node.OperatorToken.Text == "is")
