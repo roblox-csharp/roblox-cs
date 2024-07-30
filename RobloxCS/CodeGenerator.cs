@@ -1698,7 +1698,7 @@ namespace RobloxCS
                         && node.Parent != null
                         && fullyQualifiedParentKinds.Contains(node.Parent.Kind())
                         && typeSymbol.ContainingNamespace != null
-                        && (parentNamespace != null && Utility.GetNamesFromNode(parentNamespace.Name).LastOrDefault() != typeSymbol.ContainingNamespace.Name)
+                        && (parentNamespace != null ? Utility.GetNamesFromNode(parentNamespace.Name).LastOrDefault() != typeSymbol.ContainingNamespace.Name : true)
                         && !Constants.NO_FULL_QUALIFICATION_TYPES.Contains(typeSymbol.ContainingNamespace.Name)
                 )
                 {

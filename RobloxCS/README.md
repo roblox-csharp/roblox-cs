@@ -18,12 +18,12 @@ This project includes the compiler and transformers.
 - Overloaded methods
 - Full qualification of types/namespaces inside of namespaces
 - Macro `new Type()` with collection types to `{}`
-- Transform `typeof()` expressions into identifiers of their type
 - `Utility.FixPathSep()` replacing `../` with `.`
 
 ## Will maybe be supported
 - [Class finalizers (destructors)](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers)
 - Custom get/set methods
+- Named arguments
 - `yield` keyword
 - `out` keyword
 - `partial` keyword
