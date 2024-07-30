@@ -174,6 +174,11 @@ namespace RobloxCS
             return filePaths;
         }
 
+        public override void VisitRefExpression(RefExpressionSyntax node)
+        {
+            Logger.UnsupportedError(node, "Refs");
+        }
+
         public override void VisitUnsafeStatement(UnsafeStatementSyntax node)
         {
             Logger.UnsupportedError(node, "Unsafe contexts");

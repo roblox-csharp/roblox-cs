@@ -12,6 +12,7 @@ This project includes the compiler and transformers.
 - `do` statement
 - Destructuring/parenthesized variable designation (i.e. `var (value1, value2) = tuple;`)
 - Emit virtual methods of interfaces similar to a class
+- Abstract classes
 - Anonymous types (e.g. `var x = new { };`)
 - Type hoisting when outside of namespace
 - Macro `GetType` function to the name of the type as a string (maybe)
