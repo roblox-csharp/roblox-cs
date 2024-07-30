@@ -726,6 +726,20 @@ namespace RobloxCS
                         Visit(memberAccess.Expression);
                         Write(')');
                         return;
+                    case "Equals":
+                        Visit(memberAccess.Expression);
+                        Write(" == ");
+
+                        var value = node.ArgumentList.Arguments.FirstOrDefault();
+                        if (value != null)
+                        {
+                            Visit(value);
+                        }
+                        else
+                        {
+                            Write("nil");
+                        }
+                        return;
                     case "Write":
                     case "WriteLine":
                         if (objectType == null || objectType.Name != "Console") break;

@@ -26,8 +26,14 @@ namespace RobloxCS
             var newNode = node.Identifier.ValueText switch
             {
                 "ToString" => node.WithIdentifier(CreateIdentifierToken("__tostring")),
+                "Equals" => node.WithIdentifier(CreateIdentifierToken("__eq")),
                 _ => node
             };
+            if (node != newNode && HasSyntax(newNode.Modifiers, SyntaxKind.OverrideKeyword))
+            {
+                var newModifiers = newNode.Modifiers.RemoveAt(newNode.Modifiers.Select(token => token.Kind()).ToList().IndexOf(SyntaxKind.OverrideKeyword));
+                newNode = newNode.WithModifiers(newModifiers);
+            }
             return base.VisitMethodDeclaration(newNode);
         }
 
@@ -62,6 +68,11 @@ namespace RobloxCS
                 return base.VisitConditionalAccessExpression(node.WithWhenNotNull(whenNotNull));
             }
             return base.VisitConditionalAccessExpression(node);
+        }
+
+        private static bool HasSyntax(SyntaxTokenList tokens, SyntaxKind syntax)
+        {
+            return tokens.Any(token => token.IsKind(syntax));
         }
 
         private static SyntaxToken CreateIdentifierToken(string text, string? valueText = null, SyntaxTriviaList? trivia = null)

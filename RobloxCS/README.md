@@ -11,13 +11,15 @@ This project includes the compiler and transformers.
 - Switch expressions
 - `do` statement
 - Destructuring/parenthesized variable designation (i.e. `var (value1, value2) = tuple;`)
-- Interfaces to Luau `export type`
+- Emit interfaces similar to classes
 - Anonymous types (e.g. `var x = new { };`)
 - Type hoisting when outside of namespace
-- Macro `Equals` function to `__eq`
-- Macro `GetType` function to the name of the type as a string
+- Macro `GetType` function to the name of the type as a string (maybe)
 - Async/await
 - Overloaded methods
+- Full qualification of types/namespaces inside of namespaces
+- Macro `new Type()` with collection types to `{}`
+- Transform `typeof()` expressions into identifiers of their type
 
 ## Will maybe be supported
 - [Class finalizers (destructors)](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers)
