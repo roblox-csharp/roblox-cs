@@ -684,6 +684,35 @@ namespace RobloxCS
             WriteListTable(node.Expressions.ToList());
         }
 
+        public override void VisitAnonymousObjectMemberDeclarator(AnonymousObjectMemberDeclaratorSyntax node)
+        {
+            if (node.NameEquals != null)
+            {
+                Write(GetName(node.NameEquals));
+                Write(" = ");
+            }
+            Visit(node.Expression);
+        }
+
+        public override void VisitAnonymousObjectCreationExpression(AnonymousObjectCreationExpressionSyntax node)
+        {
+            WriteLine('{');
+            _indent++;
+            
+            foreach (var initializer in node.Initializers)
+            {
+                Visit(initializer);
+                if (initializer != node.Initializers.Last())
+                {
+                    Write(", ");
+                }
+                WriteLine();
+            }
+
+            _indent--;
+            WriteLine('}');
+        }
+
         public override void VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
         {
             Visit(node.Type);
