@@ -174,6 +174,16 @@ namespace RobloxCS
             return filePaths;
         }
 
+        public override void VisitUnsafeStatement(UnsafeStatementSyntax node)
+        {
+            Logger.UnsupportedError(node, "Unsafe contexts");
+        }
+
+        public override void VisitUsingStatement(UsingStatementSyntax node)
+        {
+            Logger.UnsupportedError(node, "Using statements");
+        }
+
         public override void VisitAttribute(AttributeSyntax node)
         {
             if (GetName(node) == "Native")
@@ -1335,6 +1345,11 @@ namespace RobloxCS
             if (HasSyntax(node.Modifiers, SyntaxKind.AbstractKeyword))
             {
                 Logger.UnsupportedError(node, "Abstract classes");
+                return;
+            }
+            if (HasSyntax(node.Modifiers, SyntaxKind.PartialKeyword))
+            {
+                Logger.UnsupportedError(node, "Partial classes");
                 return;
             }
 

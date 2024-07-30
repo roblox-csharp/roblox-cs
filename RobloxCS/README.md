@@ -28,7 +28,3 @@ This project includes the compiler and transformers.
 - `out` keyword
 - `partial` keyword
 - `using Name = Type` expressions (type aliases)
-
-## Will not be supported
-- `using name = value` expressions (equivalent to `:=` operator in other languages)
-- Any unsafe context (pointers, `volatile`, `fixed`, etc.)
