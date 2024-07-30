@@ -328,28 +328,10 @@ namespace RobloxCS
         {
             Write("if ");
             Visit(node.Condition);
-
-            void writePatternDeclarations()
-            {
-                if (node.Condition is IsPatternExpressionSyntax isPattern)
-                {
-                    if (isPattern.Pattern is DeclarationPatternSyntax declarationPattern)
-                    {
-                        Visit(declarationPattern.Designation);
-                    }
-                    else if (isPattern.Pattern is VarPatternSyntax varPattern)
-                    {
-                        Visit(varPattern.Designation);
-                    }
-                    Write(" = ");
-                    Visit(isPattern.Expression);
-                    WriteLine();
-                }
-            }
             WriteLine(" then");
             _indent++;
 
-            writePatternDeclarations();
+            WritePatternDeclarations(node.Condition);
             Visit(node.Statement);
 
             _indent--;
@@ -1120,7 +1102,6 @@ namespace RobloxCS
             }
 
             var (willBeHandled, writePattern) = getPatternWriter();
-
             if (!willBeHandled && pattern.IsKind(SyntaxKind.NotPattern))
             {
                 Write("not ");
@@ -1169,6 +1150,11 @@ namespace RobloxCS
             {
                 Write(" = ");
                 Visit(node.Initializer);
+                if (node.Initializer.Value.IsKind(SyntaxKind.IsPatternExpression))
+                {
+                    WriteLine();
+                }
+                WritePatternDeclarations(node.Initializer.Value);
             }
             WriteLine();
         }
@@ -1178,6 +1164,11 @@ namespace RobloxCS
             Visit(node.Left);
             Write(" = ");
             Visit(node.Right);
+            if (node.Right.IsKind(SyntaxKind.IsPatternExpression))
+            {
+                WriteLine();
+            }
+            WritePatternDeclarations(node.Right);
         }
 
         public override void VisitGenericName(GenericNameSyntax node)
@@ -1799,6 +1790,30 @@ namespace RobloxCS
             if (block != null && !block.Statements.Any(stmt => stmt.IsKind(SyntaxKind.ReturnStatement)))
             {
                 WriteLine("return nil :: any");
+            }
+        }
+
+        private void WritePatternDeclarations(SyntaxNode node)
+        {
+            if (node is IsPatternExpressionSyntax isPattern)
+            {
+                void writeInitializer()
+                {
+                    Write(" = ");
+                    Visit(isPattern.Expression);
+                    WriteLine();
+                }
+
+                if (isPattern.Pattern is DeclarationPatternSyntax declarationPattern)
+                {
+                    Visit(declarationPattern.Designation);
+                    writeInitializer();
+                }
+                else if (isPattern.Pattern is VarPatternSyntax varPattern)
+                {
+                    Visit(varPattern.Designation);
+                    writeInitializer();
+                }
             }
         }
 
