@@ -897,7 +897,17 @@ namespace RobloxCS
                 {
                     if (node.Expression is IdentifierNameSyntax identifier)
                     {
-                        Visit(node.Name);
+                        // TODO: check parent classes of parent class
+                        var parentClass = FindFirstAncestor<ClassDeclarationSyntax>(node);
+                        var parentClassSymbol = parentClass != null ? _semanticModel.GetDeclaredSymbol(parentClass) : null;
+                        if (parentClass != null && SymbolEqualityComparer.Default.Equals(objectType, parentClassSymbol))
+                        {
+                            Write("class");
+                        }
+                        else
+                        {
+                            Visit(node.Name);
+                        }
                     }
                     else if (node.Expression is GenericNameSyntax genericName)
                     {
@@ -1408,7 +1418,8 @@ namespace RobloxCS
             }
 
             var name = GetName(node);
-            Write($"function {objectName}.{name}");
+            var accessOp = objectName == "self" ? ':' : '.';
+            Write($"function {objectName}{accessOp}{name}");
             Visit(node.ParameterList);
             _indent++;
 
@@ -1559,7 +1570,7 @@ namespace RobloxCS
                         {
                             var name = GetName(declarator);
                             if (name != identifierText) continue;
-                            prefix = (isStatic ? GetName(ancestorClass) : "self") + '.';
+                            prefix = (isStatic ? "class" : "self") + '.';
                         }
                     }
                 }
