@@ -43,7 +43,7 @@ namespace RobloxCS
 
         public static void HandleDiagnostic(Diagnostic diagnostic)
         {
-            HashSet<string> ignoredCodes = ["CS7022"];
+            HashSet<string> ignoredCodes = ["CS7022", "CS0017" /* more than one entry point */];
             if (ignoredCodes.Contains(diagnostic.Id)) return;
 
             var lineSpan = diagnostic.Location.GetLineSpan();

@@ -4,15 +4,14 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static Roblox.Enum.PrivilegeType;
-using YamlDotNet.Core.Events;
-using System.Diagnostics.Contracts;
 
 namespace RobloxCS
 {
-    enum CodeGenFlag
+    internal class CodeGeneratorFlags
     {
-        ShouldCallGetAssemblyType
+        public bool ShouldCallGetAssemblyType { get; set; }
+        public bool ClientEntryPointDefined { get; set; }
+        public bool ServerEntryPointDefined { get; set; }
     }
 
     internal sealed class CodeGenerator : CSharpSyntaxWalker
@@ -28,9 +27,11 @@ namespace RobloxCS
         private readonly INamespaceSymbol _runtimeLibNamespace;
         private readonly RojoProject? _rojoProject;
         private readonly int _indentSize;
-        private readonly Dictionary<CodeGenFlag, bool> _flags = new Dictionary<CodeGenFlag, bool>
+        private readonly CodeGeneratorFlags _flags = new CodeGeneratorFlags
         {
-            [CodeGenFlag.ShouldCallGetAssemblyType] = true
+            ShouldCallGetAssemblyType = true,
+            ClientEntryPointDefined = false,
+            ServerEntryPointDefined = false
         };
 
         private readonly StringBuilder _output = new StringBuilder();
@@ -1072,7 +1073,7 @@ namespace RobloxCS
 
             var typeIsImported = usings.Any(usingDirective => namespaceType.ContainingNamespace != null && usingDirective.Name != null && Utility.GetNamesFromNode(usingDirective).Contains(namespaceType.ContainingNamespace.Name));
             Write($"CS.getAssemblyType(\"{namespaceType.Name}\").");
-            _flags[CodeGenFlag.ShouldCallGetAssemblyType] = false;
+            _flags.ShouldCallGetAssemblyType = false;
         }
 
         public override void VisitIsPatternExpression(IsPatternExpressionSyntax node)
@@ -1469,10 +1470,22 @@ namespace RobloxCS
             var isEntryPointClass = GetName(node) == _config.CSharpOptions.EntryPointName;
             if (isEntryPointClass)
             {
-                var mainMethod = methods
-                    .Where(method => GetName(method) == _config.CSharpOptions.MainMethodName)
-                    .FirstOrDefault();
+                var filePath = Path.TrimEndingDirectorySeparator(_tree.FilePath);
+                var isClientFile = filePath.EndsWith(".client.cs");
+                if ((_flags.ClientEntryPointDefined && isClientFile) || (_flags.ServerEntryPointDefined && !isClientFile))
+                {
+                    Logger.CodegenError(node, $"No more than one main method can be defined on the {(isClientFile ? "client" : "server")}.");
+                }
+                if (isClientFile)
+                {
+                    _flags.ClientEntryPointDefined = true;
+                }
+                else
+                {
+                    _flags.ServerEntryPointDefined = true;
+                }
 
+                var mainMethod = methods.FirstOrDefault(method => GetName(method) == _config.CSharpOptions.MainMethodName);
                 if (mainMethod == null)
                 {
                     Logger.CodegenError(node.Identifier, $"No main method \"{_config.CSharpOptions.MainMethodName}\" found in entry point class");
@@ -1745,14 +1758,14 @@ namespace RobloxCS
                     }
                     else
                     {
-                        if (_flags[CodeGenFlag.ShouldCallGetAssemblyType])
+                        if (_flags.ShouldCallGetAssemblyType)
                         {
                             Write($"CS.getAssemblyType(\"{identifierText}\")");
                         }
                         else
                         {
                             Write(identifierText);
-                            _flags[CodeGenFlag.ShouldCallGetAssemblyType] = true;
+                            _flags.ShouldCallGetAssemblyType = true;
                         }
                     }
                 }
