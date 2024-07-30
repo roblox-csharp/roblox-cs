@@ -130,7 +130,12 @@ namespace RobloxCS
 
         public static ISymbol? FindMember(INamespaceSymbol namespaceSymbol, string memberName)
         {
-            return namespaceSymbol.GetMembers().FirstOrDefault(member => member.Name == memberName);
+            var member = namespaceSymbol.GetMembers().FirstOrDefault<ISymbol?>(member => member?.Name == memberName, null);
+            if (member == null && namespaceSymbol.ContainingNamespace != null)
+            {
+                member = FindMember(namespaceSymbol.ContainingNamespace, memberName);
+            }
+            return member;
         }
 
         public static ISymbol? FindMemberDeep(INamedTypeSymbol namedTypeSymbol, string memberName)

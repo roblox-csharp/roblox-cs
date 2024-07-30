@@ -978,7 +978,7 @@ namespace RobloxCS
         {
             if (namespaceType == null) return;
 
-            var typeIsImported = usings.Any(usingDirective => usingDirective.Name != null && Utility.GetNamesFromNode(usingDirective).Contains(namespaceType.ContainingNamespace.Name));
+            var typeIsImported = usings.Any(usingDirective => namespaceType.ContainingNamespace != null && usingDirective.Name != null && Utility.GetNamesFromNode(usingDirective).Contains(namespaceType.ContainingNamespace.Name));
             Write($"CS.getAssemblyType(\"{namespaceType.Name}\").");
             _flags[CodeGenFlag.ShouldCallGetAssemblyType] = false;
         }
@@ -1576,7 +1576,7 @@ namespace RobloxCS
                     || (pluginClassesNamespace != null && IsDescendantOfNamespaceSymbol(symbol, pluginClassesNamespace))
                 ) : false;
 
-                List<SyntaxKind> fullyQualifiedParentKinds = [SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ObjectCreationExpression];
+                HashSet<SyntaxKind> fullyQualifiedParentKinds = [SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ObjectCreationExpression];
                 if (
                     symbol != null
                         && symbol is ITypeSymbol typeSymbol
@@ -1594,24 +1594,23 @@ namespace RobloxCS
                 var parentAccessExpression = FindFirstAncestor<MemberAccessExpressionSyntax>(node);
                 var isLeftSide = parentAccessExpression == null ? true : node == parentAccessExpression.Expression;
                 var parentBlocks = GetAncestors<SyntaxNode>(node);
-                var localScopeIncludesIdentifier = parentBlocks
-                    .Any(block =>
-                    {
-                        var descendants = block.DescendantNodes();
-                        var localFunctions = descendants.OfType<LocalFunctionStatementSyntax>();
-                        var variableDesignations = descendants.OfType<VariableDesignationSyntax>();
-                        var variableDeclarators = descendants.OfType<VariableDeclaratorSyntax>();
-                        var forEachStatements = descendants.OfType<ForEachStatementSyntax>();
-                        var forStatements = descendants.OfType<ForStatementSyntax>();
-                        var parameters = descendants.OfType<ParameterSyntax>();
-                        var checkNamePredicate = (SyntaxNode node) => TryGetName(node) == identifierText;
-                        return localFunctions.Any(checkNamePredicate)
-                            || variableDesignations.Any(checkNamePredicate)
-                            || variableDeclarators.Any(checkNamePredicate)
-                            || parameters.Any(checkNamePredicate)
-                            || forEachStatements.Any(checkNamePredicate)
-                            || forStatements.Any(forStatement => forStatement.Initializers.Count() > 0);
-                    });
+                var localScopeIncludesIdentifier = parentBlocks.Any(block =>
+                {
+                    var descendants = block.DescendantNodes();
+                    var localFunctions = descendants.OfType<LocalFunctionStatementSyntax>();
+                    var variableDesignations = descendants.OfType<VariableDesignationSyntax>();
+                    var variableDeclarators = descendants.OfType<VariableDeclaratorSyntax>();
+                    var forEachStatements = descendants.OfType<ForEachStatementSyntax>();
+                    var forStatements = descendants.OfType<ForStatementSyntax>();
+                    var parameters = descendants.OfType<ParameterSyntax>();
+                    var checkNamePredicate = (SyntaxNode node) => TryGetName(node) == identifierText;
+                    return localFunctions.Any(checkNamePredicate)
+                        || variableDesignations.Any(checkNamePredicate)
+                        || variableDeclarators.Any(checkNamePredicate)
+                        || parameters.Any(checkNamePredicate)
+                        || forEachStatements.Any(checkNamePredicate)
+                        || forStatements.Any(forStatement => forStatement.Initializers.Count() > 0);
+                });
 
                 if (isLeftSide && !localScopeIncludesIdentifier && !runtimeNamespaceIncludesIdentifier)
                 {

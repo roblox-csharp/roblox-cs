@@ -14,6 +14,10 @@ This project includes the compiler and transformers.
 - Interfaces to Luau `export type`
 - Anonymous types (e.g. `var x = new { };`)
 - Type hoisting when outside of namespace
+- Macro `Equals` function to `__eq`
+- Macro `GetType` function to the name of the type as a string
+- Async/await
+- Overloaded methods
 
 ## Will maybe be supported
 - [Class finalizers (destructors)](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers)
@@ -25,5 +29,4 @@ This project includes the compiler and transformers.
 
 ## Will not be supported
 - `using name = value` expressions (equivalent to `:=` operator in other languages)
-- `volatile`, `fixed`, and `unsafe` keywords
-- Pointers
+- Any unsafe context (pointers, `volatile`, `fixed`, etc.)

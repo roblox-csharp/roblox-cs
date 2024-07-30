@@ -102,17 +102,18 @@ namespace RobloxCS
             return references;
         }
 
-        private static List<PortableExecutableReference> GetCoreLibReferences()
+        private static HashSet<PortableExecutableReference> GetCoreLibReferences()
         {
             var coreLib = typeof(object).GetTypeInfo().Assembly.Location;
-            var systemRuntime = Path.Combine(Path.GetDirectoryName(coreLib)!, "System.Runtime.dll");
-            var systemConsole = Path.Combine(Path.GetDirectoryName(coreLib)!, "System.Console.dll");
-            return new List<PortableExecutableReference>
+            HashSet<string> coreDlls = ["System.Runtime.dll", "System.Core.dll", "System.Console.dll", "System.Collections.dll"];
+            HashSet<PortableExecutableReference> references = [MetadataReference.CreateFromFile(coreLib)];
+            
+            foreach (var coreDll in coreDlls)
             {
-                MetadataReference.CreateFromFile(coreLib),
-                MetadataReference.CreateFromFile(systemRuntime),
-                MetadataReference.CreateFromFile(systemConsole)
-            };
+                var dllPath = Path.Combine(Path.GetDirectoryName(coreLib)!, coreDll);
+                references.Add(MetadataReference.CreateFromFile(dllPath));
+            }
+            return references;
         }
     }
 }

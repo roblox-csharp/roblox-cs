@@ -1,9 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.IO;
-using System.Linq.Expressions;
-using System.Text.RegularExpressions;
 
 namespace RobloxCS
 {
@@ -47,12 +44,6 @@ namespace RobloxCS
             return base.VisitIdentifierName(node.WithIdentifier(newToken));
         }
 
-        private static SyntaxToken CreateIdentifierToken(string text, string? valueText = null, SyntaxTriviaList? trivia = null)
-        {
-            var triviaList = trivia ??= SyntaxFactory.TriviaList();
-            return SyntaxFactory.VerbatimIdentifier(triviaList, text, valueText ?? text, triviaList);
-        }
-
         public override SyntaxNode? VisitArgument(ArgumentSyntax node)
         {
             if (node.Expression.IsKind(SyntaxKind.IdentifierName))
@@ -71,6 +62,12 @@ namespace RobloxCS
                 return base.VisitConditionalAccessExpression(node.WithWhenNotNull(whenNotNull));
             }
             return base.VisitConditionalAccessExpression(node);
+        }
+
+        private static SyntaxToken CreateIdentifierToken(string text, string? valueText = null, SyntaxTriviaList? trivia = null)
+        {
+            var triviaList = trivia ??= SyntaxFactory.TriviaList();
+            return SyntaxFactory.VerbatimIdentifier(triviaList, text, valueText ?? text, triviaList);
         }
 
         private ExpressionSyntax? ProcessWhenNotNull(ExpressionSyntax expression, ExpressionSyntax whenNotNull)
