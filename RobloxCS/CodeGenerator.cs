@@ -287,6 +287,16 @@ namespace RobloxCS
             }
         }
 
+        public override void VisitLabeledStatement(LabeledStatementSyntax node)
+        {
+            Logger.UnsupportedError(node, "Labels & goto statements");
+        }
+
+        public override void VisitGotoStatement(GotoStatementSyntax node)
+        {
+            Logger.UnsupportedError(node, "Labels & goto statements");
+        }
+
         public override void VisitDoStatement(DoStatementSyntax node)
         {
             WriteLine("repeat");
