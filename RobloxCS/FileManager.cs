@@ -6,7 +6,9 @@
         {
             try
             {
-                return Directory.GetFiles(sourceDirectory, "*.cs", SearchOption.AllDirectories).Select(Utility.FixPathSep);
+                return Directory.GetFiles(sourceDirectory, "*.cs", SearchOption.AllDirectories)
+                    .Where(file => !Utility.FixPathSep(file).StartsWith(Utility.FixPathSep(sourceDirectory) + "/obj"))
+                    .Select(Utility.FixPathSep);
             }
             catch (Exception e)
             {
