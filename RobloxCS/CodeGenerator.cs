@@ -902,7 +902,8 @@ namespace RobloxCS
                         return;
                     }
                 }
-            } else if (node.Expression is IdentifierNameSyntax || node.Expression is GenericNameSyntax)
+            }
+            else if (node.Expression is IdentifierNameSyntax || node.Expression is GenericNameSyntax)
             {
                 var name = GetName(node.Expression);
                 switch (name)
@@ -929,6 +930,11 @@ namespace RobloxCS
 
             Visit(node.Expression);
             Visit(node.ArgumentList);
+        }
+
+        public override void VisitThisExpression(ThisExpressionSyntax node)
+        {
+            Write("self");
         }
 
         public override void VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
