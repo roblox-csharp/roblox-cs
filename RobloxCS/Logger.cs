@@ -31,6 +31,11 @@ namespace RobloxCS
             Error($"{message}\n\t- {Utility.FormatLocation(lineSpan)}");
         }
 
+        public static void UnsupportedError(SyntaxNode node, string subject, bool? useIs = false)
+        {
+            CodegenError(node, $"{subject} {(useIs == true ? "is" : "are")} not yet supported, sorry!");
+        }
+
         public static void CodegenError(SyntaxNode node, string message)
         {
             CodegenError(node.GetFirstToken(), message);

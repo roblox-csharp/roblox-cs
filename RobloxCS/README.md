@@ -11,7 +11,7 @@ This project includes the compiler and transformers.
 - Switch expressions
 - `do` statement
 - Destructuring/parenthesized variable designation (i.e. `var (value1, value2) = tuple;`)
-- Emit interfaces similar to classes
+- Emit virtual methods of interfaces similar to a class
 - Anonymous types (e.g. `var x = new { };`)
 - Type hoisting when outside of namespace
 - Macro `GetType` function to the name of the type as a string (maybe)

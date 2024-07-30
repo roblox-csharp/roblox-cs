@@ -6,6 +6,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static Roblox.Enum.PrivilegeType;
 using YamlDotNet.Core.Events;
+using System.Diagnostics.Contracts;
 
 namespace RobloxCS
 {
@@ -1318,8 +1319,25 @@ namespace RobloxCS
             WriteLine($"}}, {(isWithinNamespace ? "namespace" : "nil")})");
         }
 
+        public override void VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
+        {
+            foreach (var member in node.Members)
+            {
+                if (HasSyntax(member.Modifiers, SyntaxKind.VirtualKeyword))
+                {
+                    Logger.UnsupportedError(node, "Virtual methods on interfaces");
+                }
+            }
+        }
+
         public override void VisitClassDeclaration(ClassDeclarationSyntax node)
         {
+            if (HasSyntax(node.Modifiers, SyntaxKind.AbstractKeyword))
+            {
+                Logger.UnsupportedError(node, "Abstract classes");
+                return;
+            }
+
             var isWithinNamespace = IsDescendantOf<NamespaceDeclarationSyntax>(node);
             var className = GetName(node);
             WriteLine($"{(isWithinNamespace ? "namespace:" : "CS.")}class(\"{className}\", @native function(namespace: CS.Namespace)");
