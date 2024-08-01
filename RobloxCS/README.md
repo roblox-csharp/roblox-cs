@@ -5,7 +5,7 @@ This project includes the compiler and transformers.
 - Table & (the rest of) string macros or extensions
 - Macro `IEnumerable<T>` (or `Array`?) methods
 - Classes/structs/interfaces nested in classes/structs/interfaces
-- Some sort of `LuaTuple` object
+- `LuaTuple` type handling
 - Compile operator methods as regular method declarations but onto `mt`
 - Transform parameterized class declarations (i.e `class Vector4(float x = 0, float y = 0, float z = 0, float w = 0)`) into regular class declarations with a constructor\
 - Switch expressions
@@ -17,7 +17,7 @@ This project includes the compiler and transformers.
 - Async/await
 - Overloaded methods
 - Full qualification of types/namespaces inside of namespaces
-- Macro `new Type()` with collection types to `{}`
+- Macro `new T()` with collection types to `{}`
 
 ## Will maybe be supported
 - [Class finalizers (destructors)](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers)
