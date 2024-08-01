@@ -191,7 +191,8 @@ namespace RobloxCS
 
         public static string FixPathSep(string path)
         {
-            return Path.TrimEndingDirectorySeparator(path).Replace("\\\\", "/").Replace('\\', '/').Replace("//", "/").Replace("./", "");
+            path = Path.TrimEndingDirectorySeparator(path);
+            return Regex.Replace(path.Replace("\\\\", "/").Replace('\\', '/').Replace("//", "/"), @"(?<!\.)\./", "");
         }
 
         public static bool IsDebug()
