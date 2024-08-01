@@ -21,7 +21,7 @@
         [Fact]
         public void IfStatements_GeneratesIf()
         {
-            var cleanedLua = GetCleanLua("var x = 1; if (x == 4) print(\"x is 4\"); else if (x == \"abc\") print(\"x is abc\"); else print(\"x is unknown\");", 1);
+            var cleanedLua = GetCleanLua("using static Roblox.Globals; var x = 1; if (x == 4) print(\"x is 4\"); else if (x == \"abc\") print(\"x is abc\"); else print(\"x is unknown\");", 1);
             var lines = GetLines(cleanedLua);
             var expectedLines = new List<string>
             {
@@ -186,10 +186,8 @@
         }
 
         [Theory]
-        [InlineData("Console.Write")]
-        [InlineData("print")]
-        [InlineData("System.Console.Write")]
-        [InlineData("System.print")]
+        [InlineData("using static Roblox.Globals; print")]
+        [InlineData("Roblox.Globals.print")]
         public void ConsoleMethods_Macro(string fullMethodPath)
         {
             var cleanedLua = GetCleanLua($"{fullMethodPath}(\"hello world\")");

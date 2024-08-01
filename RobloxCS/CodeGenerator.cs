@@ -4,6 +4,7 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq;
 
 namespace RobloxCS
 {
@@ -765,6 +766,7 @@ namespace RobloxCS
 
         public override void VisitInvocationExpression(InvocationExpressionSyntax node)
         {
+
             if (node.Expression is MemberAccessExpressionSyntax memberAccess)
             {
                 var objectType = _semanticModel.GetTypeInfo(memberAccess.Expression).Type;
@@ -883,19 +885,6 @@ namespace RobloxCS
                             return;
                         }
                 }
-
-                var nameSymbolInfo = _semanticModel.GetSymbolInfo(node);
-                {
-                    if (nameSymbolInfo.Symbol is IMethodSymbol methodSymbol)
-                    {
-                        var operatorText = methodSymbol.IsStatic ? '.' : ':';
-                        Visit(memberAccess.Expression);
-                        Write(operatorText);
-                        Visit(memberAccess.Name);
-                        Visit(node.ArgumentList);
-                        return;
-                    }
-                }
             }
             else if (node.Expression is IdentifierNameSyntax || node.Expression is GenericNameSyntax)
             {
@@ -936,19 +925,28 @@ namespace RobloxCS
             var leftIsLiteral = node.Expression is LiteralExpressionSyntax;
             var objectSymbolInfo = _semanticModel.GetSymbolInfo(node.Expression);
             var objectType = _semanticModel.GetTypeInfo(node.Expression).Type;
-            if (objectType != null && objectType.OriginalDefinition is INamedTypeSymbol objectDefinitionSymbol)
+            var operatorText = '.';
+            if (objectType != null)
             {
-                var superclasses = objectDefinitionSymbol.AllInterfaces;
-                if (objectDefinitionSymbol.Name == "Services" || superclasses.Select(@interface => @interface.Name).Contains("Services"))
+                if (objectType.OriginalDefinition is INamedTypeSymbol objectDefinitionSymbol)
                 {
-                    Write("game:GetService(\"");
-                    Visit(node.Name);
-                    Write("\")");
-                    return;
+                    var superclasses = objectDefinitionSymbol.AllInterfaces;
+                    if (objectDefinitionSymbol.Name == "Services" || superclasses.Select(@interface => @interface.Name).Contains("Services"))
+                    {
+                        Write("game:GetService(\"");
+                        Visit(node.Name);
+                        Write("\")");
+                        return;
+                    }
+                }
+                else if (objectType.OriginalDefinition is IMethodSymbol methodSymbol)
+                {
+                    operatorText = methodSymbol.IsStatic ? '.' : ':';
                 }
             }
 
             var usings = GetUsings();
+            var containingNamespace = objectSymbolInfo.Symbol?.ContainingNamespace;
             if (objectSymbolInfo.Symbol != null && (objectSymbolInfo.Symbol.Kind == SymbolKind.Namespace || (objectSymbolInfo.Symbol.Kind == SymbolKind.NamedType && objectSymbolInfo.Symbol.IsStatic)))
             {
                 var namespaceName = objectSymbolInfo.Symbol.ToDisplayString();
@@ -956,7 +954,7 @@ namespace RobloxCS
                     .Where(location => location.SourceTree != null && location.SourceTree.FilePath != _tree.FilePath)
                     .Select(location => location.SourceTree!.FilePath);
 
-                var noFullQualification = Constants.NO_FULL_QUALIFICATION_TYPES.Contains(namespaceName);
+                var noFullQualification = Constants.NO_FULL_QUALIFICATION_TYPES.Contains(namespaceName) || (containingNamespace != null ? Constants.NO_FULL_QUALIFICATION_TYPES.Contains(containingNamespace.Name) : false);
                 var typeIsImported = usings.Any(usingDirective => usingDirective.Name != null && Utility.GetNamesFromNode(usingDirective).Any(name => namespaceName.StartsWith(name)));
                 if (noFullQualification && namespaceName != "System")
                 {
@@ -971,6 +969,7 @@ namespace RobloxCS
                         }
                         else
                         {
+                            if (GetName(node.Name) == "Globals") return;
                             Visit(node.Name);
                         }
                     }
@@ -980,7 +979,7 @@ namespace RobloxCS
                     }
                     else if (node.Expression is MemberAccessExpressionSyntax memberAccess)
                     {
-                        if (namespaceName == Utility.RuntimeAssemblyName && GetName(memberAccess) != "Globals")
+                        if (namespaceName == Utility.RuntimeAssemblyName && Utility.GetNamesFromNode(memberAccess.Expression).LastOrDefault() != "Globals")
                         {
                             Visit(memberAccess.Name);
                             Write('.');
@@ -1029,7 +1028,7 @@ namespace RobloxCS
             {
                 Write(')');
             }
-            Write('.');
+            Write(operatorText);
             Visit(node.Name);
         }
 
@@ -1688,7 +1687,7 @@ namespace RobloxCS
             {
                 var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
                 var parentNamespace = FindFirstAncestor<NamespaceDeclarationSyntax>(node);
-                var parentNamespaceSymbol = parentNamespace != null ? _semanticModel.GetSymbolInfo(parentNamespace).Symbol : null;
+                var parentNamespaceSymbol = parentNamespace != null ? _semanticModel.GetDeclaredSymbol(parentNamespace) : null;
                 var pluginClassesNamespace = _runtimeLibNamespace.GetNamespaceMembers().FirstOrDefault(ns => ns.Name == "PluginClasses");
                 var runtimeNamespaceIncludesIdentifier = symbol != null ? (
                     IsDescendantOfNamespaceSymbol(symbol, _runtimeLibNamespace)

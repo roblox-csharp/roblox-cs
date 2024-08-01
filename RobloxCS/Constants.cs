@@ -71,8 +71,8 @@ namespace RobloxCS
         public static readonly HashSet<string> NO_FULL_QUALIFICATION_TYPES = [
             "System",
             "Roblox",
-            "Roblox.Globals",
-            "Roblox.PluginClasses"
+            "Globals",
+            "PluginClasses"
         ];
 
         public static readonly HashSet<string> IGNORED_BINARY_OPERATORS = [
