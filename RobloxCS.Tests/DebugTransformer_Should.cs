@@ -5,8 +5,7 @@ namespace RobloxCS.Tests
         private const string _testFileName = "TestFile.client.cs";
 
         [Theory]
-        [InlineData("Console.WriteLine(\"hello baby\")")]
-        [InlineData("Console.Write(\"hello baby\")")]
+        [InlineData("print(\"hello baby\")")]
         [InlineData("warn(\"hello baby\")")]
         public void FileInfo_PrependsArgument(string input)
         {

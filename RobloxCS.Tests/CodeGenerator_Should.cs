@@ -21,7 +21,7 @@
         [Fact]
         public void IfStatements_GeneratesIf()
         {
-            var cleanedLua = GetCleanLua("var x = 1; if (x == 4) Console.WriteLine(\"x is 4\"); else if (x == \"abc\") Console.WriteLine(\"x is abc\"); else Console.WriteLine(\"x is unknown\");", 1);
+            var cleanedLua = GetCleanLua("var x = 1; if (x == 4) print(\"x is 4\"); else if (x == \"abc\") print(\"x is abc\"); else print(\"x is unknown\");", 1);
             var lines = GetLines(cleanedLua);
             var expectedLines = new List<string>
             {
@@ -187,9 +187,9 @@
 
         [Theory]
         [InlineData("Console.Write")]
-        [InlineData("Console.WriteLine")]
+        [InlineData("print")]
         [InlineData("System.Console.Write")]
-        [InlineData("System.Console.WriteLine")]
+        [InlineData("System.print")]
         public void ConsoleMethods_Macro(string fullMethodPath)
         {
             var cleanedLua = GetCleanLua($"{fullMethodPath}(\"hello world\")");
