@@ -105,7 +105,7 @@ namespace RobloxCS
         private static HashSet<PortableExecutableReference> GetCoreLibReferences()
         {
             var coreLib = typeof(object).GetTypeInfo().Assembly.Location;
-            HashSet<string> coreDlls = ["System.Runtime.dll", "System.Core.dll", "System.Console.dll", "System.Collections.dll"];
+            HashSet<string> coreDlls = ["System.Runtime.dll", "System.Core.dll", "System.Collections.dll"];
             HashSet<PortableExecutableReference> references = [MetadataReference.CreateFromFile(coreLib)];
             
             foreach (var coreDll in coreDlls)

@@ -791,12 +791,6 @@ namespace RobloxCS
                             Write("nil");
                         }
                         return;
-                    case "Write":
-                    case "WriteLine":
-                        if (objectType == null || objectType.Name != "Console") break;
-                        Write("print");
-                        Visit(node.ArgumentList);
-                        return;
                     case "Length":
                         if (objectType == null || !Constants.LENGTH_READABLE_TYPES.Contains(objectType.Name)) return;
                         Write('#');
