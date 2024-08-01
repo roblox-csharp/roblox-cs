@@ -124,8 +124,7 @@ namespace RobloxCS
 
         public static string FormatLocation(FileLinePositionSpan lineSpan)
         {
-            var filePath = lineSpan.Path;
-            return $"{(filePath == "" ? "<anonymous>" : filePath)}:{lineSpan.StartLinePosition.Line + 1}:{lineSpan.StartLinePosition.Character + 1}";
+            return $"{(lineSpan.Path == "" ? "<anonymous>" : lineSpan.Path)}:{lineSpan.StartLinePosition.Line + 1}:{lineSpan.StartLinePosition.Character + 1}";
         }
 
         public static ISymbol? FindMember(INamespaceSymbol namespaceSymbol, string memberName)

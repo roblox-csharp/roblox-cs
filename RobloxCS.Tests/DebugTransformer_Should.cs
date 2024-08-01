@@ -23,7 +23,7 @@ namespace RobloxCS.Tests
             Assert.NotNull(fileInfoArg);
 
             var fileInfoLiteral = (LiteralExpressionSyntax)fileInfoArg.Expression;
-            Assert.Equal($"[{_testFileName}:1:13]:", fileInfoLiteral.Token.ValueText);
+            Assert.Equal($"[{_testFileName}:1:39]:", fileInfoLiteral.Token.ValueText);
         }
 
         [Theory]
@@ -45,7 +45,7 @@ namespace RobloxCS.Tests
 
             var fullMessageBinary= (BinaryExpressionSyntax)fullMessageArg.Expression;
             var fileInfoLiteral = (LiteralExpressionSyntax)fullMessageBinary.Left;
-            Assert.Equal($"[{_testFileName}:1:13]: ", fileInfoLiteral.Token.ValueText);
+            Assert.Equal($"[{_testFileName}:1:39]: ", fileInfoLiteral.Token.ValueText);
         }
     }
 }

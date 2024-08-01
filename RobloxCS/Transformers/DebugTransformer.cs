@@ -72,7 +72,6 @@ namespace RobloxCS
         private LiteralExpressionSyntax GetFileInfoLiteral(SyntaxNode node, bool addSpace)
         {
             var fileLocation = FormatLocation(node);
-
             var infoText = $"[{fileLocation}]:" + (addSpace ? " " : "");
             var emptyTrivia = SyntaxFactory.TriviaList();
             var token = SyntaxFactory.Token(emptyTrivia, SyntaxKind.StringLiteralToken, infoText, infoText, emptyTrivia); // why is trivia required bruh
