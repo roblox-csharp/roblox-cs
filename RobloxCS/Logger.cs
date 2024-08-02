@@ -31,6 +31,12 @@ namespace RobloxCS
             Error($"{message}\n\t- {Utility.FormatLocation(lineSpan)}");
         }
 
+        public static void CodegenWarning(SyntaxToken token, string message)
+        {
+            var lineSpan = token.GetLocation().GetLineSpan();
+            Warn($"{message}\n\t- {Utility.FormatLocation(lineSpan)}");
+        }
+
         public static void UnsupportedError(SyntaxNode node, string subject, bool? useIs = false)
         {
             CodegenError(node, $"{subject} {(useIs == true ? "is" : "are")} not yet supported, sorry!");
@@ -39,6 +45,11 @@ namespace RobloxCS
         public static void CodegenError(SyntaxNode node, string message)
         {
             CodegenError(node.GetFirstToken(), message);
+        }
+
+        public static void CodegenWarning(SyntaxNode node, string message)
+        {
+            CodegenWarning(node.GetFirstToken(), message);
         }
 
         public static void HandleDiagnostic(Diagnostic diagnostic)

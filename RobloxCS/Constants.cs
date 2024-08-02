@@ -4,7 +4,16 @@ namespace RobloxCS
 {
     internal static class Constants
     {
-        public static readonly HashSet<string> LENGTH_READABLE_TYPES = [
+        public static readonly HashSet<string> UNSUPPORTED_BITWISE_TYPES =
+        [
+            "UInt128",
+            "ulong",
+            "long",
+            "Int128"
+        ];
+
+        public static readonly HashSet<string> LENGTH_READABLE_TYPES =
+        [
             "String",
             "string",
             "Array"
@@ -19,7 +28,8 @@ namespace RobloxCS
             { "Reverse", "reverse" }
         };
 
-        public static readonly HashSet<string> GLOBAL_LIBRARIES = [
+        public static readonly HashSet<string> GLOBAL_LIBRARIES =
+        [
             "task",
             "math",
             "table",
@@ -30,7 +40,8 @@ namespace RobloxCS
             "debug"
         ];
 
-        public static readonly HashSet<string> METAMETHODS = [
+        public static readonly HashSet<string> METAMETHODS =
+        [
             "__tostring",
             "__add",
             "__sub",
@@ -53,7 +64,8 @@ namespace RobloxCS
             "__metatable",
         ];
 
-        public static readonly HashSet<string> LUAU_KEYWORDS = [
+        public static readonly HashSet<string> LUAU_KEYWORDS =
+        [
             "local",
             "and",
             "or",
@@ -72,21 +84,24 @@ namespace RobloxCS
             "typeof"
         ];
 
-        public static readonly HashSet<SyntaxKind> MEMBER_PARENT_SYNTAXES = [
+        public static readonly HashSet<SyntaxKind> MEMBER_PARENT_SYNTAXES =
+        [
             SyntaxKind.NamespaceDeclaration,
             SyntaxKind.ClassDeclaration,
             SyntaxKind.InterfaceDeclaration,
             SyntaxKind.StructDeclaration
         ];
 
-        public static readonly HashSet<string> NO_FULL_QUALIFICATION_TYPES = [
+        public static readonly HashSet<string> NO_FULL_QUALIFICATION_TYPES =
+        [
             "System",
             "Roblox",
             "Globals",
             "PluginClasses"
         ];
 
-        public static readonly HashSet<string> IGNORED_BINARY_OPERATORS = [
+        public static readonly HashSet<string> IGNORED_BINARY_OPERATORS =
+        [
             "as"
         ];
 
@@ -95,14 +110,16 @@ namespace RobloxCS
             { ["String", "string"], ("+", "..") }
         };
 
-        public static readonly HashSet<string> DECIMAL_TYPES = [
+        public static readonly HashSet<string> DECIMAL_TYPES =
+        [
             "float",
             "double",
             "Single",
             "Double"
         ];
 
-        public static readonly HashSet<string> INTEGER_TYPES = [
+        public static readonly HashSet<string> INTEGER_TYPES =
+        [
             "sbyte",
             "byte",
             "short",
