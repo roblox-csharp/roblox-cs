@@ -89,12 +89,6 @@ namespace RobloxCS
             return tokens.Any(token => token.IsKind(syntax));
         }
 
-        private static SyntaxToken CreateIdentifierToken(string text, string? valueText = null, SyntaxTriviaList? trivia = null)
-        {
-            var triviaList = trivia ??= SyntaxFactory.TriviaList();
-            return SyntaxFactory.VerbatimIdentifier(triviaList, text, valueText ?? text, triviaList);
-        }
-
         private ExpressionSyntax? ProcessWhenNotNull(ExpressionSyntax expression, ExpressionSyntax whenNotNull)
         {
             if (whenNotNull == null)

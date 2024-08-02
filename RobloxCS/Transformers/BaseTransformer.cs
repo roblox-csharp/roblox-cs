@@ -30,5 +30,11 @@ namespace RobloxCS
         {
             return Utility.GetNamesFromNode(node).First();
         }
+
+        protected SyntaxToken CreateIdentifierToken(string text, string? valueText = null, SyntaxTriviaList? trivia = null)
+        {
+            var triviaList = trivia ?? SyntaxFactory.TriviaList();
+            return SyntaxFactory.VerbatimIdentifier(triviaList, text, valueText ?? text, triviaList);
+        }
     }
 }
