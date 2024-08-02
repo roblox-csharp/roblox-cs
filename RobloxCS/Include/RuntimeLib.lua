@@ -75,6 +75,7 @@ export type Namespace = {
 }
 
 local CSNamespace = {} do
+    @native
     function CSNamespace.new(name, parent)
         local self = {}
         self.name = name
@@ -87,39 +88,46 @@ local CSNamespace = {} do
         return setmetatable(self, CSNamespace)
     end
 
+    @native
     function CSNamespace:__index(index)
         return self.members[index] or CSNamespace[index]
     end
 
+    @native
     function CSNamespace:__newindex(index, value)
         self.members[index] = value
     end
 
+    @native
     function CSNamespace:__tostring(index)
         return self.name
     end
 
-    CSNamespace["$getMember"] = function(self, name)
+    CSNamespace["$getMember"] = @native function(self, name)
         return self.members[name]
     end
 
-    CSNamespace["$onLoaded"] = function(self, callback)
+    CSNamespace["$onLoaded"] = @native function(self, callback)
         table.insert(self["$loadCallbacks"], callback)
     end
 
+    @native
     function CSNamespace:class(name, create)
         CS.class(name, create, self)
     end
 
+    @native
     function CSNamespace:namespace(name, registerMembers)
         CS.namespace(name, registerMembers, self.members, self)
     end
 end
 
+@native
 function CS.classInstance(class: table, mt: table, namespace: Namespace?)
     local instance = {}
     instance["$className"] = class.__name
 
+    @native
     local function getSuperclass()
         if class.__superclass == nil then return end
         if class.__superclass:match(".") == nil then
@@ -134,11 +142,12 @@ function CS.classInstance(class: table, mt: table, namespace: Namespace?)
         return result
     end
 
+    @native
     function mt.__tostring()
         return class.__name
     end
 
-    instance["$base"] = function(...)
+    instance["$base"] = @native function(...)
         if instance["$superclass"] ~= nil then return end
         local Superclass = getSuperclass()
         local superclassInstance = Superclass.new(...)
@@ -149,10 +158,12 @@ function CS.classInstance(class: table, mt: table, namespace: Namespace?)
     return setmetatable(instance, mt)
 end
 
-function CS.classDef(name: string, namespace: Namespace?, superclass: string, ...: string)
+@native
+function CS.classDef(name: string, namespace: Namespace?, superclass: string?, ...: string)
     local mt = {}
     mt.__index = chainIndex(if namespace ~= nil then namespace else assemblyGlobal, ...)
 
+    @native
     function mt.__tostring()
         return name
     end
@@ -163,12 +174,14 @@ function CS.classDef(name: string, namespace: Namespace?, superclass: string, ..
     return setmetatable(class, mt)
 end
 
+@native
 function CS.class(name: string, create: (namespace: Namespace?) -> table, namespace: Namespace?)
     local location = if namespace ~= nil then namespace.members else assemblyGlobal
     local class = create(namespace)
     location[name] = class
 end
 
+@native
 function CS.namespace(name: string, registerMembers: () -> nil, location: table?, parent: table?): Namespace
     if location == nil then
         location = assemblyGlobal
@@ -184,12 +197,14 @@ function CS.namespace(name: string, registerMembers: () -> nil, location: table?
     return namespaceDefinition
 end
 
+@native
 function CS.enum(name: string, definition: table, location: table): table
     if location == nil then
         location = assemblyGlobal
     end
-
     definition.__name = name
+
+    @native
     function definition:__index(index: string | number): table
         if index == "__name" then return name end
         local member = {
@@ -199,17 +214,21 @@ function CS.enum(name: string, definition: table, location: table): table
         }
 
         return setmetatable(member, createArithmeticOperators(member, {
-            __eq = function(self, other)
+            __eq = @native function(self, other)
                 return typeof(other) == "table" and other.__isEnumMember and self.value == other.value
             end,
-            __tostring = function(self)
+            __tostring = @native function(self)
                 return self.name
             end
         }, "value"))
     end
+
+    @native
     function definition:__eq(other: table): boolean
         return self.__name == other.__name
     end
+
+    @native
     function definition:__tostring(): string
         return self.__name
     end
@@ -218,7 +237,8 @@ function CS.enum(name: string, definition: table, location: table): table
     return location[name]
 end
 
-function CS.is(object: any, class: table | string)
+@native
+function CS.is(object: any, class: table | string): boolean
     if typeof(class) == "table" and type(class.__name) == "string" then
 		return typeof(object) == "table" and type(object["className"]) == "string" and object["className"] == class.__name
 	end
@@ -246,6 +266,7 @@ function CS.is(object: any, class: table | string)
     return false
 end
 
+@native
 function CS.getAssemblyType(name)
     local env
     if getfenv == nil then
@@ -259,17 +280,21 @@ end
 CS.class("Exception", @native function()
     local class = CS.classDef("Exception")
 
-    function class.new(message: string): CS.Exception
+    @native
+    function class.new(message: string?): Exception
         local mt = {}
-        local self = CS.classInstance(class, mt)
-        self.Message = message or "An error occurred"
+        local self = CS.classInstance(class, mt) :: Exception
 
+        if message == nil then message = "An error occurred" end
+        self.Message = message
+
+        @native
         function mt.__tostring(): string
             return `{self["$className"]}: {self.Message}`
         end
 
-        function self:Throw(withinTryBlock: boolean?): nil
-            if withinTryBlock == nil then withinTryBlock = false end
+        @native
+        function self.Throw(withinTryBlock: boolean): nil
             error(if withinTryBlock then self else tostring(self))
             return nil
         end
@@ -287,21 +312,24 @@ export type Exception = {
 
 type CatchBlock = {
     exceptionClass: string;
-    block: (ex: Exception?) -> nil
+    block: (ex: Exception?, rethrow: () -> nil) -> nil
 }
 
+@native
 function CS.try(block: () -> nil, finallyBlock: () -> nil, catchBlocks: { CatchBlock })
-    local success, ex = pcall(block)
+    local success: boolean, ex: Exception | string | nil = pcall(block)
     if not success then
         if typeof(ex) == "string" then
             ex = CS.getAssemblyType("Exception").new(ex, false)
         end
         for _, catchBlock in catchBlocks do
             if catchBlock.exceptionClass ~= nil and catchBlock.exceptionClass ~= ex["$className"] then continue end
-            catchBlock.block(ex)
+            catchBlock.block(ex :: Exception, (ex :: Exception).Throw)
         end
     end
-    finallyBlock();
+    if finallyBlock ~= nil then
+        finallyBlock()
+    end
 end
 
 return CS

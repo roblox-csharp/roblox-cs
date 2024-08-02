@@ -227,6 +227,31 @@ namespace RobloxCS
             Visit(node.Expression);
         }
 
+        public override void VisitThrowStatement(ThrowStatementSyntax node)
+        {
+            Throw(node.Expression);
+        }
+
+        public override void VisitThrowExpression(ThrowExpressionSyntax node)
+        {
+            Throw(node.Expression);
+        }
+
+        private void Throw(ExpressionSyntax? exception)
+        {
+            if (exception == null)
+            {
+                WriteLine("_catch_rethrow()");
+            }
+            else
+            {
+                Visit(exception);
+                Write(":Throw(");
+                Write((exception.Parent?.Parent is TryStatementSyntax).ToString().ToLower());
+                WriteLine(')');
+            }
+        }
+
         public override void VisitTryStatement(TryStatementSyntax node)
         {
             WriteLine("CS.try(function()");
@@ -267,12 +292,8 @@ namespace RobloxCS
                     WriteLine(", ");
                 }
                 Write("block = function(");
-                if (catchBlock.Declaration != null)
-                {
-                    Write(GetName(catchBlock.Declaration));
-                    Write(": CS.Exception");
-                }
-                WriteLine(')');
+                Write(catchBlock.Declaration != null ? (GetName(catchBlock.Declaration) + ": CS.Exception") : "_");
+                WriteLine(", _catch_rethrow: () -> nil)");
                 _indent++;
 
                 Visit(catchBlock.Block);
@@ -1082,7 +1103,7 @@ namespace RobloxCS
 
             if (leftIsLiteral)
             {
-                Write('(');
+                Write(";(");
             }
             Visit(node.Expression);
             if (leftIsLiteral)
@@ -1338,6 +1359,9 @@ namespace RobloxCS
             var callable = node.Parent;
             switch (callable)
             {
+                case ConstructorDeclarationSyntax constructor:
+                    Write($": {GetName(constructor)}");
+                    break;
                 case MethodDeclarationSyntax method:
                     WriteTypeAnnotation(method.ReturnType, true);
                     break;
@@ -1586,8 +1610,7 @@ namespace RobloxCS
             }
 
             var name = GetName(node);
-            var accessOp = objectName == "self" ? ':' : '.';
-            Write($"function {objectName}{accessOp}{name}");
+            Write($"function {objectName}.{name}");
             Visit(node.ParameterList);
             _indent++;
 
@@ -1629,7 +1652,7 @@ namespace RobloxCS
             {
                 Write(", namespace");
             }
-            WriteLine(')');
+            WriteLine($") :: {GetName(parentClass)}");
             WriteLine();
             if (initializerArguments != null)
             {
