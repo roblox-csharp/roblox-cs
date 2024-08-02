@@ -1037,7 +1037,7 @@ namespace RobloxCS
                     .Select(location => location.SourceTree!.FilePath);
 
                 var isNoFullQualificationType = Constants.NO_FULL_QUALIFICATION_TYPES.Contains(namespaceName) || (containingNamespace != null ? Constants.NO_FULL_QUALIFICATION_TYPES.Contains(containingNamespace.Name) : false);
-                var noFullQualification = isNoFullQualificationType && objectType != null && !Constants.GLOBAL_LIBRARIES.Contains(objectType.Name);
+                var noFullQualification = isNoFullQualificationType && (objectType == null || !Constants.GLOBAL_LIBRARIES.Contains(objectType.Name));
                 var typeIsImported = usings.Any(usingDirective => usingDirective.Name != null && Utility.GetNamesFromNode(usingDirective).Any(name => namespaceName.StartsWith(name)));
                 if (noFullQualification && namespaceName != "System")
                 {
