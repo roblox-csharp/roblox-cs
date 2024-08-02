@@ -1224,6 +1224,11 @@ namespace RobloxCS
             Write($"local {GetName(node)}");
         }
 
+        public override void VisitLocalDeclarationStatement(LocalDeclarationStatementSyntax node)
+        {
+            Visit(node.Declaration);
+        }
+
         public override void VisitVariableDeclaration(VariableDeclarationSyntax node)
         {
             foreach (var declarator in node.Variables)
@@ -1234,7 +1239,24 @@ namespace RobloxCS
 
         public override void VisitVariableDeclarator(VariableDeclaratorSyntax node)
         {
-            Write($"local {GetName(node)}");
+            var localDeclaration = FindFirstAncestor<LocalDeclarationStatementSyntax>(node);
+            var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node);
+            if (
+                localDeclaration != null
+                    && classDeclaration != null
+                    && !IsDescendantOf<MethodDeclarationSyntax>(node)
+                    && !IsDescendantOf<PropertyDeclarationSyntax>(node))
+            {
+                var isStatic = HasSyntax(classDeclaration.Modifiers, SyntaxKind.StaticKeyword) || HasSyntax(localDeclaration.Modifiers, SyntaxKind.StaticKeyword);
+                Write(isStatic ? "class" : "self");
+                Write(".");
+            }
+            else
+            {
+                Write("local ");
+            }
+
+            Write($"{GetName(node)}");
             var parent = node.Parent;
             if (parent is VariableDeclarationSyntax declaration)
             {
@@ -1532,6 +1554,7 @@ namespace RobloxCS
             }
 
             var isWithinNamespace = IsDescendantOf<NamespaceDeclarationSyntax>(node);
+            var isStatic = HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
             var className = GetName(node);
             var nativeAttribute = _config.EmitNativeAttributeOnClassOrNamespaceCallbacks ? "@native " : "";
             WriteLine($"{(isWithinNamespace ? "namespace:" : "CS.")}class(\"{className}\", {nativeAttribute}function(namespace: CS.Namespace)");
@@ -1556,15 +1579,14 @@ namespace RobloxCS
             InitializeFields(
                 node.Members
                     .OfType<FieldDeclarationSyntax>()
-                    .Where(member => HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword))
+                    .Where(member => isStatic || HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword))
             );
             InitializeProperties(
                 node.Members
                     .OfType<PropertyDeclarationSyntax>()
-                    .Where(member => HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword))
+                    .Where(member => isStatic || HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword))
             );
 
-            var isStatic = HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
             var constructors = node.Members.OfType<ConstructorDeclarationSyntax>().ToList();
             constructors.Sort((a, b) => a.ParameterList.Parameters.Count - b.ParameterList.Parameters.Count);
 
@@ -1706,7 +1728,7 @@ namespace RobloxCS
                 Visit(initializerArguments);
             }
 
-            var isNotStatic = (MemberDeclarationSyntax member) => !HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword);
+            var isNotStatic = (MemberDeclarationSyntax member) => !HasSyntax(parentClass.Modifiers, SyntaxKind.StaticKeyword) && !HasSyntax(member.Modifiers, SyntaxKind.StaticKeyword);
             var isNotAbstract = (MemberDeclarationSyntax member) => !HasSyntax(member.Modifiers, SyntaxKind.AbstractKeyword);
             var nonStaticFields = parentClass.Members
                 .Where(isNotStatic)
@@ -1756,7 +1778,8 @@ namespace RobloxCS
         {
             foreach (var field in fields)
             {
-                var isStatic = HasSyntax(field.Modifiers, SyntaxKind.StaticKeyword);
+                var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(field)!;
+                var isStatic = HasSyntax(classDeclaration.Modifiers, SyntaxKind.StaticKeyword) || HasSyntax(field.Modifiers, SyntaxKind.StaticKeyword);
                 foreach (var declarator in field.Declaration.Variables)
                 {
                     if (declarator.Initializer == null) continue;
@@ -1773,7 +1796,8 @@ namespace RobloxCS
             {
                 if (property.Initializer == null) continue;
 
-                var isStatic = HasSyntax(property.Modifiers, SyntaxKind.StaticKeyword);
+                var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(property)!;
+                var isStatic = HasSyntax(classDeclaration.Modifiers, SyntaxKind.StaticKeyword) || HasSyntax(property.Modifiers, SyntaxKind.StaticKeyword);
                 Write($"{(isStatic ? "class" : "self")}.{GetName(property)} = ");
                 Visit(property.Initializer);
                 WriteLine();
@@ -1802,7 +1826,8 @@ namespace RobloxCS
                     var fields = ancestorClass.Members.OfType<FieldDeclarationSyntax>();
                     foreach (var field in fields)
                     {
-                        var isStatic = HasSyntax(field.Modifiers, SyntaxKind.StaticKeyword);
+                        var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(field)!;
+                        var isStatic = HasSyntax(classDeclaration.Modifiers, SyntaxKind.StaticKeyword) || HasSyntax(field.Modifiers, SyntaxKind.StaticKeyword);
                         foreach (var declarator in field.Declaration.Variables)
                         {
                             var name = GetName(declarator);
