@@ -42,7 +42,11 @@ namespace RobloxCS
             {
                 var fileContents = File.ReadAllText(sourceFile);
                 var tree = TranspilerUtility.ParseTree(fileContents, sourceFile);
-                List<Func<SyntaxTree, ConfigData, SyntaxTree>> transformers = [TransformFactory.Main(), TransformFactory.Debug()];
+                HashSet<Func<SyntaxTree, ConfigData, SyntaxTree>> transformers = [TransformFactory.Main()];
+                if (_config.EnableDebugTransformer)
+                {
+                    transformers.Add(TransformFactory.Debug());
+                }
 
                 var transformedTree = TranspilerUtility.TransformTree(tree, transformers, _config);
                 foreach (var diagnostic in transformedTree.GetDiagnostics())

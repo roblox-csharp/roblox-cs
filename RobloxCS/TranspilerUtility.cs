@@ -58,7 +58,7 @@ namespace RobloxCS
             return compiler;
         }
 
-        public static SyntaxTree TransformTree(SyntaxTree cleanTree, List<Func<SyntaxTree, ConfigData, SyntaxTree>> transformMethods, ConfigData? config = null)
+        public static SyntaxTree TransformTree(SyntaxTree cleanTree, HashSet<Func<SyntaxTree, ConfigData, SyntaxTree>> transformMethods, ConfigData? config = null)
         {
             config ??= ConfigReader.UnitTestingConfig;
 
