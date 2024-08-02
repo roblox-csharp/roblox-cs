@@ -18,8 +18,6 @@ This project includes the compiler and transformers.
 - Overloaded methods
 - Full qualification of types/namespaces inside of namespaces
 - Macro `new T()` with collection types to `{}`
-- `const` declarations
-- Disable `extern` keyword
 - Test MainTransformer more
 
 ## Will maybe be supported

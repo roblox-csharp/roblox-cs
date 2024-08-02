@@ -37,9 +37,9 @@ namespace RobloxCS
             Warn($"{message}\n\t- {Utility.FormatLocation(lineSpan)}");
         }
 
-        public static void UnsupportedError(SyntaxNode node, string subject, bool? useIs = false)
+        public static void UnsupportedError(SyntaxNode node, string subject, bool useIs = false, bool useYet = true)
         {
-            CodegenError(node, $"{subject} {(useIs == true ? "is" : "are")} not yet supported, sorry!");
+            CodegenError(node, $"{subject} {(useIs == true ? "is" : "are")} not {(useYet ? "yet " : "")} supported, sorry!");
         }
 
         public static void CodegenError(SyntaxNode node, string message)

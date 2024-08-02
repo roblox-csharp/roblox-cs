@@ -1660,6 +1660,11 @@ namespace RobloxCS
 
         public override void VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
+            if (HasSyntax(node.Modifiers, SyntaxKind.ExternKeyword))
+            {
+                Logger.UnsupportedError(node, "Extern methods", useYet: false);
+            }
+
             foreach (var attributeList in node.AttributeLists)
             {
                 Visit(attributeList);
