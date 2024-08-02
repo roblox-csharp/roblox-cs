@@ -1729,6 +1729,11 @@ namespace RobloxCS
             }
             foreach (var method in nonStaticMethods)
             {
+                if (HasSyntax(method.Modifiers, SyntaxKind.ExternKeyword))
+                {
+                    Logger.CodegenError(method, "extern methods are not supported.");
+                }
+
                 Visit(method);
             }
 
