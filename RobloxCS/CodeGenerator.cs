@@ -993,7 +993,7 @@ namespace RobloxCS
 
                     case "nameof":
                         Write('"');
-                        Write(_semanticModel.GetConstantValue(node).Value?.ToString() ?? $"??? nameof({node.ToString()}) ???");
+                        Write(_semanticModel.GetConstantValue(node).Value?.ToString() ?? $"??? nameof({node}) ???");
                         Write('"');
                         return;
                 }
