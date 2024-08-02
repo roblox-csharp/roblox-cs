@@ -21,8 +21,8 @@
         public string SourceFolder { get; set; }
         public string OutputFolder { get; set; }
         public string RojoProjectName { get; set; } = "default";
-        public bool EnableDebugTransformer { get; set;} = true;
         public bool EmitNativeAttributeOnClassOrNamespaceCallbacks { get; set; } = true;
+        public HashSet<string> EnabledBuiltInTransformers { get; set; } = ["Debug"];
         public CSharpOptions CSharpOptions { get; set; }
 
         public bool IsValid()

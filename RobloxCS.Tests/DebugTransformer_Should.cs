@@ -10,7 +10,7 @@ namespace RobloxCS.Tests
         public void FileInfo_PrependsArgument(string input)
         {
             var cleanTree = TranspilerUtility.ParseTree(input);
-            var transformedTree = TranspilerUtility.TransformTree(cleanTree, [TransformFactory.Main(), TransformFactory.Debug()]);
+            var transformedTree = TranspilerUtility.TransformTree(cleanTree, [BuiltInTransformers.Main(), BuiltInTransformers.Get("Debug")]);
             var cleanRoot = cleanTree.GetRoot();
             var cleanInvocation = cleanRoot.DescendantNodes().OfType<InvocationExpressionSyntax>().First();
             var transformedRoot = transformedTree.GetRoot();
@@ -31,7 +31,7 @@ namespace RobloxCS.Tests
         public void FileInfo_ConcatenatesLiteral(string input)
         {
             var cleanTree = TranspilerUtility.ParseTree(input);
-            var transformedTree = TranspilerUtility.TransformTree(cleanTree, [TransformFactory.Main(), TransformFactory.Debug()]);
+            var transformedTree = TranspilerUtility.TransformTree(cleanTree, [BuiltInTransformers.Main(), BuiltInTransformers.Get("Debug")]);
             var cleanRoot = cleanTree.GetRoot();
             var cleanInvocation = cleanRoot.DescendantNodes().OfType<InvocationExpressionSyntax>().First();
             var transformedRoot = transformedTree.GetRoot();

@@ -9,7 +9,7 @@ namespace RobloxCS.Tests
         public void SafeNavigation_TransformsWhenNotNull(string source)
         {
             var cleanTree = TranspilerUtility.ParseTree(source);
-            var transformedTree = TranspilerUtility.TransformTree(cleanTree, [TransformFactory.Main()]);
+            var transformedTree = TranspilerUtility.TransformTree(cleanTree, [BuiltInTransformers.Main()]);
             var cleanRoot = cleanTree.GetRoot();
             var cleanTernary = cleanRoot.DescendantNodes().OfType<ConditionalAccessExpressionSyntax>().First();
             var transformedRoot = transformedTree.GetRoot();

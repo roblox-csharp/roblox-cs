@@ -18,7 +18,7 @@ This project includes the compiler and transformers.
 - Overloaded methods
 - Full qualification of types/namespaces inside of namespaces
 - Macro `new T()` with collection types to `{}`
-- Test MainTransformer more
+- Test `MainTransformer` more
 
 ## Will maybe be supported
 - [Class finalizers (destructors)](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers)

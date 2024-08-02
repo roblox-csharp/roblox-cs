@@ -14,7 +14,7 @@ namespace RobloxCS
                     SourceFolder = "test-src",
                     OutputFolder = "test-dist",
                     RojoProjectName = "UNIT_TESTING",
-                    EnableDebugTransformer = true,
+                    EnabledBuiltInTransformers = ["Debug"],
                     EmitNativeAttributeOnClassOrNamespaceCallbacks = true,
                     CSharpOptions = new CSharpOptions()
                     {

@@ -280,7 +280,7 @@
         private string GetCleanLua(string source, int extraLines = 0)
         {
             var cleanTree = TranspilerUtility.ParseTree(source);
-            var transformedTree = TranspilerUtility.TransformTree(cleanTree, [TransformFactory.Main()]);
+            var transformedTree = TranspilerUtility.TransformTree(cleanTree, [BuiltInTransformers.Main()]);
             var compiler = TranspilerUtility.GetCompiler([transformedTree]);
             var memberCollector = new MemberCollector([cleanTree]);
             var generatedLua = TranspilerUtility.GenerateLua(transformedTree, compiler, memberCollector.Collect());
