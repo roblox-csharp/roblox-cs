@@ -1,3 +1,6 @@
+--!strict
+--!native
+
 local CS = {}
 local assemblyGlobal = {}
 
@@ -5,7 +8,7 @@ local fempty = function() end
 
 local split = string.split
 if split == nil then
-    split = function(inputString, separator)
+    split = function(inputString: string, separator: string)
         if sep == nil then
             sep = "%s"
         end
@@ -17,7 +20,7 @@ if split == nil then
     end
 end
 
-local function chainIndex(location, ...)
+local function chainIndex(location: table, ...): any
     local names = {...}
     return function(t, k)
         for _, name in pairs(names) do
@@ -30,7 +33,7 @@ local function chainIndex(location, ...)
     end
 end
 
-local function createArithmeticOperators(self, mt, fieldName)
+local function createArithmeticOperators(self, mt, fieldName): table
     -- TODO: bitwise ops (if necessary)
     local function getNumericValue(value: table | number): number
         return if typeof(value) == "table" and value.__isEnumMember then value[fieldName] else value
@@ -113,8 +116,9 @@ local CSNamespace = {} do
     end
 end
 
-function CS.classInstance(class, mt, namespace)
+function CS.classInstance(class: table, mt: table, namespace: Namespace?)
     local instance = {}
+    instance["$className"] = class.__name
 
     local function getSuperclass()
         if class.__superclass == nil then return end
@@ -145,8 +149,7 @@ function CS.classInstance(class, mt, namespace)
     return setmetatable(instance, mt)
 end
 
-function CS.classDef(name, namespace, superclass, ...)
-    local mixins = {...}
+function CS.classDef(name: string, namespace: Namespace?, superclass: string, ...: string)
     local mt = {}
     mt.__index = chainIndex(if namespace ~= nil then namespace else assemblyGlobal, ...)
 
@@ -160,13 +163,13 @@ function CS.classDef(name, namespace, superclass, ...)
     return setmetatable(class, mt)
 end
 
-function CS.class(name, create, namespace)
+function CS.class(name: string, create: (namespace: Namespace?) -> table, namespace: Namespace?)
     local location = if namespace ~= nil then namespace.members else assemblyGlobal
     local class = create(namespace)
     location[name] = class
 end
 
-function CS.namespace(name, registerMembers, location, parent)
+function CS.namespace(name: string, registerMembers: () -> nil, location: table?, parent: table?): Namespace
     if location == nil then
         location = assemblyGlobal
     end
@@ -181,13 +184,13 @@ function CS.namespace(name, registerMembers, location, parent)
     return namespaceDefinition
 end
 
-function CS.enum(name, definition, location)
+function CS.enum(name: string, definition: table, location: table): table
     if location == nil then
         location = assemblyGlobal
     end
 
     definition.__name = name
-    function definition:__index(index)
+    function definition:__index(index: string | number): table
         if index == "__name" then return name end
         local member = {
             name = index,
@@ -204,10 +207,10 @@ function CS.enum(name, definition, location)
             end
         }, "value"))
     end
-    function definition:__eq(other)
+    function definition:__eq(other: table): boolean
         return self.__name == other.__name
     end
-    function definition:__tostring()
+    function definition:__tostring(): string
         return self.__name
     end
 
@@ -215,9 +218,9 @@ function CS.enum(name, definition, location)
     return location[name]
 end
 
-function CS.is(object, class)
-    if typeof(class) == "table" and type(class.instanceof) == "function" then
-		return class.instanceof(object)
+function CS.is(object: any, class: table | string)
+    if typeof(class) == "table" and type(class.__name) == "string" then
+		return typeof(object) == "table" and type(object["className"]) == "string" and object["className"] == class.__name
 	end
 
 	-- metatable check
@@ -251,6 +254,54 @@ function CS.getAssemblyType(name)
         env = getfenv()
     end
     return assemblyGlobal[name] or env[name]
+end
+
+CS.class("Exception", @native function()
+    local class = CS.classDef("Exception")
+
+    function class.new(message: string): CS.Exception
+        local mt = {}
+        local self = CS.classInstance(class, mt)
+        self.Message = message or "An error occurred"
+
+        function mt.__tostring(): string
+            return `{self["$className"]}: {self.Message}`
+        end
+
+        function self:Throw(withinTryBlock: boolean?): nil
+            if withinTryBlock == nil then withinTryBlock = false end
+            error(if withinTryBlock then self else tostring(self))
+            return nil
+        end
+
+        return self
+    end
+
+    return class
+end)
+
+export type Exception = {
+    Message: string;
+    Throw: () -> nil;
+}
+
+type CatchBlock = {
+    exceptionClass: string;
+    block: (ex: Exception?) -> nil
+}
+
+function CS.try(block: () -> nil, finallyBlock: () -> nil, catchBlocks: { CatchBlock })
+    local success, ex = pcall(block)
+    if not success then
+        if typeof(ex) == "string" then
+            ex = CS.getAssemblyType("Exception").new(ex, false)
+        end
+        for _, catchBlock in catchBlocks do
+            if catchBlock.exceptionClass ~= nil and catchBlock.exceptionClass ~= ex["$className"] then continue end
+            catchBlock.block(ex)
+        end
+    end
+    finallyBlock();
 end
 
 return CS

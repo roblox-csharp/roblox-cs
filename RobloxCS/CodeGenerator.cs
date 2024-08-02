@@ -227,6 +227,67 @@ namespace RobloxCS
             Visit(node.Expression);
         }
 
+        public override void VisitTryStatement(TryStatementSyntax node)
+        {
+            WriteLine("CS.try(function()");
+            _indent++;
+
+            Visit(node.Block);
+
+            _indent--;
+            Write("end, ");
+            if (node.Finally != null)
+            {
+                WriteLine("function()");
+                _indent++;
+
+                Visit(node.Finally);
+
+                _indent--;
+                Write("end");
+            }
+            else
+            {
+                Write("nil");
+            }
+            WriteLine(", {");
+            _indent++;
+
+            foreach (var catchBlock in node.Catches)
+            {
+                WriteLine('{');
+                _indent++;
+
+                Write("exceptionClass = ");
+                if (catchBlock.Declaration != null)
+                {
+                    Write('"');
+                    Write(catchBlock.Declaration.Type.ToString());
+                    Write('"');
+                    WriteLine(", ");
+                }
+                Write("block = function(");
+                if (catchBlock.Declaration != null)
+                {
+                    Write(GetName(catchBlock.Declaration));
+                    Write(": CS.Exception");
+                }
+                WriteLine(')');
+                _indent++;
+
+                Visit(catchBlock.Block);
+
+                _indent--;
+                WriteLine("end");
+
+                _indent--;
+                WriteLine('}');
+            }
+
+            _indent--;
+            WriteLine("})");
+        }
+
         public override void VisitForEachVariableStatement(ForEachVariableStatementSyntax node)
         {
             Visit(node.Variable);
@@ -1721,11 +1782,13 @@ namespace RobloxCS
                     var forEachStatements = descendants.OfType<ForEachStatementSyntax>();
                     var forStatements = descendants.OfType<ForStatementSyntax>();
                     var parameters = descendants.OfType<ParameterSyntax>();
+                    var catchDeclarations = descendants.OfType<CatchDeclarationSyntax>();
                     var checkNamePredicate = (SyntaxNode node) => TryGetName(node) == identifierText;
                     return localFunctions.Any(checkNamePredicate)
                         || variableDesignations.Any(checkNamePredicate)
                         || variableDeclarators.Any(checkNamePredicate)
                         || parameters.Any(checkNamePredicate)
+                        || catchDeclarations.Any(checkNamePredicate)
                         || forEachStatements.Any(checkNamePredicate)
                         || forStatements.Any(forStatement => forStatement.Initializers.Count() > 0);
                 });
