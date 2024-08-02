@@ -19,6 +19,11 @@ namespace RobloxCS
             return base.VisitCompilationUnit(node.WithUsings(usings));
         }
 
+        public override SyntaxNode? VisitFileScopedNamespaceDeclaration(FileScopedNamespaceDeclarationSyntax node)
+        {
+            return VisitNamespaceDeclaration(SyntaxFactory.NamespaceDeclaration(node.AttributeLists, node.Modifiers, node.Name, node.Externs, node.Usings, node.Members));
+        }
+
         public override SyntaxNode? VisitDoStatement(DoStatementSyntax node)
         {
             // invert condition

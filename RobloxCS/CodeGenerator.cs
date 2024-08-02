@@ -73,7 +73,6 @@ namespace RobloxCS
 
         private void WriteHeader()
         {
-            WriteLine($"package.path = \"{Utility.GetRbxcsDirectory()}/{Utility.RuntimeAssemblyName}/?.lua;\" .. package.path");
             Write($"local CS = ");
             WriteRequire(GetLuaRuntimeLibPath());
             WriteLine();
