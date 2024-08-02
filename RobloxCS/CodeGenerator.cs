@@ -1343,6 +1343,13 @@ namespace RobloxCS
 
         public override void VisitParameter(ParameterSyntax node)
         {
+            if (node.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.ParamsKeyword)))
+            {
+                Write("...");
+                if (node.Type != null)
+                    WriteTypeAnnotation(node.Type);
+                return;
+            }
             Write(GetName(node));
             if (node.Type != null)
             {
@@ -1364,12 +1371,17 @@ namespace RobloxCS
                     }
                 }
             }
+            ParameterSyntax? vaargParameter = null;
             foreach (var parameter in node.Parameters)
             {
                 Visit(parameter);
                 if (parameter != node.Parameters.Last())
                 {
                     Write(", ");
+                }
+                else
+                {
+                    if (parameter.Modifiers.Any(modifier => modifier.IsKind(SyntaxKind.ParamsKeyword))) vaargParameter = parameter;
                 }
             }
             Write(')');
@@ -1389,6 +1401,14 @@ namespace RobloxCS
                     break;
             }
             _indent++;
+
+            if (vaargParameter != null)
+            {
+                WriteLine("--> rbxcsc: vararg parameter conversion");
+                Write($"local {GetName(vaargParameter)} = {{ ... }}");
+                WriteLine();
+            }
+
 
             foreach (var parameter in node.Parameters)
             {
@@ -1799,12 +1819,12 @@ namespace RobloxCS
                 HashSet<SyntaxKind> fullyQualifiedParentKinds = [SyntaxKind.SimpleMemberAccessExpression, SyntaxKind.ObjectCreationExpression];
                 if (
                     symbol != null
-                        && symbol is ITypeSymbol typeSymbol
-                        && node.Parent != null
-                        && fullyQualifiedParentKinds.Contains(node.Parent.Kind())
-                        && typeSymbol.ContainingNamespace != null
-                        && (parentNamespace != null ? Utility.GetNamesFromNode(parentNamespace.Name).LastOrDefault() != typeSymbol.ContainingNamespace.Name : true)
-                        && !Constants.NO_FULL_QUALIFICATION_TYPES.Contains(typeSymbol.ContainingNamespace.Name)
+                    && symbol is ITypeSymbol typeSymbol
+                    && node.Parent != null
+                    && fullyQualifiedParentKinds.Contains(node.Parent.Kind())
+                    && typeSymbol.ContainingNamespace != null
+                    && (parentNamespace != null ? Utility.GetNamesFromNode(parentNamespace.Name).LastOrDefault() != typeSymbol.ContainingNamespace.Name : true)
+                    && !Constants.NO_FULL_QUALIFICATION_TYPES.Contains(typeSymbol.ContainingNamespace.Name)
                 )
                 {
                     var usings = GetUsings();
