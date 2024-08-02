@@ -350,7 +350,7 @@ namespace RobloxCS
             WriteLine(" do");
             _indent++;
 
-            
+
             Visit(node.Statement);
             foreach (var incrementor in node.Incrementors)
             {
@@ -456,16 +456,16 @@ namespace RobloxCS
             foreach (var section in node.Sections)
             {
                 var statementKinds = section.Statements.Select(stmt => stmt.Kind());
+                HashSet<SyntaxKind> supportedPatterns = [
+                    SyntaxKind.VarPattern,
+                    SyntaxKind.DeclarationPattern
+                ];
+
                 var caseLabels = section.Labels.Where(label =>
-                {
-                    return !label.IsKind(SyntaxKind.DefaultSwitchLabel)
+                    !label.IsKind(SyntaxKind.DefaultSwitchLabel)
                         && !(label is CasePatternSwitchLabelSyntax casePattern
-                            && new HashSet<SyntaxKind>
-                            {
-                                SyntaxKind.VarPattern,
-                                SyntaxKind.DeclarationPattern
-                            }.Contains(casePattern.Pattern.Kind()));
-                });
+                            && supportedPatterns.Contains(casePattern.Pattern.Kind()))
+                );
 
                 foreach (var label in caseLabels)
                 {
@@ -480,7 +480,12 @@ namespace RobloxCS
                     Write('(');
                     Visit(condition);
 
-                    var op = expression.IsKind(SyntaxKind.NotPattern) ? "~=" : "==";
+                    var op = expression.IsKind(SyntaxKind.NotPattern) ?
+                        "~="
+                        : expression is RelationalPatternSyntax relationalPattern ?
+                            Utility.GetMappedOperator(relationalPattern.OperatorToken.Text)
+                            : "==";
+
                     Write($" {op} ");
                     Visit(expression);
                     if (label is CasePatternSwitchLabelSyntax casePattern && casePattern.WhenClause != null)
@@ -585,7 +590,7 @@ namespace RobloxCS
                 Visit(node.ExpressionBody);
                 WriteLine();
             }
-            
+
             _indent--;
             Write("end");
         }
@@ -783,7 +788,7 @@ namespace RobloxCS
         {
             WriteLine('{');
             _indent++;
-            
+
             foreach (var initializer in node.Initializers)
             {
                 Visit(initializer);
