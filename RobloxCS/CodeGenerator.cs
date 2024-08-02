@@ -1011,34 +1011,32 @@ namespace RobloxCS
         public override void VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
         {
             var leftIsLiteral = node.Expression is LiteralExpressionSyntax;
-            var objectSymbolInfo = _semanticModel.GetSymbolInfo(node.Expression);
+            var objectSymbol = _semanticModel.GetSymbolInfo(node.Expression).Symbol?.OriginalDefinition;
             var objectType = _semanticModel.GetTypeInfo(node.Expression).Type;
+            var nameType = _semanticModel.GetSymbolInfo(node.Name).Symbol?.OriginalDefinition;
             var operatorText = '.';
-            if (objectType != null)
+            if (objectSymbol != null)
             {
-                if (objectType.OriginalDefinition is INamedTypeSymbol objectDefinitionSymbol)
+                if (objectType is INamedTypeSymbol objectDefinitionSymbol && (objectDefinitionSymbol.Name == "Services" || objectDefinitionSymbol.AllInterfaces.Select(@interface => @interface.Name).Contains("Services")))
                 {
-                    var superclasses = objectDefinitionSymbol.AllInterfaces;
-                    if (objectDefinitionSymbol.Name == "Services" || superclasses.Select(@interface => @interface.Name).Contains("Services"))
-                    {
-                        Write("game:GetService(\"");
-                        Visit(node.Name);
-                        Write("\")");
-                        return;
-                    }
+                    Write("game:GetService(\"");
+                    Visit(node.Name);
+                    Write("\")");
+                    return;
                 }
-                else if (objectType.OriginalDefinition is IMethodSymbol methodSymbol)
+
+                if (nameType is IMethodSymbol methodSymbol)
                 {
                     operatorText = methodSymbol.IsStatic ? '.' : ':';
                 }
             }
 
             var usings = GetUsings();
-            var containingNamespace = objectSymbolInfo.Symbol?.ContainingNamespace;
-            if (objectSymbolInfo.Symbol != null && (objectSymbolInfo.Symbol.Kind == SymbolKind.Namespace || (objectSymbolInfo.Symbol.Kind == SymbolKind.NamedType && objectSymbolInfo.Symbol.IsStatic)))
+            var containingNamespace = objectSymbol?.ContainingNamespace;
+            if (objectSymbol != null && (objectSymbol.Kind == SymbolKind.Namespace || (objectSymbol.Kind == SymbolKind.NamedType && objectSymbol.IsStatic)))
             {
-                var namespaceName = objectSymbolInfo.Symbol.ToDisplayString();
-                var filePathsContainingType = objectSymbolInfo.Symbol.Locations
+                var namespaceName = objectSymbol.ToDisplayString();
+                var filePathsContainingType = objectSymbol.Locations
                     .Where(location => location.SourceTree != null && location.SourceTree.FilePath != _tree.FilePath)
                     .Select(location => location.SourceTree!.FilePath);
 
@@ -1082,7 +1080,7 @@ namespace RobloxCS
                 }
             }
 
-            if (objectSymbolInfo.Symbol?.OriginalDefinition is ILocalSymbol typeSymbol)
+            if (objectSymbol?.OriginalDefinition is ILocalSymbol typeSymbol)
             {
                 switch (typeSymbol.Type.Name)
                 {
@@ -1109,7 +1107,7 @@ namespace RobloxCS
 
             if (leftIsLiteral)
             {
-                Write(";(");
+                Write('(');
             }
             Visit(node.Expression);
             if (leftIsLiteral)
@@ -1352,7 +1350,18 @@ namespace RobloxCS
 
         public override void VisitParameterList(ParameterListSyntax node)
         {
+            var callable = node.Parent;
             Write('(');
+            {
+                if (callable is MethodDeclarationSyntax method && !HasSyntax(method.Modifiers, SyntaxKind.StaticKeyword))
+                {
+                    Write('_');
+                    if (node.Parameters.Count > 0)
+                    {
+                        Write(", ");
+                    }
+                }
+            }
             foreach (var parameter in node.Parameters)
             {
                 Visit(parameter);
@@ -1362,11 +1371,10 @@ namespace RobloxCS
                 }
             }
             Write(')');
-            var callable = node.Parent;
             switch (callable)
             {
                 case ConstructorDeclarationSyntax constructor:
-                    Write($": {GetName(constructor)}");
+                    WriteLine($": {GetName(constructor)}");
                     break;
                 case MethodDeclarationSyntax method:
                     WriteTypeAnnotation(method.ReturnType, true);
