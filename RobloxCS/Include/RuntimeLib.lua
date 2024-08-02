@@ -4,26 +4,10 @@
 local CS = {}
 local assemblyGlobal = {}
 
-local fempty = function() end
-
-local split = string.split
-if split == nil then
-    split = function(inputString: string, separator: string)
-        if sep == nil then
-            sep = "%s"
-        end
-        local t = {}
-        for str in string.gmatch(inputString, "([^"..sep.."]+)") do
-            table.insert(t, str)
-        end
-        return t
-    end
-end
-
-local function chainIndex(location: table, ...): any
+local function chainIndex(location: table, ...: table): () -> any
     local names = {...}
     return function(t, k)
-        for _, name in pairs(names) do
+        for _, name in names do
             local tbl = location[name]
             local v = tbl[k]
             if v ~= nil then
@@ -34,7 +18,7 @@ local function chainIndex(location: table, ...): any
 end
 
 local function createArithmeticOperators(self, mt, fieldName): table
-    -- TODO: bitwise ops (if necessary)
+    -- TODO: bitwise ops (if necessary) (or possible)
     local function getNumericValue(value: table | number): number
         return if typeof(value) == "table" and value.__isEnumMember then value[fieldName] else value
     end
@@ -123,7 +107,7 @@ local CSNamespace = {} do
 end
 
 @native
-function CS.classInstance(class: table, mt: table, namespace: Namespace?)
+function CS.classInstance(class: Class, mt: table, namespace: Namespace?)
     local instance = {}
     instance["$className"] = class.__name
 
@@ -135,9 +119,9 @@ function CS.classInstance(class: table, mt: table, namespace: Namespace?)
         end
 
         local pieces = class.__superclass:split(".");
-        local result
-        for _, piece in pairs(pieces) do
-            result = (result or assemblyGlobal)[piece]
+        local result = assemblyGlobal
+        for _, piece in pieces do
+            result = result[piece] or result
         end
         return result
     end
@@ -182,18 +166,20 @@ function CS.class(name: string, create: (namespace: Namespace?) -> table, namesp
 end
 
 @native
-function CS.namespace(name: string, registerMembers: () -> nil, location: table?, parent: table?): Namespace
+function CS.namespace(name: string, registerMembers: () -> nil, location: table?): Namespace
+    local parent = location
     if location == nil then
         location = assemblyGlobal
     end
 
     local namespaceDefinition = location[name] or CSNamespace.new(name, parent)
     registerMembers(namespaceDefinition)
-    for _, callback in pairs(namespaceDefinition["$loadCallbacks"]) do
+    location[name] = namespaceDefinition
+
+    for _, callback in namespaceDefinition["$loadCallbacks"] do
         callback()
     end
 
-    location[name] = namespaceDefinition
     return namespaceDefinition
 end
 
@@ -238,7 +224,7 @@ function CS.enum(name: string, definition: table, location: table): table
 end
 
 @native
-function CS.is(object: any, class: table | string): boolean
+function CS.is(object: any, class: Class | string): boolean
     if typeof(class) == "table" and type(class.__name) == "string" then
 		return typeof(object) == "table" and type(object["className"]) == "string" and object["className"] == class.__name
 	end

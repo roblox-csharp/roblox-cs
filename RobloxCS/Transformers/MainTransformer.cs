@@ -14,7 +14,7 @@ namespace RobloxCS
         public override SyntaxNode? VisitCompilationUnit(CompilationUnitSyntax node)
         {
             var usings = node.Usings;
-            usings.Add(SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("Roblox")));
+            usings = usings.Add(SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("Roblox")));
             usings = usings.Add(SyntaxFactory.UsingDirective(SyntaxFactory.Token(SyntaxKind.StaticKeyword), null, SyntaxFactory.QualifiedName(SyntaxFactory.IdentifierName("Roblox"), SyntaxFactory.IdentifierName("Globals"))));
             return base.VisitCompilationUnit(node.WithUsings(usings));
         }
