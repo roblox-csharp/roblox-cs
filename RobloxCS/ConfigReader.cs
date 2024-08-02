@@ -15,6 +15,7 @@ namespace RobloxCS
                     OutputFolder = "test-dist",
                     RojoProjectName = "UNIT_TESTING",
                     EnableDebugTransformer = true,
+                    EmitNativeAttributeOnClassOrNamespaceCallbacks = true,
                     CSharpOptions = new CSharpOptions()
                     {
                         EntryPointName = "UnitTest",
