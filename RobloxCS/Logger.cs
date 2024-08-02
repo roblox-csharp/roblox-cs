@@ -84,7 +84,6 @@ namespace RobloxCS
 
         public static void Debug(string message)
         {
-            if (!Utility.IsDebug()) return;
             Log(message, ConsoleColor.Magenta, "DEBUG");
         }
 

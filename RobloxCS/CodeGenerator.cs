@@ -73,10 +73,7 @@ namespace RobloxCS
 
         private void WriteHeader()
         {
-            if (Utility.IsDebug())
-            {
-                WriteLine($"package.path = \"{Utility.GetRbxcsDirectory()}/{Utility.RuntimeAssemblyName}/?.lua;\" .. package.path");
-            }
+            WriteLine($"package.path = \"{Utility.GetRbxcsDirectory()}/{Utility.RuntimeAssemblyName}/?.lua;\" .. package.path");
             Write($"local CS = ");
             WriteRequire(GetLuaRuntimeLibPath());
             WriteLine();
@@ -115,7 +112,7 @@ namespace RobloxCS
 
         private string GetLuaRuntimeLibPath()
         {
-            if (Utility.IsDebug() || _rojoProject == null)
+            if (_rojoProject == null)
             {
                 return $"\"{Utility.LuaRuntimeModuleName}\"";
             }
@@ -134,7 +131,7 @@ namespace RobloxCS
                 csharpFilePath = csharpFilePath.Substring(1);
             }
 
-            if (Utility.IsDebug() || _rojoProject == null)
+            if (_rojoProject == null)
             {
                 return "\"./" + csharpFilePath.Replace(".cs", "") + '"';
             }
@@ -1040,7 +1037,8 @@ namespace RobloxCS
                     .Where(location => location.SourceTree != null && location.SourceTree.FilePath != _tree.FilePath)
                     .Select(location => location.SourceTree!.FilePath);
 
-                var noFullQualification = Constants.NO_FULL_QUALIFICATION_TYPES.Contains(namespaceName) || (containingNamespace != null ? Constants.NO_FULL_QUALIFICATION_TYPES.Contains(containingNamespace.Name) : false);
+                var isNoFullQualificationType = Constants.NO_FULL_QUALIFICATION_TYPES.Contains(namespaceName) || (containingNamespace != null ? Constants.NO_FULL_QUALIFICATION_TYPES.Contains(containingNamespace.Name) : false);
+                var noFullQualification = isNoFullQualificationType && objectType != null && !Constants.GLOBAL_LIBRARIES.Contains(objectType.Name);
                 var typeIsImported = usings.Any(usingDirective => usingDirective.Name != null && Utility.GetNamesFromNode(usingDirective).Any(name => namespaceName.StartsWith(name)));
                 if (noFullQualification && namespaceName != "System")
                 {

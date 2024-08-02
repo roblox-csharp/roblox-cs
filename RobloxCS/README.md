@@ -20,7 +20,8 @@ This project includes the compiler and transformers.
 - Macro `new T()` with collection types to `{}`
 - `const` declarations
 - Disable `extern` keyword
-- Config setting for debug transformer
+- `params` keyword
+- Config option for emitting `@native` on namespace/class callbacks
 
 ## Will maybe be supported
 - [Class finalizers (destructors)](https://learn.microsoft.com/en-us/dotnet/csharp/programming-guide/classes-and-structs/finalizers)

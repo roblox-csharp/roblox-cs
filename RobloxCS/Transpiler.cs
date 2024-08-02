@@ -6,20 +6,20 @@ namespace RobloxCS
 {
     public sealed class Transpiler
     {
-        private const string _includeFolderName = "Include";
+        public readonly ConfigData Config;
 
+        private const string _includeFolderName = "Include";
         private List<SyntaxTree> _fileTrees = new List<SyntaxTree>();
         private readonly string _inputDirectory;
-        private readonly ConfigData _config;
         private readonly string _sourceDirectory;
         private readonly string _outDirectory;
 
         public Transpiler(string inputDirectory)
         {
+            Config = ConfigReader.Read(inputDirectory);
             _inputDirectory = inputDirectory;
-            _config = ConfigReader.Read(inputDirectory);
-            _sourceDirectory = inputDirectory + "/" + _config.SourceFolder;
-            _outDirectory = inputDirectory + "/" + _config.OutputFolder;
+            _sourceDirectory = inputDirectory + "/" + Config.SourceFolder;
+            _outDirectory = inputDirectory + "/" + Config.OutputFolder;
         }
 
         public void Transpile()
@@ -34,7 +34,7 @@ namespace RobloxCS
         {
             if (!Directory.Exists(_sourceDirectory))
             {
-                Logger.Error($"Source folder \"{_config.SourceFolder}\" does not exist!");
+                Logger.Error($"Source folder \"{Config.SourceFolder}\" does not exist!");
             }
 
             var sourceFiles = FileManager.GetSourceFiles(_sourceDirectory);
@@ -43,12 +43,12 @@ namespace RobloxCS
                 var fileContents = File.ReadAllText(sourceFile);
                 var tree = TranspilerUtility.ParseTree(fileContents, sourceFile);
                 HashSet<Func<SyntaxTree, ConfigData, SyntaxTree>> transformers = [TransformFactory.Main()];
-                if (_config.EnableDebugTransformer)
+                if (Config.EnableDebugTransformer)
                 {
                     transformers.Add(TransformFactory.Debug());
                 }
 
-                var transformedTree = TranspilerUtility.TransformTree(tree, transformers, _config);
+                var transformedTree = TranspilerUtility.TransformTree(tree, transformers, Config);
                 foreach (var diagnostic in transformedTree.GetDiagnostics())
                 {
                     Logger.HandleDiagnostic(diagnostic);
@@ -60,7 +60,7 @@ namespace RobloxCS
         
         private CSharpCompilation CompileASTs()
         {
-            var compiler = TranspilerUtility.GetCompiler(_fileTrees, _config);
+            var compiler = TranspilerUtility.GetCompiler(_fileTrees, Config);
             foreach (var diagnostic in compiler.GetDiagnostics())
             {
                 Logger.HandleDiagnostic(diagnostic);
@@ -99,15 +99,15 @@ namespace RobloxCS
             var compiledFiles = new List<CompiledFile>();
             var memberCollector = new MemberCollector(_fileTrees);
             var members = memberCollector.Collect();
-            if (_config.CSharpOptions.EntryPointRequired && _fileTrees.All(tree => !tree.GetRoot().DescendantNodes().Any(node => node is ClassDeclarationSyntax classDeclaration && Utility.GetNamesFromNode(classDeclaration).FirstOrDefault() == _config.CSharpOptions.EntryPointName)))
+            if (Config.CSharpOptions.EntryPointRequired && _fileTrees.All(tree => !tree.GetRoot().DescendantNodes().Any(node => node is ClassDeclarationSyntax classDeclaration && Utility.GetNamesFromNode(classDeclaration).FirstOrDefault() == Config.CSharpOptions.EntryPointName)))
             {
-                Logger.Error($"No entry point class \"{_config.CSharpOptions.EntryPointName}\" found!");
+                Logger.Error($"No entry point class \"{Config.CSharpOptions.EntryPointName}\" found!");
             }
 
             foreach (var tree in _fileTrees)
             {
-                var generatedLua = TranspilerUtility.GenerateLua(tree, compiler, members, _inputDirectory, _config);
-                var targetPath = tree.FilePath.Replace(_config.SourceFolder, _config.OutputFolder).Replace(".cs", ".lua");
+                var generatedLua = TranspilerUtility.GenerateLua(tree, compiler, members, _inputDirectory, Config);
+                var targetPath = tree.FilePath.Replace(Config.SourceFolder, Config.OutputFolder).Replace(".cs", ".lua");
                 compiledFiles.Add(new CompiledFile(targetPath, generatedLua));
             }
 
@@ -120,7 +120,7 @@ namespace RobloxCS
             var subDirectories = Directory.GetDirectories(_sourceDirectory, "*", SearchOption.AllDirectories);
             foreach (string subDirectory in subDirectories)
             {
-                Directory.CreateDirectory(subDirectory.Replace(_config.SourceFolder, _config.OutputFolder));
+                Directory.CreateDirectory(subDirectory.Replace(Config.SourceFolder, Config.OutputFolder));
             }
         }
     }

@@ -9,7 +9,7 @@ namespace RobloxCS
     {
         public static RojoProject? GetRojoProject(string inputDirectory, string projectName)
         {
-            if (Utility.IsDebug() || projectName == "UNIT_TESTING") return null;
+            if (projectName == "UNIT_TESTING") return null;
 
             var path = RojoReader.FindProjectPath(inputDirectory, projectName);
             if (path == null)
@@ -23,9 +23,8 @@ namespace RobloxCS
 
         public static string CleanUpLuaForTests(string luaSource, int? extraLines)
         {
-            var debugExtraLines = Utility.IsDebug() ? 1 : 0;
             var lines = luaSource.Split('\n').ToList();
-            lines.RemoveRange(0, 2 + (extraLines ?? 0) + debugExtraLines);
+            lines.RemoveRange(0, 2 + (extraLines ?? 0));
 
             return string.Join('\n', lines).Replace("\r", "").Trim();
         }

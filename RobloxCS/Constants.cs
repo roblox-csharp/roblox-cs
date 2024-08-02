@@ -19,6 +19,17 @@ namespace RobloxCS
             { "Reverse", "reverse" }
         };
 
+        public static readonly HashSet<string> GLOBAL_LIBRARIES = [
+            "task",
+            "math",
+            "table",
+            "os",
+            "buffer",
+            "coroutine",
+            "utf8",
+            "debug"
+        ];
+
         public static readonly HashSet<string> METAMETHODS = [
             "__tostring",
             "__add",

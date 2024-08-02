@@ -194,15 +194,6 @@ namespace RobloxCS
             return Regex.Replace(path.Replace("\\\\", "/").Replace('\\', '/').Replace("//", "/"), @"(?<!\.)\./", "");
         }
 
-        public static bool IsDebug()
-        {
-#if DEBUG
-            return true;
-#else
-            return false;
-#endif
-        }
-
         public static string? GetRbxcsDirectory()
         {
             var directoryName = Path.GetDirectoryName(GetAssemblyDirectory()); // pretend like this isn't here lol
