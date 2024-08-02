@@ -723,6 +723,14 @@ namespace RobloxCS
                 Write(", ");
                 Visit(node.Right);
                 Write(")");
+
+                if ((leftType == null || rightType == null) || (!Constants.UNSUPPORTED_BITWISE_TYPES.Contains(leftType.Name) && !Constants.UNSUPPORTED_BITWISE_TYPES.Contains(rightType.Name)))
+                    return;
+
+                Logger.CodegenWarning(node, "Using 128/64 bit integers when performing binary operations on Luau may result in undefined behaviour.");
+                WriteLine();
+                Write("--> rbxcsc warn: long/Int64 or Int128/UInt128 bit operations may lead to undefined behaviour (above this warning).");
+
                 return;
             }
 

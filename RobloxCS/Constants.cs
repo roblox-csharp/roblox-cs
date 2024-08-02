@@ -4,6 +4,14 @@ namespace RobloxCS
 {
     internal static class Constants
     {
+        public static readonly HashSet<string> UNSUPPORTED_BITWISE_TYPES =
+        [
+            "UInt128",
+            "ulong",
+            "long",
+            "Int128"
+        ];
+
         public static readonly HashSet<string> LENGTH_READABLE_TYPES =
         [
             "String",
