@@ -19,8 +19,6 @@ This project includes the compiler and transformers.
 - Full qualification of types/namespaces inside of namespaces
 - Macro `new T()` with collection types to `{}`
 - `const` declarations
-- Disable `extern` keyword
-- `params` keyword
 - Config option for emitting `@native` on namespace/class callbacks
 
 ## Will maybe be supported
