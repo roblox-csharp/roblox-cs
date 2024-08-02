@@ -990,6 +990,12 @@ namespace RobloxCS
                         Write("tonumber");
                         Visit(node.ArgumentList);
                         return;
+
+                    case "nameof":
+                        Write('"');
+                        Write(_semanticModel.GetConstantValue(node).Value?.ToString() ?? $"??? nameof({node.ToString()}) ???");
+                        Write('"');
+                        return;
                 }
             }
 
@@ -1652,7 +1658,7 @@ namespace RobloxCS
             {
                 Write(", namespace");
             }
-            WriteLine($") :: {GetName(parentClass)}");
+            WriteLine(')'); // TODO: (when typedefs are generated for classes) $") :: {GetName(parentClass)}" 
             WriteLine();
             if (initializerArguments != null)
             {
