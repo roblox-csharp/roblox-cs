@@ -16,7 +16,7 @@ public sealed class RojoProject
     public int ServePort { get; set; } = 34872;
 
     [JsonPropertyName("servePlaceIds")]
-    public List<string> ServePlaceIds { get; set; } = new List<string>();
+    public List<uint> ServePlaceIds { get; set; } = [];
 
     [JsonPropertyName("placeId")]
     public string? PlaceId { get; set; }
@@ -28,7 +28,7 @@ public sealed class RojoProject
     public string? ServeAddress { get; set; }
 
     [JsonPropertyName("globIgnorePaths")]
-    public List<string> GlobIgnorePaths { get; set; } = new List<string>();
+    public List<string> GlobIgnorePaths { get; set; } = [];
 
     [JsonPropertyName("emitLegacyScripts")]
     public bool EmitLegacyScripts { get; set; } = true;
@@ -49,10 +49,10 @@ public sealed class InstanceDescription
     public Dictionary<string, object>? Properties { get; set; }
     [JsonPropertyName("$ignoreUnknownInstances")]
     public bool IgnoreUnknownInstances { get; set; } = true;
-    public Dictionary<string, InstanceDescription> Instances { get; set; } = new Dictionary<string, InstanceDescription>();
+    public Dictionary<string, InstanceDescription> Instances { get; set; } = [];
 
     [JsonExtensionData]
-    public IDictionary<string, JsonElement> AdditionalData { get; set; } = new Dictionary<string, JsonElement>();
+    public IDictionary<string, JsonElement> AdditionalData { get; set; } = [];
 
     public void OnDeserialized()
     {
