@@ -4,7 +4,7 @@
     {
         public Name Name { get; } = name;
         public Expression? Initializer { get; } = initializer;
-        public TypeRef? Type { get; } = type == null ? null : ((initializer != null || type.IsNullable) ? new TypeRef(type.Path + "?") : type);
+        public TypeRef? Type { get; } = type == null ? null : initializer != null || type.IsNullable ? new TypeRef(type.Path + "?") : type;
 
         public override void Render(LuauWriter luau)
         {

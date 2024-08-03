@@ -1,8 +1,8 @@
-﻿namespace RobloxCS
+﻿namespace RobloxCS.Luau
 {
     public class LuauWriter : BaseWriter
     {
-        public string Render(Luau.AST ast)
+        public string Render(AST ast)
         {
             ast.Render(this);
             return ToString();
@@ -13,7 +13,7 @@
             WriteLine($"require({requirePath})");
         }
 
-        public void WriteIf(Luau.Expression condition, Luau.Statement body, Luau.Statement? elseBranch)
+        public void WriteIf(Expression condition, Statement body, Statement? elseBranch)
         {
             Write("if ");
             condition.Render(this);
@@ -28,7 +28,7 @@
             WriteLine("end");
         }
 
-        public void WriteFunction(Luau.Name? name, bool isLocal, Luau.ParameterList parameterList, Luau.TypeRef? returnType = null, Luau.Block? body = null)
+        public void WriteFunction(Name? name, bool isLocal, ParameterList parameterList, TypeRef? returnType = null, Block? body = null)
         {
             if (isLocal)
             {
@@ -55,7 +55,7 @@
             WriteLine("end");
         }
 
-        public void WriteVariable(Luau.Name name, bool isLocal, Luau.Expression? initializer = null, Luau.TypeRef? type = null)
+        public void WriteVariable(Name name, bool isLocal, Expression? initializer = null, TypeRef? type = null)
         {
             if (isLocal)
             {
@@ -71,7 +71,7 @@
             WriteLine();
         }
 
-        public void WriteReturn(Luau.Expression? expression = null, Luau.TypeRef? type = null)
+        public void WriteReturn(Expression? expression = null, TypeRef? type = null)
         {
             Write("return");
             if (expression != null)
@@ -93,7 +93,7 @@
             WriteLine();
         }
 
-        public void WriteTypeAnnotation(Luau.TypeRef? type)
+        public void WriteTypeAnnotation(TypeRef? type)
         {
             if (type != null)
             {
@@ -102,21 +102,21 @@
             }
         }
 
-        public void WriteTypeCast(Luau.Expression expression, Luau.TypeRef type)
+        public void WriteTypeCast(Expression expression, TypeRef type)
         {
             expression.Render(this);
             Write(" :: ");
             type.Render(this);
         }
 
-        public void WritePossibleBlock(Luau.Statement statement)
+        public void WritePossibleBlock(Statement statement)
         {
-            if (statement is not Luau.Block)
+            if (statement is not Block)
             {
                 PushIndent();
             }
             statement.Render(this);
-            if (statement is not Luau.Block)
+            if (statement is not Block)
             {
                 PopIndent();
             }

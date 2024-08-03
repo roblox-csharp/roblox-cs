@@ -3,13 +3,13 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static RobloxCS.Constants;
 
 namespace RobloxCS
 {
     public static class Utility
     {
         public const string RuntimeAssemblyName = "Roblox";
-        public const string LuaRuntimeModuleName = "RuntimeLib";
 
         public static string GetMappedType(string csharpType)
         {
@@ -49,7 +49,7 @@ namespace RobloxCS
                     return "number";
 
                 default:
-                    if (Constants.INTEGER_TYPES.Contains(csharpType))
+                    if (INTEGER_TYPES.Contains(csharpType))
                     {
                         return "number";
                     }
@@ -107,6 +107,28 @@ namespace RobloxCS
             }
         }
 
+        public static string GetDefaultValueForType(string typeName)
+        {
+            if (INTEGER_TYPES.Contains(typeName) || DECIMAL_TYPES.Contains(typeName))
+            {
+                return "0";
+            }
+
+            switch (typeName)
+            {
+                case "char":
+                case "Char":
+                case "string":
+                case "String":
+                    return "\"\"";
+                case "bool":
+                case "Boolean":
+                    return "false";
+                default:
+                    return "nil";
+            }
+        }
+
         public static List<string> ExtractTypeArguments(string input)
         {
             var typeArguments = new List<string>();
@@ -114,12 +136,8 @@ namespace RobloxCS
             var match = regex.Match(input);
             if (match.Success)
             {
-                // Get the matched group containing the type arguments
                 var args = match.Groups["args"].Value;
-
-                // Split the arguments by comma and trim whitespace
                 var argsArray = args.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-
                 foreach (var arg in argsArray)
                 {
                     typeArguments.Add(arg.Trim());
@@ -127,11 +145,6 @@ namespace RobloxCS
             }
 
             return typeArguments;
-        }
-
-        public static string FormatLocation(FileLinePositionSpan lineSpan)
-        {
-            return $"{(lineSpan.Path == "" ? "<anonymous>" : lineSpan.Path)}:{lineSpan.StartLinePosition.Line + 1}:{lineSpan.StartLinePosition.Character + 1}";
         }
 
         public static ISymbol? FindMember(INamespaceSymbol namespaceSymbol, string memberName)

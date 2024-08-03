@@ -1,5 +1,4 @@
-﻿
-namespace RobloxCS.Luau
+﻿namespace RobloxCS.Luau
 {
     public class AST(List<Statement> statements) : Node
     {

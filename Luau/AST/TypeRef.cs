@@ -3,7 +3,7 @@
     public class TypeRef : Expression
     {
         public string Path { get; }
-        public bool IsNullable {  get; }
+        public bool IsNullable { get; }
 
         public TypeRef(string path)
         {
