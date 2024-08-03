@@ -16,7 +16,7 @@ public sealed class RojoProject
     public int ServePort { get; set; } = 34872;
 
     [JsonPropertyName("servePlaceIds")]
-    public List<uint> ServePlaceIds { get; set; } = [];
+    public List<ulong> ServePlaceIds { get; set; } = [];
 
     [JsonPropertyName("placeId")]
     public string? PlaceId { get; set; }
