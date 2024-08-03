@@ -1,5 +1,4 @@
-﻿using System.Diagnostics;
-using System.Reflection;
+﻿using System.Reflection;
 using LibGit2Sharp;
 using CommandLine;
 using Spectre.Console;
@@ -135,7 +134,7 @@ namespace RobloxCS.CLI
                 lines = lines.Remove(start, end - start);
                 lines = lines.Insert(start, projectName);
                 File.WriteAllText(projectFile, lines);
-               
+
                 DotNet.Command.Create("dotnet", ["sln", Path.Combine(path, $"{projectName}.sln"), "add", projectFile]).Execute();
                 AnsiConsole.MarkupLine("[cyan]Successfully renamed project.[/]");
 
