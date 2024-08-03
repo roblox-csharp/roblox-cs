@@ -25,9 +25,6 @@ namespace RobloxCS.CLI
 
             [Value(0, Required = false, HelpText = "Project directory path", MetaName = "Path")]
             public string? Path { get; set; }
-
-            [Value(1, Required = false, HelpText = "Project name", MetaName = "Name")]
-            public string? Name { get; set; }
         }
 
         public static void Main(string[] args)
@@ -35,7 +32,6 @@ namespace RobloxCS.CLI
             Parser.Default.ParseArguments<Options>(args)
                 .WithParsed(options =>
                 {
-                    var name = options.Name ?? "Example";
                     var path = options.Path ?? ".";
                     if (options.Version)
                     {
@@ -43,7 +39,7 @@ namespace RobloxCS.CLI
                     }
                     else if (options.Init)
                     {
-                        InitializeProject(path, name);
+                        InitializeProject(path);
                     }
                     else if (options.WatchMode)
                     {
@@ -97,8 +93,9 @@ namespace RobloxCS.CLI
             }
         }
 
-        private static void InitializeProject(string path, string projectName)
+        private static void InitializeProject(string path)
         {
+            var projectName = Path.GetDirectoryName(path) == "" ? Path.GetFileName(path) : Path.GetDirectoryName(path) ?? "Example";
             try
             {
                 Repository.Clone(_exampleProjectRepo, path);
@@ -116,15 +113,15 @@ namespace RobloxCS.CLI
 
             if (projectName != "Example")
             {
-                var projectFolder = Path.Combine(path, projectName);
-                var projectSourceFolder = Path.Combine(projectFolder, "src");
+                var projectFolder = path;
+                var projectSourceFolder = Path.Combine(projectFolder, projectName, "src");
                 var projectFile = Path.Combine(projectSourceFolder, $"{projectName}.csproj");
-                var rojoManifestFile = Path.Combine(projectFolder, "default.project.json");
+                var rojoManifestFile = Path.Combine(projectFolder, projectName, "default.project.json");
 
                 AnsiConsole.MarkupLine("[yellow]Renaming project...[/]");
                 File.Delete(Path.Combine(path, "Example.sln"));
                 DotNet.Command.Create("dotnet", ["new", "sln", "-n", projectName, "-o", path]).Execute();
-                Directory.Move(Path.Combine(path, "Example"), projectFolder);
+                Directory.Move(Path.Combine(path, "Example"), Path.Combine(projectFolder, projectName));
                 File.Move(Path.Combine(projectSourceFolder, "Example.csproj"), projectFile);
 
                 // Dynamicallty replace <Title>...</Title> inside of the csproj file. This sucks, and we must edit the solution to not lose the reference to it.
