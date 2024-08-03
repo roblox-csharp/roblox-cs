@@ -2,6 +2,14 @@
 
 namespace RobloxCS.CodeGeneration;
 
+public enum LuauIterator
+{
+    Pairs,
+    IndexedPairs,
+    Next,
+    None
+}
+
 public class LuauWriter
 {
     private WritableTextBuffer _buffer;
@@ -9,6 +17,38 @@ public class LuauWriter
     public LuauWriter()
     {
         _buffer = new WritableTextBuffer();
+    }
+
+    public void WriteIterator(string indexVariableName, string valueVariableName, LuauWriter writer, string tableName, LuauIterator iteratorFunction)
+    {
+        var iterator = iteratorFunction switch
+        {
+            LuauIterator.Pairs => "pairs",
+            LuauIterator.IndexedPairs => "ipairs",
+            LuauIterator.Next => "next, ",
+            LuauIterator.None => ""
+        };
+
+        _buffer.WriteLine((string?)null);
+        _buffer.WriteLine($"for {indexVariableName}, {valueVariableName} in {iterator}({tableName}) do");
+        _buffer.IncreaseIndent();
+        _buffer.Write(writer.ToString());
+        _buffer.DecreaseIndentation();
+        _buffer.WriteLine("end");
+    }
+
+    public void WriteConditionalStatement(string condition, LuauWriter trueWriter, LuauWriter falseWriter)
+    {
+        _buffer.WriteLine((string?)null);
+        _buffer.WriteLine($"if ({condition}) then");
+        _buffer.IncreaseIndent();
+        _buffer.Write(trueWriter.ToString());
+        _buffer.DecreaseIndentation();
+        _buffer.WriteLine("else");
+        _buffer.IncreaseIndent();
+        _buffer.Write(falseWriter.ToString());
+        _buffer.DecreaseIndentation();
+        _buffer.WriteLine("end");
     }
 
     public void WriteRequire(string requirePath)
@@ -49,5 +89,10 @@ public class LuauWriter
                 $"{variableName}{typeNote}" :
                 $"{variableName}{typeNote} = {defaultVariableValue}"
         );
+    }
+
+    public override string? ToString()
+    {
+        return _buffer.ToString();
     }
 }
