@@ -12,7 +12,7 @@ public class WritableTextBuffer
     {
         _indentationSize = 4;
         _indentation = 0;
-        _stringBuilder = new StringBuilder(2048);
+        _stringBuilder = new StringBuilder();
     }
 
     private bool MatchLastCharacter(char character)
