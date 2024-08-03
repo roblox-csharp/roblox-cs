@@ -52,7 +52,7 @@ public sealed class InstanceDescription
     public Dictionary<string, InstanceDescription> Instances { get; set; } = [];
 
     [JsonExtensionData]
-    public IDictionary<string, JsonElement> AdditionalData { get; set; } = new Dictionary<string, JsonElement>;
+    public IDictionary<string, JsonElement> AdditionalData { get; set; } = new Dictionary<string, JsonElement>();
 
     public void OnDeserialized()
     {
