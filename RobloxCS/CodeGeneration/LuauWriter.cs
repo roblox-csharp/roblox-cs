@@ -10,6 +10,12 @@ public enum LuauIterator
     None
 }
 
+public struct ConditonalStatement
+{
+    public string Condition;
+    public LuauWriter ConditionSuccessful;
+}
+
 public class LuauWriter
 {
     private WritableTextBuffer _buffer;
@@ -37,18 +43,16 @@ public class LuauWriter
         _buffer.WriteLine("end");
     }
 
-    public void WriteConditionalStatement(string condition, LuauWriter trueWriter, LuauWriter falseWriter)
+    public void WriteConditionalStatement(ConditonalStatement[] conditions)
     {
-        _buffer.WriteLine((string?)null);
-        _buffer.WriteLine($"if ({condition}) then");
-        _buffer.IncreaseIndent();
-        _buffer.Write(trueWriter.ToString());
-        _buffer.DecreaseIndentation();
-        _buffer.WriteLine("else");
-        _buffer.IncreaseIndent();
-        _buffer.Write(falseWriter.ToString());
-        _buffer.DecreaseIndentation();
-        _buffer.WriteLine("end");
+        foreach (var condition in conditions)
+        {
+            _buffer.WriteLine("if {condition.Condition} then");
+            _buffer.IncreaseIndent();
+            _buffer.Write(condition.ConditionSuccessful.ToString());
+            _buffer.DecreaseIndentation();
+            _buffer.WriteLine("end");
+        }
     }
 
     public void WriteRequire(string requirePath)
