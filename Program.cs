@@ -5,6 +5,7 @@ var source = """
 void increment(int n = 69)
 {
     var x = 1;
+    return x;
 }
 """;
 

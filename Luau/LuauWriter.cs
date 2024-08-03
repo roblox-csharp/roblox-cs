@@ -73,10 +73,9 @@
 
         public void WriteReturn(Expression? expression = null, TypeRef? type = null)
         {
-            Write("return");
+            Write("return ");
             if (expression != null)
             {
-                Write(" ");
                 if (type != null)
                 {
                     WriteTypeCast(expression, type);

@@ -31,6 +31,16 @@ namespace RobloxCS
             return new Luau.AST(statements);
         }
 
+        public override Luau.Node? VisitIdentifierName(IdentifierNameSyntax node)
+        {
+            return new Luau.IdentifierName(GetName(node));
+        }
+
+        public override Luau.Node? VisitReturnStatement(ReturnStatementSyntax node)
+        {
+            return new Luau.Return(TryVisit(node.Expression) as Luau.Expression);
+        }
+
         public override Luau.Node? VisitBlock(BlockSyntax node)
         {
             return new Luau.Block(node.Statements.Select(Visit).OfType<Luau.Statement>().ToList());
