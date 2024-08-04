@@ -12,6 +12,8 @@
             {
                 statement.Render(luau);
             }
+            // TODO: return all public members?
+            luau.WriteLine("return nil");
         }
     }
 }

@@ -2,10 +2,9 @@
 using RobloxCS;
 
 var source = """
-do
-{
-    print("epicness");
-} while (true);
+for (int i = 10; i > 5; i--) {
+    i &= 69;
+}
 """;
 
 var sourceAST = CSharpSyntaxTree.ParseText(source);
