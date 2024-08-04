@@ -2,8 +2,7 @@
 using RobloxCS;
 
 var source = """
-var x = (1 + 2) / 2;
-var name = nameof(x);
+var lambda = (int abc, int defg) => print("epic guy");
 """;
 
 var sourceAST = CSharpSyntaxTree.ParseText(source);

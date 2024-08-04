@@ -199,10 +199,33 @@ namespace RobloxCS
             return new Luau.Parenthesized(expression);
         }
 
+        public override Luau.AnonymousFunction VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node)
+        {
+            var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
+            var body = node.ExpressionBody != null ?
+                new Luau.Block([new Luau.ExpressionStatement(Visit<Luau.Expression>(node.ExpressionBody))])
+                : Visit<Luau.Block?>(node.Block);
+
+            return new Luau.AnonymousFunction(parameterList, body);
+        }
+
+        public override Luau.AnonymousFunction VisitSimpleLambdaExpression(SimpleLambdaExpressionSyntax node)
+        {
+            var parameterList = new Luau.ParameterList([Visit<Luau.Parameter>(node.Parameter)]);
+            var body = node.ExpressionBody != null ?
+                new Luau.Block([new Luau.ExpressionStatement(Visit<Luau.Expression>(node.ExpressionBody))])
+                : Visit<Luau.Block?>(node.Block);
+
+            return new Luau.AnonymousFunction(parameterList, body);
+        }
+
         public override Luau.AnonymousFunction VisitAnonymousMethodExpression(AnonymousMethodExpressionSyntax node)
         {
             var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
-            var body = Visit<Luau.Block?>(node.Body);
+            var body = node.ExpressionBody != null ?
+                new Luau.Block([new Luau.ExpressionStatement(Visit<Luau.Expression>(node.ExpressionBody))])
+                : Visit<Luau.Block?>(node.Block);
+
             return new Luau.AnonymousFunction(parameterList, body);
         }
 
@@ -211,7 +234,10 @@ namespace RobloxCS
             var name = CreateIdentifierName(node);
             var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
             var returnType = CreateTypeRef(node.ReturnType);
-            var body = Visit<Luau.Block?>(node.Body);
+            var body = node.ExpressionBody != null ?
+                new Luau.Block([new Luau.ExpressionStatement(Visit<Luau.Expression>(node.ExpressionBody.Expression))])
+                : Visit<Luau.Block?>(node.Body);
+
             var attributeLists = node.AttributeLists.Select(Visit<Luau.AttributeList>).ToList();
             return new Luau.Function(name, true, parameterList, returnType, body, attributeLists);
         }
