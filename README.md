@@ -7,11 +7,15 @@
 
 In no particular order:
 - [x] built-in attributes (aka `@native`)
+- [x] variables 
 - [x] local methods
 - [x] anonymous methods 
+- [x] anonymous object creation
 - [x] returning
 - [x] calling
 - [x] lambdas 
+- [ ] if using temporary variables and a regular variable with the same name is created, append temporary names with `_n` where `n` is the index of the temporary variable
+- [ ] emit comments
 - [ ] method overloading
 - [ ] using postfix unary ops as expressions (`doSomething(i++);`)
 - [ ] using assignments as expressions (`var x = i = 2;`)
@@ -24,6 +28,7 @@ In no particular order:
 - [ ] types
 	- [x] map primitives to luau
 	- [ ] generics
+- [ ] namespaces
 - [ ] enums
 - [ ] interfaces
 - [ ] partial classes/structs/interfaces

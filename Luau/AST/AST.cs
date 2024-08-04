@@ -13,7 +13,7 @@
                 statement.Render(luau);
             }
             // TODO: return all public members?
-            luau.WriteLine("return nil");
+            luau.WriteReturn();
         }
     }
 }

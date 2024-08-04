@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using static RobloxCS.Luau.Constants;
 
 namespace RobloxCS
 {
@@ -18,6 +19,10 @@ namespace RobloxCS
 
         protected Luau.IdentifierName CreateIdentifierName(string name)
         {
+            if (RESERVED_IDENTIFIERS.Contains(name))
+            {
+                // TODO: throw 
+            }
             return new Luau.IdentifierName(name);
         }
 

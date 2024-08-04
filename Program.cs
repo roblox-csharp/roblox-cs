@@ -2,12 +2,14 @@
 using RobloxCS;
 
 var source = """
-for (int i = 10; i > 5; i--) {
-    i &= 69;
+foreach (var x in abc)
+{
+
 }
 
-for (int i = 1;;i += 1) {
-    print("hello ", i);
+foreach (var (a, b) in xyz)
+{
+
 }
 """;
 

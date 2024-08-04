@@ -1,42 +1,37 @@
 namespace RobloxCS.Luau
 {
-    public class For(Variable? initializer, Expression? incrementBy, Expression? condition, Statement body) : Statement
+    public class For(List<Name> initializers, Expression iterator, Statement body) : Statement
     {
-        public Variable? Initializer { get; } = initializer;
-        public Expression Condition { get; } = condition ?? new Literal("true");
-        public Statement? IncrementBy { get; private set; } = incrementBy != null ? new ExpressionStatement(incrementBy) : null;
+        public List<Name> Names { get; } = initializers;
+        public Expression Iterator { get; } = iterator;
         public Statement Body { get; } = body;
 
         public override void Render(LuauWriter luau)
         {
-            luau.WriteLine("do");
-            luau.PushIndent();
-            Initializer?.Render(luau);
-
-            var shouldIncrementIdentifier = new IdentifierName("_shouldIncrement");
-            if (IncrementBy != null)
+            var singleValueIteration = Names.Count == 1;
+            luau.Write("for _, ");
+            if (singleValueIteration)
             {
-                new Variable(shouldIncrementIdentifier, true, AstUtility.False()).Render(luau);
+                Names.First().Render(luau);
             }
-
-            luau.WriteLine("while true do");
-            luau.PushIndent();
-            Body.Render(luau);
-            if (IncrementBy != null)
+            else
             {
-                if (IncrementBy is ExpressionStatement expressionStatement
-                    && expressionStatement.Expression is BinaryOperator binaryOperator
-                    && !binaryOperator.Operator.Contains('='))
+                luau.Write("_binding");
+            }
+            luau.Write(" in ");
+            Iterator.Render(luau);
+            luau.WriteLine(" do");
+            luau.PushIndent();
+
+            if (!singleValueIteration)
+            {
+                foreach (var name in Names)
                 {
-                    IncrementBy = new Variable(new IdentifierName("_"), true, expressionStatement.Expression);
+                    var index = new Literal((Names.IndexOf(name) + 1).ToString());
+                    new Variable(name, true, new ElementAccess(new IdentifierName("_binding"), index)).Render(luau);
                 }
-                new If(shouldIncrementIdentifier, IncrementBy, new ExpressionStatement(new Assignment(shouldIncrementIdentifier, AstUtility.True()))).Render(luau);
             }
-
-            new If(new UnaryOperator("not ", new Parenthesized(Condition)), new Break()).Render(luau);
-
-            luau.PopIndent();
-            luau.WriteLine("end");
+            Body.Render(luau);
 
             luau.PopIndent();
             luau.WriteLine("end");

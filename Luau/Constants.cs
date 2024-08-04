@@ -1,6 +1,6 @@
 ﻿using Microsoft.CodeAnalysis.CSharp;
 
-namespace RobloxCS
+namespace RobloxCS.Luau
 {
     internal static class Constants
     {
@@ -9,8 +9,7 @@ namespace RobloxCS
             "UInt128",
             "ulong",
             "long",
-            "Int128",
-            "BigInt"
+            "Int128"
         ];
 
         public static readonly HashSet<string> LENGTH_READABLE_TYPES =
@@ -19,6 +18,15 @@ namespace RobloxCS
             "string",
             "Array"
         ];
+
+        public static readonly Dictionary<string, string> MAPPED_STRING_METHODS = new Dictionary<string, string>
+        {
+            { "Replace", "gsub" },
+            { "Split", "split" },
+            { "ToLower", "lower" },
+            { "ToUpper", "upper" },
+            { "Reverse", "reverse" }
+        };
 
         public static readonly HashSet<string> GLOBAL_LIBRARIES =
         [
@@ -54,6 +62,11 @@ namespace RobloxCS
             "__index",
             "__newindex",
             "__metatable",
+        ];
+
+        public static readonly HashSet<string> RESERVED_IDENTIFIERS =
+        [
+            "CS"
         ];
 
         public static readonly HashSet<string> LUAU_KEYWORDS =
@@ -106,10 +119,8 @@ namespace RobloxCS
         [
             "float",
             "double",
-            "decimal",
             "Single",
-            "Double",
-            "Decimal"
+            "Double"
         ];
 
         public static readonly HashSet<string> INTEGER_TYPES =

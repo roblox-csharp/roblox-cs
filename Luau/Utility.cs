@@ -1,5 +1,5 @@
 ﻿using System.Text.RegularExpressions;
-using static RobloxCS.Constants;
+using static RobloxCS.Luau.Constants;
 
 namespace RobloxCS.Luau
 {
