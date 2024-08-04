@@ -196,6 +196,13 @@ namespace RobloxCS
             return new Luau.MemberAccess(expression, name);
         }
 
+        public override Luau.ElementAccess VisitElementAccessExpression(ElementAccessExpressionSyntax node)
+        {
+            var expression = Visit<Luau.Expression>(node.Expression);
+            var index = Visit<Luau.Expression>(node.ArgumentList.Arguments.First().Expression);
+            return new Luau.ElementAccess(expression, index);
+        }
+
         public override Luau.IdentifierName VisitIdentifierName(IdentifierNameSyntax node)
         {
             return CreateIdentifierName(node);
@@ -204,6 +211,11 @@ namespace RobloxCS
         public override Luau.Break VisitBreakStatement(BreakStatementSyntax node)
         {
             return new Luau.Break();
+        }
+
+        public override Luau.Continue VisitContinueStatement(ContinueStatementSyntax node)
+        {
+            return new Luau.Continue();
         }
 
         public override Luau.Return VisitReturnStatement(ReturnStatementSyntax node)

@@ -2,15 +2,8 @@
 using RobloxCS;
 
 var source = """
-foreach (var x in abc)
-{
-
-}
-
-foreach (var (a, b) in xyz)
-{
-
-}
+var a = abc["someElement"];
+var b = xyz[69];
 """;
 
 var sourceAST = CSharpSyntaxTree.ParseText(source);

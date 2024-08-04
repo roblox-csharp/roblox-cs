@@ -19,11 +19,11 @@ In no particular order:
 - [ ] method overloading
 - [ ] using postfix unary ops as expressions (`doSomething(i++);`)
 - [ ] using assignments as expressions (`var x = i = 2;`)
-- [ ] control flow
+- [x] control flow
 	- [x] if
 	- [x] while
 	- [x] for
-	- [ ] foreach
+	- [x] foreach
 	- [x] do
 - [ ] types
 	- [x] map primitives to luau
