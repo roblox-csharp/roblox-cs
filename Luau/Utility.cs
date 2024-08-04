@@ -63,7 +63,7 @@ namespace RobloxCS.Luau
             }
         }
 
-        public static string GetBit32MethodName(string bitOp)
+        public static string? GetBit32MethodName(string bitOp)
         {
             switch (bitOp)
             {
@@ -87,9 +87,8 @@ namespace RobloxCS.Luau
                     return "lshift";
                 case "~":
                     return "bnot";
-                default:
-                    return bitOp;
             }
+            return null;
         }
 
         public static string GetMappedOperator(string op)

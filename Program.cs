@@ -2,11 +2,7 @@
 using RobloxCS;
 
 var source = """
-Func<int, int> action = delegate (int b)
-{
-    var x = 1 + b;
-    return x;
-};
+var x = 10 & 2;
 """;
 
 var sourceAST = CSharpSyntaxTree.ParseText(source);

@@ -86,11 +86,23 @@ namespace RobloxCS
             return new Luau.Block(node.Statements.Select(Visit).OfType<Luau.Statement>().ToList());
         }
 
-        public override Luau.BinaryExpression VisitBinaryExpression(BinaryExpressionSyntax node)
+        public override Luau.Node VisitBinaryExpression(BinaryExpressionSyntax node)
         {
             var left = Visit<Luau.Expression>(node.Left);
             var right = Visit<Luau.Expression>(node.Right);
             var mappedOperator = Luau.Utility.GetMappedOperator(node.OperatorToken.Text);
+            var bit32MethodName = Luau.Utility.GetBit32MethodName(mappedOperator);
+            if (bit32MethodName != null)
+            {
+                return new Luau.Call(
+                    new Luau.MemberAccess(
+                        new Luau.IdentifierName("bit32"),
+                        new Luau.IdentifierName(bit32MethodName)
+                    ),
+                    [left, right]
+                );
+            }
+
             return new Luau.BinaryExpression(left, mappedOperator, right);
         }
 
