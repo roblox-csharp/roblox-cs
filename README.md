@@ -11,6 +11,7 @@ In no particular order:
 - [x] anonymous methods 
 - [x] returning
 - [ ] method overloading
+- [ ] calling
 - [ ] control flow
 	- [x] if
 	- [ ] while

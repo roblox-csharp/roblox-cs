@@ -31,6 +31,23 @@ namespace RobloxCS
             return new Luau.AST(statements);
         }
 
+        public override Luau.Call VisitInvocationExpression(InvocationExpressionSyntax node)
+        {
+            var methodSymbol = _semanticModel.GetDeclaredSymbol(node.Expression)!;
+            var callee = Visit<Luau.Expression>(node.Expression);
+            if (callee is Luau.MemberAccess memberAccess)
+            {
+                memberAccess.Operator = methodSymbol.IsStatic ? '.' : ':';
+            }
+
+            List<Luau.Expression> arguments = [];
+            foreach (var argument in node.ArgumentList.Arguments)
+            {
+                arguments.Add(Visit<Luau.Expression>(argument.Expression));
+            }
+            return new Luau.Call(callee, arguments);
+        }
+
         public override Luau.Variable VisitAnonymousObjectMemberDeclarator(AnonymousObjectMemberDeclaratorSyntax node)
         {
             var name = Visit<Luau.IdentifierName?>(node.NameEquals?.Name);

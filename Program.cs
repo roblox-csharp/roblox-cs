@@ -2,10 +2,11 @@
 using RobloxCS;
 
 var source = """
-[Native]
-void nativeMethod()
+void myMethod(int x, string abc)
 {
 }
+
+myMethod(1, "yuh");
 """;
 
 var sourceAST = CSharpSyntaxTree.ParseText(source);
