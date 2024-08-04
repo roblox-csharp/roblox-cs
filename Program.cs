@@ -4,6 +4,8 @@ using RobloxCS;
 var source = """
 var x = 69;
 x++;
+x--;
+var y = x!;
 """;
 
 var sourceAST = CSharpSyntaxTree.ParseText(source);

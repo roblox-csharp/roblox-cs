@@ -98,7 +98,7 @@ namespace RobloxCS.Luau
                 case "++":
                     return "+=";
                 case "--":
-                    return "--";
+                    return "-=";
                 case "!":
                     return "not ";
                 case "!=":

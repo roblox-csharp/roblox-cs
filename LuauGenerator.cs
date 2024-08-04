@@ -24,7 +24,7 @@ namespace RobloxCS
                 var statement = Visit<Luau.Statement?>(member);
                 if (statement == null)
                 {
-                    throw new Exception($"Unhandled syntax node within \"{member}\"");
+                    throw new Exception($"Unhandled syntax node within \"{member}\" ({member.Kind()})");
                 }    
                 statements.Add(statement);
             }
@@ -106,6 +106,19 @@ namespace RobloxCS
             return new Luau.BinaryExpression(left, mappedOperator, right);
         }
 
+        public override Luau.Node VisitPostfixUnaryExpression(PostfixUnaryExpressionSyntax node)
+        {
+            var operand = Visit<Luau.Expression>(node.Operand);
+            var operandType = _semanticModel.GetTypeInfo(node.Operand).Type!;
+            if (node.OperatorToken.Text == "!")
+            {
+                return new Luau.TypeCast(operand, new Luau.TypeRef(operandType.Name.Replace("?", "")));
+            }
+
+            var mappedOperator = Luau.Utility.GetMappedOperator(node.OperatorToken.Text);
+            return new Luau.BinaryExpression(operand, mappedOperator, new Luau.Literal("1"));
+        }
+
         public override Luau.Node? VisitPrefixUnaryExpression(PrefixUnaryExpressionSyntax node)
         {
             var operatorText = node.OperatorToken.Text;
@@ -121,7 +134,7 @@ namespace RobloxCS
                 return operand;
             }
 
-            var mappedOperator = Luau.Utility.GetMappedOperator(node.OperatorToken.Text);
+            var mappedOperator = Luau.Utility.GetMappedOperator(operatorText);
             var bit32MethodName = Luau.Utility.GetBit32MethodName(mappedOperator);
             if (bit32MethodName != null)
             {
@@ -193,6 +206,12 @@ namespace RobloxCS
         public override Luau.Node? VisitEqualsValueClause(EqualsValueClauseSyntax node)
         {
             return Visit(node.Value);
+        }
+
+        public override Luau.ExpressionStatement VisitExpressionStatement(ExpressionStatementSyntax node)
+        {
+            var expression = Visit<Luau.Expression>(node.Expression);
+            return new Luau.ExpressionStatement(expression);
         }
 
         public override Luau.Literal VisitLiteralExpression(LiteralExpressionSyntax node)
