@@ -19,6 +19,12 @@ In no particular order:
 - [ ] if using temporary variables and a regular variable with the same name is created, append temporary names with `_n` where `n` is the index of the temporary variable
 - [ ] emit comments
 - [ ] method overloading
+- [ ] patterns
+	- [ ] `is`
+	- [ ] `not`
+	- [ ] type
+	- [ ] declaration
+	- [ ] relational
 - [x] control flow
 	- [x] if
 	- [x] while
