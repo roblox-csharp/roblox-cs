@@ -43,6 +43,14 @@ namespace RobloxCS
             return new Luau.While(condition, body);
         }
 
+        public override Luau.ExpressionalIf VisitConditionalExpression(ConditionalExpressionSyntax node)
+        {
+            var condition = Visit<Luau.Expression>(node.Condition);
+            var body = Visit<Luau.Expression>(node.WhenTrue);
+            var elseBranch = Visit<Luau.Expression>(node.WhenFalse);
+            return new Luau.ExpressionalIf(condition, body, elseBranch);
+        }
+
         public override Luau.If VisitIfStatement(IfStatementSyntax node)
         {
             var condition = Visit<Luau.Expression>(node.Condition);

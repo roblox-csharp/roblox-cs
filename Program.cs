@@ -2,8 +2,7 @@
 using RobloxCS;
 
 var source = """
-var a = abc["someElement"];
-var b = xyz[69];
+var a = true ? "im cool" : "im not cool";
 """;
 
 var sourceAST = CSharpSyntaxTree.ParseText(source);
