@@ -28,8 +28,13 @@
             WriteLine("end");
         }
 
-        public void WriteFunction(Name? name, bool isLocal, ParameterList parameterList, TypeRef? returnType = null, Block? body = null)
+        public void WriteFunction(Name? name, bool isLocal, ParameterList parameterList, TypeRef? returnType = null, Block? body = null, List<AttributeList>? attributeLists = null, bool inlineAttributes = false)
         {
+            foreach (var attributeList in attributeLists ?? [])
+            {
+                attributeList.Inline = inlineAttributes;
+                attributeList.Render(this);
+            }
             if (isLocal)
             {
                 Write("local ");

@@ -159,10 +159,12 @@ namespace RobloxCS
 
         public override Luau.Function VisitLocalFunctionStatement(LocalFunctionStatementSyntax node)
         {
+            var name = CreateIdentifierName(node);
             var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
             var returnType = CreateTypeRef(node.ReturnType);
             var body = Visit<Luau.Block?>(node.Body);
-            return new Luau.Function(CreateIdentifierName(node), true, parameterList, returnType, body);
+            var attributeLists = node.AttributeLists.Select(Visit<Luau.AttributeList>).ToList();
+            return new Luau.Function(name, true, parameterList, returnType, body, attributeLists);
         }
 
         public override Luau.Parameter VisitParameter(ParameterSyntax node)
@@ -172,6 +174,28 @@ namespace RobloxCS
             var initializer = Visit<Luau.Expression?>(node.Default);
             var isParams = HasSyntax(node.Modifiers, SyntaxKind.ParamsKeyword);
             return new Luau.Parameter(name, isParams, initializer, returnType);
+        }
+
+        public override Luau.Node? VisitAttribute(AttributeSyntax node)
+        {
+            switch (GetName(node))
+            {
+                case "Native":
+                    return new Luau.BuiltinAttribute(new Luau.IdentifierName("native"));
+            }
+
+            // TODO: throw cuz regular attributes aren't supported yet
+            return null;
+        }
+
+        public override Luau.AttributeList VisitAttributeList(AttributeListSyntax node)
+        {
+            List<Luau.BaseAttribute> attributes = [];
+            foreach (var attribute in node.Attributes)
+            {
+                attributes.Add(Visit<Luau.BaseAttribute>(attribute));
+            }
+            return new Luau.AttributeList(attributes);
         }
 
         public override Luau.ParameterList VisitParameterList(ParameterListSyntax node)

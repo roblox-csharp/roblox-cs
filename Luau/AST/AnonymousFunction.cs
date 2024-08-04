@@ -1,6 +1,6 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class AnonymousFunction(ParameterList parameterList, Block? body) : Expression
+    public class AnonymousFunction(ParameterList parameterList, Block? body = null) : Expression
     {
         public ParameterList ParameterList { get; } = parameterList;
         public Block? Body { get; } = body;
