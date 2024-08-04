@@ -2,10 +2,21 @@
 using RobloxCS;
 
 var source = """
-void doSomething(params int[] numbers)
+var ImCool = true;
+var table = new
 {
-    
-}
+    ImCool
+};
+
+var table2 = new
+{
+    table.ImCool
+};
+
+var table3 = new
+{
+    ImTheCoolest = true
+};
 """;
 
 var sourceAST = CSharpSyntaxTree.ParseText(source);

@@ -1,6 +1,6 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class Variable(Name name, bool isLocal, Expression? initializer, TypeRef? type) : Statement
+    public class Variable(Name name, bool isLocal, Expression? initializer = null, TypeRef? type = null) : Statement
     {
         public Name Name { get; } = name;
         public bool IsLocal { get; } = isLocal;

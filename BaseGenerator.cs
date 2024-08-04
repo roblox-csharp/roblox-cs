@@ -6,6 +6,11 @@ namespace RobloxCS
 {
     public class BaseGenerator : CSharpSyntaxVisitor<Luau.Node>
     {
+        protected TNode Visit<TNode>(SyntaxNode? node) where TNode : Luau.Node?
+        {
+            return (TNode)Visit(node)!;
+        }
+
         protected Luau.IdentifierName CreateIdentifierName(SyntaxNode node)
         {
             return CreateIdentifierName(GetName(node));

@@ -11,7 +11,7 @@ namespace RobloxCS
 
         public Luau.AST GetLuauAST()
         {
-            return (Luau.AST)Visit(_tree.GetRoot())!;
+            return Visit<Luau.AST>(_tree.GetRoot());
         }
 
         public override Luau.Node? VisitCompilationUnit(CompilationUnitSyntax node)
@@ -21,7 +21,7 @@ namespace RobloxCS
             List<Luau.Statement> statements = [];
             foreach (var member in node.Members)
             {
-                var statement = Visit(member) as Luau.Statement;
+                var statement = Visit<Luau.Statement?>(member);
                 if (statement == null)
                 {
                     throw new Exception($"Unhandled syntax node within \"{member}\"");
@@ -31,6 +31,46 @@ namespace RobloxCS
             return new Luau.AST(statements);
         }
 
+        public override Luau.Node? VisitAnonymousObjectMemberDeclarator(AnonymousObjectMemberDeclaratorSyntax node)
+        {
+            var name = Visit<Luau.IdentifierName?>(node.NameEquals?.Name);
+            if (name == null)
+            {
+                var expressionName = _semanticModel.GetSymbolInfo(node.Expression).Symbol!.Name;
+                if (expressionName.Contains('.'))
+                {
+                    expressionName = expressionName.Split('.').Last();
+                }
+                name = new Luau.IdentifierName(expressionName);
+            }
+
+            var value = Visit<Luau.Expression?>(node.Expression);
+            return new Luau.Variable(name, true, value);
+        }
+
+        public override Luau.Node? VisitAnonymousObjectCreationExpression(AnonymousObjectCreationExpressionSyntax node)
+        {
+            List<Luau.Expression> values = [];
+            List<Luau.Expression> keys = [];
+            foreach (var member in node.Initializers)
+            {
+                var declaration = Visit<Luau.Variable>(member)!;
+                var key = new Luau.Literal($"\"{declaration.Name}\"");
+                var value = declaration.Initializer!;
+                keys.Add(key);
+                values.Add(value);
+            }
+
+            return new Luau.TableInitializer(values, keys);
+        }
+
+        public override Luau.Node? VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
+        {
+            var expression = Visit<Luau.Expression>(node.Expression);
+            var name = Visit<Luau.IdentifierName>(node.Name);
+            return new Luau.MemberAccess(expression, name);
+        }
+
         public override Luau.Node? VisitIdentifierName(IdentifierNameSyntax node)
         {
             return new Luau.IdentifierName(GetName(node));
@@ -38,7 +78,7 @@ namespace RobloxCS
 
         public override Luau.Node? VisitReturnStatement(ReturnStatementSyntax node)
         {
-            return new Luau.Return(TryVisit(node.Expression) as Luau.Expression);
+            return new Luau.Return(Visit<Luau.Expression?>(node.Expression));
         }
 
         public override Luau.Node? VisitBlock(BlockSyntax node)
@@ -50,7 +90,7 @@ namespace RobloxCS
         {
             var parameterList = (Luau.ParameterList)Visit(node.ParameterList)!;
             var returnType = CreateTypeRef(node.ReturnType);
-            var body = Visit(node.Body) as Luau.Block;
+            var body = Visit<Luau.Block?>(node.Body);
             return new Luau.Function(CreateIdentifierName(node), true, parameterList, returnType, body);
         }
 
@@ -58,7 +98,7 @@ namespace RobloxCS
         {
             var name = CreateIdentifierName(node);
             var returnType = CreateTypeRef(node.Type);
-            var initializer = Visit(node.Default) as Luau.Expression;
+            var initializer = Visit<Luau.Expression?>(node.Default);
             var isParams = HasSyntax(node.Modifiers, SyntaxKind.ParamsKeyword);
             return new Luau.Parameter(name, isParams, initializer, returnType);
         }
@@ -88,7 +128,7 @@ namespace RobloxCS
         public override Luau.Node? VisitVariableDeclarator(VariableDeclaratorSyntax node)
         {
             var declaration = node.Parent as VariableDeclarationSyntax;
-            var initializer = node.Initializer != null ? Visit(node.Initializer) as Luau.Expression : null;
+            var initializer = node.Initializer != null ? Visit<Luau.Expression>(node.Initializer) : null;
             return new Luau.Variable(CreateIdentifierName(node), true, initializer, CreateTypeRef(declaration?.Type));
         }
 
