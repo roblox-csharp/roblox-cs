@@ -46,13 +46,24 @@ namespace RobloxCS
             return new Luau.If(condition, body, elseBranch);
         }
 
-        public override Luau.Call VisitInvocationExpression(InvocationExpressionSyntax node)
+        public override Luau.Node VisitInvocationExpression(InvocationExpressionSyntax node)
         {
-            var methodSymbol = _semanticModel.GetDeclaredSymbol(node.Expression)!;
+            var methodSymbolInfo = _semanticModel.GetSymbolInfo(node.Expression);
+            if (methodSymbolInfo.Symbol == null &&
+                methodSymbolInfo.CandidateSymbols.IsEmpty &&
+                methodSymbolInfo.CandidateReason == CandidateReason.None)
+            {
+                var identifier = node.Expression as IdentifierNameSyntax;
+                if (identifier != null && identifier.Identifier.IsKind(SyntaxKind.IdentifierToken) && identifier.Identifier.Text == "nameof")
+                {
+                    return new Luau.Literal('"' + node.ArgumentList.Arguments.First().Expression.ToString() + '"');
+                }
+            }
+
             var callee = Visit<Luau.Expression>(node.Expression);
             if (callee is Luau.MemberAccess memberAccess)
             {
-                memberAccess.Operator = methodSymbol.IsStatic ? '.' : ':';
+                memberAccess.Operator = methodSymbolInfo.Symbol!.IsStatic ? '.' : ':';
             }
 
             List<Luau.Expression> arguments = [];

@@ -3,6 +3,7 @@ using RobloxCS;
 
 var source = """
 var x = (1 + 2) / 2;
+var name = nameof(x);
 """;
 
 var sourceAST = CSharpSyntaxTree.ParseText(source);
