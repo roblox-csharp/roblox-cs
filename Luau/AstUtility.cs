@@ -1,6 +1,6 @@
 ﻿namespace RobloxCS
 {
-    public static class LuauUtility
+    public static class AstUtility
     {
         public static Luau.If Initializer(Luau.Name name, Luau.Expression initializer)
         {
@@ -9,6 +9,11 @@
                 new Luau.Assignment(name, initializer),
                 null
             );
+        }
+
+        public static Luau.Literal Vararg()
+        {
+            return new Luau.Literal("...");
         }
 
         public static Luau.Literal Nil()

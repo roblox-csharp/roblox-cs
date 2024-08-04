@@ -20,7 +20,7 @@ namespace RobloxCS
         {
             if (type == null) return null;
             if (type.ToString() == "var") return null;
-            return new(Utility.GetMappedType(type.ToString()));
+            return new(Luau.Utility.GetMappedType(type.ToString()));
         }
 
         protected bool HasSyntax(SyntaxTokenList tokens, SyntaxKind syntax)

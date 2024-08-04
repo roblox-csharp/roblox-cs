@@ -1,12 +1,17 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class IdentifierName(string name) : Name
+    public class IdentifierName(string text) : Name
     {
-        public string Name { get; } = name;
+        public string Text { get; } = text;
 
         public override void Render(LuauWriter luau)
         {
-            luau.Write(Name);
+            luau.Write(Text);
+        }
+
+        public override string ToString()
+        {
+            return Text;
         }
     }
 }

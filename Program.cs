@@ -2,10 +2,9 @@
 using RobloxCS;
 
 var source = """
-void increment(int n = 69)
+void doSomething(params int[] numbers)
 {
-    var x = 1;
-    return x;
+    
 }
 """;
 

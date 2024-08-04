@@ -44,11 +44,19 @@
             WriteTypeAnnotation(returnType);
             WriteLine();
 
-            body ??= new Luau.Block([]);
+            body ??= new Block([]);
             foreach (var parameter in parameterList.Parameters)
             {
-                if (parameter.Initializer == null) continue;
-                body.Statements.Insert(0, LuauUtility.Initializer(parameter.Name, parameter.Initializer));
+                if (parameter.IsVararg)
+                {
+                    var type = parameter.Type != null ? new TypeRef(parameter.Type.Path + "[]") : null;
+                    var value = new TableInitializer([AstUtility.Vararg()]);
+                    body.Statements.Insert(0, new Variable(parameter.Name, true, value, type));
+                }
+                else if (parameter.Initializer != null)
+                {
+                    body.Statements.Insert(0, AstUtility.Initializer(parameter.Name, parameter.Initializer));
+                }
             }
             body.Render(this);
 

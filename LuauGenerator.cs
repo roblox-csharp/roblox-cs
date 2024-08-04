@@ -56,15 +56,11 @@ namespace RobloxCS
 
         public override Luau.Node? VisitParameter(ParameterSyntax node)
         {
-            var initializer = Visit(node.Default) as Luau.Expression;
-
-            var isParams = HasSyntax(node.Modifiers, SyntaxKind.ParamsKeyword);
+            var name = CreateIdentifierName(node);
             var returnType = CreateTypeRef(node.Type);
-            var name = isParams ?
-                CreateIdentifierName("...")
-                : CreateIdentifierName(node);
-
-            return new Luau.Parameter(name, initializer, returnType);
+            var initializer = Visit(node.Default) as Luau.Expression;
+            var isParams = HasSyntax(node.Modifiers, SyntaxKind.ParamsKeyword);
+            return new Luau.Parameter(name, isParams, initializer, returnType);
         }
 
         public override Luau.Node? VisitParameterList(ParameterListSyntax node)
