@@ -1,0 +1,37 @@
+# RobloxCS (rewrite)
+
+## To-do
+- Generate blocks that are direct children of other blocks or the compilation unit as a `do ... end` statement
+
+## Roadmap
+
+In no particular order:
+- [x] local methods
+- [x] returning
+- [ ] method overloading
+- [ ] control flow
+	- [x] if
+	- [ ] while
+	- [ ] for
+	- [ ] foreach
+	- [ ] do
+- [] types
+	- [x] map primitives to luau
+	- [ ] generics
+- [ ] enums
+- [ ] interfaces
+- [ ] partial classes/structs/interfaces
+- [ ] classes
+	- [ ] constructors
+	- [ ] destructors/finalizers?
+	- [ ] fields
+	- [ ] properties
+	- [ ] methods
+	- [ ] operator overloading
+	- [ ] inheritance
+
+## Will not be supported
+- Structs
+- Records
+- Events (via the `event` keyword, not no Roblox events)
+- Any unsafe context (pointers, `unsafe` keyword, etc.)

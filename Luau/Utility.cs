@@ -17,13 +17,6 @@ namespace RobloxCS.Luau
                 var nonNullableType = csharpType.Substring(0, csharpType.Length - 1);
                 return $"{GetMappedType(nonNullableType)}?";
             }
-            if (csharpType.StartsWith("Dictionary<") || csharpType.StartsWith("IDictionary<"))
-            {
-                var typeArgs = ExtractTypeArguments(csharpType).Select(GetMappedType).ToList();
-                var keyType = typeArgs[0];
-                var valueType = typeArgs[1];
-                return $"{{ [{GetMappedType(keyType)}]: {GetMappedType(valueType)} }}";
-            }
             if (csharpType.StartsWith("Action<") || csharpType == "Action")
             {
                 var typeArgs = ExtractTypeArguments(csharpType).Select(GetMappedType);
