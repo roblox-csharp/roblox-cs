@@ -13,12 +13,14 @@ In no particular order:
 - [x] calling
 - [x] lambdas 
 - [ ] method overloading
+- [ ] using postfix unary ops as expressions (`doSomething(i++);`)
+- [ ] using assignments as expressions (`var x = i = 2;`)
 - [ ] control flow
 	- [x] if
 	- [x] while
 	- [x] for
 	- [ ] foreach
-	- [ ] do
+	- [x] do
 - [ ] types
 	- [x] map primitives to luau
 	- [ ] generics

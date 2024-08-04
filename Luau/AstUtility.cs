@@ -6,14 +6,35 @@
         {
             return new Luau.If(
                 new Luau.BinaryOperator(name, "==", Nil()),
-                new Luau.Assignment(name, initializer),
+                new Luau.ExpressionStatement(new Luau.Assignment(name, initializer)),
                 null
+            );
+        }
+
+        public static Luau.Call Bit32Call(string methodName, params Luau.Expression[] arguments)
+        {
+            return new Luau.Call(
+                new Luau.MemberAccess(
+                    new Luau.IdentifierName("bit32"),
+                    new Luau.IdentifierName(methodName)
+                ),
+                arguments.ToList()
             );
         }
 
         public static Luau.Literal Vararg()
         {
             return new Luau.Literal("...");
+        }
+
+        public static Luau.Literal False()
+        {
+            return new Luau.Literal("false");
+        }
+
+        public static Luau.Literal True()
+        {
+            return new Luau.Literal("true");
         }
 
         public static Luau.Literal Nil()

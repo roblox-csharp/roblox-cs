@@ -25,7 +25,7 @@ namespace RobloxCS
                 if (statement == null)
                 {
                     throw new Exception($"Unhandled syntax node within \"{member}\" ({member.Kind()})");
-                }    
+                }
                 statements.Add(statement);
             }
             return new Luau.AST(statements);
@@ -98,6 +98,33 @@ namespace RobloxCS
             return new Luau.Variable(name, true, value);
         }
 
+        public override Luau.Node VisitAssignmentExpression(AssignmentExpressionSyntax node)
+        {
+            var name = Visit<Luau.Name>(node.Left);
+            var value = Visit<Luau.Expression>(node.Right);
+            if (!node.IsKind(SyntaxKind.SimpleAssignmentExpression))
+            {
+                var mappedOperator = Luau.Utility.GetMappedOperator(node.OperatorToken.Text);
+                var bit32MethodName = Luau.Utility.GetBit32MethodName(mappedOperator);
+                if (bit32MethodName != null)
+                {
+                    return new Luau.Assignment(name, AstUtility.Bit32Call(bit32MethodName, value));
+                }
+                return new Luau.BinaryOperator(name, mappedOperator, value);
+            }
+
+            return new Luau.Assignment(name, value);
+        }
+
+        public override Luau.For VisitForStatement(ForStatementSyntax node)
+        {
+            var initializer = Visit<Luau.VariableList?>(node.Declaration)?.Variables.FirstOrDefault();
+            var incrementBy = Visit<Luau.Expression?>(node.Incrementors.FirstOrDefault());
+            var condition = Visit<Luau.Expression?>(node.Condition);
+            var body = Visit<Luau.Statement>(node.Statement);
+            return new Luau.For(initializer, incrementBy, condition, body);
+        }
+
         public override Luau.TableInitializer VisitAnonymousObjectCreationExpression(AnonymousObjectCreationExpressionSyntax node)
         {
             List<Luau.Expression> values = [];
@@ -126,6 +153,11 @@ namespace RobloxCS
             return new Luau.IdentifierName(GetName(node));
         }
 
+        public override Luau.Break VisitBreakStatement(BreakStatementSyntax node)
+        {
+            return new Luau.Break();
+        }
+
         public override Luau.Return VisitReturnStatement(ReturnStatementSyntax node)
         {
             return new Luau.Return(Visit<Luau.Expression?>(node.Expression));
@@ -144,13 +176,7 @@ namespace RobloxCS
             var bit32MethodName = Luau.Utility.GetBit32MethodName(mappedOperator);
             if (bit32MethodName != null)
             {
-                return new Luau.Call(
-                    new Luau.MemberAccess(
-                        new Luau.IdentifierName("bit32"),
-                        new Luau.IdentifierName(bit32MethodName)
-                    ),
-                    [left, right]
-                );
+                return AstUtility.Bit32Call(bit32MethodName, left, right);
             }
 
             return new Luau.BinaryOperator(left, mappedOperator, right);
@@ -188,13 +214,7 @@ namespace RobloxCS
             var bit32MethodName = Luau.Utility.GetBit32MethodName(mappedOperator);
             if (bit32MethodName != null)
             {
-                return new Luau.Call(
-                    new Luau.MemberAccess(
-                        new Luau.IdentifierName("bit32"),
-                        new Luau.IdentifierName(bit32MethodName)
-                    ),
-                    [operand]
-                );
+                return AstUtility.Bit32Call(bit32MethodName, operand);
             }
 
             return new Luau.UnaryOperator(mappedOperator, operand);
@@ -298,7 +318,7 @@ namespace RobloxCS
         public override Luau.VariableList VisitVariableDeclaration(VariableDeclarationSyntax node)
         {
             var typeRef = CreateTypeRef(node.Type);
-            var variables = node.Variables.Select(Visit).OfType<Luau.Variable>().ToList(); 
+            var variables = node.Variables.Select(Visit).OfType<Luau.Variable>().ToList();
             return new Luau.VariableList(variables);
         }
 

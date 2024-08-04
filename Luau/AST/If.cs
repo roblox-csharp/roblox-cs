@@ -1,6 +1,6 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class If(Expression condition, Statement body, Statement? elseBranch) : Statement
+    public class If(Expression condition, Statement body, Statement? elseBranch = null) : Statement
     {
         public Expression Condition { get; } = condition;
         public Statement Body { get; } = body;

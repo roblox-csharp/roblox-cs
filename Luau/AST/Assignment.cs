@@ -1,6 +1,6 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class Assignment(Name name, Expression value) : Statement
+    public class Assignment(Name name, Expression value) : Expression
     {
         public Name Name { get; } = name;
         public Expression Value { get; } = value;
