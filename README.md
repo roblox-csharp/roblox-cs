@@ -14,6 +14,8 @@ In no particular order:
 - [x] returning
 - [x] calling
 - [x] lambdas 
+- [x] ternary operator (`condition ? whenTrue : whenFalse`)
+- [ ] save navigation (`a?.b?.c`)
 - [ ] if using temporary variables and a regular variable with the same name is created, append temporary names with `_n` where `n` is the index of the temporary variable
 - [ ] emit comments
 - [ ] method overloading
@@ -49,3 +51,4 @@ In no particular order:
 - Records
 - Events (via the `event` keyword, not no Roblox events)
 - Any unsafe context (pointers, `unsafe` keyword, etc.)
+- `ref` keyword
