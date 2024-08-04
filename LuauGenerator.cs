@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RobloxCS.Luau;
 
 namespace RobloxCS
 {
@@ -25,7 +26,7 @@ namespace RobloxCS
                 if (statement == null)
                 {
                     throw new Exception($"Unhandled syntax node within \"{member}\" ({member.Kind()})");
-                }    
+                }
                 statements.Add(statement);
             }
             return new Luau.AST(statements);
@@ -89,6 +90,49 @@ namespace RobloxCS
 
             var value = Visit<Luau.Expression?>(node.Expression);
             return new Luau.Variable(name, true, value);
+        }
+
+        public override Luau.Node VisitAssignmentExpression(AssignmentExpressionSyntax node)
+        {
+            if (node.Kind() == SyntaxKind.SubtractAssignmentExpression)
+            {
+                return new BinaryOperator(Visit<Luau.IdentifierName>(node.Left), "-=", Visit<Luau.Expression>(node.Right));
+            }
+            else if (node.Kind() == SyntaxKind.AddAssignmentExpression)
+            {
+                return new BinaryOperator(Visit<Luau.IdentifierName>(node.Left), "+=", Visit<Luau.Expression>(node.Right));
+            }
+            else if (node.Kind() == SyntaxKind.SimpleAssignmentExpression)
+            {
+                return new Luau.Assignment(Visit<Luau.IdentifierName>(node.Left), Visit<Luau.Expression>(node.Right));
+            }
+
+            throw new Exception("Unhandled assignment expression: " + node.Kind());
+        }
+
+        public override Luau.For VisitForStatement(ForStatementSyntax node)
+        {
+            var initialize = Visit<Luau.VariableList?>(node.Declaration)?.Variables.First();
+            var incrementBy = Visit<Luau.Node?>(node.Incrementors.First());
+            var condition = Visit<Luau.Expression?>(node.Condition);
+            var body = Visit<Luau.Statement>(node.Statement);
+
+            if (initialize == null)
+            {
+                throw new Exception("Expected for loop to have an initializer");
+            }
+
+            if (incrementBy == null)
+            {
+                throw new Exception("Expected for loop to have an incrementor");
+            }
+
+            if (condition == null)
+            {
+                throw new Exception("Expected for loop to have a condition");
+            }
+
+            return new Luau.For(initialize, incrementBy, condition, body);
         }
 
         public override Luau.TableInitializer VisitAnonymousObjectCreationExpression(AnonymousObjectCreationExpressionSyntax node)
@@ -291,7 +335,7 @@ namespace RobloxCS
         public override Luau.VariableList VisitVariableDeclaration(VariableDeclarationSyntax node)
         {
             var typeRef = CreateTypeRef(node.Type);
-            var variables = node.Variables.Select(Visit).OfType<Luau.Variable>().ToList(); 
+            var variables = node.Variables.Select(Visit).OfType<Luau.Variable>().ToList();
             return new Luau.VariableList(variables);
         }
 
