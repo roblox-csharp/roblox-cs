@@ -16,7 +16,7 @@ In no particular order:
 - [ ] control flow
 	- [x] if
 	- [x] while
-	- [ ] for
+	- [x] for
 	- [ ] foreach
 	- [ ] do
 - [ ] types

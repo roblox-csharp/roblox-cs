@@ -2,7 +2,10 @@
 using RobloxCS;
 
 var source = """
-var lambda = (int abc, int defg) => print("epic guy");
+do
+{
+    print("epicness");
+} while (true);
 """;
 
 var sourceAST = CSharpSyntaxTree.ParseText(source);

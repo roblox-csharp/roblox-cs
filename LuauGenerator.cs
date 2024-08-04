@@ -31,6 +31,13 @@ namespace RobloxCS
             return new Luau.AST(statements);
         }
 
+        public override Luau.Node? VisitDoStatement(DoStatementSyntax node)
+        {
+            var condition = Visit<Luau.Expression>(node.Condition);
+            var body = Visit<Luau.Statement>(node.Statement);
+            return new Luau.Repeat(new Luau.UnaryOperator("not ", condition), body);
+        }
+
         public override Luau.While VisitWhileStatement(WhileStatementSyntax node)
         {
             var condition = Visit<Luau.Expression>(node.Condition);
