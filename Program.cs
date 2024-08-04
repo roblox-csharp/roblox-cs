@@ -2,20 +2,10 @@
 using RobloxCS;
 
 var source = """
-var ImCool = true;
-var table = new
+Func<int, int> action = delegate (int b)
 {
-    ImCool
-};
-
-var table2 = new
-{
-    table.ImCool
-};
-
-var table3 = new
-{
-    ImTheCoolest = true
+    var x = 1 + b;
+    return x;
 };
 """;
 

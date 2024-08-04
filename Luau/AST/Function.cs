@@ -5,8 +5,8 @@
         public Name Name { get; } = name;
         public bool IsLocal { get; } = isLocal;
         public ParameterList ParameterList { get; } = parameterList;
-        public TypeRef? ReturnType { get; } = returnType;
         public Block? Body { get; } = body;
+        public TypeRef? ReturnType { get; } = returnType;
 
         public override void Render(LuauWriter luau)
         {

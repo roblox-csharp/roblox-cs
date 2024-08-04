@@ -14,7 +14,7 @@ namespace RobloxCS
             return Visit<Luau.AST>(_tree.GetRoot());
         }
 
-        public override Luau.Node? VisitCompilationUnit(CompilationUnitSyntax node)
+        public override Luau.AST VisitCompilationUnit(CompilationUnitSyntax node)
         {
             // TODO: handle usings
 
@@ -31,7 +31,7 @@ namespace RobloxCS
             return new Luau.AST(statements);
         }
 
-        public override Luau.Node? VisitAnonymousObjectMemberDeclarator(AnonymousObjectMemberDeclaratorSyntax node)
+        public override Luau.Variable VisitAnonymousObjectMemberDeclarator(AnonymousObjectMemberDeclaratorSyntax node)
         {
             var name = Visit<Luau.IdentifierName?>(node.NameEquals?.Name);
             if (name == null)
@@ -48,7 +48,7 @@ namespace RobloxCS
             return new Luau.Variable(name, true, value);
         }
 
-        public override Luau.Node? VisitAnonymousObjectCreationExpression(AnonymousObjectCreationExpressionSyntax node)
+        public override Luau.TableInitializer VisitAnonymousObjectCreationExpression(AnonymousObjectCreationExpressionSyntax node)
         {
             List<Luau.Expression> values = [];
             List<Luau.Expression> keys = [];
@@ -64,37 +64,52 @@ namespace RobloxCS
             return new Luau.TableInitializer(values, keys);
         }
 
-        public override Luau.Node? VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
+        public override Luau.MemberAccess VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
         {
             var expression = Visit<Luau.Expression>(node.Expression);
             var name = Visit<Luau.IdentifierName>(node.Name);
             return new Luau.MemberAccess(expression, name);
         }
 
-        public override Luau.Node? VisitIdentifierName(IdentifierNameSyntax node)
+        public override Luau.IdentifierName VisitIdentifierName(IdentifierNameSyntax node)
         {
             return new Luau.IdentifierName(GetName(node));
         }
 
-        public override Luau.Node? VisitReturnStatement(ReturnStatementSyntax node)
+        public override Luau.Return VisitReturnStatement(ReturnStatementSyntax node)
         {
             return new Luau.Return(Visit<Luau.Expression?>(node.Expression));
         }
 
-        public override Luau.Node? VisitBlock(BlockSyntax node)
+        public override Luau.Block VisitBlock(BlockSyntax node)
         {
             return new Luau.Block(node.Statements.Select(Visit).OfType<Luau.Statement>().ToList());
         }
 
-        public override Luau.Node? VisitLocalFunctionStatement(LocalFunctionStatementSyntax node)
+        public override Luau.BinaryExpression VisitBinaryExpression(BinaryExpressionSyntax node)
         {
-            var parameterList = (Luau.ParameterList)Visit(node.ParameterList)!;
+            var left = Visit<Luau.Expression>(node.Left);
+            var right = Visit<Luau.Expression>(node.Right);
+            var mappedOperator = Luau.Utility.GetMappedOperator(node.OperatorToken.Text);
+            return new Luau.BinaryExpression(left, mappedOperator, right);
+        }
+
+        public override Luau.AnonymousFunction VisitAnonymousMethodExpression(AnonymousMethodExpressionSyntax node)
+        {
+            var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
+            var body = Visit<Luau.Block?>(node.Body);
+            return new Luau.AnonymousFunction(parameterList, body);
+        }
+
+        public override Luau.Function VisitLocalFunctionStatement(LocalFunctionStatementSyntax node)
+        {
+            var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
             var returnType = CreateTypeRef(node.ReturnType);
             var body = Visit<Luau.Block?>(node.Body);
             return new Luau.Function(CreateIdentifierName(node), true, parameterList, returnType, body);
         }
 
-        public override Luau.Node? VisitParameter(ParameterSyntax node)
+        public override Luau.Parameter VisitParameter(ParameterSyntax node)
         {
             var name = CreateIdentifierName(node);
             var returnType = CreateTypeRef(node.Type);
@@ -103,7 +118,7 @@ namespace RobloxCS
             return new Luau.Parameter(name, isParams, initializer, returnType);
         }
 
-        public override Luau.Node? VisitParameterList(ParameterListSyntax node)
+        public override Luau.ParameterList VisitParameterList(ParameterListSyntax node)
         {
             return new Luau.ParameterList(node.Parameters.Select(Visit).OfType<Luau.Parameter>().ToList());
         }
@@ -118,14 +133,14 @@ namespace RobloxCS
             return Visit(node.Declaration);
         }
 
-        public override Luau.Node? VisitVariableDeclaration(VariableDeclarationSyntax node)
+        public override Luau.VariableList VisitVariableDeclaration(VariableDeclarationSyntax node)
         {
             var typeRef = CreateTypeRef(node.Type);
             var variables = node.Variables.Select(Visit).OfType<Luau.Variable>().ToList(); 
             return new Luau.VariableList(variables);
         }
 
-        public override Luau.Node? VisitVariableDeclarator(VariableDeclaratorSyntax node)
+        public override Luau.Variable VisitVariableDeclarator(VariableDeclaratorSyntax node)
         {
             var declaration = node.Parent as VariableDeclarationSyntax;
             var initializer = node.Initializer != null ? Visit<Luau.Expression>(node.Initializer) : null;
@@ -137,8 +152,9 @@ namespace RobloxCS
             return Visit(node.Value);
         }
 
-        public override Luau.Node? VisitLiteralExpression(LiteralExpressionSyntax node)
+        public override Luau.Literal VisitLiteralExpression(LiteralExpressionSyntax node)
         {
+
             var valueText = "";
             switch (node.Kind())
             {

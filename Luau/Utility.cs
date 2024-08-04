@@ -19,10 +19,22 @@ namespace RobloxCS.Luau
             }
             if (csharpType.StartsWith("Dictionary<") || csharpType.StartsWith("IDictionary<"))
             {
-                var typeArgs = ExtractTypeArguments(csharpType);
+                var typeArgs = ExtractTypeArguments(csharpType).Select(GetMappedType).ToList();
                 var keyType = typeArgs[0];
                 var valueType = typeArgs[1];
                 return $"{{ [{GetMappedType(keyType)}]: {GetMappedType(valueType)} }}";
+            }
+            if (csharpType.StartsWith("Action<") || csharpType == "Action")
+            {
+                var typeArgs = ExtractTypeArguments(csharpType).Select(GetMappedType);
+                return $"({string.Join(", ", typeArgs)}) -> nil";
+            }
+            if (csharpType.StartsWith("Func<"))
+            {
+                var typeArgs = ExtractTypeArguments(csharpType).Select(GetMappedType);
+                var returnType = typeArgs.Last();
+                typeArgs = typeArgs.SkipLast(1).ToList();
+                return $"({string.Join(", ", typeArgs)}) -> {returnType}";
             }
 
             switch (csharpType)

@@ -1,16 +1,16 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class BinaryExpression(Expression left, string @operator, Expression right) : Expression
+    public class MemberAccess(Expression expression, IdentifierName name, char @operator = '.') : Expression
     {
-        public Expression Left { get; } = left;
-        public string Operator { get; } = @operator;
-        public Expression Right { get; } = right;
+        public Expression Expression { get; } = expression;
+        public char Operator { get; set; } = @operator;
+        public IdentifierName Name { get; } = name;
 
         public override void Render(LuauWriter luau)
         {
-            Left.Render(luau);
-            luau.Write($" {Operator} ");
-            Right.Render(luau);
+            Expression.Render(luau);
+            luau.Write($"{Operator}");
+            Name.Render(luau);
         }
     }
 }
