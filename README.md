@@ -34,7 +34,7 @@ In no particular order:
 	- [ ] operator overloading
 	- [ ] inheritance
 - [ ] reflection
-	- [ ] nameof
+	- [x] nameof
 	- [ ] `Type` class
 
 ## Will not be supported
