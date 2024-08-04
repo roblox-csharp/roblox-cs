@@ -106,6 +106,37 @@ namespace RobloxCS
             return new Luau.BinaryExpression(left, mappedOperator, right);
         }
 
+        public override Luau.Node? VisitPrefixUnaryExpression(PrefixUnaryExpressionSyntax node)
+        {
+            var operatorText = node.OperatorToken.Text;
+            if (operatorText == "^")
+            {
+                // TODO: error (unsupported)
+                return null;
+            }
+
+            var operand = Visit<Luau.Expression>(node.Operand);
+            if (operatorText == "+")
+            {
+                return operand;
+            }
+
+            var mappedOperator = Luau.Utility.GetMappedOperator(node.OperatorToken.Text);
+            var bit32MethodName = Luau.Utility.GetBit32MethodName(mappedOperator);
+            if (bit32MethodName != null)
+            {
+                return new Luau.Call(
+                    new Luau.MemberAccess(
+                        new Luau.IdentifierName("bit32"),
+                        new Luau.IdentifierName(bit32MethodName)
+                    ),
+                    [operand]
+                );
+            }
+
+            return new Luau.UnaryExpression(mappedOperator, operand);
+        }
+
         public override Luau.AnonymousFunction VisitAnonymousMethodExpression(AnonymousMethodExpressionSyntax node)
         {
             var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);

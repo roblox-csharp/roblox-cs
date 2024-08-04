@@ -2,7 +2,8 @@
 using RobloxCS;
 
 var source = """
-var x = 10 & 2;
+var x = 69;
+x++;
 """;
 
 var sourceAST = CSharpSyntaxTree.ParseText(source);
