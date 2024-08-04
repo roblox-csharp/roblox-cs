@@ -1,11 +1,29 @@
 namespace RobloxCS.Luau
 {
-    public class NumericalFor(Variable? initializer, Expression? incrementBy, Expression? condition, Statement body) : Statement
+    public class NumericalFor : Statement
     {
-        public Variable? Initializer { get; } = initializer;
-        public Expression Condition { get; } = condition ?? new Literal("true");
-        public Statement? IncrementBy { get; private set; } = incrementBy != null ? new ExpressionStatement(incrementBy) : null;
-        public Statement Body { get; } = body;
+        public Variable? Initializer { get; }
+        public Expression Condition { get; }
+        public Statement? IncrementBy { get; private set; }
+        public Statement Body { get; }
+
+        public NumericalFor(Variable? initializer, Expression? incrementBy, Expression? condition, Statement body)
+        {
+            Initializer = initializer;
+            Condition = condition ?? new Literal("true");
+            IncrementBy = incrementBy != null ? new ExpressionStatement(incrementBy) : null;
+            Body = body;
+
+            AddChildren([Condition, Body]);
+            if (Initializer != null)
+            {
+                AddChild(Initializer);
+            }
+            if (IncrementBy != null)
+            {
+                AddChild(IncrementBy);
+            }
+        }
 
         public override void Render(LuauWriter luau)
         {

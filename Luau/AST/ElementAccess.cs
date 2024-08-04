@@ -1,9 +1,16 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class ElementAccess(Expression expression, Expression index) : Expression
+    public sealed class ElementAccess : Expression
     {
-        public Expression Expression { get; } = expression;
-        public Expression Index { get; } = index;
+        public Expression Expression { get; }
+        public Expression Index { get; set; }
+
+        public ElementAccess(Expression expression, Expression index)
+        {
+            Expression = expression;
+            Index = index;
+            AddChildren([Expression, Index]);
+        }
 
         public override void Render(LuauWriter luau)
         {

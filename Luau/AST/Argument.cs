@@ -1,10 +1,10 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class ExpressionStatement : Statement
+    public class Argument : Expression
     {
-        public Expression Expression { get; }
+        public Expression Expression { get; set; }
 
-        public ExpressionStatement(Expression expression)
+        public Argument(Expression expression)
         {
             Expression = expression;
             AddChildren([Expression]);
@@ -13,7 +13,6 @@
         public override void Render(LuauWriter luau)
         {
             Expression.Render(luau);
-            luau.WriteLine();
         }
     }
 }

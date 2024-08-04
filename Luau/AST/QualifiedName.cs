@@ -1,9 +1,16 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class QualifiedName(Name left, IdentifierName right) : Name
+    public class QualifiedName : Name
     {
-        public Name Left { get; } = left;
-        public IdentifierName Right { get; } = right;
+        public Name Left { get; }
+        public IdentifierName Right { get; }
+
+        public QualifiedName(Name left, IdentifierName right)
+        {
+            Left = left;
+            Right = right;
+            AddChildren([Left, Right]);
+        }
 
         public override void Render(LuauWriter luau)
         {

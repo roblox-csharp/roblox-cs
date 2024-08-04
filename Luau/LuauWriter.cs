@@ -1,4 +1,6 @@
-﻿namespace RobloxCS.Luau
+﻿using System.Net.WebSockets;
+
+namespace RobloxCS.Luau
 {
     public class LuauWriter : BaseWriter
     {
@@ -9,6 +11,26 @@
             ast.Render(this);
             return ToString();
         }
+
+        public void WriteNodesCommaSeparated<TNode>(List<TNode> nodes) where TNode : Node
+        {
+            foreach (var node in nodes)
+            {
+                node.Render(this);
+                if (node != nodes.Last())
+                {
+                    Write(", ");
+                }
+            }
+        }
+        public void WriteNodes<TNode>(List<TNode> nodes) where TNode : Node
+        {
+            foreach (var node in nodes)
+            {
+                node.Render(this);
+            }
+        }
+
 
         public void WriteRequire(string requirePath)
         {
@@ -73,6 +95,13 @@
             WriteLine("end");
         }
 
+        public void WriteAssignment(Name name, Expression initializer)
+        {
+            name.Render(this);
+            Write(" = ");
+            initializer.Render(this);
+        }
+
         public void WriteVariable(Name name, bool isLocal, Expression? initializer = null, TypeRef? type = null)
         {
             if (isLocal)
@@ -124,6 +153,79 @@
             expression.Render(this);
             Write(" :: ");
             type.Render(this);
+        }
+
+        public void WriteDescendantStatements(ref Node node)
+        {
+            if (node.Parent is not Variable && node is not Argument) {
+                if (node is Assignment assignment)
+                {
+                    node = assignment.Name;
+                }
+                else if (node is BinaryOperator binaryOperator && binaryOperator.Operator.Contains('='))
+                {
+                    node = binaryOperator.Left;
+                }
+            }
+
+            var original = new IdentifierName("_original");
+            var isNotCall = node is not Call;
+            if (node.Parent is Variable)
+            {
+                if (node is Assignment assignment)
+                {
+                    new Variable(original, true, assignment.Name).Render(this);
+                    new ExpressionStatement(assignment).Render(this);
+                    node = original;
+                }
+                else if (node is BinaryOperator binaryOperator && binaryOperator.Operator.Contains('='))
+                {
+                    new Variable(original, true, binaryOperator.Left).Render(this);
+                    new ExpressionStatement(binaryOperator).Render(this);
+                    node = original;
+                }
+            }
+
+            node.Descendants = node.Descendants.Select(descendant =>
+            {
+                if (!isNotCall)
+                {
+                    if (descendant is Assignment assignment)
+                    {
+                        new Variable(original, true, assignment.Name).Render(this);
+                        new ExpressionStatement(assignment).Render(this);
+                    }
+                    else if (descendant is BinaryOperator binaryOperator && binaryOperator.Operator.Contains('='))
+                    {
+                        new Variable(original, true, binaryOperator.Left).Render(this);
+                        new ExpressionStatement(binaryOperator).Render(this);
+                    }
+                }
+
+                WriteDescendantStatements(ref descendant);
+                return descendant;
+            }).ToList();
+
+            FixNode(node);
+        }
+
+        private Node FixNode(Node node)
+        {
+            var original = new IdentifierName("_original");
+            switch (node)
+            {
+                case ElementAccess elementAccess:
+                    elementAccess.Index = original;
+                    break;
+                case Variable variable:
+                    variable.Initializer = original;
+                    break;
+                case Argument argument:
+                    argument.Expression = original;
+                    break;
+            }
+
+            return node;
         }
     }
 }

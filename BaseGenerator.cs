@@ -1,7 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static RobloxCS.Luau.Constants;
 
 namespace RobloxCS
 {
@@ -10,27 +8,6 @@ namespace RobloxCS
         protected TNode Visit<TNode>(SyntaxNode? node) where TNode : Luau.Node?
         {
             return (TNode)Visit(node)!;
-        }
-
-        protected Luau.IdentifierName CreateIdentifierName(SyntaxNode node)
-        {
-            return CreateIdentifierName(GetName(node));
-        }
-
-        protected Luau.IdentifierName CreateIdentifierName(string name)
-        {
-            if (RESERVED_IDENTIFIERS.Contains(name))
-            {
-                // TODO: throw 
-            }
-            return new Luau.IdentifierName(name);
-        }
-
-        protected Luau.TypeRef? CreateTypeRef(TypeSyntax? type)
-        {
-            if (type == null) return null;
-            if (type.ToString() == "var") return null;
-            return new(Luau.Utility.GetMappedType(type.ToString()));
         }
 
         protected bool HasSyntax(SyntaxTokenList tokens, SyntaxKind syntax)

@@ -1,15 +1,25 @@
-﻿namespace RobloxCS.Luau
+﻿using System.Xml.Linq;
+
+namespace RobloxCS.Luau
 {
-    public class Assignment(Name name, Expression value) : Expression
+    public sealed class Assignment : Expression
     {
-        public Name Name { get; } = name;
-        public Expression Value { get; } = value;
+        public Name Name { get; }
+        public Expression Value;
+
+        public Assignment(Name name, Expression value)
+        {
+            Name = name;
+            Value = value;
+            AddChildren([Name, Value]);
+        }
 
         public override void Render(LuauWriter luau)
         {
-            Name.Render(luau);
-            luau.Write(" = ");
-            Value.Render(luau);
+            Node value = Value;
+            luau.WriteDescendantStatements(ref value);
+            Value = (Expression)value;
+            luau.WriteAssignment(Name, Value);
         }
     }
 }

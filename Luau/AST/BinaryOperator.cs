@@ -1,10 +1,18 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class BinaryOperator(Expression left, string @operator, Expression right) : Expression
+    public class BinaryOperator : Expression
     {
-        public Expression Left { get; } = left;
-        public string Operator { get; } = @operator;
-        public Expression Right { get; } = right;
+        public Expression Left { get; }
+        public string Operator { get; }
+        public Expression Right { get; }
+
+        public BinaryOperator(Expression left, string @operator, Expression right)
+        {
+            Left = left;
+            Operator = @operator;
+            Right = right;
+            AddChildren([Left, Right]);
+        }
 
         public override void Render(LuauWriter luau)
         {

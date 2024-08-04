@@ -2,13 +2,8 @@
 using RobloxCS;
 
 var source = """
-var i = 2;
-var x = new
-{
-    a = true
-};
-var y = i = 5;
-var z = x.a = false;
+var i = 5;
+var pooder = abc[i = 2];
 """;
 
 var sourceAST = CSharpSyntaxTree.ParseText(source);

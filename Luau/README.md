@@ -1,31 +1,29 @@
 # Luau AST
 
 ## To-do
-- Generate blocks that are direct children of other blocks (or the compilation unit) as a `do ... end` statement
+- Generate blocks that are direct children of other blocks (or the compilation unit) as a `do..end` statement
 - If using temporary variables and a regular variable with the same name is created, append temporary names with `_n` where `n` is the index of the temporary variable
 
 ## Roadmap
 
 In no particular order:
-- [x] built-in attributes (aka `@native`)
-- [x] variables 
-- [x] local methods
-- [x] anonymous methods 
-- [x] anonymous object creation
-- [x] returning
-- [x] calling
-- [x] lambdas 
-- [x] ternary operator (`condition ? whenTrue : whenFalse`)
 - [ ] save navigation (`a?.b?.c`)
 - [ ] emit comments
 - [ ] method overloading
-- [ ] using postfix unary ops as expressions (`doSomething(i++);`)
-- [x] control flow
+- [ ] patterns
+	- [ ] `is`
+	- [ ] `not`
+	- [ ] type
+	- [ ] declaration
+	- [ ] relational
+- [ ] control flow
 	- [x] if
 	- [x] while
 	- [x] for
 	- [x] foreach
 	- [x] do
+	- [ ] switch statements
+	- [ ] switch expressions
 - [ ] types
 	- [x] map primitives to luau
 	- [ ] generics

@@ -1,9 +1,16 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class UnaryOperator(string @operator, Expression operand) : Expression
+    public class UnaryOperator : Expression
     {
-        public string Operator { get; } = @operator;
-        public Expression Operand { get; } = operand;
+        public string Operator { get; }
+        public Expression Operand { get; }
+
+        public UnaryOperator(string @operator, Expression operand)
+        {
+            Operator = @operator;
+            Operand = operand;
+            AddChild(Operand);
+        }
 
         public override void Render(LuauWriter luau)
         {

@@ -4,6 +4,7 @@ namespace RobloxCS.Luau
 {
     public class Parameter : Statement
     {
+
         public Name Name { get; }
         public Expression? Initializer { get; }
         public TypeRef? Type { get; }
@@ -16,9 +17,15 @@ namespace RobloxCS.Luau
             Type = type;
             IsVararg = isVararg;
 
+            AddChildren([Name]);
+            if (Initializer != null)
+            {
+                AddChild(Initializer);
+            }
             if (Type != null)
             {
                 Type = FixType(Type);
+                AddChild(Type);
             }
         }
 
