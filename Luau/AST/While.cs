@@ -10,7 +10,9 @@
             luau.Write("while ");
             Condition.Render(luau);
             luau.WriteLine(" do");
-            luau.WritePossibleBlock(Body);
+            luau.PushIndent();
+            Body.Render(luau);
+            luau.PopIndent();
             luau.WriteLine("end");
         }
     }

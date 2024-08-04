@@ -6,12 +6,10 @@
 
         public override void Render(LuauWriter luau)
         {
-            luau.PushIndent();
             foreach (var statement in Statements)
             {
                 statement.Render(luau);
             }
-            luau.PopIndent();
         }
     }
 }

@@ -5,7 +5,7 @@
         public static Luau.If Initializer(Luau.Name name, Luau.Expression initializer)
         {
             return new Luau.If(
-                new Luau.BinaryExpression(name, "==", Nil()),
+                new Luau.BinaryOperator(name, "==", Nil()),
                 new Luau.Assignment(name, initializer),
                 null
             );

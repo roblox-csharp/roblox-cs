@@ -33,6 +33,7 @@
             parameterList.Render(this);
             WriteTypeAnnotation(returnType);
             WriteLine();
+            PushIndent();
 
             body ??= new Block([]);
             foreach (var parameter in parameterList.Parameters)
@@ -50,6 +51,7 @@
             }
             body.Render(this);
 
+            PopIndent();
             WriteLine("end");
         }
 
@@ -104,19 +106,6 @@
             expression.Render(this);
             Write(" :: ");
             type.Render(this);
-        }
-
-        public void WritePossibleBlock(Statement statement)
-        {
-            if (statement is not Block)
-            {
-                PushIndent();
-            }
-            statement.Render(this);
-            if (statement is not Block)
-            {
-                PopIndent();
-            }
         }
     }
 }

@@ -11,14 +11,26 @@
             luau.Write("if ");
             Condition.Render(luau);
             luau.WriteLine(" then");
-            luau.WritePossibleBlock(Body);
-            luau.WriteLine();
+            luau.PushIndent();
+            Body.Render(luau);
+
+            var isElseIf = ElseBranch is If;
             if (ElseBranch != null)
             {
-                luau.WriteLine("else");
-                luau.WritePossibleBlock(ElseBranch);
+                luau.PopIndent();
+                luau.Write("else" + (isElseIf ? "" : '\n'));
+                if (!isElseIf)
+                {
+                    luau.PushIndent();
+                }
+                ElseBranch.Render(luau);
             }
-            luau.WriteLine("end");
+
+            luau.PopIndent();
+            if (!isElseIf)
+            {
+                luau.WriteLine("end");
+            }
         }
     }
 }

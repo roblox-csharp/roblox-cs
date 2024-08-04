@@ -11,6 +11,7 @@ In no particular order:
 - [x] anonymous methods 
 - [x] returning
 - [x] calling
+- [ ] lambdas 
 - [ ] method overloading
 - [ ] control flow
 	- [x] if
@@ -32,6 +33,9 @@ In no particular order:
 	- [ ] methods
 	- [ ] operator overloading
 	- [ ] inheritance
+- [ ] reflection
+	- [ ] nameof
+	- [ ] `Type` class
 
 ## Will not be supported
 - Structs

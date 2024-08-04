@@ -38,6 +38,14 @@ namespace RobloxCS
             return new Luau.While(condition, body);
         }
 
+        public override Luau.If VisitIfStatement(IfStatementSyntax node)
+        {
+            var condition = Visit<Luau.Expression>(node.Condition);
+            var body = Visit<Luau.Statement>(node.Statement);
+            var elseBranch = Visit<Luau.Statement?>(node.Else?.Statement);
+            return new Luau.If(condition, body, elseBranch);
+        }
+
         public override Luau.Call VisitInvocationExpression(InvocationExpressionSyntax node)
         {
             var methodSymbol = _semanticModel.GetDeclaredSymbol(node.Expression)!;
@@ -127,7 +135,7 @@ namespace RobloxCS
                 );
             }
 
-            return new Luau.BinaryExpression(left, mappedOperator, right);
+            return new Luau.BinaryOperator(left, mappedOperator, right);
         }
 
         public override Luau.Node VisitPostfixUnaryExpression(PostfixUnaryExpressionSyntax node)
@@ -140,7 +148,7 @@ namespace RobloxCS
             }
 
             var mappedOperator = Luau.Utility.GetMappedOperator(node.OperatorToken.Text);
-            return new Luau.BinaryExpression(operand, mappedOperator, new Luau.Literal("1"));
+            return new Luau.BinaryOperator(operand, mappedOperator, new Luau.Literal("1"));
         }
 
         public override Luau.Node? VisitPrefixUnaryExpression(PrefixUnaryExpressionSyntax node)
@@ -171,7 +179,13 @@ namespace RobloxCS
                 );
             }
 
-            return new Luau.UnaryExpression(mappedOperator, operand);
+            return new Luau.UnaryOperator(mappedOperator, operand);
+        }
+
+        public override Luau.Parenthesized VisitParenthesizedExpression(ParenthesizedExpressionSyntax node)
+        {
+            var expression = Visit<Luau.Expression>(node.Expression);
+            return new Luau.Parenthesized(expression);
         }
 
         public override Luau.AnonymousFunction VisitAnonymousMethodExpression(AnonymousMethodExpressionSyntax node)

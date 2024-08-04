@@ -1,6 +1,6 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class BinaryExpression(Expression left, string @operator, Expression right) : Expression
+    public class BinaryOperator(Expression left, string @operator, Expression right) : Expression
     {
         public Expression Left { get; } = left;
         public string Operator { get; } = @operator;

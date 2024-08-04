@@ -2,10 +2,7 @@
 using RobloxCS;
 
 var source = """
-while (true)
-{
-    print("im cool");
-}
+var x = (1 + 2) / 2;
 """;
 
 var sourceAST = CSharpSyntaxTree.ParseText(source);
