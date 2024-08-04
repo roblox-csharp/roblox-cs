@@ -15,7 +15,7 @@ In no particular order:
 	- [ ] for
 	- [ ] foreach
 	- [ ] do
-- [] types
+- [ ] types
 	- [x] map primitives to luau
 	- [ ] generics
 - [ ] enums
