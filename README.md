@@ -6,7 +6,9 @@
 ## Roadmap
 
 In no particular order:
+- [x] built-in attributes (aka `@native`)
 - [x] local methods
+- [x] anonymous methods 
 - [x] returning
 - [ ] method overloading
 - [ ] control flow
