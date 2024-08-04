@@ -197,11 +197,17 @@ namespace RobloxCS
             return new Luau.TableInitializer(values, keys);
         }
 
-        public override Luau.MemberAccess VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
+        public override Luau.Node VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
         {
             var expression = Visit<Luau.Expression>(node.Expression);
             var name = Visit<Luau.IdentifierName>(node.Name);
-            return new Luau.MemberAccess(expression, name);
+            var memberAccess = new Luau.MemberAccess(expression, name);
+            if (node.Parent is AssignmentExpressionSyntax assignment && assignment.Left == node)
+            {
+                return AstUtility.QualifiedNameFromMemberAccess(memberAccess);
+            }
+
+            return memberAccess;
         }
 
         public override Luau.ElementAccess VisitElementAccessExpression(ElementAccessExpressionSyntax node)

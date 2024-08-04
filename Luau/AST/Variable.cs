@@ -9,7 +9,15 @@
 
         public override void Render(LuauWriter luau)
         {
-            luau.WriteVariable(Name, IsLocal, Initializer, Type);
+            if (Initializer != null && Initializer is Assignment assignment)
+            {
+                new ExpressionStatement(assignment).Render(luau);
+                luau.WriteVariable(Name, IsLocal, assignment.Name, Type);
+            }
+            else
+            {
+                luau.WriteVariable(Name, IsLocal, Initializer, Type);
+            }
         }
     }
 }

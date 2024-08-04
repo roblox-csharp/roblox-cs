@@ -22,6 +22,20 @@
             );
         }
 
+        public static Luau.QualifiedName QualifiedNameFromMemberAccess(Luau.MemberAccess memberAccess)
+        {
+            Luau.Name left;
+            if (memberAccess.Expression is Luau.MemberAccess leftMemberAccess)
+            {
+                left = QualifiedNameFromMemberAccess(leftMemberAccess);
+            }
+            else
+            {
+                left = (Luau.Name)memberAccess.Expression;
+            }
+            return new Luau.QualifiedName(left, memberAccess.Name);
+        }
+
         public static Luau.Literal Vararg()
         {
             return new Luau.Literal("...");
