@@ -5,6 +5,10 @@ var source = """
 for (int i = 10; i > 5; i--) {
     i &= 69;
 }
+
+for (int i = 1;;i += 1) {
+    print("hello ", i);
+}
 """;
 
 var sourceAST = CSharpSyntaxTree.ParseText(source);
