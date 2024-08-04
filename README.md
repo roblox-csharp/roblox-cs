@@ -10,11 +10,11 @@ In no particular order:
 - [x] local methods
 - [x] anonymous methods 
 - [x] returning
+- [x] calling
 - [ ] method overloading
-- [ ] calling
 - [ ] control flow
 	- [x] if
-	- [ ] while
+	- [x] while
 	- [ ] for
 	- [ ] foreach
 	- [ ] do

@@ -31,6 +31,13 @@ namespace RobloxCS
             return new Luau.AST(statements);
         }
 
+        public override Luau.While VisitWhileStatement(WhileStatementSyntax node)
+        {
+            var condition = Visit<Luau.Expression>(node.Condition);
+            var body = Visit<Luau.Statement>(node.Statement);
+            return new Luau.While(condition, body);
+        }
+
         public override Luau.Call VisitInvocationExpression(InvocationExpressionSyntax node)
         {
             var methodSymbol = _semanticModel.GetDeclaredSymbol(node.Expression)!;

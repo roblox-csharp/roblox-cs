@@ -8,7 +8,17 @@
 
         public override void Render(LuauWriter luau)
         {
-            luau.WriteIf(Condition, Body, ElseBranch);
+            luau.Write("if ");
+            Condition.Render(luau);
+            luau.WriteLine(" then");
+            luau.WritePossibleBlock(Body);
+            luau.WriteLine();
+            if (ElseBranch != null)
+            {
+                luau.WriteLine("else");
+                luau.WritePossibleBlock(ElseBranch);
+            }
+            luau.WriteLine("end");
         }
     }
 }

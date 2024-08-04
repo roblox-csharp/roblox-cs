@@ -13,21 +13,6 @@
             WriteLine($"require({requirePath})");
         }
 
-        public void WriteIf(Expression condition, Statement body, Statement? elseBranch)
-        {
-            Write("if ");
-            condition.Render(this);
-            WriteLine(" then");
-            WritePossibleBlock(body);
-            WriteLine();
-            if (elseBranch != null)
-            {
-                WriteLine("else");
-                WritePossibleBlock(elseBranch);
-            }
-            WriteLine("end");
-        }
-
         public void WriteFunction(Name? name, bool isLocal, ParameterList parameterList, TypeRef? returnType = null, Block? body = null, List<AttributeList>? attributeLists = null, bool inlineAttributes = false)
         {
             foreach (var attributeList in attributeLists ?? [])

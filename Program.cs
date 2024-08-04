@@ -2,11 +2,10 @@
 using RobloxCS;
 
 var source = """
-void myMethod(int x, string abc)
+while (true)
 {
+    print("im cool");
 }
-
-myMethod(1, "yuh");
 """;
 
 var sourceAST = CSharpSyntaxTree.ParseText(source);
