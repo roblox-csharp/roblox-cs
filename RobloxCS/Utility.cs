@@ -1,9 +1,7 @@
 ﻿using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static RobloxCS.Luau.Constants;
+using static RobloxCS.Constants;
 
 namespace RobloxCS
 {
@@ -51,47 +49,6 @@ namespace RobloxCS
                 return FindMemberDeep(namedTypeSymbol.BaseType, memberName);
             }
             return member;
-        }
-
-        public static List<string> GetNamesFromNode(SyntaxNode? node)
-        {
-            if (node is BaseExpressionSyntax baseExpression)
-            {
-                return [""];
-            }
-
-            var names = new List<string>();
-            if (node == null) return names;
-
-            var identifierProperty = node.GetType().GetProperty("Identifier");
-            var identifierValue = identifierProperty?.GetValue(node);
-            if (identifierProperty != null && identifierValue != null && identifierValue is SyntaxToken)
-            {
-                names.Add(((SyntaxToken)identifierValue).ValueText.Trim());
-                return names;
-            }
-
-            var childNodes = node.ChildNodes();
-            var qualifiedNameNodes = node.IsKind(SyntaxKind.QualifiedName) ? [(QualifiedNameSyntax)node] : childNodes.OfType<QualifiedNameSyntax>();
-            var identifierNameNodes = node.IsKind(SyntaxKind.IdentifierName) ? [(IdentifierNameSyntax)node] : childNodes.OfType<IdentifierNameSyntax>();
-            foreach (var qualifiedNameNode in qualifiedNameNodes)
-            {
-                foreach (var name in GetNamesFromNode(qualifiedNameNode.Left))
-                {
-                    names.Add(name.Trim());
-                }
-                foreach (var name in GetNamesFromNode(qualifiedNameNode.Right))
-                {
-                    names.Add(name.Trim());
-                }
-            }
-
-            foreach (var identifierNameNode in identifierNameNodes)
-            {
-                names.Add(identifierNameNode.Identifier.ValueText.Trim());
-            }
-
-            return names;
         }
 
         public static void PrettyPrint(object? obj)

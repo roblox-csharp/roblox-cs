@@ -1,7 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 
-namespace RobloxCS
+namespace RobloxCS.Luau
 {
     public class BaseGenerator : CSharpSyntaxVisitor<Luau.Node>
     {

@@ -1,6 +1,6 @@
 ﻿using System.Text;
 
-namespace RobloxCS
+namespace RobloxCS.Luau
 {
     public class BaseWriter
     {

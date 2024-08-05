@@ -4,7 +4,7 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace RobloxCS
 {
-    public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) : BaseGenerator
+    public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) : Luau.BaseGenerator
     {
         private readonly SyntaxTree _tree = tree;
         private readonly SemanticModel _semanticModel = compiler.GetSemanticModel(tree);
@@ -70,7 +70,7 @@ namespace RobloxCS
 
         public override Luau.For VisitForEachStatement(ForEachStatementSyntax node)
         {
-            List<Luau.Name> names = [AstUtility.CreateIdentifierName(node)];
+            List<Luau.Name> names = [Luau.AstUtility.CreateIdentifierName(node)];
             var iterator = Visit<Luau.Expression>(node.Expression);
             var body = Visit<Luau.Statement>(node.Statement);
             return new Luau.For(names, iterator, body);
@@ -97,7 +97,7 @@ namespace RobloxCS
 
         public override Luau.Variable VisitSingleVariableDesignation(SingleVariableDesignationSyntax node)
         {
-            return new Luau.Variable(AstUtility.CreateIdentifierName(node), true);
+            return new Luau.Variable(Luau.AstUtility.CreateIdentifierName(node), true);
         }
 
         public override Luau.VariableList VisitParenthesizedVariableDesignation(ParenthesizedVariableDesignationSyntax node)
@@ -164,7 +164,7 @@ namespace RobloxCS
                 {
                     expressionName = expressionName.Split('.').Last();
                 }
-                name = AstUtility.CreateIdentifierName(expressionName);
+                name = Luau.AstUtility.CreateIdentifierName(expressionName);
             }
 
             var value = Visit<Luau.Expression?>(node.Expression);
@@ -181,7 +181,7 @@ namespace RobloxCS
                 var bit32MethodName = Luau.Utility.GetBit32MethodName(mappedOperator);
                 if (bit32MethodName != null)
                 {
-                    return new Luau.Assignment(name, AstUtility.Bit32Call(bit32MethodName, name, value));
+                    return new Luau.Assignment(name, Luau.AstUtility.Bit32Call(bit32MethodName, name, value));
                 }
                 return new Luau.BinaryOperator(name, mappedOperator, value);
             }
@@ -212,10 +212,10 @@ namespace RobloxCS
             var memberAccess = new Luau.MemberAccess(expression, name);
             if (node.Parent is AssignmentExpressionSyntax assignment && assignment.Left == node)
             {
-                return AstUtility.QualifiedNameFromMemberAccess(memberAccess);
+                return Luau.AstUtility.QualifiedNameFromMemberAccess(memberAccess);
             }
 
-            return AstUtility.DiscardVariableIfExpressionStatement(memberAccess, node.Parent);
+            return Luau.AstUtility.DiscardVariableIfExpressionStatement(memberAccess, node.Parent);
         }
 
         public override Luau.Node VisitElementAccessExpression(ElementAccessExpressionSyntax node)
@@ -223,12 +223,12 @@ namespace RobloxCS
             var expression = Visit<Luau.Expression>(node.Expression);
             var index = Visit<Luau.Expression>(node.ArgumentList.Arguments.First().Expression);
             var elementAccess = new Luau.ElementAccess(expression, index);
-            return AstUtility.DiscardVariableIfExpressionStatement(elementAccess, node.Parent);
+            return Luau.AstUtility.DiscardVariableIfExpressionStatement(elementAccess, node.Parent);
         }
 
         public override Luau.IdentifierName VisitIdentifierName(IdentifierNameSyntax node)
         {
-            return AstUtility.CreateIdentifierName(node);
+            return Luau.AstUtility.CreateIdentifierName(node);
         }
 
         public override Luau.Break VisitBreakStatement(BreakStatementSyntax node)
@@ -259,7 +259,7 @@ namespace RobloxCS
             var bit32MethodName = Luau.Utility.GetBit32MethodName(mappedOperator);
             if (bit32MethodName != null)
             {
-                return AstUtility.Bit32Call(bit32MethodName, left, right);
+                return Luau.AstUtility.Bit32Call(bit32MethodName, left, right);
             }
 
             return new Luau.BinaryOperator(left, mappedOperator, right);
@@ -297,7 +297,7 @@ namespace RobloxCS
             var bit32MethodName = Luau.Utility.GetBit32MethodName(mappedOperator);
             if (bit32MethodName != null)
             {
-                return AstUtility.Bit32Call(bit32MethodName, operand);
+                return Luau.AstUtility.Bit32Call(bit32MethodName, operand);
             }
 
             return new Luau.UnaryOperator(mappedOperator, operand);
@@ -341,9 +341,9 @@ namespace RobloxCS
 
         public override Luau.Function VisitLocalFunctionStatement(LocalFunctionStatementSyntax node)
         {
-            var name = AstUtility.CreateIdentifierName(node);
+            var name = Luau.AstUtility.CreateIdentifierName(node);
             var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
-            var returnType = AstUtility.CreateTypeRef(node.ReturnType);
+            var returnType = Luau.AstUtility.CreateTypeRef(node.ReturnType);
             var body = node.ExpressionBody != null ?
                 new Luau.Block([new Luau.ExpressionStatement(Visit<Luau.Expression>(node.ExpressionBody.Expression))])
                 : Visit<Luau.Block?>(node.Body);
@@ -354,8 +354,8 @@ namespace RobloxCS
 
         public override Luau.Parameter VisitParameter(ParameterSyntax node)
         {
-            var name = AstUtility.CreateIdentifierName(node);
-            var returnType = AstUtility.CreateTypeRef(node.Type);
+            var name = Luau.AstUtility.CreateIdentifierName(node);
+            var returnType = Luau.AstUtility.CreateTypeRef(node.Type);
             var initializer = Visit<Luau.Expression?>(node.Default);
             var isParams = HasSyntax(node.Modifiers, SyntaxKind.ParamsKeyword);
             return new Luau.Parameter(name, isParams, initializer, returnType);
@@ -400,7 +400,7 @@ namespace RobloxCS
 
         public override Luau.VariableList VisitVariableDeclaration(VariableDeclarationSyntax node)
         {
-            var typeRef = AstUtility.CreateTypeRef(node.Type);
+            var typeRef = Luau.AstUtility.CreateTypeRef(node.Type);
             var variables = node.Variables.Select(Visit).OfType<Luau.Variable>().ToList();
             return new Luau.VariableList(variables);
         }
@@ -409,7 +409,7 @@ namespace RobloxCS
         {
             var declaration = node.Parent as VariableDeclarationSyntax;
             var initializer = node.Initializer != null ? Visit<Luau.Expression>(node.Initializer) : null;
-            return new Luau.Variable(AstUtility.CreateIdentifierName(node), true, initializer, AstUtility.CreateTypeRef(declaration?.Type));
+            return new Luau.Variable(Luau.AstUtility.CreateIdentifierName(node), true, initializer, Luau.AstUtility.CreateTypeRef(declaration?.Type));
         }
 
         public override Luau.Node? VisitEqualsValueClause(EqualsValueClauseSyntax node)
