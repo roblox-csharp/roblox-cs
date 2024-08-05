@@ -27,14 +27,13 @@
 
         public override void Render(LuauWriter luau)
         {
-            var variable = this;
             if (Initializer != null)
             {
                 Node initializer = Initializer;
                 luau.WriteDescendantStatements(ref initializer);
                 Initializer = (Expression)initializer;
             }
-            luau.WriteVariable(variable.Name, variable.IsLocal, variable.Initializer, variable.Type);
+            luau.WriteVariable(Name, IsLocal, Initializer, Type);
         }
     }
 }

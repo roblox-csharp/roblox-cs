@@ -1,10 +1,24 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class ExpressionalIf(Expression condition, Expression body, Expression? elseBranch = null) : Expression
+    public class ExpressionalIf : Expression
     {
-        public Expression Condition { get; } = condition;
-        public Expression Body { get; } = body;
-        public Expression? ElseBranch { get; } = elseBranch;
+        public Expression Condition { get; }
+        public Expression Body { get; }
+        public Expression? ElseBranch { get; }
+
+        public ExpressionalIf(Expression condition, Expression body, Expression? elseBranch = null)
+        {
+            Condition = condition;
+            Body = body;
+            ElseBranch = elseBranch;
+
+            AddChild(Condition);
+            AddChild(Body);
+            if (ElseBranch != null)
+            {
+                AddChild(ElseBranch);
+            }
+        }
 
         public override void Render(LuauWriter luau)
         {

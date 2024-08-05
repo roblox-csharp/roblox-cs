@@ -1,9 +1,15 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class TableInitializer(List<Expression> values, List<Expression>? keys = null) : Expression
+    public class TableInitializer : Expression
     {
-        public List<Expression> Values { get; } = values;
-        public List<Expression> Keys { get; } = keys ?? [];
+        public List<Expression> Values { get; }
+        public List<Expression> Keys { get; }
+
+        public TableInitializer(List<Expression> values, List<Expression>? keys = null)
+        {
+            Values = values;
+            Keys = keys ?? [];
+        }
 
         public override void Render(LuauWriter luau)
         {

@@ -1,9 +1,16 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class While(Expression condition, Statement body) : Statement
+    public class While : Statement
     {
-        public Expression Condition { get; } = condition;
-        public Statement Body { get; } = body;
+        public Expression Condition { get; }
+        public Statement Body { get; }
+
+        public While(Expression condition, Statement body)
+        {
+            Condition = condition;
+            Body = body;
+            AddChildren([Condition, Body]);
+        }
 
         public override void Render(LuauWriter luau)
         {

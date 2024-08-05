@@ -1,6 +1,4 @@
-﻿using System.Net.WebSockets;
-
-namespace RobloxCS.Luau
+﻿namespace RobloxCS.Luau
 {
     public class LuauWriter : BaseWriter
     {
@@ -169,7 +167,8 @@ namespace RobloxCS.Luau
             }
 
             var original = new IdentifierName("_original");
-            var isNotCall = node is not Call;
+            var isCall = node is Call;
+            var isElementAccess = node is ElementAccess;
             if (node.Parent is Variable)
             {
                 if (node is Assignment assignment)
@@ -188,7 +187,7 @@ namespace RobloxCS.Luau
 
             node.Descendants = node.Descendants.Select(descendant =>
             {
-                if (!isNotCall)
+                if (isCall || isElementAccess)
                 {
                     if (descendant is Assignment assignment)
                     {

@@ -1,10 +1,20 @@
 namespace RobloxCS.Luau
 {
-    public class For(List<Name> initializers, Expression iterator, Statement body) : Statement
+    public class For : Statement
     {
-        public List<Name> Names { get; } = initializers;
-        public Expression Iterator { get; } = iterator;
-        public Statement Body { get; } = body;
+        public List<Name> Names { get; }
+        public Expression Iterator { get; }
+        public Statement Body { get; }
+
+        public For(List<Name> initializers, Expression iterator, Statement body)
+        {
+            Names = initializers;
+            Iterator = iterator;
+            Body = body;
+            AddChildren(Names);
+            AddChild(Iterator);
+            AddChild(Body);
+        }
 
         public override void Render(LuauWriter luau)
         {

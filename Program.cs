@@ -3,7 +3,7 @@ using RobloxCS;
 
 var source = """
 var i = 5;
-var pooder = abc[i = 2];
+var pooder = i = 2;
 """;
 
 var sourceAST = CSharpSyntaxTree.ParseText(source);

@@ -1,8 +1,17 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class Return(Expression? expression) : Statement
+    public class Return : Statement
     {
-        public Expression? Expression { get; } = expression;
+        public Expression? Expression { get; }
+
+        public Return(Expression? expression)
+        {
+            Expression = expression;
+            if (Expression != null)
+            {
+                AddChild(Expression);
+            }
+        }
 
         public override void Render(LuauWriter luau)
         {

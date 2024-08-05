@@ -1,9 +1,17 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class Repeat(Expression untilCondition, Statement body) : Statement
+    public class Repeat : Statement
     {
-        public Expression UntilCondition { get; } = untilCondition;
-        public Statement Body { get; } = body;
+        public Expression UntilCondition { get; }
+        public Statement Body { get; }
+
+        public Repeat(Expression untilCondition, Statement body)
+        {
+            UntilCondition = untilCondition;
+            Body = body;
+            AddChild(untilCondition);
+            AddChild(body);
+        }
 
         public override void Render(LuauWriter luau)
         {

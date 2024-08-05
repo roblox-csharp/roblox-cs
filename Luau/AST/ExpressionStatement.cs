@@ -7,7 +7,7 @@
         public ExpressionStatement(Expression expression)
         {
             Expression = expression;
-            AddChildren([Expression]);
+            AddChild(Expression);
         }
 
         public override void Render(LuauWriter luau)

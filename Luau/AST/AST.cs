@@ -1,8 +1,14 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class AST(List<Statement> statements) : Node
+    public class AST : Node
     {
-        public List<Statement> Statements { get; } = statements;
+        public List<Statement> Statements { get; }
+
+        public AST(List<Statement> statements)
+        {
+            Statements = statements;
+            AddChildren(Statements);
+        }
 
         public override void Render(LuauWriter luau)
         {

@@ -17,7 +17,7 @@ namespace RobloxCS.Luau
             Type = type;
             IsVararg = isVararg;
 
-            AddChildren([Name]);
+            AddChild(Name);
             if (Initializer != null)
             {
                 AddChild(Initializer);

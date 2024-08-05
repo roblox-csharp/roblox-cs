@@ -1,6 +1,4 @@
-﻿using System.Xml.Linq;
-
-namespace RobloxCS.Luau
+﻿namespace RobloxCS.Luau
 {
     public sealed class Assignment : Expression
     {

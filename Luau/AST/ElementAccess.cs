@@ -14,6 +14,10 @@
 
         public override void Render(LuauWriter luau)
         {
+            Node index = Index;
+            luau.WriteDescendantStatements(ref index);
+            Index = (Expression)index;
+
             Expression.Render(luau);
             luau.Write('[');
             Index.Render(luau);
