@@ -102,6 +102,12 @@
 
         public void WriteVariable(Name name, bool isLocal, Expression? initializer = null, TypeRef? type = null)
         {
+            if (initializer != null)
+            {
+                Node initializerNode = initializer;
+                WriteDescendantStatements(ref initializerNode);
+                initializer = (Expression)initializerNode;
+            }
             if (isLocal)
             {
                 Write("local ");

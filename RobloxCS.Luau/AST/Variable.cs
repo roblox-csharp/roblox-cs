@@ -27,12 +27,6 @@
 
         public override void Render(LuauWriter luau)
         {
-            if (Initializer != null)
-            {
-                Node initializer = Initializer;
-                luau.WriteDescendantStatements(ref initializer);
-                Initializer = (Expression)initializer;
-            }
             luau.WriteVariable(Name, IsLocal, Initializer, Type);
         }
     }
