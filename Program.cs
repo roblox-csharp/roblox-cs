@@ -2,8 +2,7 @@
 using RobloxCS;
 
 var source = """
-var i = 5;
-var pooder = i = 2;
+Type objectType = (5).GetType();
 """;
 
 var sourceAST = CSharpSyntaxTree.ParseText(source);
