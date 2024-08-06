@@ -40,30 +40,30 @@ namespace RobloxCS.Luau
             return new QualifiedName(left, memberAccess.Name);
         }
 
-        public static Node DiscardVariableIfExpressionStatement(Node value, SyntaxNode? valueParent)
+        public static Node DiscardVariableIfExpressionStatement(SyntaxNode node, Node value, SyntaxNode? valueParent)
         {
             if (valueParent is ExpressionStatementSyntax)
             {
-                return DiscardVariable((Expression)value);
+                return DiscardVariable(node, (Expression)value);
             }
             return value;
         }
 
-        public static Variable DiscardVariable(Expression value)
+        public static Variable DiscardVariable(SyntaxNode node, Expression value)
         {
-            return new Variable(CreateIdentifierName("_"), true, value);
+            return new Variable(CreateIdentifierName(node, "_"), true, value);
         }
 
         public static IdentifierName CreateIdentifierName(SyntaxNode node)
         {
-            return CreateIdentifierName(Utility.GetNamesFromNode(node).First());
+            return CreateIdentifierName(node, Utility.GetNamesFromNode(node).First());
         }
 
-        public static IdentifierName CreateIdentifierName(string name)
+        public static IdentifierName CreateIdentifierName(SyntaxNode node, string name)
         {
             if (RESERVED_IDENTIFIERS.Contains(name))
             {
-                // TODO: throw 
+                Logger.UnsupportedError(node, $"Using '{name}' as an identifier", useIs: true, useYet: false);
             }
             return new IdentifierName(name);
         }

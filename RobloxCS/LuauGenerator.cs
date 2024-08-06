@@ -164,7 +164,7 @@ namespace RobloxCS
                 {
                     expressionName = expressionName.Split('.').Last();
                 }
-                name = Luau.AstUtility.CreateIdentifierName(expressionName);
+                name = Luau.AstUtility.CreateIdentifierName(node, expressionName);
             }
 
             var value = Visit<Luau.Expression?>(node.Expression);
@@ -215,7 +215,7 @@ namespace RobloxCS
                 return Luau.AstUtility.QualifiedNameFromMemberAccess(memberAccess);
             }
 
-            return Luau.AstUtility.DiscardVariableIfExpressionStatement(memberAccess, node.Parent);
+            return Luau.AstUtility.DiscardVariableIfExpressionStatement(node, memberAccess, node.Parent);
         }
 
         public override Luau.Node VisitElementAccessExpression(ElementAccessExpressionSyntax node)
@@ -223,7 +223,7 @@ namespace RobloxCS
             var expression = Visit<Luau.Expression>(node.Expression);
             var index = Visit<Luau.Expression>(node.ArgumentList.Arguments.First().Expression);
             var elementAccess = new Luau.ElementAccess(expression, index);
-            return Luau.AstUtility.DiscardVariableIfExpressionStatement(elementAccess, node.Parent);
+            return Luau.AstUtility.DiscardVariableIfExpressionStatement(node, elementAccess, node.Parent);
         }
 
         public override Luau.IdentifierName VisitIdentifierName(IdentifierNameSyntax node)
@@ -283,7 +283,7 @@ namespace RobloxCS
             var operatorText = node.OperatorToken.Text;
             if (operatorText == "^")
             {
-                // TODO: error (unsupported, for now)
+                Logger.UnsupportedError(node, "'^' unary operator", useIs: true);
                 return null;
             }
 
@@ -369,7 +369,7 @@ namespace RobloxCS
                     return new Luau.BuiltinAttribute(new Luau.IdentifierName("native"));
             }
 
-            // TODO: throw cuz regular attributes aren't supported yet
+            Logger.UnsupportedError(node, "Non-builtin attributes");
             return null;
         }
 
