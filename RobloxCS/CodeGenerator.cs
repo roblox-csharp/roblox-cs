@@ -4,7 +4,6 @@ using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq;
 
 namespace RobloxCS
 {
@@ -595,35 +594,6 @@ namespace RobloxCS
             Write("end");
         }
 
-        public override void VisitBracketedArgumentList(BracketedArgumentListSyntax node)
-        {
-            Write('[');
-            if (node.Arguments.Count > 1)
-            {
-                Logger.CodegenError(node.Arguments.Last(), "Cannot have more than one argument between brackets.");
-            }
-
-            foreach (var argument in node.Arguments)
-            {
-                if (argument.Expression is LiteralExpressionSyntax numericLiteral && numericLiteral.IsKind(SyntaxKind.NumericLiteralExpression))
-                {
-                    int.TryParse(numericLiteral.Token.ValueText, out var indexValue);
-                    Write((indexValue + 1).ToString());
-                }
-                else
-                {
-                    Visit(argument);
-
-                    var typeSymbol = _semanticModel.GetTypeInfo(argument.Expression).Type;
-                    if (typeSymbol != null && Constants.INTEGER_TYPES.Contains(typeSymbol.Name))
-                    {
-                        Write(" + 1");
-                    }
-                }
-            }
-            Write(']');
-        }
-
         public override void VisitConditionalAccessExpression(ConditionalAccessExpressionSyntax node)
         {
             Write("if ");
@@ -1017,16 +987,50 @@ namespace RobloxCS
             Write("self");
         }
 
+        public override void VisitElementAccessExpression(ElementAccessExpressionSyntax node)
+        {
+            base.VisitElementAccessExpression(node);
+        }
+
+        public override void VisitBracketedArgumentList(BracketedArgumentListSyntax node)
+        {
+            Write('[');
+            if (node.Arguments.Count > 1)
+            {
+                Logger.CodegenError(node.Arguments.Last(), "Cannot have more than one argument between brackets.");
+            }
+
+            foreach (var argument in node.Arguments)
+            {
+                if (argument.Expression is LiteralExpressionSyntax numericLiteral && numericLiteral.IsKind(SyntaxKind.NumericLiteralExpression))
+                {
+                    int.TryParse(numericLiteral.Token.ValueText, out var indexValue);
+                    Write((indexValue + 1).ToString());
+                }
+                else
+                {
+                    Visit(argument);
+
+                    var typeSymbol = _semanticModel.GetTypeInfo(argument.Expression).Type;
+                    if (typeSymbol != null && Constants.INTEGER_TYPES.Contains(typeSymbol.Name))
+                    {
+                        Write(" + 1");
+                    }
+                }
+            }
+            Write(']');
+        }
+
         public override void VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
         {
             var leftIsLiteral = node.Expression is LiteralExpressionSyntax;
-            var objectSymbol = _semanticModel.GetSymbolInfo(node.Expression).Symbol?.OriginalDefinition;
-            var objectType = _semanticModel.GetTypeInfo(node.Expression).Type;
-            var nameType = _semanticModel.GetSymbolInfo(node.Name).Symbol?.OriginalDefinition;
+            var expressionSymbol = _semanticModel.GetSymbolInfo(node.Expression).Symbol?.OriginalDefinition ?? _semanticModel.GetTypeInfo(node.Expression).Type;
+            var expressionType = _semanticModel.GetTypeInfo(node.Expression).Type;
+            var nameType = _semanticModel.GetSymbolInfo(node.Name).Symbol;
             var operatorText = '.';
-            if (objectSymbol != null)
+            if (expressionSymbol != null)
             {
-                if (objectType is INamedTypeSymbol objectDefinitionSymbol && (objectDefinitionSymbol.Name == "Services" || objectDefinitionSymbol.AllInterfaces.Select(@interface => @interface.Name).Contains("Services")))
+                if (expressionSymbol is INamedTypeSymbol objectDefinitionSymbol && (objectDefinitionSymbol.Name == "Services" || objectDefinitionSymbol.AllInterfaces.Select(@interface => @interface.Name).Contains("Services")))
                 {
                     Write("game:GetService(\"");
                     Visit(node.Name);
@@ -1041,16 +1045,16 @@ namespace RobloxCS
             }
 
             var usings = GetUsings();
-            var containingNamespace = objectSymbol?.ContainingNamespace;
-            if (objectSymbol != null && (objectSymbol.Kind == SymbolKind.Namespace || (objectSymbol.Kind == SymbolKind.NamedType && objectSymbol.IsStatic)))
+            var containingNamespace = expressionSymbol?.ContainingNamespace;
+            if (expressionSymbol != null && (expressionSymbol.Kind == SymbolKind.Namespace || (expressionSymbol.Kind == SymbolKind.NamedType && expressionSymbol.IsStatic)))
             {
-                var namespaceName = objectSymbol.ToDisplayString();
-                var filePathsContainingType = objectSymbol.Locations
+                var namespaceName = expressionSymbol.ToDisplayString();
+                var filePathsContainingType = expressionSymbol.Locations
                     .Where(location => location.SourceTree != null && location.SourceTree.FilePath != _tree.FilePath)
                     .Select(location => location.SourceTree!.FilePath);
 
                 var isNoFullQualificationType = Constants.NO_FULL_QUALIFICATION_TYPES.Contains(namespaceName) || (containingNamespace != null ? Constants.NO_FULL_QUALIFICATION_TYPES.Contains(containingNamespace.Name) : false);
-                var noFullQualification = isNoFullQualificationType && (objectType == null || !Constants.GLOBAL_LIBRARIES.Contains(objectType.Name));
+                var noFullQualification = isNoFullQualificationType && (expressionType == null || !Constants.GLOBAL_LIBRARIES.Contains(expressionType.Name));
                 var typeIsImported = usings.Any(usingDirective => usingDirective.Name != null && Utility.GetNamesFromNode(usingDirective).Any(name => namespaceName.StartsWith(name)));
                 if (noFullQualification && namespaceName != "System")
                 {
@@ -1059,7 +1063,7 @@ namespace RobloxCS
                         // TODO: check parent classes of parent class
                         var parentClass = FindFirstAncestor<ClassDeclarationSyntax>(node);
                         var parentClassSymbol = parentClass != null ? _semanticModel.GetDeclaredSymbol(parentClass) : null;
-                        if (parentClass != null && SymbolEqualityComparer.Default.Equals(objectType, parentClassSymbol))
+                        if (parentClass != null && SymbolEqualityComparer.Default.Equals(expressionType, parentClassSymbol))
                         {
                             Write("class");
                         }
@@ -1090,7 +1094,20 @@ namespace RobloxCS
                 }
             }
 
-            if (objectSymbol?.OriginalDefinition is ILocalSymbol typeSymbol)
+            void writeExpression()
+            {
+                if (leftIsLiteral)
+                {
+                    Write('(');
+                }
+                Visit(node.Expression);
+                if (leftIsLiteral)
+                {
+                    Write(')');
+                }
+            }
+
+            if (expressionSymbol?.OriginalDefinition is ILocalSymbol typeSymbol)
             {
                 switch (typeSymbol.Type.Name)
                 {
@@ -1099,15 +1116,7 @@ namespace RobloxCS
                         if (name.StartsWith("Item"))
                         {
                             var itemIndex = name.Split("Item").Last();
-                            if (leftIsLiteral)
-                            {
-                                Write('(');
-                            }
-                            Visit(node.Expression);
-                            if (leftIsLiteral)
-                            {
-                                Write(')');
-                            }
+                            writeExpression();
                             Write($"[{itemIndex}]");
                             return;
                         }
@@ -1115,15 +1124,7 @@ namespace RobloxCS
                 }
             }
 
-            if (leftIsLiteral)
-            {
-                Write('(');
-            }
-            Visit(node.Expression);
-            if (leftIsLiteral)
-            {
-                Write(')');
-            }
+            writeExpression();
             Write(operatorText);
             Visit(node.Name);
         }
