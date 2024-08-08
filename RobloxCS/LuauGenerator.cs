@@ -29,8 +29,7 @@ namespace RobloxCS
 
         public override Luau.Node VisitPropertyDeclaration(PropertyDeclarationSyntax node)
         {
-            var isStatic = HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
-            if (!isStatic || node.Initializer == null || node.Parent is not ClassDeclarationSyntax)
+            if (!IsStatic(node) || node.Parent is not ClassDeclarationSyntax || node.Initializer == null)
             {
                 return new Luau.NoOp();
             }
@@ -50,8 +49,7 @@ namespace RobloxCS
 
         public override Luau.Node VisitFieldDeclaration(FieldDeclarationSyntax node)
         {
-            var isStatic = HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
-            if (!isStatic || node.Parent is not ClassDeclarationSyntax)
+            if (!IsStatic(node) || node.Parent is not ClassDeclarationSyntax)
             {
                 return new Luau.NoOp();
             }
@@ -92,10 +90,9 @@ namespace RobloxCS
 
         public override Luau.Function VisitMethodDeclaration(MethodDeclarationSyntax node)
         {
-            var isStatic = HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
             var name = Luau.AstUtility.CreateIdentifierName(node);
             var className = Luau.AstUtility.CreateIdentifierName(node.Parent!);
-            var fullName = new Luau.QualifiedName(className, name, isStatic ? '.' : ':');
+            var fullName = new Luau.QualifiedName(className, name, IsStatic(node) ? '.' : ':');
             var parameterList = Visit<Luau.ParameterList>(node.ParameterList);
             var returnType = Visit<Luau.TypeRef>(node.ReturnType);
             var body = Visit<Luau.Block?>(node.Body);

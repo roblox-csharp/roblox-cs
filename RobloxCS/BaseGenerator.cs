@@ -105,6 +105,12 @@ namespace RobloxCS.Luau
             return node.Parent.IsKind(SyntaxKind.GlobalStatement) || node.Parent.IsKind(SyntaxKind.CompilationUnit);
         }
 
+        protected bool IsStatic(MemberDeclarationSyntax node)
+        {
+            var classIsStatic = IsParentClassStatic(node);
+            return classIsStatic || HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
+        }
+
         protected bool HasSyntax(SyntaxTokenList tokens, SyntaxKind syntax)
         {
             return tokens.Any(token => token.IsKind(syntax));
@@ -123,6 +129,13 @@ namespace RobloxCS.Luau
         protected List<T> GetAncestors<T>(SyntaxNode node) where T : SyntaxNode
         {
             return node.Ancestors().OfType<T>().ToList();
+        }
+
+        private bool IsParentClassStatic(SyntaxNode node)
+        {
+            return node.Parent is ClassDeclarationSyntax classDeclaration ?
+                HasSyntax(classDeclaration.Modifiers, SyntaxKind.StaticKeyword)
+                : false;
         }
     }
 }
