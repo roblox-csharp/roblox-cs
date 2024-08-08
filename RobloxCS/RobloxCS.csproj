@@ -10,9 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.10.0" />
-  </ItemGroup>
-
-  <ItemGroup>
+    <PackageReference Include="RobloxCS.Types" Version="*" />
     <ProjectReference Include="..\RobloxCS.Luau\RobloxCS.Luau.csproj" />
   </ItemGroup>
 

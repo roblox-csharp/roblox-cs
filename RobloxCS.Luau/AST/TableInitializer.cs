@@ -42,7 +42,7 @@
                 value.Render(luau);
                 if (value != Values.Last())
                 {
-                    luau.WriteLine(", ");
+                    luau.Write(", ");
                     if (hasAnyKeys)
                     {
                         luau.WriteLine();
@@ -52,6 +52,7 @@
             if (hasAnyKeys)
             { 
                 luau.PopIndent();
+                luau.WriteLine();
             }
             luau.Write('}');
         }

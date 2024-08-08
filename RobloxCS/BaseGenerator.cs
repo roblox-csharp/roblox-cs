@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Reflection;
 
 namespace RobloxCS.Luau
 {
@@ -24,6 +25,29 @@ namespace RobloxCS.Luau
         protected TNode Visit<TNode>(SyntaxNode? node) where TNode : Node?
         {
             return (TNode)Visit(node)!;
+        }
+
+        protected Type GetRuntimeType(SyntaxNode node, string fullyQualifiedName)
+        {
+            Type? type;
+            using (var memoryStream = new MemoryStream())
+            {
+                var result = _semanticModel.Compilation.Emit(memoryStream);
+
+                memoryStream.Seek(0, SeekOrigin.Begin);
+                var assembly = Assembly.Load(memoryStream.ToArray());
+
+                // get the type from the loaded assembly
+                type = assembly.GetType(fullyQualifiedName)!;
+            }
+
+            type ??= Type.GetType(fullyQualifiedName);
+            if (type == null)
+            {
+                throw Logger.CodegenError(node, $"Unable to resolve type '{fullyQualifiedName}'.");
+            }
+
+            return type;
         }
 
         protected Function GenerateConstructor(ClassDeclarationSyntax classDeclaration, ParameterList parameterList, Block? body = null, List<AttributeList>? attributeLists = null)
@@ -98,6 +122,12 @@ namespace RobloxCS.Luau
         protected string? TryGetName(SyntaxNode? node)
         {
             return Utility.GetNamesFromNode(node).FirstOrDefault();
+        }
+
+        protected string GetFullSymbolName(ISymbol symbol)
+        {
+            var containerName = symbol.ContainingNamespace != null || symbol.ContainingType != null ? GetFullSymbolName(symbol.ContainingNamespace ?? (ISymbol)symbol.ContainingType) : null;
+            return (!string.IsNullOrEmpty(containerName) ? containerName + "." : "") + symbol.Name;
         }
 
         protected bool IsGlobal(SyntaxNode node)

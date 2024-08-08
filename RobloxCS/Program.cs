@@ -3,24 +3,22 @@ using RobloxCS;
 using RobloxCS.Luau;
 
 var source = """
-namespace X
-{
-    public class Abc
-    {
-        private int Rah { get; }
-        private int Rah { get; }
-
-        public Abc()
-        {
-            Rah = 69;
-            this.Rah = 420;
-        }
-    }
-}
+var intType = typeof(int);
 """.Trim();
 
+var references = FileUtility.GetCompilationReferences();
 var sourceAST = CSharpSyntaxTree.ParseText(source);
-var compiler = CSharpCompilation.Create("RewriteTest", [sourceAST]);
+var compiler = CSharpCompilation.Create(
+    assemblyName: "RewriteTest",
+    syntaxTrees: [sourceAST],
+    references
+);
+
+foreach (var diagnostic in compiler.GetDiagnostics())
+{
+    Logger.HandleDiagnostic(diagnostic);
+}
+
 var generator = new LuauGenerator(sourceAST, compiler);
 var luauAST = generator.GetLuauAST();
 var luau = new LuauWriter();

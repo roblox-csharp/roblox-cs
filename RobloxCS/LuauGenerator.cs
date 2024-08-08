@@ -1,6 +1,8 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Emit;
+using System.Reflection;
 using System.Runtime.InteropServices;
 
 namespace RobloxCS
@@ -316,6 +318,20 @@ namespace RobloxCS
             return new Luau.VariableList(variableNodes);
         }
 
+        public override Luau.TableInitializer VisitTypeOfExpression(TypeOfExpressionSyntax node)
+        {
+            var typeSymbol = _semanticModel.GetTypeInfo(node.Type).Type;
+            if (typeSymbol == null)
+            {
+                Logger.CodegenError(node, "Unable to resolve type symbol of the type provided to typeof()");
+                return null!;
+            }
+
+            var fullyQualifiedName = GetFullSymbolName(typeSymbol);
+            var type = GetRuntimeType(node, fullyQualifiedName);
+            return Luau.AstUtility.CreateTypeInfo(type);
+        }
+
         public override Luau.Node VisitInvocationExpression(InvocationExpressionSyntax node)
         {
             var methodSymbolInfo = _semanticModel.GetSymbolInfo(node.Expression);
@@ -324,9 +340,13 @@ namespace RobloxCS
                 methodSymbolInfo.CandidateReason == CandidateReason.None)
             {
                 var identifier = node.Expression as IdentifierNameSyntax;
-                if (identifier != null && identifier.Identifier.IsKind(SyntaxKind.IdentifierToken) && identifier.Identifier.Text == "nameof")
+                if (identifier != null && identifier.Identifier.IsKind(SyntaxKind.IdentifierToken))
                 {
-                    return new Luau.Literal('"' + node.ArgumentList.Arguments.First().Expression.ToString() + '"');
+                    switch (identifier.Identifier.Text)
+                    {
+                        case "nameof":
+                            return new Luau.Literal('"' + node.ArgumentList.Arguments.First().Expression.ToString() + '"');
+                    }
                 }
             }
 

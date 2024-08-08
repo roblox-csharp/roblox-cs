@@ -7,9 +7,12 @@
 
 ## Roadmap
 
+Key:
+- `?` -> will maybe be added
+
 In no particular order:
 - [ ] save navigation (`a?.b?.c`)
-- [ ] emit comments
+- [ ] emit comments?
 - [ ] method overloading
 - [ ] patterns
 	- [ ] `is`
@@ -44,8 +47,8 @@ In no particular order:
 	- [ ] inheritance
 - [ ] reflection
 	- [x] nameof
-	- [ ] typeof
-	- [ ] `Type` class
+	- [ ] typeof (partially done!)
+	- [ ] `object.GetType()`
 
 ## Will not be supported
 - Structs

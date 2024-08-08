@@ -72,25 +72,6 @@ namespace RobloxCS
             Console.WriteLine(result);
         }
 
-        public static string FixPathSep(string path)
-        {
-            path = Path.TrimEndingDirectorySeparator(path);
-            return Regex.Replace(path.Replace("\\\\", "/").Replace('\\', '/').Replace("//", "/"), @"(?<!\.)\./", "");
-        }
-
-        public static string? GetRbxcsDirectory()
-        {
-            var directoryName = Path.GetDirectoryName(GetAssemblyDirectory()); // pretend like this isn't here lol
-            return directoryName == null ? null : FixPathSep(directoryName);
-        }
-
-        public static string GetAssemblyDirectory()
-        {
-            var location = FixPathSep(Assembly.GetExecutingAssembly().Location);
-            var directoryName = Path.GetDirectoryName(location)!;
-            return FixPathSep(directoryName);
-        }
-
         public static List<T> FilterDuplicates<T>(IEnumerable<T> items, IEqualityComparer<T> comparer) where T : notnull
         {
             var seen = new Dictionary<T, bool>(comparer);

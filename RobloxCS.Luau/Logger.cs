@@ -14,22 +14,22 @@ namespace RobloxCS
             Log(message, ConsoleColor.Cyan, "INFO");
         }
 
-        public static void Error(string message)
+        public static Exception Error(string message)
         {
             Log(message, ConsoleColor.Red, "ERROR");
             Environment.Exit(1);
+            return new Exception();
         }
 
         public static Exception CompilerError(string message)
         {
-            Error($"{message} (roblox-cs compiler error)");
-            return new Exception();
+            return Error($"{message} (roblox-cs compiler error)");
         }
 
-        public static void CodegenError(SyntaxToken token, string message)
+        public static Exception CodegenError(SyntaxToken token, string message)
         {
             var lineSpan = token.GetLocation().GetLineSpan();
-            Error($"{message}\n\t- {FormatLocation(lineSpan)}");
+            return Error($"{message}\n\t- {FormatLocation(lineSpan)}");
         }
 
         public static void CodegenWarning(SyntaxToken token, string message)
@@ -38,14 +38,14 @@ namespace RobloxCS
             Warn($"{message}\n\t- {FormatLocation(lineSpan)}");
         }
 
-        public static void UnsupportedError(SyntaxNode node, string subject, bool useIs = false, bool useYet = true)
+        public static Exception UnsupportedError(SyntaxNode node, string subject, bool useIs = false, bool useYet = true)
         {
-            CodegenError(node, $"{subject} {(useIs == true ? "is" : "are")} not {(useYet ? "yet " : "")} supported, sorry!");
+            return CodegenError(node, $"{subject} {(useIs == true ? "is" : "are")} not {(useYet ? "yet " : "")} supported, sorry!");
         }
 
-        public static void CodegenError(SyntaxNode node, string message)
+        public static Exception CodegenError(SyntaxNode node, string message)
         {
-            CodegenError(node.GetFirstToken(), message);
+            return CodegenError(node.GetFirstToken(), message);
         }
 
         public static void CodegenWarning(SyntaxNode node, string message)
