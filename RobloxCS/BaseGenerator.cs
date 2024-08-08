@@ -1,5 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace RobloxCS.Luau
 {
@@ -24,7 +25,51 @@ namespace RobloxCS.Luau
         {
             return (TNode)Visit(node)!;
         }
-        
+
+        protected Function GenerateConstructor(ClassDeclarationSyntax classDeclaration, ParameterList parameterList, Block? body = null, List<AttributeList>? attributeLists = null)
+        {
+            var className = AstUtility.CreateIdentifierName(classDeclaration);
+            body ??= new Block([]);
+
+            // visit fields being assigned a value outside of the constructor
+            var nonStaticFields = classDeclaration.Members
+                .OfType<FieldDeclarationSyntax>()
+                .Where(field => !HasSyntax(field.Modifiers, SyntaxKind.StaticKeyword));
+            foreach (var field in nonStaticFields)
+            {
+                foreach (var declarator in field.Declaration.Variables)
+                {
+                    if (declarator.Initializer == null) continue;
+
+                    var initializer = Visit<Expression>(declarator.Initializer);
+                    body.Statements.Add(new ExpressionStatement(
+                        new Assignment(
+                            new MemberAccess(
+                                new IdentifierName("self"),
+                                AstUtility.CreateIdentifierName(declarator)
+                            ),
+                            initializer
+                        )
+                    ));
+                }
+            }
+
+            // add an explicit return (for native codegen) if there isn't one
+            if (!body.Statements.Any(statement => statement is Return))
+            {
+                body.Statements.Add(new Return(AstUtility.Nil()));
+            }
+
+            return new Function(
+                new AssignmentFunctionName(className, className, ':'),
+                false,
+                parameterList,
+                new TypeRef("nil"),
+                body,
+                attributeLists
+            );
+        }
+
         protected string GetName(SyntaxNode node)
         {
             return Utility.GetNamesFromNode(node).First();

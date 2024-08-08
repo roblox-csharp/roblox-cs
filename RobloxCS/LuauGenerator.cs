@@ -26,13 +26,49 @@ namespace RobloxCS
             return new Luau.AST(statements);
         }
 
+        public override Luau.Node VisitFieldDeclaration(FieldDeclarationSyntax node)
+        {
+            var isStatic = HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
+            if (!isStatic || node.Parent is not ClassDeclarationSyntax)
+            {
+                return new Luau.NoOp();
+            }
+
+            var classDeclaration = (ClassDeclarationSyntax)node.Parent!;
+            var staticFields = classDeclaration.Members
+                .OfType<FieldDeclarationSyntax>()
+                .Where(field => HasSyntax(field.Modifiers, SyntaxKind.StaticKeyword));
+
+            List<Luau.Statement> statements = [];
+            foreach (var field in staticFields)
+            {
+                foreach (var declarator in field.Declaration.Variables)
+                {
+                    if (declarator.Initializer == null) continue;
+
+                    var initializer = Visit<Luau.Expression>(declarator.Initializer);
+                    statements.Add(new Luau.ExpressionStatement(
+                        new Luau.Assignment(
+                            new Luau.MemberAccess(
+                                Luau.AstUtility.CreateIdentifierName(classDeclaration),
+                                Luau.AstUtility.CreateIdentifierName(declarator)
+                            ),
+                            initializer
+                        )
+                    ));
+                }
+            }
+            return new Luau.Block(statements);
+        }
+
         public override Luau.Function VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
         {
+            var classDeclaration = (ClassDeclarationSyntax)node.Parent!;
             var className = Luau.AstUtility.CreateIdentifierName(node.Parent!);
             var parameterList = Visit<Luau.ParameterList>(node.ParameterList);
             var body = Visit<Luau.Block?>(node.Body);
             var attributeLists = node.AttributeLists.Select(Visit<Luau.AttributeList>).ToList();
-            return Luau.AstUtility.Constructor(className, parameterList, body, attributeLists);
+            return GenerateConstructor(classDeclaration, parameterList, body, attributeLists);
         }
 
         public override Luau.Function VisitMethodDeclaration(MethodDeclarationSyntax node)
@@ -48,6 +84,7 @@ namespace RobloxCS
             return new Luau.Function(fullName, false, parameterList, returnType, body, attributeLists);
         }
 
+        // long as hell lol
         public override Luau.Block VisitClassDeclaration(ClassDeclarationSyntax node)
         {
             var name = Luau.AstUtility.CreateIdentifierName(node);
@@ -117,7 +154,7 @@ namespace RobloxCS
 
             if (explicitConstructor == null)
             {
-                classMemberStatements.Add(Luau.AstUtility.Constructor(name, new Luau.ParameterList([])));
+                classMemberStatements.Add(GenerateConstructor(node, new Luau.ParameterList([])));
             }
             classMemberStatements.AddRange(members);
 

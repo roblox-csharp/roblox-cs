@@ -1,4 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static RobloxCS.Luau.Constants;
 
@@ -8,24 +9,6 @@ namespace RobloxCS.Luau
     {
         /// <summary>file path -> dictionary(identifier name, amount of times identifier is used)</summary>
         private static Dictionary<string, Dictionary<string, uint>> _identifierDeclarations = [];
-
-        public static Function Constructor(IdentifierName className, ParameterList parameterList, Block? body = null, List<AttributeList>? attributeLists = null)
-        {
-            body ??= new Block([]);
-            if (!body.Statements.Any(statement => statement is Return))
-            {
-                body.Statements.Add(new Return());
-            }
-
-            return new Function(
-                new AssignmentFunctionName(className, className, ':'),
-                false,
-                parameterList,
-                new TypeRef("nil"),
-                body,
-                attributeLists
-            );
-        }
 
         public static Call DefineGlobal(Name name, Expression value)
         {

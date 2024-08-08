@@ -7,10 +7,7 @@ namespace X
 {
     public class Abc
     {
-        public void Hello()
-        {
-            print("hello");
-        }
+        private static int Rah = 1;
     }
 }
 """.Trim();

@@ -33,15 +33,16 @@ In no particular order:
 - [ ] interfaces
 - [ ] partial classes/structs/interfaces
 - [ ] classes
-	- [ ] constructors
+	- [x] constructors
 	- [ ] destructors/finalizers?
 	- [ ] fields
 	- [ ] properties
-	- [ ] methods
+	- [x] methods
 	- [ ] operator overloading
 	- [ ] inheritance
 - [ ] reflection
 	- [x] nameof
+	- [ ] typeof
 	- [ ] `Type` class
 
 ## Will not be supported
