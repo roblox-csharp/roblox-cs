@@ -18,7 +18,7 @@ namespace RobloxCS.Luau
             }
 
             return new Function(
-                new AssignmentFunctionName(className, new IdentifierName("constructor"), ':'),
+                new AssignmentFunctionName(className, className, ':'),
                 false,
                 parameterList,
                 new TypeRef("nil"),

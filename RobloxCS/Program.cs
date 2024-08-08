@@ -7,12 +7,13 @@ namespace X
 {
     public class Abc
     {
-        public Abc(int x)
+        public void Hello()
         {
+            print("hello");
         }
     }
 }
-""";
+""".Trim();
 
 var sourceAST = CSharpSyntaxTree.ParseText(source);
 var compiler = CSharpCompilation.Create("RewriteTest", [sourceAST]);

@@ -1,6 +1,5 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace RobloxCS.Luau
 {
@@ -10,11 +9,22 @@ namespace RobloxCS.Luau
         protected readonly SyntaxTree _tree = tree;
         protected readonly SemanticModel _semanticModel = compiler.GetSemanticModel(tree);
 
+        private readonly HashSet<SyntaxKind> multiLineCommentSyntaxes = [
+            SyntaxKind.MultiLineCommentTrivia,
+            SyntaxKind.MultiLineDocumentationCommentTrivia
+        ];
+        private readonly SyntaxKind[] commentSyntaxes = [
+            SyntaxKind.SingleLineCommentTrivia,
+            SyntaxKind.SingleLineDocumentationCommentTrivia,
+            SyntaxKind.MultiLineCommentTrivia,
+            SyntaxKind.MultiLineDocumentationCommentTrivia
+        ];
+
         protected TNode Visit<TNode>(SyntaxNode? node) where TNode : Node?
         {
             return (TNode)Visit(node)!;
         }
-
+        
         protected string GetName(SyntaxNode node)
         {
             return Utility.GetNamesFromNode(node).First();

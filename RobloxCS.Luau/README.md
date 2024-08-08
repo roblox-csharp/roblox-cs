@@ -3,6 +3,7 @@
 ## To-do
 - Generate blocks that are direct children of other blocks (or the compilation unit) as `ScopedBlock`s
 - Only generate interface declarations & inherit from interfaces if they have methods with implementations
+- Map `dynamic` to no type at all
 
 ## Roadmap
 
@@ -46,6 +47,6 @@ In no particular order:
 ## Will not be supported
 - Structs
 - Records
-- Events (via the `event` keyword, not no Roblox events)
-- Any unsafe context (pointers, `unsafe` keyword, etc.)
+- Events (via the `event` keyword, not Roblox events)
+- Any unsafe context (pointers, `unsafe` keyword, `stackalloc`, etc.)
 - `ref` keyword

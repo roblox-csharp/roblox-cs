@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using RobloxCS.Luau;
 
 namespace RobloxCS
 {
@@ -36,13 +35,26 @@ namespace RobloxCS
             return Luau.AstUtility.Constructor(className, parameterList, body, attributeLists);
         }
 
+        public override Luau.Function VisitMethodDeclaration(MethodDeclarationSyntax node)
+        {
+            var isStatic = HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
+            var name = Luau.AstUtility.CreateIdentifierName(node);
+            var className = Luau.AstUtility.CreateIdentifierName(node.Parent!);
+            var fullName = new Luau.QualifiedName(className, name, isStatic ? '.' : ':');
+            var parameterList = Visit<Luau.ParameterList>(node.ParameterList);
+            var returnType = Visit<Luau.TypeRef>(node.ReturnType);
+            var body = Visit<Luau.Block?>(node.Body);
+            var attributeLists = node.AttributeLists.Select(Visit<Luau.AttributeList>).ToList();
+            return new Luau.Function(fullName, false, parameterList, returnType, body, attributeLists);
+        }
+
         public override Luau.Block VisitClassDeclaration(ClassDeclarationSyntax node)
         {
             var name = Luau.AstUtility.CreateIdentifierName(node);
             var members = node.Members.Select(Visit<Luau.Statement>).ToList();
             var explicitConstructor = node.Members.FirstOrDefault(member => member.IsKind(SyntaxKind.ConstructorDeclaration)) as ConstructorDeclarationSyntax;
 
-            List<Statement> classMemberStatements = [
+            List<Luau.Statement> classMemberStatements = [
                 new Luau.ExpressionStatement(
                     new Luau.Assignment(
                         name,
@@ -76,7 +88,7 @@ namespace RobloxCS
                     new Luau.AssignmentFunctionName(name, new Luau.IdentifierName("new")),
                     false,
                     new Luau.ParameterList([new Luau.Parameter(new Luau.IdentifierName("..."))]),
-                    new TypeRef(name.Text),
+                    new Luau.TypeRef(name.Text),
                     new Luau.Block([
                         new Luau.Variable(
                             new Luau.IdentifierName("self"),
@@ -92,7 +104,7 @@ namespace RobloxCS
                         new Luau.Return(
                             new Luau.BinaryOperator(
                                 new Luau.Call(
-                                    new Luau.MemberAccess(new Luau.IdentifierName("self"), new Luau.IdentifierName("constructor"), ':'),
+                                    new Luau.MemberAccess(new Luau.IdentifierName("self"), name, ':'),
                                     Luau.AstUtility.CreateArgumentList([new Luau.IdentifierName("...")])
                                 ),
                                 "or",
