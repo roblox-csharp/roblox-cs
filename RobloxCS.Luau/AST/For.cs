@@ -2,11 +2,11 @@ namespace RobloxCS.Luau
 {
     public class For : Statement
     {
-        public List<Name> Names { get; }
+        public List<IdentifierName> Names { get; }
         public Expression Iterator { get; }
         public Statement Body { get; }
 
-        public For(List<Name> initializers, Expression iterator, Statement body)
+        public For(List<IdentifierName> initializers, Expression iterator, Statement body)
         {
             Names = initializers;
             Iterator = iterator;

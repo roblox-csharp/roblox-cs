@@ -5,9 +5,9 @@
         public List<Expression> Values { get; }
         public List<Expression> Keys { get; }
 
-        public TableInitializer(List<Expression> values, List<Expression>? keys = null)
+        public TableInitializer(List<Expression>? values = null, List<Expression>? keys = null)
         {
-            Values = values;
+            Values = values ?? [];
             Keys = keys ?? [];
         }
 

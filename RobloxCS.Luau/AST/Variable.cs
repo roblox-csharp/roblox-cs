@@ -2,12 +2,12 @@
 {
     public sealed class Variable : Statement
     {
-        public Name Name { get; }
+        public IdentifierName Name { get; }
         public bool IsLocal { get; }
         public Expression? Initializer;
         public TypeRef? Type { get; }
 
-        public Variable(Name name, bool isLocal, Expression? initializer = null, TypeRef? type = null)
+        public Variable(IdentifierName name, bool isLocal, Expression? initializer = null, TypeRef? type = null)
         {
             Name = name;
             IsLocal = isLocal;

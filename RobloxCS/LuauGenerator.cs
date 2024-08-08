@@ -26,10 +26,28 @@ namespace RobloxCS
                 }
                 statements.Add(statement);
             }
-            return new Luau.AST(statements);
+            return new Luau.AST(statements, node);
+        }
+        
+        public override Luau.Block VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
+        {
+            var namespaceName = Luau.AstUtility.CreateIdentifierName(node);
+            var members = new Luau.Block(node.Members.Select(Visit<Luau.Statement>).ToList());
+            return new Luau.Block([
+                new Luau.Variable(Luau.AstUtility.CreateIdentifierName(node), true, new Luau.TableInitializer()),
+                new Luau.ScopedBlock([
+                    members
+                ]),
+                new Luau.ExpressionStatement(
+                    new Luau.Assignment(
+                        new Luau.QualifiedName(Luau.AstUtility.CreateIdentifierName(node, "_exports"), namespaceName),
+                        namespaceName
+                    )
+                )
+            ]);
         }
 
-        public override Luau.Node? VisitDoStatement(DoStatementSyntax node)
+        public override Luau.Repeat VisitDoStatement(DoStatementSyntax node)
         {
             var condition = Visit<Luau.Expression>(node.Condition);
             var body = Visit<Luau.Statement>(node.Statement);
@@ -70,7 +88,7 @@ namespace RobloxCS
 
         public override Luau.For VisitForEachStatement(ForEachStatementSyntax node)
         {
-            List<Luau.Name> names = [Luau.AstUtility.CreateIdentifierName(node)];
+            List<Luau.IdentifierName> names = [Luau.AstUtility.CreateIdentifierName(node)];
             var iterator = Visit<Luau.Expression>(node.Expression);
             var body = Visit<Luau.Statement>(node.Statement);
             return new Luau.For(names, iterator, body);
@@ -84,7 +102,7 @@ namespace RobloxCS
                 variableList = new Luau.VariableList([variable]);
             }
 
-            List<Luau.Name> names = ((Luau.VariableList)variableList).Variables.Select(variable => variable.Name).ToList();
+            List<Luau.IdentifierName> names = ((Luau.VariableList)variableList).Variables.Select(variable => variable.Name).ToList();
             var iterator = Visit<Luau.Expression>(node.Expression);
             var body = Visit<Luau.Statement>(node.Statement);
             return new Luau.For(names, iterator, body);
@@ -383,19 +401,24 @@ namespace RobloxCS
             return new Luau.AttributeList(attributes);
         }
 
+        public override Luau.Statement VisitGlobalStatement(GlobalStatementSyntax node)
+        {
+            var luauNode = Visit<Luau.Statement>(node.Statement);
+            if (HasSyntax(node.Modifiers, SyntaxKind.PublicKeyword))
+            {
+
+            }
+            return luauNode;
+        }
+
         public override Luau.ParameterList VisitParameterList(ParameterListSyntax node)
         {
             return new Luau.ParameterList(node.Parameters.Select(Visit).OfType<Luau.Parameter>().ToList());
         }
 
-        public override Luau.Node? VisitGlobalStatement(GlobalStatementSyntax node)
+        public override Luau.Statement VisitLocalDeclarationStatement(LocalDeclarationStatementSyntax node)
         {
-            return Visit(node.Statement);
-        }
-
-        public override Luau.Node? VisitLocalDeclarationStatement(LocalDeclarationStatementSyntax node)
-        {
-            return Visit(node.Declaration);
+            return Visit<Luau.Statement>(node.Declaration);
         }
 
         public override Luau.VariableList VisitVariableDeclaration(VariableDeclarationSyntax node)

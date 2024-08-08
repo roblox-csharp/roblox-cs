@@ -5,12 +5,12 @@ namespace RobloxCS.Luau
     public class Parameter : Statement
     {
 
-        public Name Name { get; }
+        public IdentifierName Name { get; }
         public Expression? Initializer { get; }
         public TypeRef? Type { get; }
         public bool IsVararg { get; }
 
-        public Parameter(Name name, bool isVararg, Expression? initializer, TypeRef? type)
+        public Parameter(IdentifierName name, bool isVararg, Expression? initializer, TypeRef? type)
         {
             Name = name;
             Initializer = initializer;

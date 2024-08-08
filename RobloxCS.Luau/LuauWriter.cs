@@ -2,8 +2,6 @@
 {
     public class LuauWriter : BaseWriter
     {
-        private uint _bindingNumber = 0;
-
         public string Render(AST ast)
         {
             ast.Render(this);
@@ -33,22 +31,6 @@
         public void WriteRequire(string requirePath)
         {
             WriteLine($"require({requirePath})");
-        }
-
-        public void WriteBindingName()
-        {
-            Write("_binding");
-            if (_bindingNumber > 0)
-            {
-                Write('_');
-                Write(_bindingNumber.ToString());
-            }
-            _bindingNumber++;
-        }
-
-        public void CloseBindingName()
-        {
-            _bindingNumber--;
         }
 
         public void WriteFunction(Name? name, bool isLocal, ParameterList parameterList, TypeRef? returnType = null, Block? body = null, List<AttributeList>? attributeLists = null, bool inlineAttributes = false)

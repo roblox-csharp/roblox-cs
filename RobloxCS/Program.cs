@@ -3,8 +3,9 @@ using RobloxCS;
 using RobloxCS.Luau;
 
 var source = """
-var i = 2;
-var abc = i++;
+namespace X
+{
+}
 """;
 
 var sourceAST = CSharpSyntaxTree.ParseText(source);
