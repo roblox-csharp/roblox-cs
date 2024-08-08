@@ -75,7 +75,7 @@
             WriteLine("end");
         }
 
-        public void WriteAssignment(Name name, Expression initializer)
+        public void WriteAssignment(Expression name, Expression initializer)
         {
             name.Render(this);
             Write(" = ");
@@ -146,12 +146,13 @@
             if (node.Parent is not Variable && node is not Argument) {
                 if (node is Assignment assignment)
                 {
-                    node = assignment.Name;
+                    node = assignment.Expression;
                 }
                 else if (node is BinaryOperator binaryOperator && binaryOperator.Operator.Contains('='))
                 {
                     node = binaryOperator.Left;
                 }
+                FixNode(node);
             }
 
             var original = new IdentifierName("_original");
@@ -161,7 +162,7 @@
             {
                 if (node is Assignment assignment)
                 {
-                    new Variable(original, true, assignment.Name).Render(this);
+                    new Variable(original, true, assignment.Expression).Render(this);
                     new ExpressionStatement(assignment).Render(this);
                     node = original;
                 }
@@ -179,7 +180,7 @@
                 {
                     if (descendant is Assignment assignment)
                     {
-                        new Variable(original, true, assignment.Name).Render(this);
+                        new Variable(original, true, assignment.Expression).Render(this);
                         new ExpressionStatement(assignment).Render(this);
                     }
                     else if (descendant is BinaryOperator binaryOperator && binaryOperator.Operator.Contains('='))
@@ -192,8 +193,6 @@
                 WriteDescendantStatements(ref descendant);
                 return descendant;
             }).ToList();
-
-            FixNode(node);
         }
 
         private Node FixNode(Node node)

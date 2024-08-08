@@ -9,14 +9,80 @@ namespace RobloxCS.Luau
         /// <summary>file path -> dictionary(identifier name, amount of times identifier is used)</summary>
         private static Dictionary<string, Dictionary<string, uint>> _identifierDeclarations = [];
 
-        public static ExpressionStatement Exported(SyntaxNode node, Variable variable)
+        public static Function Constructor(IdentifierName className, ParameterList parameterList, Block? body = null, List<AttributeList>? attributeLists = null)
         {
-            return new ExpressionStatement(
-                new Assignment(
-                    new QualifiedName(CreateIdentifierName(node, "_exports"), variable.Name),
-                    variable.Initializer ?? Nil()
-                )
+            body ??= new Block([]);
+            if (!body.Statements.Any(statement => statement is Return))
+            {
+                body.Statements.Add(new Return());
+            }
+
+            return new Function(
+                new AssignmentFunctionName(className, new IdentifierName("constructor"), ':'),
+                false,
+                parameterList,
+                new TypeRef("nil"),
+                body,
+                attributeLists
             );
+        }
+
+        public static Call DefineGlobal(Name name, Expression value)
+        {
+            return CSCall("defineGlobal", new Literal($"\"{name}\""), value);
+        }
+
+        public static Call GetGlobal(Name name)
+        {
+            return CSCall("getGlobal", new Literal($"\"{name}\""));
+        }
+
+        public static Call CSCall(string methodName, params Expression[] arguments)
+        {
+            return new Call(
+                new MemberAccess(
+                    new IdentifierName("CS"),
+                    new IdentifierName(methodName)
+                ),
+                CreateArgumentList(arguments.ToList())
+            );
+        }
+
+        public static Call Bit32Call(string methodName, params Expression[] arguments)
+        {
+            return new Call(
+                new MemberAccess(
+                    new IdentifierName("bit32"),
+                    new IdentifierName(methodName)
+                ),
+                CreateArgumentList(arguments.ToList())
+            );
+        }
+
+        public static ArgumentList CreateArgumentList(List<Expression> arguments)
+        {
+            return new ArgumentList(arguments.ConvertAll(expression => new Argument(expression)));
+        }
+
+        public static Expression? GetFullParentName(SyntaxNode node)
+        {
+            if (node.Parent == null) return null;
+
+            var parentLocation = GetFullParentName(node.Parent);
+            switch (node.Parent)
+            {
+                case CompilationUnitSyntax:
+                    return null;
+            }
+
+            var parentName = CreateIdentifierName(node.Parent);
+            return parentLocation == null ?
+                (
+                    node.Parent.SyntaxTree == node.SyntaxTree ?
+                        parentName
+                        : CSCall("getGlobal", new Literal($"\"{parentName.Text}\""))
+                )
+                : new MemberAccess(parentLocation, parentName);
         }
 
         public static If Initializer(Name name, Expression initializer)
@@ -28,28 +94,12 @@ namespace RobloxCS.Luau
             );
         }
 
-        public static Call Bit32Call(string methodName, params Expression[] arguments)
-        {
-            return new Call(
-                new MemberAccess(
-                    new IdentifierName("bit32"),
-                    new IdentifierName(methodName)
-                ),
-                new ArgumentList(arguments.ToList().ConvertAll(expression => new Argument(expression)))
-            );
-        }
-
         public static QualifiedName QualifiedNameFromMemberAccess(MemberAccess memberAccess)
         {
-            Name left;
-            if (memberAccess.Expression is MemberAccess leftMemberAccess)
-            {
-                left = QualifiedNameFromMemberAccess(leftMemberAccess);
-            }
-            else
-            {
-                left = (Name)memberAccess.Expression;
-            }
+            var left = memberAccess.Expression is MemberAccess leftMemberAccess ?
+                QualifiedNameFromMemberAccess(leftMemberAccess)
+                : (Name)memberAccess.Expression;
+
             return new QualifiedName(left, memberAccess.Name);
         }
 
@@ -72,9 +122,9 @@ namespace RobloxCS.Luau
             return CreateIdentifierName(node, Utility.GetNamesFromNode(node).First());
         }
 
-        public static IdentifierName CreateIdentifierName(SyntaxNode node, string name)
+        public static IdentifierName CreateIdentifierName(SyntaxNode node, string name, bool bypassReserved = false)
         {
-            if (RESERVED_IDENTIFIERS.Contains(name))
+            if (RESERVED_IDENTIFIERS.Contains(name) && !bypassReserved)
             {
                 Logger.UnsupportedError(node, $"Using '{name}' as an identifier", useIs: true, useYet: false);
             }
@@ -82,6 +132,7 @@ namespace RobloxCS.Luau
             return new IdentifierName(name);
         }
 
+        // TODO: reference the correct identifier names
         public static string FixIdentifierNameText(SyntaxNode node, string name)
         {
             if (!_identifierDeclarations.ContainsKey(node.SyntaxTree.FilePath))

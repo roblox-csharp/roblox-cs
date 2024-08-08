@@ -4,7 +4,7 @@
     {
         public Expression? Expression { get; }
 
-        public Return(Expression? expression)
+        public Return(Expression? expression = null)
         {
             Expression = expression;
             if (Expression != null)

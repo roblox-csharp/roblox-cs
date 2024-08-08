@@ -1,10 +1,21 @@
+--!native
+--!strict
+
 local CS = {}
+CS.globalNamespace = {} :: { [string]: any }
+
+function CS.defineGlobal<T>(name: string, value: T)
+    CS.globalNamespace[name] = value
+end
+
+function CS.getGlobal<T>(name: string): T -- TODO: if getting namespace call getGlobal<Namespace>, if class then getGlobal<Class>, etc
+    return CS.globalNamespace[name]
+end
 
 export type Class = {
     __name: string; -- prob temporary
 } -- stub
 
-@native
 function CS.is(object: any, class: Class | string): boolean
     if typeof(class) == "table" and type(class.__name) == "string" then
 		return typeof(object) == "table" and type(object["className"]) == "string" and object["className"] == class.__name
@@ -13,16 +24,14 @@ function CS.is(object: any, class: Class | string): boolean
 	-- metatable check
 	if typeof(object) == "table" then
 		object = getmetatable(object)
+
 		while object ~= nil do
 			if object == class then
 				return true
 			end
+
 			local mt = getmetatable(object)
-			if mt then
-				object = mt.__index
-			else
-				object = nil
-			end
+			object = if mt then mt.__index else nil
 		end
 	end
 
@@ -40,7 +49,6 @@ end
 export type Exception = {
     Message: string;
     Throw: () -> nil;
-
 }
 --[[
 if message == nil then message = "An error occurred" end
@@ -63,12 +71,11 @@ type CatchBlock = {
     block: (ex: Exception?, rethrow: () -> nil) -> nil
 }
 
-@native
 function CS.try(block: () -> nil, finallyBlock: () -> nil, catchBlocks: { CatchBlock }): nil
     local success: boolean, ex: Exception | string | nil = pcall(block)
     if not success then
         if typeof(ex) == "string" then
-            ex = CS.getAssemblyType("Exception").new(ex, false)
+            ex = CS.getGlobal("Exception").new(ex, false)
         end
         for _, catchBlock in catchBlocks do
             if catchBlock.exceptionClass ~= nil and catchBlock.exceptionClass ~= (ex :: Exception)["$className"] then continue end

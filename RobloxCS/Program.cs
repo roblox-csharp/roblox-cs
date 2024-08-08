@@ -5,6 +5,9 @@ using RobloxCS.Luau;
 var source = """
 namespace X
 {
+    public class Abc
+    {
+    }
 }
 """;
 

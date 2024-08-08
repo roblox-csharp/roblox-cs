@@ -1,14 +1,12 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RobloxCS.Luau;
 
 namespace RobloxCS
 {
-    public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) : Luau.BaseGenerator
+    public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) : Luau.BaseGenerator(tree, compiler)
     {
-        private readonly SyntaxTree _tree = tree;
-        private readonly SemanticModel _semanticModel = compiler.GetSemanticModel(tree);
-
         public Luau.AST GetLuauAST()
         {
             return Visit<Luau.AST>(_tree.GetRoot());
@@ -22,29 +20,141 @@ namespace RobloxCS
                 var statement = Visit<Luau.Statement?>(member);
                 if (statement == null)
                 {
-                    throw new Exception($"Unhandled syntax node within {member.Kind()}:\n{member}");
+                    throw Logger.CompilerError($"Unhandled syntax node within {member.Kind()}:\n{member}");
                 }
                 statements.Add(statement);
             }
-            return new Luau.AST(statements, node);
+            return new Luau.AST(statements);
         }
-        
-        public override Luau.Block VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
+
+        public override Luau.Function VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
         {
-            var namespaceName = Luau.AstUtility.CreateIdentifierName(node);
-            var members = new Luau.Block(node.Members.Select(Visit<Luau.Statement>).ToList());
-            return new Luau.Block([
-                new Luau.Variable(Luau.AstUtility.CreateIdentifierName(node), true, new Luau.TableInitializer()),
-                new Luau.ScopedBlock([
-                    members
-                ]),
+            var className = Luau.AstUtility.CreateIdentifierName(node.Parent!);
+            var parameterList = Visit<Luau.ParameterList>(node.ParameterList);
+            var body = Visit<Luau.Block?>(node.Body);
+            var attributeLists = node.AttributeLists.Select(Visit<Luau.AttributeList>).ToList();
+            return Luau.AstUtility.Constructor(className, parameterList, body, attributeLists);
+        }
+
+        public override Luau.Block VisitClassDeclaration(ClassDeclarationSyntax node)
+        {
+            var name = Luau.AstUtility.CreateIdentifierName(node);
+            var members = node.Members.Select(Visit<Luau.Statement>).ToList();
+            var explicitConstructor = node.Members.FirstOrDefault(member => member.IsKind(SyntaxKind.ConstructorDeclaration)) as ConstructorDeclarationSyntax;
+
+            List<Statement> classMemberStatements = [
                 new Luau.ExpressionStatement(
                     new Luau.Assignment(
-                        new Luau.QualifiedName(Luau.AstUtility.CreateIdentifierName(node, "_exports"), namespaceName),
-                        namespaceName
+                        name,
+                        new Luau.Call(
+                            new Luau.IdentifierName("setmetatable"),
+                            Luau.AstUtility.CreateArgumentList([
+                                new Luau.TableInitializer(),
+                                new Luau.TableInitializer(
+                                    [new Luau.AnonymousFunction(
+                                        new Luau.ParameterList([]),
+                                        new Luau.Block([
+                                            new Luau.Return(new Luau.Literal($"\"{name.Text}\""))
+                                        ])
+                                    )],
+                                    [new Luau.IdentifierName("__tostring")]
+                                )
+                            ])
+                        )
                     )
+                ),
+                new Luau.ExpressionStatement(
+                    new Luau.Assignment(
+                        new Luau.MemberAccess(
+                            name,
+                            new Luau.IdentifierName("__index")
+                        ),
+                        name
+                    )
+                ),
+                new Luau.Function(
+                    new Luau.AssignmentFunctionName(name, new Luau.IdentifierName("new")),
+                    false,
+                    new Luau.ParameterList([new Luau.Parameter(new Luau.IdentifierName("..."))]),
+                    new TypeRef(name.Text),
+                    new Luau.Block([
+                        new Luau.Variable(
+                            new Luau.IdentifierName("self"),
+                            true,
+                            new Luau.Call(
+                                new Luau.IdentifierName("setmetatable"),
+                                Luau.AstUtility.CreateArgumentList([
+                                    new Luau.TableInitializer(),
+                                    name
+                                ])
+                            )
+                        ),
+                        new Luau.Return(
+                            new Luau.BinaryOperator(
+                                new Luau.Call(
+                                    new Luau.MemberAccess(new Luau.IdentifierName("self"), new Luau.IdentifierName("constructor"), ':'),
+                                    Luau.AstUtility.CreateArgumentList([new Luau.IdentifierName("...")])
+                                ),
+                                "or",
+                                new Luau.IdentifierName("self")
+                            )
+                        )
+                    ])
                 )
-            ]);
+            ];
+
+            if (explicitConstructor != null)
+            {
+                classMemberStatements.Add(Luau.AstUtility.Constructor(name, new Luau.ParameterList([])));
+            }
+            classMemberStatements.AddRange(members);
+
+            List<Luau.Statement> statements = [
+                new Luau.Variable(Luau.AstUtility.CreateIdentifierName(node), true),
+                new Luau.ScopedBlock(classMemberStatements)
+            ];
+
+            if (IsGlobal(node))
+            {
+                statements.Insert(0, new Luau.ExpressionStatement(Luau.AstUtility.DefineGlobal(name, name)));
+            }
+            else
+            {
+                var fullParentName = Luau.AstUtility.GetFullParentName(node);
+                if (fullParentName != null)
+                {
+                    statements.Add(new Luau.ExpressionStatement(
+                        new Luau.Assignment(
+                            new Luau.MemberAccess(
+                                fullParentName,
+                                name
+                            ),
+                            name
+                        )
+                    ));
+                }
+            }
+
+            return new Luau.Block(statements);
+        }
+
+        public override Luau.Block VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
+        {
+            var name = Luau.AstUtility.CreateIdentifierName(node);
+            var members = new Luau.Block(node.Members.Select(Visit<Luau.Statement>).ToList());
+            List<Luau.Statement> statements = [
+                new Luau.Variable(Luau.AstUtility.CreateIdentifierName(node), true, new Luau.TableInitializer())
+            ];
+
+            if (IsGlobal(node))
+            {
+                statements.Add(new Luau.ExpressionStatement(Luau.AstUtility.DefineGlobal(name, name)));
+            }
+
+            statements.Add(new Luau.ScopedBlock([
+                members
+            ]));
+            return new Luau.Block(statements);
         }
 
         public override Luau.Repeat VisitDoStatement(DoStatementSyntax node)

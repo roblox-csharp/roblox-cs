@@ -27,17 +27,27 @@
                 var key = Keys.ElementAtOrDefault(index);
                 if (key != null)
                 {
-                    luau.Write('[');
+                    if (key is not IdentifierName)
+                    {
+                        luau.Write('[');
+                    }
                     key.Render(luau);
-                    luau.Write("] = ");
+                    if (key is not IdentifierName)
+                    {
+                        luau.Write(']');
+                    }
+                    luau.Write(" = ");
                 }
 
                 value.Render(luau);
                 if (value != Values.Last())
                 {
-                    luau.Write(", ");
+                    luau.WriteLine(", ");
+                    if (hasAnyKeys)
+                    {
+                        luau.WriteLine();
+                    }
                 }
-                luau.WriteLine();
             }
             if (hasAnyKeys)
             { 

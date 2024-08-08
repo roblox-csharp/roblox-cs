@@ -2,14 +2,14 @@
 {
     public sealed class Assignment : Expression
     {
-        public Name Name { get; }
+        public Expression Expression { get; }
         public Expression Value;
 
-        public Assignment(Name name, Expression value)
+        public Assignment(Expression name, Expression value)
         {
-            Name = name;
+            Expression = name;
             Value = value;
-            AddChildren([Name, Value]);
+            AddChildren([Expression, Value]);
         }
 
         public override void Render(LuauWriter luau)
@@ -17,7 +17,7 @@
             Node value = Value;
             luau.WriteDescendantStatements(ref value);
             Value = (Expression)value;
-            luau.WriteAssignment(Name, Value);
+            luau.WriteAssignment(Expression, Value);
         }
     }
 }

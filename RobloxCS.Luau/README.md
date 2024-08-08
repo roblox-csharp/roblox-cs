@@ -1,8 +1,8 @@
 # Luau AST
 
 ## To-do
-- Generate blocks that are direct children of other blocks (or the compilation unit) as a `do..end` statement
-- If using temporary variables and a regular variable with the same name is created, append temporary names with `_n` where `n` is the index of the temporary variable
+- Generate blocks that are direct children of other blocks (or the compilation unit) as `ScopedBlock`s
+- Only generate interface declarations & inherit from interfaces if they have methods with implementations
 
 ## Roadmap
 
@@ -27,7 +27,7 @@ In no particular order:
 - [ ] types
 	- [x] map primitives to luau
 	- [ ] generics
-- [ ] namespaces
+- [x] namespaces
 - [ ] enums
 - [ ] interfaces
 - [ ] partial classes/structs/interfaces

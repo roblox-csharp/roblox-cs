@@ -10,7 +10,7 @@ namespace RobloxCS.Luau
         public TypeRef? Type { get; }
         public bool IsVararg { get; }
 
-        public Parameter(IdentifierName name, bool isVararg, Expression? initializer, TypeRef? type)
+        public Parameter(IdentifierName name, bool isVararg = false, Expression? initializer = null, TypeRef? type = null)
         {
             Name = name;
             Initializer = initializer;

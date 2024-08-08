@@ -20,9 +20,10 @@ namespace RobloxCS
             Environment.Exit(1);
         }
 
-        public static void CompilerError(string message)
+        public static Exception CompilerError(string message)
         {
             Error($"{message} (roblox-cs compiler error)");
+            return new Exception();
         }
 
         public static void CodegenError(SyntaxToken token, string message)
