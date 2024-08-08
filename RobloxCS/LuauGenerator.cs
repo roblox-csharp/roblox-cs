@@ -26,6 +26,27 @@ namespace RobloxCS
             return new Luau.AST(statements);
         }
 
+        public override Luau.Node VisitPropertyDeclaration(PropertyDeclarationSyntax node)
+        {
+            var isStatic = HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
+            if (!isStatic || node.Initializer == null || node.Parent is not ClassDeclarationSyntax)
+            {
+                return new Luau.NoOp();
+            }
+
+            var classDeclaration = (ClassDeclarationSyntax)node.Parent!;
+            var initializer = Visit<Luau.Expression>(node.Initializer);
+            return new Luau.ExpressionStatement(
+                new Luau.Assignment(
+                    new Luau.MemberAccess(
+                        Luau.AstUtility.CreateIdentifierName(classDeclaration),
+                        Luau.AstUtility.CreateIdentifierName(node)
+                    ),
+                    initializer
+                )
+            );
+        }
+
         public override Luau.Node VisitFieldDeclaration(FieldDeclarationSyntax node)
         {
             var isStatic = HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
@@ -40,23 +61,20 @@ namespace RobloxCS
                 .Where(field => HasSyntax(field.Modifiers, SyntaxKind.StaticKeyword));
 
             List<Luau.Statement> statements = [];
-            foreach (var field in staticFields)
+            foreach (var declarator in node.Declaration.Variables)
             {
-                foreach (var declarator in field.Declaration.Variables)
-                {
-                    if (declarator.Initializer == null) continue;
+                if (declarator.Initializer == null) continue;
 
-                    var initializer = Visit<Luau.Expression>(declarator.Initializer);
-                    statements.Add(new Luau.ExpressionStatement(
-                        new Luau.Assignment(
-                            new Luau.MemberAccess(
-                                Luau.AstUtility.CreateIdentifierName(classDeclaration),
-                                Luau.AstUtility.CreateIdentifierName(declarator)
-                            ),
-                            initializer
-                        )
-                    ));
-                }
+                var initializer = Visit<Luau.Expression>(declarator.Initializer);
+                statements.Add(new Luau.ExpressionStatement(
+                    new Luau.Assignment(
+                        new Luau.MemberAccess(
+                            Luau.AstUtility.CreateIdentifierName(classDeclaration),
+                            Luau.AstUtility.CreateIdentifierName(declarator)
+                        ),
+                        initializer
+                    )
+                ));
             }
             return new Luau.Block(statements);
         }

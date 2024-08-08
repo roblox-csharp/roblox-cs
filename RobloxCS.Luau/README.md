@@ -35,8 +35,10 @@ In no particular order:
 - [ ] classes
 	- [x] constructors
 	- [ ] destructors/finalizers?
-	- [ ] fields
-	- [ ] properties
+	- [x] fields
+	- [x] basic properties
+	- [ ] property getters
+	- [ ] property setters
 	- [x] methods
 	- [ ] operator overloading
 	- [ ] inheritance

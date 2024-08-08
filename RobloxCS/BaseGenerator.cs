@@ -31,10 +31,14 @@ namespace RobloxCS.Luau
             var className = AstUtility.CreateIdentifierName(classDeclaration);
             body ??= new Block([]);
 
-            // visit fields being assigned a value outside of the constructor
+            // visit fields/properties being assigned a value outside of the constructor (aka non-static & with initializers)
             var nonStaticFields = classDeclaration.Members
                 .OfType<FieldDeclarationSyntax>()
                 .Where(field => !HasSyntax(field.Modifiers, SyntaxKind.StaticKeyword));
+            var nonStaticProperties = classDeclaration.Members
+                .OfType<PropertyDeclarationSyntax>()
+                .Where(field => !HasSyntax(field.Modifiers, SyntaxKind.StaticKeyword));
+
             foreach (var field in nonStaticFields)
             {
                 foreach (var declarator in field.Declaration.Variables)
@@ -52,6 +56,22 @@ namespace RobloxCS.Luau
                         )
                     ));
                 }
+            }
+
+            foreach (var property in nonStaticProperties)
+            {
+                if (property.Initializer == null) continue;
+
+                var initializer = Visit<Expression>(property.Initializer);
+                body.Statements.Add(new ExpressionStatement(
+                    new Assignment(
+                        new MemberAccess(
+                            new IdentifierName("self"),
+                            AstUtility.CreateIdentifierName(property)
+                        ),
+                        initializer
+                    )
+                ));
             }
 
             // add an explicit return (for native codegen) if there isn't one

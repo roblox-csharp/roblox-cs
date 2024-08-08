@@ -7,7 +7,7 @@ namespace X
 {
     public class Abc
     {
-        private static int Rah = 1;
+        private static int Rah { get; } = 1;
     }
 }
 """.Trim();
