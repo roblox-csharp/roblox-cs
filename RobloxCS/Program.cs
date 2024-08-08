@@ -7,7 +7,13 @@ namespace X
 {
     public class Abc
     {
-        private static int Rah { get; } = 1;
+        private int Rah { get; }
+
+        public Abc()
+        {
+            Rah = 69;
+            this.Rah = 420;
+        }
     }
 }
 """.Trim();

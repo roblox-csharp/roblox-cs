@@ -102,6 +102,11 @@ namespace RobloxCS
             return new Luau.Function(fullName, false, parameterList, returnType, body, attributeLists);
         }
 
+        public override Luau.IdentifierName VisitThisExpression(ThisExpressionSyntax node)
+        {
+            return new Luau.IdentifierName("self");
+        }
+
         // long as hell lol
         public override Luau.Block VisitClassDeclaration(ClassDeclarationSyntax node)
         {
