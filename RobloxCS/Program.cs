@@ -7,6 +7,9 @@ namespace X
 {
     public class Abc
     {
+        public Abc(int x)
+        {
+        }
     }
 }
 """;

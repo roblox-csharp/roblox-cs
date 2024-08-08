@@ -103,7 +103,7 @@ namespace RobloxCS
                 )
             ];
 
-            if (explicitConstructor != null)
+            if (explicitConstructor == null)
             {
                 classMemberStatements.Add(Luau.AstUtility.Constructor(name, new Luau.ParameterList([])));
             }
