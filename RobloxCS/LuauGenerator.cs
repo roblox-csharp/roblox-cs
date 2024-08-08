@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Runtime.InteropServices;
 
 namespace RobloxCS
 {
@@ -373,7 +374,7 @@ namespace RobloxCS
 
         public override Luau.Node VisitAssignmentExpression(AssignmentExpressionSyntax node)
         {
-            var name = Visit<Luau.Name>(node.Left);
+            var name = Visit<Luau.Expression>(node.Left);
             var value = Visit<Luau.Expression>(node.Right);
             if (!node.IsKind(SyntaxKind.SimpleAssignmentExpression))
             {
@@ -426,9 +427,15 @@ namespace RobloxCS
             return Luau.AstUtility.DiscardVariableIfExpressionStatement(node, elementAccess, node.Parent);
         }
 
-        public override Luau.IdentifierName VisitIdentifierName(IdentifierNameSyntax node)
+        public override Luau.Node VisitIdentifierName(IdentifierNameSyntax node)
         {
-            return Luau.AstUtility.CreateIdentifierName(node);
+            var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node);
+            var isClassMember = classDeclaration != null
+                && classDeclaration.Members.Any(member => member is not ConstructorDeclarationSyntax &&  TryGetName(member) == GetName(node))
+                && (node.Parent is not MemberAccessExpressionSyntax memberAccess || memberAccess.Expression is not ThisExpressionSyntax);
+
+            var name = Luau.AstUtility.CreateIdentifierName(node);
+            return isClassMember ? new Luau.MemberAccess(new Luau.IdentifierName("self"), name) : name;
         }
 
         public override Luau.Break VisitBreakStatement(BreakStatementSyntax node)

@@ -109,5 +109,20 @@ namespace RobloxCS.Luau
         {
             return tokens.Any(token => token.IsKind(syntax));
         }
+
+        protected bool IsDescendantOf<T>(SyntaxNode node) where T : SyntaxNode
+        {
+            return FindFirstAncestor<T>(node) != null;
+        }
+
+        protected T? FindFirstAncestor<T>(SyntaxNode node) where T : SyntaxNode
+        {
+            return GetAncestors<T>(node).FirstOrDefault();
+        }
+
+        protected List<T> GetAncestors<T>(SyntaxNode node) where T : SyntaxNode
+        {
+            return node.Ancestors().OfType<T>().ToList();
+        }
     }
 }

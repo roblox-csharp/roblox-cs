@@ -8,6 +8,7 @@ namespace X
     public class Abc
     {
         private int Rah { get; }
+        private int Rah { get; }
 
         public Abc()
         {
