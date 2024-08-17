@@ -3,14 +3,7 @@ using RobloxCS;
 using RobloxCS.Luau;
 
 var source = """
-var brah = new B.Brah();
-
-namespace B
-{
-    public class Brah
-    {
-    }
-}
+class A {}
 """.Trim();
 
 var references = FileUtility.GetCompilationReferences();

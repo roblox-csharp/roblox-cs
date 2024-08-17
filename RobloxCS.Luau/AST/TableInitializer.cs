@@ -42,16 +42,21 @@
                 value.Render(luau);
                 if (value != Values.Last())
                 {
-                    luau.Write(", ");
+                    luau.Write(',');
                     if (hasAnyKeys && value is not AnonymousFunction)
                     {
                         luau.WriteLine();
+                    }
+                    else
+                    {
+                        luau.Write(' ');
                     }
                 }
             }
             if (hasAnyKeys)
             { 
                 luau.PopIndent();
+                luau.WriteLine();
             }
             luau.Write('}');
         }

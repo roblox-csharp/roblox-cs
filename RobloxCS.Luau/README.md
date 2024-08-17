@@ -28,6 +28,9 @@ In no particular order:
 	- [x] do
 	- [ ] switch statements
 	- [ ] switch expressions
+	- [x] `return`
+	- [x] `break`
+	- [x] `continue`
 - [ ] types
 	- [x] map primitives to luau
 	- [ ] generics

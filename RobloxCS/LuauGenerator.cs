@@ -178,6 +178,11 @@ namespace RobloxCS
                 )
             ];
 
+            if (IsGlobal(node))
+            {
+                classMemberStatements.Insert(2, new Luau.ExpressionStatement(Luau.AstUtility.DefineGlobal(name, name)));
+            }
+
             if (explicitConstructor == null)
             {
                 classMemberStatements.Add(GenerateConstructor(node, new Luau.ParameterList([])));
@@ -189,11 +194,7 @@ namespace RobloxCS
                 new Luau.ScopedBlock(classMemberStatements)
             ];
 
-            if (IsGlobal(node))
-            {
-                statements.Insert(0, new Luau.ExpressionStatement(Luau.AstUtility.DefineGlobal(name, name)));
-            }
-            else
+            if (!IsGlobal(node))
             {
                 var fullParentName = Luau.AstUtility.GetFullParentName(node);
                 if (fullParentName != null)

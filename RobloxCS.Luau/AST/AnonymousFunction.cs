@@ -18,7 +18,7 @@
 
         public override void Render(LuauWriter luau)
         {
-            luau.WriteFunction(null, false, ParameterList, null, Body);
+            luau.WriteFunction(null, false, ParameterList, null, Body, createNewline: false);
         }
     }
 }

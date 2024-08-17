@@ -33,7 +33,7 @@
             WriteLine($"require({requirePath})");
         }
 
-        public void WriteFunction(Name? name, bool isLocal, ParameterList parameterList, TypeRef? returnType = null, Block? body = null, List<AttributeList>? attributeLists = null, bool inlineAttributes = false)
+        public void WriteFunction(Name? name, bool isLocal, ParameterList parameterList, TypeRef? returnType = null, Block? body = null, List<AttributeList>? attributeLists = null, bool inlineAttributes = false, bool createNewline = true)
         {
             foreach (var attributeList in attributeLists ?? [])
             {
@@ -72,7 +72,14 @@
             body.Render(this);
 
             PopIndent();
-            WriteLine("end");
+            if (createNewline)
+            {
+                WriteLine("end");
+            }
+            else
+            {
+                Write("end");
+            }
         }
 
         public void WriteAssignment(Expression name, Expression initializer)
