@@ -43,7 +43,7 @@
                 if (value != Values.Last())
                 {
                     luau.Write(", ");
-                    if (hasAnyKeys)
+                    if (hasAnyKeys && value is not AnonymousFunction)
                     {
                         luau.WriteLine();
                     }
@@ -52,7 +52,6 @@
             if (hasAnyKeys)
             { 
                 luau.PopIndent();
-                luau.WriteLine();
             }
             luau.Write('}');
         }

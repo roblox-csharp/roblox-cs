@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using System.Linq.Expressions;
 using System.Reflection;
 using static RobloxCS.Luau.Constants;
 
@@ -236,6 +237,20 @@ namespace RobloxCS.Luau
         public static Variable DiscardVariable(SyntaxNode node, Expression value)
         {
             return new Variable(CreateIdentifierName(node, "_"), true, value);
+        }
+
+        public static Name CreateName(string text)
+        {
+            Name expression = new IdentifierName(text);
+            var pieces = text.Split('.');
+            if (pieces.Length > 0)
+            {
+                foreach (var piece in pieces.Skip(1))
+                {
+                    expression = new QualifiedName(expression, new IdentifierName(piece));
+                }
+            }
+            return expression;
         }
 
         public static IdentifierName CreateIdentifierName(SyntaxNode node)

@@ -3,7 +3,14 @@ using RobloxCS;
 using RobloxCS.Luau;
 
 var source = """
-var intType = typeof(int);
+var brah = new B.Brah();
+
+namespace B
+{
+    public class Brah
+    {
+    }
+}
 """.Trim();
 
 var references = FileUtility.GetCompilationReferences();
@@ -14,8 +21,10 @@ var compiler = CSharpCompilation.Create(
     references
 );
 
+// RobloxCS.Utility.PrettyPrint(sourceAST.GetRoot().ChildNodes().First().ChildNodes().First().ChildNodes().First().ChildNodes().Last().ChildNodes().First().ChildNodes().First().ChildNodes().First());
 foreach (var diagnostic in compiler.GetDiagnostics())
 {
+    if (diagnostic.Id == "CS5001") continue;
     Logger.HandleDiagnostic(diagnostic);
 }
 

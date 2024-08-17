@@ -31,11 +31,13 @@ In no particular order:
 - [ ] types
 	- [x] map primitives to luau
 	- [ ] generics
+- [ ] type hoisting
 - [x] namespaces
 - [ ] enums
 - [ ] interfaces
 - [ ] partial classes/structs/interfaces
 - [ ] classes
+	- [x] `new`
 	- [x] constructors
 	- [ ] destructors/finalizers?
 	- [x] fields
