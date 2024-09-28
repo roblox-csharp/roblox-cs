@@ -60,7 +60,7 @@
             {
                 if (parameter.IsVararg)
                 {
-                    var type = parameter.Type != null ? new TypeRef(parameter.Type.Path + "[]") : null;
+                    var type = parameter.Type != null ? AstUtility.CreateTypeRef(parameter.Type.Path + "[]") : null;
                     var value = new TableInitializer([AstUtility.Vararg()]);
                     body.Statements.Insert(0, new Variable(parameter.Name, true, value, type));
                 }
@@ -127,7 +127,7 @@
             }
             else
             {
-                WriteTypeCast(new Literal("nil"), type ?? new TypeRef("any"));
+                WriteTypeCast(new Literal("nil"), type ?? AstUtility.CreateTypeRef("any")!);
             }
             WriteLine();
         }

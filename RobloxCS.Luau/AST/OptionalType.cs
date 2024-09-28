@@ -5,7 +5,7 @@
         public TypeRef NonNullableType { get; }
 
         public OptionalType(TypeRef nonNullableType)
-            : base(nonNullableType.Path + "?")
+            : base(nonNullableType.Path + "?", true)
         {
             NonNullableType = nonNullableType;
         }

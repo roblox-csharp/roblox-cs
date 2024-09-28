@@ -3,6 +3,8 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Security.Cryptography;
+using System.Text.RegularExpressions;
 using static RobloxCS.Luau.Constants;
 
 namespace RobloxCS.Luau
@@ -293,11 +295,24 @@ namespace RobloxCS.Luau
             return name;
         }
 
+        public static TypeRef? CreateTypeRef(string? typePath)
+        {
+            if (typePath == null) return null;
+            if (typePath == "var") return null;
+
+            var mappedType = Utility.GetMappedType(typePath);
+            var arrayMatch = Regex.Match(mappedType, @"\{[a-zA-Z0-9]+\}");
+            if (mappedType.EndsWith("?"))
+                return new OptionalType(CreateTypeRef(mappedType.Replace("?", ""))!);
+            else if (arrayMatch.Success)
+                return new ArrayType(CreateTypeRef(arrayMatch.Value.Trim())!);
+
+            return new(mappedType, rawPath: true);
+        }
+
         public static TypeRef? CreateTypeRef(TypeSyntax? type)
         {
-            if (type == null) return null;
-            if (type.ToString() == "var") return null;
-            return new(Utility.GetMappedType(type.ToString()));
+            return CreateTypeRef(type?.ToString());
         }
 
         public static Literal Vararg()

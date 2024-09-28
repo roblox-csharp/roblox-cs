@@ -5,7 +5,7 @@
         public TypeRef ElementType { get; }
 
         public ArrayType(TypeRef elementType)
-            : base("{ " + elementType.Path + " }")
+            : base("{ " + elementType.Path + " }", true)
         {
             ElementType = elementType;
         }

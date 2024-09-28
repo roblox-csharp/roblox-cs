@@ -3,7 +3,11 @@ using RobloxCS;
 using RobloxCS.Luau;
 
 var source = """
-class A {}
+class A {
+    public int x { get; set; } = 1;
+
+    public void Rah() {}
+}
 """.Trim();
 
 var references = FileUtility.GetCompilationReferences();

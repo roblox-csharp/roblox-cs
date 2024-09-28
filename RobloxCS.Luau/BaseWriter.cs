@@ -4,7 +4,7 @@ namespace RobloxCS.Luau
 {
     public class BaseWriter
     {
-        private const int _indentSize = 2;
+        public static readonly int IndentSize = 2;
         private readonly StringBuilder _output = new();
         private int _indent = 0;
 
@@ -58,7 +58,7 @@ namespace RobloxCS.Luau
 
         private void WriteIndent()
         {
-            _output.Append(MatchLastCharacter('\n') ? string.Concat(Enumerable.Repeat(" ", _indentSize * _indent)) : "");
+            _output.Append(MatchLastCharacter('\n') ? string.Concat(Enumerable.Repeat(" ", IndentSize * _indent)) : "");
         }
 
         private bool MatchLastCharacter(char character)
