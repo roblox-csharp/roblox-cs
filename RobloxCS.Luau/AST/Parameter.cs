@@ -47,16 +47,15 @@ namespace RobloxCS.Luau
         }
 
         private TypeRef FixType(TypeRef type) {
-            var arrayTypeMatch = Regex.Match(type.Path, @"\{ (\w+) \}");
-            if (arrayTypeMatch.Success && IsVararg)
+            if (type is ArrayType arrayType && IsVararg)
             {
-                var elementType = arrayTypeMatch.Groups[1].Value;
-                return FixType(new TypeRef(elementType));
+                return FixType(arrayType.ElementType);
             }
 
-            if (Initializer != null || type.IsNullable)
+            var isOptional = type is OptionalType;
+            if (Initializer != null || isOptional)
             {
-                return new TypeRef(type.Path + "?");
+                return isOptional ? type : new OptionalType(type);
             }
 
             return type;

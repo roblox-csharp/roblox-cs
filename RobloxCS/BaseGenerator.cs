@@ -108,7 +108,7 @@ namespace RobloxCS.Luau
                 new AssignmentFunctionName(className, className, ':'),
                 false,
                 parameterList,
-                new TypeRef("nil"),
+                new OptionalType(new TypeRef(className.ToString())),
                 body,
                 attributeLists
             );
