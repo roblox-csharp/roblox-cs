@@ -3,12 +3,16 @@ using RobloxCS;
 using RobloxCS.Luau;
 
 var source = """
-namespace X {
-    enum Abc {
-        A,
-        B,
-        C
-    }
+int a = 1
+switch (5) {
+    case 4:
+        a = 4
+    case 5:
+        a = 5
+        break;
+    default:
+        a = 10
+        break;
 }
 """.Trim();
 

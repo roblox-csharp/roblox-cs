@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using RobloxCS.Luau;
 using System.Reflection;
 
 namespace RobloxCS
@@ -668,7 +667,7 @@ namespace RobloxCS
                         foreach (var s in section.Statements)
                             Console.WriteLine(s.ToString());
 
-                        List<Luau.Statement> body;
+                        var body = (section.Statements).Select(Visit<Luau.Statement>).ToList();
 
                         var BinaryOp = new Luau.BinaryOperator(
                             new Luau.IdentifierName("_exp"), "==", Visit<Luau.Expression>(caseLabel.Value)
@@ -678,9 +677,7 @@ namespace RobloxCS
                             BinaryOp = new Luau.BinaryOperator(new Luau.IdentifierName("_fallthrough"), "or", BinaryOp);
 
                         if (FallThrough)
-                            body = new List<Luau.Statement>([new Luau.ExpressionStatement(new Luau.Assignment(new Luau.IdentifierName("_fallthrough"), Luau.AstUtility.True()))]);
-                        else
-                            body = (section.Statements).Select(Visit<Luau.Statement>).ToList();
+                            body.Insert(0, new Luau.ExpressionStatement(new Luau.Assignment(new Luau.IdentifierName("_fallthrough"), Luau.AstUtility.True())));
 
                         ifStatements.Add(new Luau.If(BinaryOp, new Luau.Block(body)));
                     } else if (label is DefaultSwitchLabelSyntax)
