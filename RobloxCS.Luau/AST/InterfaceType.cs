@@ -1,6 +1,4 @@
-﻿using System.Linq;
-
-namespace RobloxCS.Luau
+﻿namespace RobloxCS.Luau
 {
     public class InterfaceType : TypeRef
     {
@@ -22,7 +20,7 @@ namespace RobloxCS.Luau
             var tabsInside = new string(' ', ((int)indent + 1) * BaseWriter.IndentSize);
             var newline = (IsCompact ? "" : "\n");
             return tabsOutside + "{" + newline
-                + string.Join(";" + newline, Fields.Select(field => tabsInside + field.Path))
+                + string.Join(newline, Fields.Select(field => tabsInside + field.Path))
                 + tabsOutside + newline + "}";
         }
     }
