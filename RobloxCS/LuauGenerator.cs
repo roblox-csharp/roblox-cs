@@ -650,7 +650,6 @@ namespace RobloxCS
             var ifStatements = new List<Luau.Statement>();
             List<Luau.Statement>? defaultStatements = null;
 
-            //var fallThrough = false;
             var nodeHasFallThrough = false;
 
             foreach (var section in node.Sections)
@@ -669,7 +668,7 @@ namespace RobloxCS
                             if (section.Labels.First() != label && fallThrough)
                                 binaryOp = new Luau.BinaryOperator(new Luau.IdentifierName("_fallthrough"), "or", binaryOp);
 
-                            if (fallThrough) {
+                            if (fallThrough && label != section.Labels.Last()) {
                                 nodeHasFallThrough = true;
                                 body.Insert(0, new Luau.ExpressionStatement(new Luau.Assignment(new Luau.IdentifierName("_fallthrough"), Luau.AstUtility.True())));
                             }
