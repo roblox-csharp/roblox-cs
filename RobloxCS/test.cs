@@ -1,5 +1,5 @@
-class A {
-    public int x { get; set; } = 1;
-                         
-    public void Rah() {}
+switch (6)
+{
+    case <= 10:
+       break;
 }
