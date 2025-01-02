@@ -29,20 +29,6 @@ public sealed class MainTransformer(SyntaxTree tree, ConfigData config) : BaseTr
 
     public override SyntaxNode? VisitGlobalStatement(GlobalStatementSyntax node) => base.VisitGlobalStatement(node);
     
-    public override SyntaxNode? VisitSwitchStatement(SwitchStatementSyntax node)
-    {
-        foreach (var section in node.Sections)
-        {
-            Console.WriteLine("Section: {0}", section);
-            foreach (var label in section.Labels)
-            {
-                Console.WriteLine("Label: {0}", label);
-            }
-        }
-        
-        return base.VisitSwitchStatement(node);
-    }
-    
     // Return an IsPatternExpression if the binary operator is `is`
     public override SyntaxNode? VisitBinaryExpression(BinaryExpressionSyntax node)
     {
