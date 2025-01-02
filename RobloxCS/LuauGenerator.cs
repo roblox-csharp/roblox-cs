@@ -644,7 +644,7 @@ namespace RobloxCS
             return new Luau.UnaryOperator(mappedOperator, operand);
         }
 
-        // TODO: Fix fallthroughs
+        // TODO: Fix fallthroughs when a case is empty
         public override Luau.Block VisitSwitchStatement(SwitchStatementSyntax node)
         {
             var ifStatements = new List<Luau.Statement>([new Luau.Variable(new Luau.IdentifierName("_fallthrough"), true, Luau.AstUtility.False())]);
@@ -652,9 +652,9 @@ namespace RobloxCS
 
             var FallThrough = false;
 
-            var checkNoFallthrough = (StatementSyntax statement) => !statement.IsKind(SyntaxKind.BreakStatement)
-                && !statement.IsKind(SyntaxKind.ReturnStatement)
-                && !statement.DescendantNodes().All(descendant => !descendant.IsKind(SyntaxKind.BreakStatement) && !descendant.IsKind(SyntaxKind.ReturnStatement));
+            var checkNoFallthrough = (StatementSyntax statement) => statement.IsKind(SyntaxKind.BreakStatement)
+                || statement.IsKind(SyntaxKind.ReturnStatement)
+                || statement.DescendantNodes().All(descendant => descendant.IsKind(SyntaxKind.BreakStatement) || descendant.IsKind(SyntaxKind.ReturnStatement));
 
             foreach (var section in node.Sections)
             {
@@ -662,10 +662,13 @@ namespace RobloxCS
                 foreach (var label in section.Labels) {
                     if (label is CaseSwitchLabelSyntax caseLabel) {
                         var LastFallThrough = FallThrough;
-                        FallThrough = section.Statements.Any((statement) => !checkNoFallthrough(statement));
+                        FallThrough = !section.Statements.Any((statement) => checkNoFallthrough(statement));
                         Console.WriteLine(FallThrough);
                         foreach (var s in section.Statements)
+                        {
                             Console.WriteLine(s.ToString());
+                            Console.WriteLine(checkNoFallthrough(s));
+                        }
 
                         var body = (section.Statements).Select(Visit<Luau.Statement>).ToList();
 
@@ -673,7 +676,7 @@ namespace RobloxCS
                             new Luau.IdentifierName("_exp"), "==", Visit<Luau.Expression>(caseLabel.Value)
                         );
 
-                        if (LastFallThrough && FallThrough)
+                        if (LastFallThrough || FallThrough)
                             BinaryOp = new Luau.BinaryOperator(new Luau.IdentifierName("_fallthrough"), "or", BinaryOp);
 
                         if (FallThrough)

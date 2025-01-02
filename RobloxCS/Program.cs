@@ -3,15 +3,18 @@ using RobloxCS;
 using RobloxCS.Luau;
 
 var source = """
-int a = 1
+int a = 1;
 switch (5) {
     case 4:
-        a = 4
+        a = 4;
     case 5:
-        a = 5
+        a = 5;
+        break;
+    case 8:
+        a = 8;
         break;
     default:
-        a = 10
+        a = 10;
         break;
 }
 """.Trim();
