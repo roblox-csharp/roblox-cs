@@ -644,48 +644,40 @@ namespace RobloxCS
             return new Luau.UnaryOperator(mappedOperator, operand);
         }
 
-        // TODO: Fix fallthroughs when a case is empty
+        // TODO: Fix fallthrough when a case is empty
         public override Luau.Block VisitSwitchStatement(SwitchStatementSyntax node)
         {
             var ifStatements = new List<Luau.Statement>([new Luau.Variable(new Luau.IdentifierName("_fallthrough"), true, Luau.AstUtility.False())]);
-            List<Luau.Statement> defaultStatements = null;
+            List<Luau.Statement>? defaultStatements = null;
 
             var FallThrough = false;
 
-            var checkNoFallthrough = (StatementSyntax statement) => statement.IsKind(SyntaxKind.BreakStatement)
-                || statement.IsKind(SyntaxKind.ReturnStatement)
-                || statement.DescendantNodes().All(descendant => descendant.IsKind(SyntaxKind.BreakStatement) || descendant.IsKind(SyntaxKind.ReturnStatement));
-
             foreach (var section in node.Sections)
             {
-
                 foreach (var label in section.Labels) {
-                    if (label is CaseSwitchLabelSyntax caseLabel) {
-                        var LastFallThrough = FallThrough;
-                        FallThrough = !section.Statements.Any((statement) => checkNoFallthrough(statement));
-                        Console.WriteLine(FallThrough);
-                        foreach (var s in section.Statements)
-                        {
-                            Console.WriteLine(s.ToString());
-                            Console.WriteLine(checkNoFallthrough(s));
+                    switch (label) {
+                        case CaseSwitchLabelSyntax caseLabel: {
+                            var LastFallThrough = FallThrough;
+                            FallThrough = !section.Statements.Any(CheckNoFallthrough);
+
+                            var body = section.Statements.Select(Visit<Luau.Statement>).ToList();
+                            var BinaryOp = new Luau.BinaryOperator(
+                                new Luau.IdentifierName("_exp"), "==", Visit<Luau.Expression>(caseLabel.Value)
+                            );
+
+                            if (LastFallThrough || FallThrough)
+                                BinaryOp = new Luau.BinaryOperator(new Luau.IdentifierName("_fallthrough"), "or", BinaryOp);
+
+                            if (FallThrough)
+                                body.Insert(0, new Luau.ExpressionStatement(new Luau.Assignment(new Luau.IdentifierName("_fallthrough"), Luau.AstUtility.True())));
+
+                            ifStatements.Add(new Luau.If(BinaryOp, new Luau.Block(body)));
+                            break;
                         }
 
-                        var body = (section.Statements).Select(Visit<Luau.Statement>).ToList();
-
-                        var BinaryOp = new Luau.BinaryOperator(
-                            new Luau.IdentifierName("_exp"), "==", Visit<Luau.Expression>(caseLabel.Value)
-                        );
-
-                        if (LastFallThrough || FallThrough)
-                            BinaryOp = new Luau.BinaryOperator(new Luau.IdentifierName("_fallthrough"), "or", BinaryOp);
-
-                        if (FallThrough)
-                            body.Insert(0, new Luau.ExpressionStatement(new Luau.Assignment(new Luau.IdentifierName("_fallthrough"), Luau.AstUtility.True())));
-
-                        ifStatements.Add(new Luau.If(BinaryOp, new Luau.Block(body)));
-                    } else if (label is DefaultSwitchLabelSyntax)
-                    {
-                        defaultStatements = section.Statements.Select(Visit<Luau.Statement>).ToList();
+                        case DefaultSwitchLabelSyntax:
+                            defaultStatements = section.Statements.Select(Visit<Luau.Statement>).ToList();
+                            break;
                     }
                 }
             }
@@ -696,6 +688,8 @@ namespace RobloxCS
                 new Luau.Variable(new Luau.IdentifierName("_exp"), true, Visit<Luau.Expression>(node.Expression)),
                 new Luau.Repeat(Luau.AstUtility.True(), new Luau.Block(ifStatements))
             ]);
+
+            bool CheckNoFallthrough(StatementSyntax statement) => statement.IsKind(SyntaxKind.BreakStatement) || statement.IsKind(SyntaxKind.ReturnStatement) || statement.DescendantNodes().All(descendant => descendant.IsKind(SyntaxKind.BreakStatement) || descendant.IsKind(SyntaxKind.ReturnStatement));
         }
 
         public override Luau.Parenthesized VisitParenthesizedExpression(ParenthesizedExpressionSyntax node)
