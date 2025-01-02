@@ -1,5 +1,7 @@
 .vs/
 .idea/
+**/Properties
+test.cs
 
 obj/
 bin/

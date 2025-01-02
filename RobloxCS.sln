@@ -7,6 +7,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RobloxCS", "RobloxCS\Roblox
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RobloxCS.Luau", "RobloxCS.Luau\RobloxCS.Luau.csproj", "{F0B0E304-CFB3-4B58-891E-3B6DAE23E597}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{44CF4B5D-C4EB-41BF-8D70-20D5213AFA4A}"
+	ProjectSection(SolutionItems) = preProject
+		.gitignore = .gitignore
+		test.cs = test.cs
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
