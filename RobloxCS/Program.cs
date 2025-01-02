@@ -3,10 +3,12 @@ using RobloxCS;
 using RobloxCS.Luau;
 
 var source = """
-class A {
-    public int x { get; set; } = 1;
-
-    public void Rah() {}
+namespace X {
+    enum Abc {
+        A,
+        B,
+        C
+    }
 }
 """.Trim();
 
