@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Reflection;
 
 namespace RobloxCS
 {
@@ -651,7 +650,10 @@ namespace RobloxCS
             List<Luau.Statement>? defaultStatements = null;
 
             var nodeHasFallThrough = false;
-
+            var createTempVariable = node.Expression is not IdentifierNameSyntax && node.Expression is not LiteralExpressionSyntax;
+            var condition = Visit<Luau.Expression>(node.Expression);
+            var comparand = createTempVariable ? new Luau.IdentifierName("_exp") : condition;
+            
             foreach (var section in node.Sections)
             {
                 var fallThrough = section.Labels.Count > 1;
@@ -660,9 +662,12 @@ namespace RobloxCS
                     switch (label) {
                         case CaseSwitchLabelSyntax caseLabel: {
 
-                            var body = section.Labels.Last() == label ? section.Statements.Select(Visit<Luau.Statement>).ToList() : new List<Luau.Statement>();
+                            var body = section.Labels.Last() == label ?
+                                section.Statements.Select(Visit<Luau.Statement>).ToList()
+                                : [];
+                            
                             var binaryOp = new Luau.BinaryOperator(
-                                new Luau.IdentifierName("_exp"), "==", Visit<Luau.Expression>(caseLabel.Value)
+                                comparand, "==", Visit<Luau.Expression>(caseLabel.Value)
                             );
 
                             if (section.Labels.First() != label && fallThrough)
@@ -688,14 +693,16 @@ namespace RobloxCS
                 ifStatements.Insert(0, new Luau.Variable(new Luau.IdentifierName("_fallthrough"), true, Luau.AstUtility.False()));
 
             if (defaultStatements != null)
-            {
                 ifStatements.Add(new Luau.ScopedBlock(defaultStatements));
-            }
 
-            return new Luau.Block([
-                new Luau.Variable(new Luau.IdentifierName("_exp"), true, Visit<Luau.Expression>(node.Expression)),
+            List<Luau.Statement> blockStatements = [
                 new Luau.Repeat(Luau.AstUtility.True(), new Luau.Block(ifStatements))
-            ]);
+            ];
+
+            if (createTempVariable)
+                blockStatements = blockStatements.Prepend(new Luau.Variable((Luau.IdentifierName)comparand, true, condition)).ToList();
+            
+            return new Luau.Block(blockStatements);
         }
 
         public override Luau.Parenthesized VisitParenthesizedExpression(ParenthesizedExpressionSyntax node)
