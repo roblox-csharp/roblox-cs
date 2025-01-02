@@ -21,6 +21,7 @@
             luau.PopIndent();
             luau.Write("until ");
             UntilCondition.Render(luau);
+            luau.WriteLine(""); // is there a better way to add a new line?
         }
     }
 }

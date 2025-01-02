@@ -36,7 +36,7 @@ In no particular order:
 	- [ ] generics
 - [ ] type hoisting
 - [x] namespaces
-- [ ] enums
+- [x] enums
 - [ ] interfaces
 - [ ] partial classes/structs/interfaces
 - [ ] classes

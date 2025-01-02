@@ -5,6 +5,7 @@ using System.Reflection;
 
 namespace RobloxCS
 {
+
     public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) : Luau.BaseGenerator(tree, compiler)
     {
         public Luau.AST GetLuauAST()
@@ -251,6 +252,65 @@ namespace RobloxCS
             return new Luau.Block(statements);
         }
 
+        public override Luau.Block VisitEnumDeclaration(EnumDeclarationSyntax node)
+        {
+            var enumKeys = new List<Luau.Expression>();
+            var enumValues = new List<Luau.Expression>();
+            var enumTypes = new List<Luau.TypeRef>();
+
+            int Index = 0;
+            foreach (var member in node.Members)
+            {
+                var Value = member.EqualsValue?.Value.ToString();
+
+                if (Value != null)
+                    Index = int.Parse(Value);
+
+                enumTypes.Add(new Luau.TypeRef(Value ?? Index.ToString()));
+
+                enumKeys.Add(new Luau.Literal($"\"{member.Identifier.Text}\""));
+                enumValues.Add(new Luau.Literal(Value ?? Index.ToString()));
+                Index++;
+            }
+
+            var finalType = new Luau.TypeRef(string.Join(" | ", enumTypes.ConvertAll(typeRef => typeRef.Path)));
+
+            List<Luau.Statement> statements = [
+                new Luau.ExpressionStatement(
+                    new Luau.Assignment(
+                        new Luau.IdentifierName(node.Identifier.Text),
+                        new Luau.Call(
+                            new Luau.MemberAccess(
+                                new Luau.IdentifierName("table"),
+                                new Luau.IdentifierName("freeze")),
+                            new Luau.ArgumentList([new Luau.Argument(new Luau.TableInitializer(enumValues, enumKeys))])))),
+            ];
+
+            if (IsGlobal(node))
+                statements.Add(new Luau.ExpressionStatement(Luau.AstUtility.DefineGlobal(new Luau.IdentifierName(node.Identifier.Text), new Luau.Literal(node.Identifier.Text))));
+            else
+            {
+                var fullParentName = Luau.AstUtility.GetFullParentName(node);
+                if (fullParentName != null)
+                {
+                    statements.Add(new Luau.ExpressionStatement(
+                        new Luau.Assignment(
+                            new Luau.MemberAccess(
+                                fullParentName,
+                                new Luau.IdentifierName(node.Identifier.Text)
+                            ),
+                            new Luau.Literal(node.Identifier.Text)
+                        )
+                    ));
+                }
+            }
+
+            return new Luau.Block([
+                new Luau.TypeAlias(new Luau.IdentifierName(node.Identifier.Text), finalType),
+                new Luau.Variable(new Luau.IdentifierName(node.Identifier.Text), true, null),
+                new Luau.ScopedBlock(statements)
+            ]);
+        }
         public override Luau.Block VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
         {
             var name = Luau.AstUtility.CreateIdentifierName(node);
@@ -582,6 +642,60 @@ namespace RobloxCS
             }
 
             return new Luau.UnaryOperator(mappedOperator, operand);
+        }
+
+        // TODO: Fix fallthroughs when a case is empty
+        public override Luau.Block VisitSwitchStatement(SwitchStatementSyntax node)
+        {
+            var ifStatements = new List<Luau.Statement>([new Luau.Variable(new Luau.IdentifierName("_fallthrough"), true, Luau.AstUtility.False())]);
+            List<Luau.Statement> defaultStatements = null;
+
+            var FallThrough = false;
+
+            var checkNoFallthrough = (StatementSyntax statement) => statement.IsKind(SyntaxKind.BreakStatement)
+                || statement.IsKind(SyntaxKind.ReturnStatement)
+                || statement.DescendantNodes().All(descendant => descendant.IsKind(SyntaxKind.BreakStatement) || descendant.IsKind(SyntaxKind.ReturnStatement));
+
+            foreach (var section in node.Sections)
+            {
+
+                foreach (var label in section.Labels) {
+                    if (label is CaseSwitchLabelSyntax caseLabel) {
+                        var LastFallThrough = FallThrough;
+                        FallThrough = !section.Statements.Any((statement) => checkNoFallthrough(statement));
+                        Console.WriteLine(FallThrough);
+                        foreach (var s in section.Statements)
+                        {
+                            Console.WriteLine(s.ToString());
+                            Console.WriteLine(checkNoFallthrough(s));
+                        }
+
+                        var body = (section.Statements).Select(Visit<Luau.Statement>).ToList();
+
+                        var BinaryOp = new Luau.BinaryOperator(
+                            new Luau.IdentifierName("_exp"), "==", Visit<Luau.Expression>(caseLabel.Value)
+                        );
+
+                        if (LastFallThrough || FallThrough)
+                            BinaryOp = new Luau.BinaryOperator(new Luau.IdentifierName("_fallthrough"), "or", BinaryOp);
+
+                        if (FallThrough)
+                            body.Insert(0, new Luau.ExpressionStatement(new Luau.Assignment(new Luau.IdentifierName("_fallthrough"), Luau.AstUtility.True())));
+
+                        ifStatements.Add(new Luau.If(BinaryOp, new Luau.Block(body)));
+                    } else if (label is DefaultSwitchLabelSyntax)
+                    {
+                        defaultStatements = section.Statements.Select(Visit<Luau.Statement>).ToList();
+                    }
+                }
+            }
+
+            ifStatements.Add(new Luau.ScopedBlock(defaultStatements ?? new()));
+
+            return new Luau.Block([
+                new Luau.Variable(new Luau.IdentifierName("_exp"), true, Visit<Luau.Expression>(node.Expression)),
+                new Luau.Repeat(Luau.AstUtility.True(), new Luau.Block(ifStatements))
+            ]);
         }
 
         public override Luau.Parenthesized VisitParenthesizedExpression(ParenthesizedExpressionSyntax node)
