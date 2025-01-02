@@ -10,6 +10,5 @@ public static class Program
         var source = File.ReadAllText(args[0]).Trim();
 
         Console.WriteLine(Transpiler.Transpile(source));
-        Console.ReadLine();
     }
 }
