@@ -647,14 +647,16 @@ namespace RobloxCS
         // TODO: Fix fallthrough when a case is empty
         public override Luau.Block VisitSwitchStatement(SwitchStatementSyntax node)
         {
-            var fallThroughVariable = new Luau.Variable(new Luau.IdentifierName("_fallthrough"), true, Luau.AstUtility.False());
             var ifStatements = new List<Luau.Statement>();
             List<Luau.Statement>? defaultStatements = null;
 
-            var fallThrough = false;
+            //var fallThrough = false;
+            var nodeHasFallThrough = false;
 
             foreach (var section in node.Sections)
             {
+                var fallThrough = section.Labels.Count > 1;
+
                 foreach (var label in section.Labels) {
                     switch (label) {
                         case CaseSwitchLabelSyntax caseLabel: {
@@ -669,8 +671,10 @@ namespace RobloxCS
                             if (lastFallThrough || fallThrough)
                                 binaryOp = new Luau.BinaryOperator(new Luau.IdentifierName("_fallthrough"), "or", binaryOp);
 
-                            if (fallThrough)
+                            if (fallThrough) {
+                                nodeHasFallThrough = true;
                                 body.Insert(0, new Luau.ExpressionStatement(new Luau.Assignment(new Luau.IdentifierName("_fallthrough"), Luau.AstUtility.True())));
+                            }
 
                             ifStatements.Add(new Luau.If(binaryOp, new Luau.Block(body)));
                             break;
@@ -682,6 +686,9 @@ namespace RobloxCS
                     }
                 }
             }
+
+            if (nodeHasFallThrough)
+                ifStatements.Add(new Luau.Variable(new Luau.IdentifierName("_fallthrough"), true, Luau.AstUtility.False()));
 
             ifStatements.Add(new Luau.ScopedBlock(defaultStatements ?? []));
 
