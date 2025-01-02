@@ -655,29 +655,26 @@ namespace RobloxCS
 
             foreach (var section in node.Sections)
             {
-                foreach (var label in section.Labels)
-                {
-                    switch (label)
-                    {
-                        case CaseSwitchLabelSyntax caseLabel:
-                            {
-                                var lastFallThrough = fallThrough;
-                                fallThrough = !section.Statements.Any(CheckNoFallthrough);
+                foreach (var label in section.Labels) {
+                    switch (label) {
+                        case CaseSwitchLabelSyntax caseLabel: {
+                            var lastFallThrough = fallThrough;
+                            fallThrough = !section.Statements.Any(CheckNoFallthrough);
 
-                                var body = section.Statements.Select(Visit<Luau.Statement>).ToList();
-                                var binaryOp = new Luau.BinaryOperator(
-                                    new Luau.IdentifierName("_exp"), "==", Visit<Luau.Expression>(caseLabel.Value)
-                                );
+                            var body = section.Statements.Select(Visit<Luau.Statement>).ToList();
+                            var binaryOp = new Luau.BinaryOperator(
+                                new Luau.IdentifierName("_exp"), "==", Visit<Luau.Expression>(caseLabel.Value)
+                            );
 
-                                if (lastFallThrough || fallThrough)
-                                    binaryOp = new Luau.BinaryOperator(new Luau.IdentifierName("_fallthrough"), "or", binaryOp);
+                            if (lastFallThrough || fallThrough)
+                                binaryOp = new Luau.BinaryOperator(new Luau.IdentifierName("_fallthrough"), "or", binaryOp);
 
-                                if (fallThrough)
-                                    body.Insert(0, new Luau.ExpressionStatement(new Luau.Assignment(new Luau.IdentifierName("_fallthrough"), Luau.AstUtility.True())));
+                            if (fallThrough)
+                                body.Insert(0, new Luau.ExpressionStatement(new Luau.Assignment(new Luau.IdentifierName("_fallthrough"), Luau.AstUtility.True())));
 
-                                ifStatements.Add(new Luau.If(binaryOp, new Luau.Block(body)));
-                                break;
-                            }
+                            ifStatements.Add(new Luau.If(binaryOp, new Luau.Block(body)));
+                            break;
+                        }
 
                         case DefaultSwitchLabelSyntax:
                             defaultStatements = section.Statements.Select(Visit<Luau.Statement>).ToList();
@@ -773,11 +770,8 @@ namespace RobloxCS
 
         public override Luau.AttributeList VisitAttributeList(AttributeListSyntax node)
         {
-            List<Luau.BaseAttribute> attributes = [];
-            foreach (var attribute in node.Attributes)
-            {
-                attributes.Add(Visit<Luau.BaseAttribute>(attribute));
-            }
+            var attributes = node.Attributes.Select(Visit<Luau.BaseAttribute>).ToList();
+
             return new Luau.AttributeList(attributes);
         }
 
@@ -788,6 +782,7 @@ namespace RobloxCS
             {
 
             }
+            
             return luauNode;
         }
 
