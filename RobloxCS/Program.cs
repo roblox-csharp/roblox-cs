@@ -1,4 +1,6 @@
-﻿using RobloxCS;
+﻿using Microsoft.CodeAnalysis.CSharp;
+using RobloxCS;
+using RobloxCS.Luau;
 
 var source = """
 class A {
