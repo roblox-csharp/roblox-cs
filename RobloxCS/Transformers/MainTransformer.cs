@@ -26,7 +26,7 @@ public sealed class MainTransformer(SyntaxTree tree, ConfigData config) : BaseTr
     // Turn file-scoped namespaces into regular namespaces (to reduce code duplication)
     public override SyntaxNode? VisitFileScopedNamespaceDeclaration(FileScopedNamespaceDeclarationSyntax node) =>
         VisitNamespaceDeclaration(SyntaxFactory.NamespaceDeclaration(node.AttributeLists, node.Modifiers, node.Name, node.Externs, node.Usings, node.Members));
-
+    
     public override SyntaxNode? VisitGlobalStatement(GlobalStatementSyntax node) => base.VisitGlobalStatement(node);
     
     // Return an IsPatternExpression if the binary operator is `is`
