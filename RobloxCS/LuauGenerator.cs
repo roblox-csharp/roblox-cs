@@ -225,12 +225,14 @@ namespace RobloxCS
             {
                 var value = member.EqualsValue?.Value.ToString() ?? index.ToString();
                 enumTypes.Add(new Luau.TypeRef(value));
-                enumKeys.Add(new Luau.Literal($"\"{member.Identifier.Text}\""));
+                enumKeys.Add(Luau.AstUtility.CreateIdentifierName(member, member.Identifier.Text));
                 enumValues.Add(new Luau.Literal(value));
                 index++;
             }
 
-            var finalType = new Luau.TypeRef("number"); // string.Join(" | ", enumTypes.ConvertAll(typeRef => typeRef.Path))
+            var name = Luau.AstUtility.CreateIdentifierName(node, node.Identifier.Text, registerIdentifier: true);
+            var enumType = new Luau.TypeOfCall(name);
+            var finalType = new Luau.IndexCall(enumType, new Luau.KeyOfCall(enumType));
             List<Luau.Statement> statements = [
                 new Luau.ExpressionStatement(
                     new Luau.Assignment(
@@ -247,7 +249,7 @@ namespace RobloxCS
             ];
 
             if (IsGlobal(node))
-                statements.Add(new Luau.ExpressionStatement(Luau.AstUtility.DefineGlobal(new Luau.IdentifierName(node.Identifier.Text), new Luau.Literal(node.Identifier.Text))));
+                statements.Add(new Luau.ExpressionStatement(Luau.AstUtility.DefineGlobal(name, name)));
             else
             {
                 var fullParentName = Luau.AstUtility.GetFullParentName(node);
@@ -256,18 +258,18 @@ namespace RobloxCS
                         new Luau.Assignment(
                             new Luau.MemberAccess(
                                 fullParentName,
-                                new Luau.IdentifierName(node.Identifier.Text)
+                                name
                             ),
-                            new Luau.Literal(node.Identifier.Text)
+                            name
                         )
                     ));
                 
             }
 
             return new Luau.Block([
-                new Luau.TypeAlias(new Luau.IdentifierName(node.Identifier.Text), finalType),
-                new Luau.Variable(new Luau.IdentifierName(node.Identifier.Text), true, null),
-                new Luau.ScopedBlock(statements)
+                new Luau.Variable(name, true, null),
+                new Luau.ScopedBlock(statements),
+                new Luau.TypeAlias(name, finalType)
             ]);
         }
         public override Luau.Block VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)

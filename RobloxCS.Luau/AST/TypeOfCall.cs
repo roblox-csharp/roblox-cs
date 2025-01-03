@@ -1,6 +1,6 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class TypeOfCall(Expression expression) : TypeRef("")
+    public sealed class TypeOfCall(Expression expression) : TypeRef("")
     {
         public Expression Expression { get; } = expression;
 
