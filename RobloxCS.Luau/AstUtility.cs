@@ -309,5 +309,8 @@ namespace RobloxCS.Luau
         {
             return new Literal("nil");
         }
+
+        public static TypeRef AnyType() =>
+            new TypeRef("any");
     }
 }

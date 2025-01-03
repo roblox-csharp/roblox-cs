@@ -111,34 +111,18 @@
             WriteLine();
         }
 
-        public void WriteReturn(Expression? expression = null, TypeRef? type = null)
+        public void WriteReturn(Expression? expression = null)
         {
             Write("return ");
-            if (expression != null)
-            {
-                if (type != null)
-                {
-                    WriteTypeCast(expression, type);
-                }
-                else
-                {
-                    expression.Render(this);
-                }
-            }
-            else
-            {
-                WriteTypeCast(new Literal("nil"), type ?? AstUtility.CreateTypeRef("any")!);
-            }
+            (expression ?? new Literal("nil")).Render(this);
             WriteLine();
         }
 
         public void WriteTypeAnnotation(TypeRef? type)
         {
-            if (type != null)
-            {
-                Write(": ");
-                type.Render(this);
-            }
+            if (type == null) return;
+            Write(": ");
+            type.Render(this);
         }
 
         public void WriteTypeCast(Expression expression, TypeRef type)

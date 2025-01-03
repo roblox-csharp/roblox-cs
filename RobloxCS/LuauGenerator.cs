@@ -157,12 +157,15 @@ namespace RobloxCS
                         new Luau.Variable(
                             new Luau.IdentifierName("self"),
                             true,
-                            new Luau.Call(
-                                new Luau.IdentifierName("setmetatable"),
-                                Luau.AstUtility.CreateArgumentList([
-                                    new Luau.TableInitializer(),
-                                    name
-                                ])
+                            new Luau.TypeCast(
+                                new Luau.Call(
+                                    new Luau.IdentifierName("setmetatable"),
+                                    Luau.AstUtility.CreateArgumentList([
+                                        new Luau.TypeCast(new Luau.TableInitializer(), Luau.AstUtility.AnyType()),
+                                        name
+                                    ])
+                                ),
+                                new Luau.TypeRef(name.Text)
                             )
                         ),
                         new Luau.Return(
@@ -186,10 +189,9 @@ namespace RobloxCS
                 classMemberStatements.Add(constructor);
             
             classMemberStatements.AddRange(members);
-            classMemberStatements.Add(new Luau.TypeAlias(name, new Luau.TypeOfCall(name)));
             
             List<Luau.Statement> statements = [
-                new Luau.Variable(Luau.AstUtility.CreateIdentifierName(node), true),
+                new Luau.Variable(Luau.AstUtility.CreateIdentifierName(node), true, null, typeRef),
                 new Luau.ScopedBlock(classMemberStatements)
             ];
 
@@ -208,6 +210,7 @@ namespace RobloxCS
                     )
                 ));
 
+            statements.Add(new Luau.TypeAlias(name, new Luau.TypeOfCall(name)));
             return new Luau.Block(statements);
         }
 
@@ -271,16 +274,16 @@ namespace RobloxCS
         {
             var name = Luau.AstUtility.CreateIdentifierName(node, registerIdentifier: true);
             var members = new Luau.Block(node.Members.Select(Visit<Luau.Statement>).ToList());
+            var typeRef = Luau.AstUtility.CreateTypeRef(name.Text);
             List<Luau.Statement> statements = [
-                new Luau.Variable(Luau.AstUtility.CreateIdentifierName(node), true, new Luau.TableInitializer())
+                new Luau.Variable(Luau.AstUtility.CreateIdentifierName(node), true, new Luau.TableInitializer(), typeRef)
             ];
 
             if (IsGlobal(node))
                 statements.Add(new Luau.ExpressionStatement(Luau.AstUtility.DefineGlobal(name, name)));
 
-            var scopedStatements = members.Statements;
-            scopedStatements.Add(new Luau.TypeAlias(name, new Luau.TypeOfCall(name)));
-            statements.Add(new Luau.ScopedBlock(scopedStatements));
+            statements.Add(new Luau.ScopedBlock(members.Statements));
+            statements.Add(new Luau.TypeAlias(name, new Luau.TypeOfCall(name)));
             
             return new Luau.Block(statements);
         }
