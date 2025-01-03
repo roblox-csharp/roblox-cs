@@ -1,10 +1,7 @@
-﻿using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
-using System.Linq.Expressions;
-using System.Reflection;
-using System.Security.Cryptography;
+﻿using System.Reflection;
 using System.Text.RegularExpressions;
+using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static RobloxCS.Luau.Constants;
 
 namespace RobloxCS.Luau
@@ -236,36 +233,36 @@ namespace RobloxCS.Luau
                 .Aggregate(expression, (current, piece) => new QualifiedName(current, new IdentifierName(piece)));
         }
 
-        public static IdentifierName CreateIdentifierName(SyntaxNode node) =>
-            CreateIdentifierName(node, Utility.GetNamesFromNode(node).First());
+        public static IdentifierName CreateIdentifierName(SyntaxNode node, bool registerIdentifier = false, bool bypassReserved = false) =>
+            CreateIdentifierName(node, Utility.GetNamesFromNode(node).First(), registerIdentifier, bypassReserved);
 
-        public static IdentifierName CreateIdentifierName(SyntaxNode node, string name, bool bypassReserved = false)
+        public static IdentifierName CreateIdentifierName(SyntaxNode node, string name, bool registerIdentifier = false, bool bypassReserved = false)
         {
             if (RESERVED_IDENTIFIERS.Contains(name) && !bypassReserved)
                 Logger.UnsupportedError(node, $"Using '{name}' as an identifier", useIs: true, useYet: false);
-
-            return new IdentifierName(name);
+            
+            return new IdentifierName(registerIdentifier ? FixIdentifierNameText(node, name, registerIdentifier) : name);
         }
 
         // TODO: reference the correct identifier names
-        public static string FixIdentifierNameText(SyntaxNode node, string name)
+        public static string FixIdentifierNameText(SyntaxNode node, string name, bool registerIdentifier = false)
         {
-            if (!_identifierDeclarations.ContainsKey(node.SyntaxTree.FilePath))
-                _identifierDeclarations[node.SyntaxTree.FilePath] = [];
-            
-            if (!_identifierDeclarations[node.SyntaxTree.FilePath].ContainsKey(name))
-                _identifierDeclarations[node.SyntaxTree.FilePath][name] = 0;
+            _identifierDeclarations.TryAdd(node.SyntaxTree.FilePath, []);
 
-            var useCount = _identifierDeclarations[node.SyntaxTree.FilePath][name]++;
+            var identifiersInFile = _identifierDeclarations[node.SyntaxTree.FilePath];
+            identifiersInFile.TryAdd(name, 0);
+
+            var useCount = identifiersInFile[name];
+            if (registerIdentifier)
+                identifiersInFile[name]++;
+            
             if (useCount <= 0)
                 return name;
             
             if (!name.EndsWith('_'))
-            {
                 name += '_';
-            }
+            
             name += useCount;
-
             return name;
         }
 

@@ -30,9 +30,7 @@ namespace RobloxCS
         public override Luau.Statement VisitPropertyDeclaration(PropertyDeclarationSyntax node)
         {
             if (!IsStatic(node) || node.Parent is not ClassDeclarationSyntax || node.Initializer == null)
-            {
                 return new Luau.NoOp();
-            }
 
             var classDeclaration = (ClassDeclarationSyntax)node.Parent!;
             var initializer = Visit<Luau.Expression>(node.Initializer);
@@ -112,7 +110,7 @@ namespace RobloxCS
         // long as hell lol
         public override Luau.Block VisitClassDeclaration(ClassDeclarationSyntax node)
         {
-            var name = Luau.AstUtility.CreateIdentifierName(node);
+            var name = Luau.AstUtility.CreateIdentifierName(node, registerIdentifier: true);
             var members = node.Members.Select(Visit<Luau.Statement>).ToList();
             var explicitConstructor = node.Members.FirstOrDefault(member => member.IsKind(SyntaxKind.ConstructorDeclaration)) as ConstructorDeclarationSyntax;
             
@@ -624,8 +622,12 @@ namespace RobloxCS
             var nodeHasFallThrough = false;
             var createTempVariable = node.Expression is not IdentifierNameSyntax && node.Expression is not LiteralExpressionSyntax;
             var condition = Visit<Luau.Expression>(node.Expression);
-            var comparand = createTempVariable ? new Luau.IdentifierName("_exp") : condition;
-            
+            var comparand = createTempVariable ?
+                Luau.AstUtility.CreateIdentifierName(node.Expression, "_exp", registerIdentifier: true)
+                : condition;
+
+            var anyNodeHasFallThrough = node.Sections.Any(section => section.Labels.Count > 1);
+            var fallthroughIdentifier = Luau.AstUtility.CreateIdentifierName(node.Expression, "_fallthrough", registerIdentifier: anyNodeHasFallThrough);
             foreach (var section in node.Sections)
             {
                 var fallThrough = section.Labels.Count > 1;
@@ -633,23 +635,22 @@ namespace RobloxCS
                 foreach (var label in section.Labels) {
                     switch (label) {
                         case CaseSwitchLabelSyntax caseLabel: {
-
                             var body = section.Labels.Last() == label ?
                                 section.Statements.Select(Visit<Luau.Statement>).ToList()
                                 : [];
-                            
-                            var binaryOp = new Luau.BinaryOperator(
-                                comparand, "==", Visit<Luau.Expression>(caseLabel.Value)
-                            );
 
-                            if (section.Labels.First() != label && fallThrough)
-                                binaryOp = new Luau.BinaryOperator(new Luau.IdentifierName("_fallthrough"), "or", binaryOp);
+                            var caseValue = Visit<Luau.Expression>(caseLabel.Value);
+                            var binaryOp = new Luau.BinaryOperator(comparand, "==", caseValue);
 
-                            if (fallThrough && label != section.Labels.Last()) {
+                            var hasFallThrough = fallThrough && label != section.Labels.Last();
+                            if (hasFallThrough) {
                                 nodeHasFallThrough = true;
-                                body.Insert(0, new Luau.ExpressionStatement(new Luau.Assignment(new Luau.IdentifierName("_fallthrough"), Luau.AstUtility.True())));
+                                body.Insert(0, new Luau.ExpressionStatement(new Luau.Assignment(fallthroughIdentifier, Luau.AstUtility.True())));
                             }
-
+                            
+                            if (fallThrough && label != section.Labels.First())
+                                binaryOp = new Luau.BinaryOperator(fallthroughIdentifier, "or", binaryOp);
+                            
                             ifStatements.Add(new Luau.If(binaryOp, new Luau.Block(body)));
                             break;
                         }
@@ -662,7 +663,7 @@ namespace RobloxCS
             }
 
             if (nodeHasFallThrough)
-                ifStatements.Insert(0, new Luau.Variable(new Luau.IdentifierName("_fallthrough"), true, Luau.AstUtility.False()));
+                ifStatements.Insert(0, new Luau.Variable(fallthroughIdentifier, true, Luau.AstUtility.False()));
 
             if (defaultStatements != null)
                 ifStatements.Add(new Luau.ScopedBlock(defaultStatements));
@@ -715,7 +716,7 @@ namespace RobloxCS
 
         public override Luau.Function VisitLocalFunctionStatement(LocalFunctionStatementSyntax node)
         {
-            var name = Luau.AstUtility.CreateIdentifierName(node);
+            var name = Luau.AstUtility.CreateIdentifierName(node, registerIdentifier: true);
             var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
             var returnType = Luau.AstUtility.CreateTypeRef(node.ReturnType);
             var body = node.ExpressionBody != null ?
@@ -728,7 +729,7 @@ namespace RobloxCS
 
         public override Luau.Parameter VisitParameter(ParameterSyntax node)
         {
-            var name = Luau.AstUtility.CreateIdentifierName(node);
+            var name = Luau.AstUtility.CreateIdentifierName(node, registerIdentifier: true);
             var returnType = Luau.AstUtility.CreateTypeRef(node.Type);
             var initializer = Visit<Luau.Expression?>(node.Default);
             var isParams = HasSyntax(node.Modifiers, SyntaxKind.ParamsKeyword);
@@ -786,7 +787,7 @@ namespace RobloxCS
             var initializer = node.Initializer != null ? Visit<Luau.Expression>(node.Initializer) : null;
             
             return new Luau.Variable(
-                Luau.AstUtility.CreateIdentifierName(node),
+                Luau.AstUtility.CreateIdentifierName(node, registerIdentifier: true),
                 true,
                 initializer,
                 Luau.AstUtility.CreateTypeRef(declaration?.Type)

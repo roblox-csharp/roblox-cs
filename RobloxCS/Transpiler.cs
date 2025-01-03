@@ -6,11 +6,18 @@ namespace RobloxCS;
 public class Transpiler
 {
     private const string _includeFolderName = "Include";
+    private static readonly HashSet<string> _ignoredDiagnostics =
+    [
+        "CS5001"
+    ];
 
     public static string Transpile(string source)
     {
         var tree = ParseSource(source);
-        var compiler = CompileASTs(tree);
+        var compiler = TranspilerUtility.GetCompiler([tree]);
+        foreach (var diagnostic in compiler.GetDiagnostics().Where(diagnostic => !_ignoredDiagnostics.Contains(diagnostic.Id)))
+            Logger.HandleDiagnostic(diagnostic);
+        
         return WriteLuaOutput(compiler);
     }
 
@@ -18,25 +25,8 @@ public class Transpiler
     {
         var tree = TranspilerUtility.ParseTree(source);
         HashSet<Func<SyntaxTree, ConfigData, SyntaxTree>> transformers = [BuiltInTransformers.Main()];
-
-        var transformedTree = TranspilerUtility.TransformTree(tree, transformers);
-        foreach (var diagnostic in transformedTree.GetDiagnostics())
-        {
-            Logger.HandleDiagnostic(diagnostic);
-        }
-
-        return transformedTree;
-    }
-    
-    private static CSharpCompilation CompileASTs(SyntaxTree tree)
-    {
-        var compiler = TranspilerUtility.GetCompiler([tree]);
-        foreach (var diagnostic in compiler.GetDiagnostics())
-        {
-            Logger.HandleDiagnostic(diagnostic);
-        }
-
-        return compiler;
+        
+        return TranspilerUtility.TransformTree(tree, transformers);
     }
     
     private static string WriteLuaOutput(CSharpCompilation compiler)

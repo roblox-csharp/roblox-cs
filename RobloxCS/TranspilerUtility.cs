@@ -22,17 +22,12 @@ public static class TranspilerUtility
         config ??= new ConfigData();
         
         var compilationOptions = new CSharpCompilationOptions(OutputKind.ConsoleApplication);
-        var compiler = CSharpCompilation.Create(
-            assemblyName: "test",//config.CSharpOptions.AssemblyName,
-            syntaxTrees: trees,
-            references: FileUtility.GetCompilationReferences(),
-            options: compilationOptions
-        );
-        
-        foreach (var diagnostic in compiler.GetDiagnostics().Where(diagnostic => diagnostic.Id != "CS5001"))
-            Logger.HandleDiagnostic(diagnostic);
-
-        return compiler;
+        return CSharpCompilation.Create(
+           assemblyName: "test",//config.CSharpOptions.AssemblyName,
+           syntaxTrees: trees,
+           references: FileUtility.GetCompilationReferences(),
+           options: compilationOptions
+       );
     }
     
     public static SyntaxTree TransformTree(SyntaxTree cleanTree, HashSet<Func<SyntaxTree, ConfigData, SyntaxTree>> transformMethods, ConfigData? config = null)
