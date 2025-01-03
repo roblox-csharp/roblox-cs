@@ -223,11 +223,13 @@ namespace RobloxCS
             
             foreach (var member in node.Members)
             {
-                var value = member.EqualsValue?.Value.ToString() ?? index.ToString();
+                var explicitValue = member.EqualsValue?.Value;
+                var value = explicitValue?.ToString() ?? index.ToString();
                 enumTypes.Add(new Luau.TypeRef(value));
                 enumKeys.Add(Luau.AstUtility.CreateIdentifierName(member, member.Identifier.Text));
                 enumValues.Add(new Luau.Literal(value));
-                index++;
+                
+                index = (explicitValue != null ? int.Parse(explicitValue.ToString()) : index) + 1;
             }
 
             var name = Luau.AstUtility.CreateIdentifierName(node, node.Identifier.Text, registerIdentifier: true);
