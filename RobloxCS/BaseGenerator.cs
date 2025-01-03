@@ -55,7 +55,7 @@ namespace RobloxCS.Luau
             var className = AstUtility.CreateIdentifierName(classDeclaration);
             body ??= new Block([]);
 
-            // visit fields/properties being assigned a value outside of the constructor (aka non-static & with initializers)
+            // visit fields/properties being assigned a value outside the constructor (aka non-static & with initializers)
             var nonStaticFields = classDeclaration.Members
                 .OfType<FieldDeclarationSyntax>()
                 .Where(field => !HasSyntax(field.Modifiers, SyntaxKind.StaticKeyword));
@@ -100,9 +100,7 @@ namespace RobloxCS.Luau
 
             // add an explicit return (for native codegen) if there isn't one
             if (!body.Statements.Any(statement => statement is Return))
-            {
                 body.Statements.Add(new Return(AstUtility.Nil()));
-            }
 
             return new Function(
                 new AssignmentFunctionName(className, className, ':'),
@@ -114,15 +112,11 @@ namespace RobloxCS.Luau
             );
         }
 
-        protected string GetName(SyntaxNode node)
-        {
-            return Utility.GetNamesFromNode(node).First();
-        }
+        protected string GetName(SyntaxNode node) =>
+            Utility.GetNamesFromNode(node).First();
 
-        protected string? TryGetName(SyntaxNode? node)
-        {
-            return Utility.GetNamesFromNode(node).FirstOrDefault();
-        }
+        protected string? TryGetName(SyntaxNode? node) =>
+            Utility.GetNamesFromNode(node).FirstOrDefault();
 
         protected string GetFullSymbolName(ISymbol symbol)
         {
@@ -130,42 +124,25 @@ namespace RobloxCS.Luau
             return (!string.IsNullOrEmpty(containerName) ? containerName + "." : "") + symbol.Name;
         }
 
-        protected bool IsGlobal(SyntaxNode node)
-        {
-            return node.Parent.IsKind(SyntaxKind.GlobalStatement) || node.Parent.IsKind(SyntaxKind.CompilationUnit);
-        }
+        protected bool IsGlobal(SyntaxNode node) =>
+            node.Parent.IsKind(SyntaxKind.GlobalStatement) || node.Parent.IsKind(SyntaxKind.CompilationUnit);
 
-        protected bool IsStatic(MemberDeclarationSyntax node)
-        {
-            var classIsStatic = IsParentClassStatic(node);
-            return classIsStatic || HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
-        }
+        protected bool IsStatic(MemberDeclarationSyntax node) =>
+            IsParentClassStatic(node) || HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
 
-        protected bool HasSyntax(SyntaxTokenList tokens, SyntaxKind syntax)
-        {
-            return tokens.Any(token => token.IsKind(syntax));
-        }
+        protected bool HasSyntax(SyntaxTokenList tokens, SyntaxKind syntax) =>
+            tokens.Any(token => token.IsKind(syntax));
 
-        protected bool IsDescendantOf<T>(SyntaxNode node) where T : SyntaxNode
-        {
-            return FindFirstAncestor<T>(node) != null;
-        }
+        protected bool IsDescendantOf<T>(SyntaxNode node) where T : SyntaxNode =>
+            FindFirstAncestor<T>(node) != null;
 
-        protected T? FindFirstAncestor<T>(SyntaxNode node) where T : SyntaxNode
-        {
-            return GetAncestors<T>(node).FirstOrDefault();
-        }
+        protected T? FindFirstAncestor<T>(SyntaxNode node) where T : SyntaxNode =>
+            GetAncestors<T>(node).FirstOrDefault();
 
-        protected List<T> GetAncestors<T>(SyntaxNode node) where T : SyntaxNode
-        {
-            return node.Ancestors().OfType<T>().ToList();
-        }
+        private List<T> GetAncestors<T>(SyntaxNode node) where T : SyntaxNode =>
+            node.Ancestors().OfType<T>().ToList();
 
-        private bool IsParentClassStatic(SyntaxNode node)
-        {
-            return node.Parent is ClassDeclarationSyntax classDeclaration ?
-                HasSyntax(classDeclaration.Modifiers, SyntaxKind.StaticKeyword)
-                : false;
-        }
+        private bool IsParentClassStatic(SyntaxNode node) =>
+            node.Parent is ClassDeclarationSyntax classDeclaration && HasSyntax(classDeclaration.Modifiers, SyntaxKind.StaticKeyword);
     }
 }

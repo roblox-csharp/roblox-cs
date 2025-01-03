@@ -78,7 +78,6 @@ namespace RobloxCS
         public override Luau.Function VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
         {
             var classDeclaration = (ClassDeclarationSyntax)node.Parent!;
-            var className = Luau.AstUtility.CreateIdentifierName(node.Parent!);
             var parameterList = Visit<Luau.ParameterList>(node.ParameterList);
             var body = Visit<Luau.Block?>(node.Body);
             var attributeLists = node.AttributeLists.Select(Visit<Luau.AttributeList>).ToList();
@@ -113,6 +112,9 @@ namespace RobloxCS
             var name = Luau.AstUtility.CreateIdentifierName(node, registerIdentifier: true);
             var members = node.Members.Select(Visit<Luau.Statement>).ToList();
             var explicitConstructor = node.Members.FirstOrDefault(member => member.IsKind(SyntaxKind.ConstructorDeclaration)) as ConstructorDeclarationSyntax;
+            var constructor = explicitConstructor == null ?
+                GenerateConstructor(node, new Luau.ParameterList([]))
+                : Visit<Luau.Function>(explicitConstructor);
             
             // TODO: maybe move this to AstUtility, this shit is huge
             var typeRef = Luau.AstUtility.CreateTypeRef(name.Text);
@@ -149,7 +151,7 @@ namespace RobloxCS
                 new Luau.Function(
                     new Luau.AssignmentFunctionName(name, new Luau.IdentifierName("new")),
                     false,
-                    new Luau.ParameterList([new Luau.Parameter(new Luau.IdentifierName("..."))]),
+                    constructor.ParameterList,
                     typeRef,
                     new Luau.Block([
                         new Luau.Variable(
@@ -167,7 +169,7 @@ namespace RobloxCS
                             new Luau.BinaryOperator(
                                 new Luau.Call(
                                     new Luau.MemberAccess(new Luau.IdentifierName("self"), name, ':'),
-                                    Luau.AstUtility.CreateArgumentList([new Luau.IdentifierName("...")])
+                                    Luau.AstUtility.CreateArgumentList(constructor.ParameterList.Parameters.ConvertAll<Luau.Expression>(parameter => parameter.Name))
                                 ),
                                 "or",
                                 new Luau.IdentifierName("self")
@@ -179,8 +181,9 @@ namespace RobloxCS
 
             if (IsGlobal(node))
                 classMemberStatements.Insert(2, new Luau.ExpressionStatement(Luau.AstUtility.DefineGlobal(name, name)));
+            
             if (explicitConstructor == null)
-                classMemberStatements.Add(GenerateConstructor(node, new Luau.ParameterList([])));
+                classMemberStatements.Add(constructor);
             
             classMemberStatements.AddRange(members);
             classMemberStatements.Add(new Luau.TypeAlias(name, new Luau.TypeOfCall(name)));
@@ -266,7 +269,7 @@ namespace RobloxCS
         }
         public override Luau.Block VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
         {
-            var name = Luau.AstUtility.CreateIdentifierName(node);
+            var name = Luau.AstUtility.CreateIdentifierName(node, registerIdentifier: true);
             var members = new Luau.Block(node.Members.Select(Visit<Luau.Statement>).ToList());
             List<Luau.Statement> statements = [
                 new Luau.Variable(Luau.AstUtility.CreateIdentifierName(node), true, new Luau.TableInitializer())
@@ -275,9 +278,9 @@ namespace RobloxCS
             if (IsGlobal(node))
                 statements.Add(new Luau.ExpressionStatement(Luau.AstUtility.DefineGlobal(name, name)));
 
-            statements.Add(new Luau.ScopedBlock([
-                members
-            ]));
+            var scopedStatements = members.Statements;
+            scopedStatements.Add(new Luau.TypeAlias(name, new Luau.TypeOfCall(name)));
+            statements.Add(new Luau.ScopedBlock(scopedStatements));
             
             return new Luau.Block(statements);
         }
