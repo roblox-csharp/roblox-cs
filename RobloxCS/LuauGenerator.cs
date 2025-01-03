@@ -4,23 +4,37 @@ using Microsoft.CodeAnalysis.CSharp.Syntax;
 
 namespace RobloxCS
 {
-
     public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) : Luau.BaseGenerator(tree, compiler)
     {
         public Luau.AST GetLuauAST() => Visit<Luau.AST>(_tree.GetRoot());
 
+        private readonly HashSet<SyntaxKind> _hoistedSyntaxes =
+        [
+            SyntaxKind.NamespaceDeclaration,
+            SyntaxKind.ClassDeclaration,
+            SyntaxKind.InterfaceDeclaration,
+            SyntaxKind.EnumDeclaration
+        ];
+
         public override Luau.AST VisitCompilationUnit(CompilationUnitSyntax node)
         {
             List<Luau.Statement> statements = [];
-            foreach (var member in node.Members)
+            void visitStatement(MemberDeclarationSyntax member)
             {
                 var statement = Visit<Luau.Statement?>(member);
                 if (statement == null)
-                {
                     throw Logger.CompilerError($"Unhandled syntax node within {member.Kind()}:\n{member}");
-                }
+                
                 statements.Add(statement);
             }
+
+            var hoistedNodes = node.Members.Where(member => _hoistedSyntaxes.Contains(member.Kind()));
+            var regularNodes = node.Members.Where(member => !_hoistedSyntaxes.Contains(member.Kind()));
+            foreach (var member in hoistedNodes)
+                visitStatement(member);
+            foreach (var member in regularNodes)
+                visitStatement(member);
+            
             return new Luau.AST(statements);
         }
 
