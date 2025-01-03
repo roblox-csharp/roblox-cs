@@ -239,13 +239,7 @@ namespace RobloxCS
                 new Luau.ExpressionStatement(
                     new Luau.Assignment(
                         new Luau.IdentifierName(node.Identifier.Text),
-                        new Luau.Call(
-                            new Luau.MemberAccess(
-                                new Luau.IdentifierName("table"),
-                                new Luau.IdentifierName("freeze")
-                            ),
-                            new Luau.ArgumentList([new Luau.Argument(new Luau.TableInitializer(enumValues, enumKeys))])
-                        )
+                        new Luau.TableInitializer(enumValues, enumKeys)
                     )
                 )
             ];
