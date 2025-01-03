@@ -12,7 +12,7 @@ namespace RobloxCS.Luau
     public static class AstUtility
     {
         /// <summary>file path -> dictionary(identifier name, amount of times identifier is used)</summary>
-        private static Dictionary<string, Dictionary<string, uint>> _identifierDeclarations = [];
+        private static readonly Dictionary<string, Dictionary<string, uint>> _identifierDeclarations = [];
 
         public static TableInitializer CreateTypeInfo(Type type)
         {
@@ -76,6 +76,7 @@ namespace RobloxCS.Luau
                 new Literal("\"GenericTypeArguments\""),
                 new Literal("\"GUID\""),
             ];
+            
             List<Expression> values = [
                 new Literal($"\"{type.Name}\""),
                 type.FullName != null ? new Literal($"\"{type.FullName}\"") : Nil(),
@@ -129,7 +130,7 @@ namespace RobloxCS.Luau
                 new Literal(type.IsValueType.ToString().ToLower()),
                 new Literal(type.IsVariableBoundArray.ToString().ToLower()),
                 new Literal(type.IsVisible.ToString().ToLower()),
-                type.UnderlyingSystemType != null && type != type.UnderlyingSystemType ? CreateTypeInfo(type.UnderlyingSystemType) : Nil(),
+                type != type.UnderlyingSystemType ? CreateTypeInfo(type.UnderlyingSystemType) : Nil(),
                 type.BaseType != null ? CreateTypeInfo(type.BaseType) : Nil(),
                 type.DeclaringType != null ? CreateTypeInfo(type.DeclaringType) : Nil(),
                 new Literal(type.ContainsGenericParameters.ToString().ToLower()),
@@ -148,58 +149,48 @@ namespace RobloxCS.Luau
             List<Expression> values = [
                 new Literal(type.Name),
             ];
+            
             return new TableInitializer(values, keys);
         }
 
-        public static Call DefineGlobal(Name name, Expression value)
-        {
-            return CSCall("defineGlobal", new Literal($"\"{name}\""), value);
-        }
+        public static Call DefineGlobal(Name name, Expression value) =>
+            CSCall("defineGlobal", new Literal($"\"{name}\""), value);
 
-        public static Call GetGlobal(Name name)
-        {
-            return CSCall("getGlobal", new Literal($"\"{name}\""));
-        }
+        public static Call GetGlobal(Name name) =>
+            CSCall("getGlobal", new Literal($"\"{name}\""));
 
-        public static Call CSCall(string methodName, params Expression[] arguments)
-        {
-            return new Call(
+        public static Call CSCall(string methodName, params Expression[] arguments) =>
+            new Call(
                 new MemberAccess(
                     new IdentifierName("CS"),
                     new IdentifierName(methodName)
                 ),
                 CreateArgumentList(arguments.ToList())
             );
-        }
 
-        public static Call Bit32Call(string methodName, params Expression[] arguments)
-        {
-            return new Call(
+        public static Call Bit32Call(string methodName, params Expression[] arguments) =>
+            new Call(
                 new MemberAccess(
                     new IdentifierName("bit32"),
                     new IdentifierName(methodName)
                 ),
                 CreateArgumentList(arguments.ToList())
             );
-        }
 
-        public static ArgumentList CreateArgumentList(List<Expression> arguments)
-        {
-            return new ArgumentList(arguments.ConvertAll(expression => new Argument(expression)));
-        }
+        public static ArgumentList CreateArgumentList(List<Expression> arguments) =>
+            new ArgumentList(arguments.ConvertAll(expression => new Argument(expression)));
 
         public static Expression? GetFullParentName(SyntaxNode node)
         {
-            if (node.Parent == null) return null;
-
-            var parentLocation = GetFullParentName(node.Parent);
             switch (node.Parent)
             {
+                case null:
                 case CompilationUnitSyntax:
                     return null;
             }
 
             var parentName = CreateIdentifierName(node.Parent);
+            var parentLocation = GetFullParentName(node.Parent);
             return parentLocation == null ?
                 (
                     node.Parent.SyntaxTree == node.SyntaxTree ?
@@ -209,14 +200,12 @@ namespace RobloxCS.Luau
                 : new MemberAccess(parentLocation, parentName);
         }
 
-        public static If Initializer(Name name, Expression initializer)
-        {
-            return new If(
+        public static If Initializer(Name name, Expression initializer) =>
+            new If(
                 new BinaryOperator(name, "==", Nil()),
                 new ExpressionStatement(new Assignment(name, initializer)),
                 null
             );
-        }
 
         public static QualifiedName QualifiedNameFromMemberAccess(MemberAccess memberAccess)
         {
@@ -227,45 +216,33 @@ namespace RobloxCS.Luau
             return new QualifiedName(left, memberAccess.Name);
         }
 
-        public static Node DiscardVariableIfExpressionStatement(SyntaxNode node, Node value, SyntaxNode? valueParent)
-        {
-            if (valueParent is ExpressionStatementSyntax)
-            {
-                return DiscardVariable(node, (Expression)value);
-            }
-            return value;
-        }
+        public static Node DiscardVariableIfExpressionStatement(SyntaxNode node, Node value, SyntaxNode? valueParent) =>
+            valueParent is ExpressionStatementSyntax ?
+                DiscardVariable(node, (Expression)value)
+                : value;
 
-        public static Variable DiscardVariable(SyntaxNode node, Expression value)
-        {
-            return new Variable(CreateIdentifierName(node, "_"), true, value);
-        }
+        public static Variable DiscardVariable(SyntaxNode node, Expression value) =>
+            new Variable(CreateIdentifierName(node, "_"), true, value);
 
         public static Name CreateName(string text)
         {
             Name expression = new IdentifierName(text);
             var pieces = text.Split('.');
-            if (pieces.Length > 0)
-            {
-                foreach (var piece in pieces.Skip(1))
-                {
-                    expression = new QualifiedName(expression, new IdentifierName(piece));
-                }
-            }
-            return expression;
+            if (pieces.Length <= 0)
+                return expression;
+
+            return pieces
+                .Skip(1)
+                .Aggregate(expression, (current, piece) => new QualifiedName(current, new IdentifierName(piece)));
         }
 
-        public static IdentifierName CreateIdentifierName(SyntaxNode node)
-        {
-            return CreateIdentifierName(node, Utility.GetNamesFromNode(node).First());
-        }
+        public static IdentifierName CreateIdentifierName(SyntaxNode node) =>
+            CreateIdentifierName(node, Utility.GetNamesFromNode(node).First());
 
         public static IdentifierName CreateIdentifierName(SyntaxNode node, string name, bool bypassReserved = false)
         {
             if (RESERVED_IDENTIFIERS.Contains(name) && !bypassReserved)
-            {
                 Logger.UnsupportedError(node, $"Using '{name}' as an identifier", useIs: true, useYet: false);
-            }
 
             return new IdentifierName(name);
         }
@@ -274,35 +251,36 @@ namespace RobloxCS.Luau
         public static string FixIdentifierNameText(SyntaxNode node, string name)
         {
             if (!_identifierDeclarations.ContainsKey(node.SyntaxTree.FilePath))
-            {
                 _identifierDeclarations[node.SyntaxTree.FilePath] = [];
-            }
+            
             if (!_identifierDeclarations[node.SyntaxTree.FilePath].ContainsKey(name))
-            {
                 _identifierDeclarations[node.SyntaxTree.FilePath][name] = 0;
-            }
 
             var useCount = _identifierDeclarations[node.SyntaxTree.FilePath][name]++;
-            if (useCount > 0)
+            if (useCount <= 0)
+                return name;
+            
+            if (!name.EndsWith('_'))
             {
-                if (!name.EndsWith('_'))
-                {
-                    name += '_';
-                }
-                name += useCount;
+                name += '_';
             }
+            name += useCount;
 
             return name;
         }
 
         public static TypeRef? CreateTypeRef(string? typePath)
         {
-            if (typePath == null) return null;
-            if (typePath == "var") return null;
+            switch (typePath)
+            {
+                case null:
+                case "var":
+                    return null;
+            }
 
             var mappedType = Utility.GetMappedType(typePath);
             var arrayMatch = Regex.Match(mappedType, @"\{[a-zA-Z0-9]+\}");
-            if (mappedType.EndsWith("?"))
+            if (mappedType.EndsWith('?'))
                 return new OptionalType(CreateTypeRef(mappedType.Replace("?", ""))!);
             else if (arrayMatch.Success)
                 return new ArrayType(CreateTypeRef(arrayMatch.Value.Trim())!);

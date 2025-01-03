@@ -1,10 +1,10 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class BuiltinAttribute : BaseAttribute
+    public class BuiltInAttribute : BaseAttribute
     {
         public Name Name { get; }
 
-        public BuiltinAttribute(Name name)
+        public BuiltInAttribute(Name name)
         {
             Name = name;
             AddChild(name);

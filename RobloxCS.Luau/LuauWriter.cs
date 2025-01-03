@@ -55,7 +55,7 @@
             WriteLine();
             PushIndent();
 
-            body ??= new Block([]);
+            body ??= new Block([new Luau.Return(Luau.AstUtility.Nil())]);
             foreach (var parameter in parameterList.Parameters)
             {
                 if (parameter.IsVararg)
