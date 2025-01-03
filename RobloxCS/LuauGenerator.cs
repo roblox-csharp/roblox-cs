@@ -590,20 +590,39 @@ namespace RobloxCS
                 var fallThrough = section.Labels.Count > 1;
 
                 foreach (var label in section.Labels) {
-                    switch (label) {
-                        case CaseSwitchLabelSyntax caseLabel: {
-                            var body = section.Labels.Last() == label ?
-                                section.Statements.Select(Visit<Luau.Statement>).ToList()
-                                : [];
+                    var body = section.Labels.Last() == label ?
+                                    section.Statements.Select(Visit<Luau.Statement>).ToList()
+                                    : [];
 
+                    var hasFallThrough = fallThrough && label != section.Labels.Last();
+                    if (hasFallThrough) {
+                        nodeHasFallThrough = true;
+                        body.Insert(0, new Luau.ExpressionStatement(new Luau.Assignment(fallthroughIdentifier, Luau.AstUtility.True())));
+                    }
+
+                    switch (label) {
+                        case CasePatternSwitchLabelSyntax patternLabel: {
+                            Luau.Expression caseValue = patternLabel.Pattern switch {
+                                RelationalPatternSyntax relationalPattern =>
+                                    Visit<Luau.Expression>(relationalPattern.Expression),
+                                _ => throw new Exception("Unsupported pattern type")
+                            };
+                            var binaryOp = new Luau.BinaryOperator(comparand, patternLabel.Pattern switch {
+                                RelationalPatternSyntax relationalPattern =>
+                                    relationalPattern.OperatorToken.Text,
+                                _ => throw new Exception("Unsupported pattern type")
+                            }, caseValue);
+
+
+                            if (fallThrough && label != section.Labels.First())
+                                binaryOp = new Luau.BinaryOperator(fallthroughIdentifier, "or", binaryOp);
+
+                            ifStatements.Add(new Luau.If(binaryOp, new Luau.Block(body)));
+                            break;
+                        }
+                        case CaseSwitchLabelSyntax caseLabel: {
                             var caseValue = Visit<Luau.Expression>(caseLabel.Value);
                             var binaryOp = new Luau.BinaryOperator(comparand, "==", caseValue);
-
-                            var hasFallThrough = fallThrough && label != section.Labels.Last();
-                            if (hasFallThrough) {
-                                nodeHasFallThrough = true;
-                                body.Insert(0, new Luau.ExpressionStatement(new Luau.Assignment(fallthroughIdentifier, Luau.AstUtility.True())));
-                            }
                             
                             if (fallThrough && label != section.Labels.First())
                                 binaryOp = new Luau.BinaryOperator(fallthroughIdentifier, "or", binaryOp);
@@ -613,7 +632,7 @@ namespace RobloxCS
                         }
 
                         case DefaultSwitchLabelSyntax:
-                            defaultStatements = section.Statements.Select(Visit<Luau.Statement>).ToList();
+                            defaultStatements = body;
                             break;
                     }
                 }
