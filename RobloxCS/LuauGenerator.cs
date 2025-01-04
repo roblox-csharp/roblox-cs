@@ -666,7 +666,7 @@ namespace RobloxCS
                 ParenthesizedPatternSyntax parenthesizedPattern => HandleParenthesizedPattern(parenthesizedPattern, comparand),
                 ConstantPatternSyntax constantPattern => HandleConstantPattern(constantPattern, comparand),
                 TypePatternSyntax typePattern => HandleTypePattern(typePattern, comparand),
-                _ => Luau.AstUtility.Nil()
+                _ => throw Logger.CompilerError($"Unhandled pattern type: {node.GetType().Name}")
             };
         }
 
