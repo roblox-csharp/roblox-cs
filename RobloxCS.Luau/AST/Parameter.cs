@@ -46,19 +46,24 @@ namespace RobloxCS.Luau
             }
         }
 
-        private TypeRef FixType(TypeRef type) {
-            if (type is ArrayType arrayType && IsVararg)
+        private TypeRef FixType(TypeRef type)
+        {
+            while (true)
             {
-                return FixType(arrayType.ElementType);
-            }
+                if (type is ArrayType arrayType && IsVararg)
+                {
+                    type = arrayType.ElementType;
+                    continue;
+                }
 
-            var isOptional = type is OptionalType;
-            if (Initializer != null || isOptional)
-            {
-                return isOptional ? type : new OptionalType(type);
-            }
+                var isOptional = type is OptionalType;
+                if (Initializer != null || isOptional)
+                {
+                    return isOptional ? type : new OptionalType(type);
+                }
 
-            return type;
+                return type;
+            }
         }
     }
 }
