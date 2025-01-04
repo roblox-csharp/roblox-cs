@@ -120,6 +120,22 @@ namespace RobloxCS
         public override Luau.IdentifierName VisitThisExpression(ThisExpressionSyntax node) =>
             new Luau.IdentifierName("self");
 
+        // TODO: Support initializers?
+        public override Luau.Call VisitArrayCreationExpression(ArrayCreationExpressionSyntax node) {
+            var sizeExpression = node.Type.RankSpecifiers[0].Sizes[0];
+            var translatedSize = Visit<Luau.Expression>(sizeExpression);
+
+            return new Luau.Call(
+                new Luau.MemberAccess(new Luau.IdentifierName("table"), new Luau.IdentifierName("create")),
+                new Luau.ArgumentList([new Luau.Argument(translatedSize)])
+            );
+        }
+
+        public override Luau.TableInitializer VisitImplicitArrayCreationExpression(ImplicitArrayCreationExpressionSyntax node) {
+            var initializers = node.Initializer.Expressions.Select(Visit<Luau.Expression>);
+            return new Luau.TableInitializer(initializers.ToList());
+        }
+
         // long as hell lol
         public override Luau.Block VisitClassDeclaration(ClassDeclarationSyntax node)
         {
@@ -399,6 +415,8 @@ namespace RobloxCS
 
         public override Luau.Call VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
         {
+            Console.WriteLine(node.Kind());
+
             // TODO: handle null node.Initializer
             var expression = Visit<Luau.Name>(node.Type);
             var argumentList = Visit<Luau.ArgumentList>(node.ArgumentList);
@@ -622,7 +640,8 @@ namespace RobloxCS
                     switch (label) {
                         case CasePatternSwitchLabelSyntax patternLabel:
                         {
-                            var binaryOp = HandlePattern(patternLabel.Pattern, comparand);
+                                Console.WriteLine(patternLabel.Pattern.Kind());
+                                var binaryOp = HandlePattern(patternLabel.Pattern, comparand);
                             if (hasFallThrough)
                                 binaryOp = new Luau.BinaryOperator(fallthroughIdentifier, "or", binaryOp);
 
