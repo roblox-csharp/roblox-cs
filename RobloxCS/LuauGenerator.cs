@@ -537,8 +537,13 @@ namespace RobloxCS
         public override Luau.Return VisitReturnStatement(ReturnStatementSyntax node) =>
             new Luau.Return(Visit<Luau.Expression?>(node.Expression));
 
-        public override Luau.Block VisitBlock(BlockSyntax node) =>
-            new Luau.Block(node.Statements.Select(Visit).OfType<Luau.Statement>().ToList());
+        public override Luau.Block VisitBlock(BlockSyntax node)
+        {
+            var statements = node.Statements.Select(Visit).OfType<Luau.Statement>().ToList();
+            return node.Parent is BlockSyntax or GlobalStatementSyntax or null
+                ? new Luau.ScopedBlock(statements)
+                : new Luau.Block(statements);
+        }
 
         public override Luau.Node VisitBinaryExpression(BinaryExpressionSyntax node)
         {
