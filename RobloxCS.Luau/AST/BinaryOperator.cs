@@ -20,5 +20,8 @@
             luau.Write($" {Operator} ");
             Right.Render(luau);
         }
+
+        public BinaryOperator WithLeft(Expression left) => new BinaryOperator(left, Operator, Right);
+        public BinaryOperator WithRight(Expression right) => new BinaryOperator(Left, Operator, right);
     }
 }

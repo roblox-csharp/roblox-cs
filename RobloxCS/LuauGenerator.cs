@@ -615,32 +615,20 @@ namespace RobloxCS
                     }
 
                     switch (label) {
-                        case CasePatternSwitchLabelSyntax patternLabel: {
-                            Luau.Expression caseValue = patternLabel.Pattern switch {
-                                RelationalPatternSyntax relationalPattern =>
-                                    Visit<Luau.Expression>(relationalPattern.Expression),
-                                _ => throw new Exception("Unsupported pattern type")
-                            };
-                            var binaryOp = new Luau.BinaryOperator(comparand, patternLabel.Pattern switch {
-                                RelationalPatternSyntax relationalPattern =>
-                                    relationalPattern.OperatorToken.Text,
-                                _ => throw new Exception("Unsupported pattern type")
-                            }, caseValue);
-
-
-                            if (fallThrough && label != section.Labels.First())
+                        case CasePatternSwitchLabelSyntax patternLabel:
+                        {
+                            var binaryOp = HandlePattern(patternLabel.Pattern, comparand);
+                            if (hasFallThrough)
                                 binaryOp = new Luau.BinaryOperator(fallthroughIdentifier, "or", binaryOp);
 
                             ifStatements.Add(new Luau.If(binaryOp, new Luau.Block(body)));
                             break;
                         }
                         case CaseSwitchLabelSyntax caseLabel: {
-                            var caseValue = Visit<Luau.Expression>(caseLabel.Value);
-                            var binaryOp = new Luau.BinaryOperator(comparand, "==", caseValue);
-                            
-                            if (fallThrough && label != section.Labels.First())
+                            var binaryOp = HandleCaseSwitchLabel(caseLabel, comparand);
+                            if (hasFallThrough)
                                 binaryOp = new Luau.BinaryOperator(fallthroughIdentifier, "or", binaryOp);
-                            
+
                             ifStatements.Add(new Luau.If(binaryOp, new Luau.Block(body)));
                             break;
                         }
@@ -666,6 +654,65 @@ namespace RobloxCS
                 blockStatements = blockStatements.Prepend(new Luau.Variable((Luau.IdentifierName)comparand, true, condition)).ToList();
             
             return new Luau.Block(blockStatements);
+        }
+
+        private Luau.Expression HandlePattern(PatternSyntax node, Luau.Expression comparand)
+        {
+            return node switch
+            {
+                RelationalPatternSyntax relationalPattern => HandleRelationalPattern(relationalPattern, comparand),
+                BinaryPatternSyntax binaryPattern => HandleBinaryPattern(binaryPattern, comparand),
+                UnaryPatternSyntax unaryPattern => HandleUnaryPattern(unaryPattern, comparand),
+                ParenthesizedPatternSyntax parenthesizedPattern => HandleParenthesizedPattern(parenthesizedPattern, comparand),
+                ConstantPatternSyntax constantPattern => HandleConstantPattern(constantPattern, comparand),
+                TypePatternSyntax typePattern => HandleTypePattern(typePattern, comparand),
+                _ => Luau.AstUtility.Nil()
+            };
+        }
+
+        private Luau.Call HandleTypePattern(TypePatternSyntax node, Luau.Expression comparand)
+        {
+            var name = Visit<Luau.Name>(node.Type);
+            var typeInfo = _semanticModel.GetTypeInfo(node.Type);
+            if (typeInfo.Type is { ContainingNamespace: { Name: "System" } } && name is Luau.IdentifierName identifierName)
+                name = new Luau.IdentifierName('"' + Luau.Utility.GetMappedType(identifierName.Text) + '"');
+            
+            return Luau.AstUtility.CSCall("is", comparand, name);
+        }
+        
+        private Luau.BinaryOperator HandleConstantPattern(ConstantPatternSyntax node, Luau.Expression comparand)
+        {
+            var operand = Visit<Luau.Expression>(node.Expression);
+            return new Luau.BinaryOperator(comparand, "==", operand);
+        }
+        
+        private Luau.Parenthesized HandleParenthesizedPattern(ParenthesizedPatternSyntax node, Luau.Expression comparand) =>
+            new Luau.Parenthesized(HandlePattern(node.Pattern, comparand));
+        
+        private Luau.UnaryOperator HandleUnaryPattern(UnaryPatternSyntax node, Luau.Expression comparand)
+        {
+            var operand = HandlePattern(node.Pattern, comparand);
+            return new Luau.UnaryOperator("not ", operand);
+        }
+        
+        private Luau.BinaryOperator HandleBinaryPattern(BinaryPatternSyntax node, Luau.Expression comparand)
+        {
+            var left = HandlePattern(node.Left, comparand);
+            var right = HandlePattern(node.Right, comparand);
+            return new Luau.BinaryOperator(left, node.OperatorToken.Text, right);
+        }
+
+        private Luau.BinaryOperator HandleRelationalPattern(RelationalPatternSyntax node, Luau.Expression comparand)
+        {
+            var op = Luau.Utility.GetMappedOperator(node.OperatorToken.Text);
+            var operand = Visit<Luau.Expression>(node.Expression);
+            return new Luau.BinaryOperator(comparand, op, operand);
+        }
+
+        private Luau.BinaryOperator HandleCaseSwitchLabel(CaseSwitchLabelSyntax caseLabel, Luau.Expression comparand)
+        {
+            var caseValue = Visit<Luau.Expression>(caseLabel.Value);
+            return new Luau.BinaryOperator(comparand, "==", caseValue);
         }
 
         public override Luau.Parenthesized VisitParenthesizedExpression(ParenthesizedExpressionSyntax node)

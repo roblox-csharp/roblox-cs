@@ -35,7 +35,6 @@ function CS.is(object: any, class: Class | string): boolean
 		end
 	end
 
-    
     return if typeof(class) == "string" then
         if typeof(object) == "Instance" then
             object:IsA(class)
