@@ -18,7 +18,7 @@ export type Class = {
 
 function CS.is(object: any, class: Class | string): boolean
     if typeof(class) == "table" and type(class.__name) == "string" then
-		return typeof(object) == "table" and type(object["className"]) == "string" and object["className"] == class.__name
+		return typeof(object) == "table" and typeof(object.__className) == "string" and object.__className == class.__name
 	end
 
 	-- metatable check
@@ -35,13 +35,14 @@ function CS.is(object: any, class: Class | string): boolean
 		end
 	end
 
-    return if typeof(class) == "string" then
-        if typeof(object) == "Instance" then
+    if typeof(class) == "string" then
+        return if typeof(object) == "Instance" then
             object:IsA(class)
         else
             typeof(object) == class
-    else
-        false
+    end
+    
+    return false
 end
 
 -- Exception class
