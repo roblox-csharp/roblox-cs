@@ -415,8 +415,6 @@ namespace RobloxCS
 
         public override Luau.Call VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
         {
-            Console.WriteLine(node.Kind());
-
             // TODO: handle null node.Initializer
             var expression = Visit<Luau.Name>(node.Type);
             var argumentList = Visit<Luau.ArgumentList>(node.ArgumentList);
@@ -640,7 +638,6 @@ namespace RobloxCS
                     switch (label) {
                         case CasePatternSwitchLabelSyntax patternLabel:
                         {
-                                Console.WriteLine(patternLabel.Pattern.Kind());
                                 var binaryOp = HandlePattern(patternLabel.Pattern, comparand);
                             if (hasFallThrough)
                                 binaryOp = new Luau.BinaryOperator(fallthroughIdentifier, "or", binaryOp);
