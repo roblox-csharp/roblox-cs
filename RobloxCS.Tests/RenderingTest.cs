@@ -6,6 +6,25 @@ public class RenderingTest
 {
     private const string _tab = "  ";
     
+    [Fact]
+    public void Renders_UnaryOperators()
+    {
+        var operand = new Luau.IdentifierName("isActive");
+        var unaryOp = new Luau.UnaryOperator("not ", operand);
+        var output = Render(unaryOp);
+        Assert.Equal("not isActive", output);
+    }
+    
+    [Fact]
+    public void Renders_BinaryOperators()
+    {
+        var left = new Luau.Literal("69");
+        var right = new Luau.Literal("420");
+        var binaryOp = new Luau.BinaryOperator(left, "+", right);
+        var output = Render(binaryOp);
+        Assert.Equal("69 + 420", output);
+    }
+    
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
