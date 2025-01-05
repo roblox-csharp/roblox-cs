@@ -8,7 +8,9 @@ public enum MacroKind
 {
     NewInstance,
     ListConstruction,
-    DictionaryConstruction
+    DictionaryConstruction,
+    IEnumerableType,
+    DictionaryType
 }
 
 public class Macro(SemanticModel semanticModel)
@@ -26,16 +28,23 @@ public class Macro(SemanticModel semanticModel)
                 // returning IdentifierName because when visiting GenericNameSyntax (C#) it expects a Name (luau)
                 
                 case "List":
+                case "IEnumerable":
                 {
                     var elementTypeName = (IdentifierName)visit(genericName.TypeArgumentList.Arguments.First())!;
-                    return new IdentifierName($"{{ {Utility.GetMappedType(elementTypeName.Text)} }}");
+                    var expanded = new IdentifierName($"{{ {Utility.GetMappedType(elementTypeName.Text)} }}");
+                    expanded.MarkExpanded(MacroKind.IEnumerableType);
+                    
+                    return expanded;
                 }
                 
                 case "Dictionary":
                 {
                     var keyTypeName = (IdentifierName)visit(genericName.TypeArgumentList.Arguments.First())!;
                     var valueTypeName = (IdentifierName)visit(genericName.TypeArgumentList.Arguments.Last())!;
-                    return new IdentifierName($"{{ [{Utility.GetMappedType(keyTypeName.Text)}]: {Utility.GetMappedType(valueTypeName.Text)} }}");
+                    var expanded = new IdentifierName($"{{ [{Utility.GetMappedType(keyTypeName.Text)}]: {Utility.GetMappedType(valueTypeName.Text)} }}");
+                    expanded.MarkExpanded(MacroKind.DictionaryType);
+                    
+                    return expanded;
                 }
             }
         }
