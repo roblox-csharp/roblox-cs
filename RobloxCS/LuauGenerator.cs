@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RobloxCS.Luau;
 
 namespace RobloxCS
 {
@@ -346,13 +347,39 @@ namespace RobloxCS
             return new Luau.If(condition, body, elseBranch);
         }
 
-        public override Luau.NumericalFor VisitForStatement(ForStatementSyntax node)
+        public override Luau.ScopedBlock VisitForStatement(ForStatementSyntax node)
         {
             var initializer = Visit<Luau.VariableList?>(node.Declaration)?.Variables.FirstOrDefault();
-            var incrementBy = Visit<Luau.Expression?>(node.Incrementors.FirstOrDefault());
-            var condition = Visit<Luau.Expression?>(node.Condition);
+            var incrementByExpression = Visit<Luau.Expression?>(node.Incrementors.FirstOrDefault());
+            Luau.Statement? incrementBy = incrementByExpression != null ? new ExpressionStatement(incrementByExpression) : null;
+            
+            var condition = Visit<Luau.Expression?>(node.Condition) ?? Luau.AstUtility.True();
             var body = Visit<Luau.Statement>(node.Statement);
-            return new Luau.NumericalFor(initializer, incrementBy, condition, body);
+            List<Luau.Statement> statements = [];
+            
+            if (initializer != null)
+                statements.Add(initializer);
+            
+            var shouldIncrementIdentifier = Luau.AstUtility.CreateIdentifierName(node, "_shouldIncrement", registerIdentifier: true);
+            if (incrementBy != null)
+            {
+                statements.Add(new Luau.Variable(shouldIncrementIdentifier, true, Luau.AstUtility.False()));
+            }
+
+            List<Luau.Statement> whileStatements = [body];
+            if (incrementBy != null)
+            {
+                if (incrementBy is ExpressionStatement { Expression: BinaryOperator binaryOperator } expressionStatement &&
+                    !binaryOperator.Operator.Contains('='))
+                {
+                    incrementBy = new Luau.Variable(new IdentifierName("_"), true, expressionStatement.Expression);
+                }
+                whileStatements.Add(new If(shouldIncrementIdentifier, incrementBy, new Luau.ExpressionStatement(new Luau.Assignment(shouldIncrementIdentifier, Luau.AstUtility.True()))));
+            }
+            
+            whileStatements.Add(new Luau.If(new Luau.UnaryOperator("not ", new Luau.Parenthesized(condition)), new Luau.Break()));
+            statements.Add(new Luau.While(Luau.AstUtility.True(), new Luau.Block(whileStatements)));
+            return new Luau.ScopedBlock(statements);
         }
 
         public override Luau.For VisitForEachStatement(ForEachStatementSyntax node)
