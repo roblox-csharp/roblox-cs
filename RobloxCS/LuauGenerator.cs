@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RobloxCS.Macros;
 
 namespace RobloxCS
 {
@@ -484,6 +485,9 @@ namespace RobloxCS
                 memberAccess.Operator = methodSymbolInfo.Symbol!.IsStatic ? '.' : ':';
 
             var argumentList = Visit<Luau.ArgumentList>(node.ArgumentList);
+            if (callee.ExpandedByMacro == MacroKind.NewInstance && callee is Luau.Call newInstanceCall)
+                return newInstanceCall;
+            
             return new Luau.Call(callee, argumentList);
         }
 
@@ -551,10 +555,16 @@ namespace RobloxCS
             var expression = Visit<Luau.Expression>(node.Expression);
             var name = Visit<Luau.SimpleName>(node.Name);
             var memberAccess = new Luau.MemberAccess(expression, name);
-            if (node.Parent is AssignmentExpressionSyntax assignment && assignment.Left == node)
-                return Luau.AstUtility.QualifiedNameFromMemberAccess(memberAccess);
 
-            return Luau.AstUtility.DiscardVariableIfExpressionStatement(node, memberAccess, node.Parent);
+            var luauNode = Luau.AstUtility.DiscardVariableIfExpressionStatement(node, memberAccess, node.Parent);
+            if (node.Parent is AssignmentExpressionSyntax assignment && assignment.Left == node)
+                luauNode = Luau.AstUtility.QualifiedNameFromMemberAccess(memberAccess);
+            
+            var expandedExpression = Macro.MemberAccess(Visit, node);
+            if (expandedExpression is not null)
+                luauNode = expandedExpression;
+            
+            return luauNode;
         }
 
         public override Luau.Node VisitElementAccessExpression(ElementAccessExpressionSyntax node)

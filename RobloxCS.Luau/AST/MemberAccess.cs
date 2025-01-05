@@ -10,9 +10,6 @@ namespace RobloxCS.Luau
 
         public MemberAccess(Expression expression, SimpleName name, char @operator = '.')
         {
-            Console.WriteLine(expression.ToString());
-            Console.WriteLine(name.ToString());
-
             Expression = expression;
             Operator = @operator;
             Name = name;
