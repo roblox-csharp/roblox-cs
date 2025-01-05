@@ -268,14 +268,6 @@ namespace RobloxCS.Luau
         /// <code>local _ = discardedValue</code>
         public static Variable DiscardVariable(SyntaxNode node, Expression value) =>
             new(CreateSimpleName<IdentifierName>(node, "_"), true, value);
-
-        public static SimpleName GetConstructorName(Name objectName)
-        {
-            var genericName = GetGenericName(objectName);
-            return genericName != null
-                ? new GenericName("new", genericName.TypeArguments)
-                : new IdentifierName("new");
-        }
         
         public static GenericName? GetGenericName(Name name) =>
             name switch

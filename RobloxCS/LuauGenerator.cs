@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using RobloxCS.Luau;
 using RobloxCS.Macros;
 
 namespace RobloxCS;
@@ -150,11 +149,9 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         var constructor = explicitConstructor == null
             ? GenerateConstructor(node, new Luau.ParameterList([]))
             : Visit<Luau.Function>(explicitConstructor);
-
-            
+        
         // TODO: maybe move this to AstUtility, this shit is huge
         var typeRef = Luau.AstUtility.CreateTypeRef(name.ToString())!;
-        var constructorName = Luau.AstUtility.GetConstructorName(name);
         List<Luau.Statement> classMemberStatements = [
             new Luau.ExpressionStatement(
                 new Luau.Assignment(
@@ -186,7 +183,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
                 )
             ),
             new Luau.Function(
-                new Luau.AssignmentFunctionName(nonGenericName, constructorName),
+                new Luau.AssignmentFunctionName(nonGenericName, new Luau.IdentifierName("new")),
                 false,
                 constructor.ParameterList,
                 typeRef,
@@ -195,12 +192,17 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
                         new Luau.IdentifierName("self"),
                         true,
                         new Luau.TypeCast(
-                            new Luau.Call(
-                                new Luau.IdentifierName("setmetatable"),
-                                Luau.AstUtility.CreateArgumentList([
-                                    new Luau.TypeCast(new Luau.TableInitializer(), Luau.AstUtility.AnyType()),
-                                    nonGenericName
-                                ])
+                            new Luau.Parenthesized(
+                                new Luau.TypeCast(
+                                    new Luau.Call(
+                                        new Luau.IdentifierName("setmetatable"),
+                                        Luau.AstUtility.CreateArgumentList([
+                                            new Luau.TableInitializer(),
+                                            nonGenericName
+                                        ])
+                                    ),
+                                    Luau.AstUtility.AnyType()
+                                )
                             ),
                             typeRef
                         )
@@ -208,7 +210,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
                     new Luau.Return(
                         new Luau.BinaryOperator(
                             new Luau.Call(
-                                new Luau.MemberAccess(new Luau.IdentifierName("self"), name, ':'),
+                                new Luau.MemberAccess(new Luau.IdentifierName("self"), nonGenericName, ':'),
                                 Luau.AstUtility.CreateArgumentList(constructor.ParameterList.Parameters.ConvertAll<Luau.Expression>(parameter => parameter.Name))
                             ),
                             "or",
@@ -228,7 +230,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         classMemberStatements.AddRange(members);
             
         List<Luau.Statement> statements = [
-            new Luau.Variable(nonGenericName, true, null, typeRef),
+            new Luau.Variable(nonGenericName, true, null),
             new Luau.ScopedBlock(classMemberStatements),
             new Luau.TypeAlias(name, new Luau.TypeOfCall(nonGenericName))
         ];
@@ -481,8 +483,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         var nonGenericName = Luau.AstUtility.GetNonGenericName(name);
         var argumentList = Visit<Luau.ArgumentList>(node.ArgumentList);
         
-        var constructorName = Luau.AstUtility.GetConstructorName(name);
-        var callee = new Luau.QualifiedName(nonGenericName, constructorName);
+        var callee = new Luau.QualifiedName(nonGenericName, new Luau.IdentifierName("new"));
         var expandedExpression = _macro.ObjectCreation(Visit, node);
 
         return expandedExpression ?? new Luau.Call(callee, argumentList);
