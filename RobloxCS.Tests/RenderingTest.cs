@@ -5,6 +5,41 @@ namespace RobloxCS.Tests;
 public class RenderingTest
 {
     private const string _tab = "  ";
+    
+    [Fact]
+    public void Renders_MappedTypes()
+    {
+        var mappedType = new Luau.MappedType(new Luau.TypeRef("string"), new Luau.TypeRef("number"));
+        var output = Render(mappedType);
+        Assert.Equal("{ [string]: number; }", output);
+    }
+    
+    [Fact]
+    public void Renders_InterfaceTypes()
+    {
+        var interfaceType = new Luau.InterfaceType(
+            [new Luau.FieldType("myField", new Luau.TypeRef("string"), true)],
+            null,
+            false
+        );
+        
+        var output = Render(interfaceType);
+        const string expectedOutput = """
+                                      {
+                                        read myField: string;
+                                      }
+                                      """;
+        
+        Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
+    }
+    
+    [Fact]
+    public void Renders_OptionalTypes()
+    {
+        var optionalType = new Luau.OptionalType(new Luau.TypeRef("boolean"));
+        var output = Render(optionalType);
+        Assert.Equal("boolean?", output);
+    }
 
     [Fact]
     public void Renders_FunctionTypes()

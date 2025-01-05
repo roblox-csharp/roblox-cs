@@ -6,11 +6,12 @@
         public MappedType? ExtraMapping { get; }
         public bool IsCompact { get; }
 
-        public InterfaceType(HashSet<FieldType> fields, MappedType? extraMapping = null, bool? isCompact = null) : base("", true)
+        public InterfaceType(HashSet<FieldType> fields, MappedType? extraMapping = null, bool isCompact = true)
+            : base("", true)
         {
             Fields = fields;
             ExtraMapping = extraMapping;
-            IsCompact = Fields.Count == 0 && isCompact == null ? true : (isCompact ?? false);
+            IsCompact = Fields.Count == 0 && isCompact;
             Path = ToString();
         }
 
