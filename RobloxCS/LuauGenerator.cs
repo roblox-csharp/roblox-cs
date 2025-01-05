@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RobloxCS.Luau;
 using RobloxCS.Macros;
 
 namespace RobloxCS;
@@ -150,12 +151,10 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             ? GenerateConstructor(node, new Luau.ParameterList([]))
             : Visit<Luau.Function>(explicitConstructor);
 
-        Luau.SimpleName constructorName = name is Luau.GenericName genericName
-            ? new Luau.GenericName("new", genericName.TypeArguments)
-            : new Luau.IdentifierName("new");
             
         // TODO: maybe move this to AstUtility, this shit is huge
         var typeRef = Luau.AstUtility.CreateTypeRef(name.ToString())!;
+        var constructorName = Luau.AstUtility.GetConstructorName(name);
         List<Luau.Statement> classMemberStatements = [
             new Luau.ExpressionStatement(
                 new Luau.Assignment(
@@ -478,9 +477,12 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
     public override Luau.Expression VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
     {
         // TODO: handle null node.Initializer
-        var expression = Visit<Luau.Name>(node.Type);
+        var name = Visit<Luau.Name>(node.Type);
+        var nonGenericName = Luau.AstUtility.GetNonGenericName(name);
         var argumentList = Visit<Luau.ArgumentList>(node.ArgumentList);
-        var callee = new Luau.QualifiedName(expression, new Luau.IdentifierName("new"));
+        
+        var constructorName = Luau.AstUtility.GetConstructorName(name);
+        var callee = new Luau.QualifiedName(nonGenericName, constructorName);
         var expandedExpression = _macro.ObjectCreation(Visit, node);
 
         return expandedExpression ?? new Luau.Call(callee, argumentList);
@@ -631,7 +633,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
 
     public override Luau.Expression VisitGenericName(GenericNameSyntax node)
     {
-        var typeArguments = node.TypeArgumentList.Arguments.Select(typeArg => typeArg.ToString()).ToList();
+        var typeArguments = node.TypeArgumentList.Arguments.Select(typeArg => Luau.Utility.GetMappedType(Visit<Luau.Name>(typeArg).ToString())).ToList();
         Luau.Expression? expandedExpression = _macro.GenericName(Visit, node);
         
         return expandedExpression ?? new Luau.GenericName(node.Identifier.Text, typeArguments);

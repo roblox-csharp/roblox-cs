@@ -269,6 +269,45 @@ namespace RobloxCS.Luau
         public static Variable DiscardVariable(SyntaxNode node, Expression value) =>
             new(CreateSimpleName<IdentifierName>(node, "_"), true, value);
 
+        public static SimpleName GetConstructorName(Name objectName)
+        {
+            var genericName = GetGenericName(objectName);
+            return genericName != null
+                ? new GenericName("new", genericName.TypeArguments)
+                : new IdentifierName("new");
+        }
+        
+        public static GenericName? GetGenericName(Name name) =>
+            name switch
+            {
+                GenericName baseName => baseName,
+                QualifiedName { Right: GenericName rightName } => rightName,
+                _ => null
+            };
+        
+        /// <summary>
+        /// Takes a Name and converts it into a non-generic Name
+        /// </summary>
+        public static Name GetNonGenericName(Name name) =>
+            name switch
+            {
+                QualifiedName qualifiedName => GetNonGenericName(qualifiedName),
+                SimpleName simpleName => GetNonGenericName(simpleName),
+                _ => name
+            };
+        
+        /// <summary>
+        /// Takes a QualifiedName and converts it into a non-generic QualifiedName
+        /// </summary>
+        public static QualifiedName GetNonGenericName(QualifiedName qualifiedName)
+        {
+            if (qualifiedName.Right is IdentifierName)
+                return qualifiedName;
+
+            var right = GetNonGenericName(qualifiedName.Right);
+            return new QualifiedName(qualifiedName.Left, right);
+        }
+
         /// <summary>
         /// Takes a SimpleName (which GenericName extends from) and converts it into a standard IdentifierName
         /// </summary>
