@@ -132,17 +132,18 @@
             type.Render(this);
         }
 
+        // wtf is this for??? i literally forgot
         public void WriteDescendantStatements(ref Node node)
         {
-            if (node.Parent is not Variable && node is not Argument) {
-                if (node is Assignment assignment)
+            if (node.Parent is not Variable && node is not Argument)
+            {
+                node = node switch
                 {
-                    node = assignment.Target;
-                }
-                else if (node is BinaryOperator binaryOperator && binaryOperator.Operator.Contains('='))
-                {
-                    node = binaryOperator.Left;
-                }
+                    Assignment assignment => assignment.Target,
+                    BinaryOperator binaryOperator when binaryOperator.Operator.Contains('=') => binaryOperator.Left,
+                    _ => node
+                };
+                
                 FixNode(node);
             }
 
@@ -151,17 +152,18 @@
             var isElementAccess = node is ElementAccess;
             if (node.Parent is Variable)
             {
-                if (node is Assignment assignment)
+                switch (node)
                 {
-                    new Variable(original, true, assignment.Target).Render(this);
-                    new ExpressionStatement(assignment).Render(this);
-                    node = original;
-                }
-                else if (node is BinaryOperator binaryOperator && binaryOperator.Operator.Contains('='))
-                {
-                    new Variable(original, true, binaryOperator.Left).Render(this);
-                    new ExpressionStatement(binaryOperator).Render(this);
-                    node = original;
+                    case Assignment assignment:
+                        new Variable(original, true, assignment.Target).Render(this);
+                        new ExpressionStatement(assignment).Render(this);
+                        node = original;
+                        break;
+                    case BinaryOperator binaryOperator when binaryOperator.Operator.Contains('='):
+                        new Variable(original, true, binaryOperator.Left).Render(this);
+                        new ExpressionStatement(binaryOperator).Render(this);
+                        node = original;
+                        break;
                 }
             }
 
@@ -169,15 +171,16 @@
             {
                 if (isCall || isElementAccess)
                 {
-                    if (descendant is Assignment assignment)
+                    switch (descendant)
                     {
-                        new Variable(original, true, assignment.Target).Render(this);
-                        new ExpressionStatement(assignment).Render(this);
-                    }
-                    else if (descendant is BinaryOperator binaryOperator && binaryOperator.Operator.Contains('='))
-                    {
-                        new Variable(original, true, binaryOperator.Left).Render(this);
-                        new ExpressionStatement(binaryOperator).Render(this);
+                        case Assignment assignment:
+                            new Variable(original, true, assignment.Target).Render(this);
+                            new ExpressionStatement(assignment).Render(this);
+                            break;
+                        case BinaryOperator binaryOperator when binaryOperator.Operator.Contains('='):
+                            new Variable(original, true, binaryOperator.Left).Render(this);
+                            new ExpressionStatement(binaryOperator).Render(this);
+                            break;
                     }
                 }
 

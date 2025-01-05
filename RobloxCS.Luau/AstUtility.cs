@@ -8,8 +8,23 @@ namespace RobloxCS.Luau
 {
     public static class AstUtility
     {
+        // TODO: make per-scope
         /// <summary>file path -> dictionary(identifier name, amount of times identifier is used)</summary>
         private static readonly Dictionary<string, Dictionary<string, uint>> _identifierDeclarations = [];
+
+        public static Expression AddOne(Expression expression)
+        {
+            return expression is Literal literal && int.TryParse(literal.ValueText, out var value)
+                ? new Literal((value + 1).ToString())
+                : new BinaryOperator(expression, "+", new Literal("1"));
+        }
+        
+        public static Expression SubtractOne(Expression expression)
+        {
+            return expression is Literal literal && int.TryParse(literal.ValueText, out var value)
+                ? new Literal((value - 1).ToString())
+                : new BinaryOperator(expression, "-", new Literal("1"));
+        }
 
         public static TableInitializer CreateTypeInfo(Type type)
         {

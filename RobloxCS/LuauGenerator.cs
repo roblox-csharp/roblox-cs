@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using RobloxCS.Luau;
 
 namespace RobloxCS
 {
@@ -347,14 +346,29 @@ namespace RobloxCS
             return new Luau.If(condition, body, elseBranch);
         }
 
-        public override Luau.ScopedBlock VisitForStatement(ForStatementSyntax node)
+        public override Luau.Statement VisitForStatement(ForStatementSyntax node)
         {
             var initializer = Visit<Luau.VariableList?>(node.Declaration)?.Variables.FirstOrDefault();
-            var incrementByExpression = Visit<Luau.Expression?>(node.Incrementors.FirstOrDefault());
-            Luau.Statement? incrementBy = incrementByExpression != null ? new ExpressionStatement(incrementByExpression) : null;
-            
             var condition = Visit<Luau.Expression?>(node.Condition) ?? Luau.AstUtility.True();
+            var isNumericLoop = initializer is { Initializer: Luau.Literal literal } && int.TryParse(literal.ValueText, out _);
+            var incrementByExpression = Visit<Luau.Expression?>(node.Incrementors.FirstOrDefault());
             var body = Visit<Luau.Statement>(node.Statement);
+            if (isNumericLoop &&
+                node.Condition is BinaryExpressionSyntax
+                {
+                    OperatorToken: { Text: "<=" or "<" }
+                } binaryOp &&
+                incrementByExpression is Luau.BinaryOperator { Operator: "+=" or "-=" } incrementBinaryOp)
+            {
+                var minimum = initializer!.Initializer!;
+                var maximum = ((Luau.BinaryOperator)condition).Right;
+                if (binaryOp.OperatorToken.Text == "<")
+                    maximum = Luau.AstUtility.SubtractOne(maximum);
+
+                return new Luau.NumericFor(initializer.Name, minimum, maximum, incrementBinaryOp.Operator == "-=" ? new Luau.Literal("-1") : null, body);
+            }
+            
+            Luau.Statement? incrementBy = incrementByExpression != null ? new Luau.ExpressionStatement(incrementByExpression) : null;
             List<Luau.Statement> statements = [];
             
             if (initializer != null)
@@ -369,12 +383,12 @@ namespace RobloxCS
             List<Luau.Statement> whileStatements = [body];
             if (incrementBy != null)
             {
-                if (incrementBy is ExpressionStatement { Expression: BinaryOperator binaryOperator } expressionStatement &&
+                if (incrementBy is Luau.ExpressionStatement { Expression: Luau.BinaryOperator binaryOperator } expressionStatement &&
                     !binaryOperator.Operator.Contains('='))
                 {
-                    incrementBy = new Luau.Variable(new IdentifierName("_"), true, expressionStatement.Expression);
+                    incrementBy = new Luau.Variable(new Luau.IdentifierName("_"), true, expressionStatement.Expression);
                 }
-                whileStatements.Add(new If(shouldIncrementIdentifier, incrementBy, new Luau.ExpressionStatement(new Luau.Assignment(shouldIncrementIdentifier, Luau.AstUtility.True()))));
+                whileStatements.Add(new Luau.If(shouldIncrementIdentifier, incrementBy, new Luau.ExpressionStatement(new Luau.Assignment(shouldIncrementIdentifier, Luau.AstUtility.True()))));
             }
             
             whileStatements.Add(new Luau.If(new Luau.UnaryOperator("not ", new Luau.Parenthesized(condition)), new Luau.Break()));
@@ -547,7 +561,7 @@ namespace RobloxCS
         {
             var expression = Visit<Luau.Expression>(node.Expression);
             var index = Visit<Luau.Expression>(node.ArgumentList.Arguments.First().Expression);
-            var elementAccess = new Luau.ElementAccess(expression, index);
+            var elementAccess = new Luau.ElementAccess(expression, Luau.AstUtility.AddOne(index));
             return Luau.AstUtility.DiscardVariableIfExpressionStatement(node, elementAccess, node.Parent);
         }
 
