@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RobloxCS.Luau;
 using RobloxCS.Macros;
 
 namespace RobloxCS
@@ -455,14 +456,24 @@ namespace RobloxCS
             return Luau.AstUtility.CreateTypeInfo(type);
         }
 
+        public override Luau.Expression VisitExpressionElement(ExpressionElementSyntax node) =>
+            Visit<Luau.Expression>(node.Expression);
+
+        public override Luau.TableInitializer VisitCollectionExpression(CollectionExpressionSyntax node)
+        {
+            var elements = node.Elements.Select(Visit<Luau.Expression>).ToList();
+            return new Luau.TableInitializer(elements);
+        }
+
         public override Luau.Expression VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
         {
             // TODO: handle null node.Initializer
             var expression = Visit<Luau.Name>(node.Type);
             var argumentList = Visit<Luau.ArgumentList>(node.ArgumentList);
             var callee = new Luau.QualifiedName(expression, new Luau.IdentifierName("new"));
-            var macro = Macro.ObjectCreation(Visit, node);
-            return macro != null ? macro : new Luau.Call(callee, argumentList);
+            var expandedExpression = Macro.ObjectCreation(Visit, node);
+            
+            return expandedExpression ?? new Luau.Call(callee, argumentList);
         }
 
         public override Luau.Node VisitInvocationExpression(InvocationExpressionSyntax node)
@@ -567,6 +578,9 @@ namespace RobloxCS
             
             return luauNode;
         }
+
+        public override Luau.Node VisitImplicitElementAccess(ImplicitElementAccessSyntax node) =>
+            Visit<Luau.Expression>(node.ArgumentList.Arguments.First().Expression);
 
         public override Luau.Node VisitElementAccessExpression(ElementAccessExpressionSyntax node)
         {

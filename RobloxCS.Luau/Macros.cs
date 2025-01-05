@@ -43,24 +43,28 @@ public static class Macro
     public static Expression? ObjectCreation(Func<SyntaxNode, Node?> visit, ObjectCreationExpressionSyntax objectCreation) {
         if (objectCreation.Type is GenericNameSyntax genericName) {
             switch (genericName.Identifier.Text) {
-                case "List": {
-                        var table = new Luau.TableInitializer(objectCreation.Initializer.Expressions.ToList().ConvertAll((expression) => (Expression)visit(expression)!)!);
-                        table.MarkExpanded(MacroKind.ListConstruction);
-                        return table;
-                    }
+                case "List":
+                {
+                    var expressions = objectCreation.Initializer?.Expressions.Select(expression => (Expression)visit(expression)!).ToList();
+                    var table = new TableInitializer(expressions ?? []);
+                    table.MarkExpanded(MacroKind.ListConstruction);
+                    
+                    return table;
+                }
+                
                 case "Dictionary": {
                         var values = new List<Expression>();
                         var keys = new List<Expression>();
 
                         if (objectCreation.Initializer != null) {
-                            foreach (var expression in objectCreation.Initializer.Expressions) {
-                                if (expression is AssignmentExpressionSyntax assignmentExpression) {
-                                    var key = new IdentifierName(assignmentExpression.Left.ToString()); // Visiting didn't seem to work here
-                                    var value = (Expression)visit(assignmentExpression.Right)!;
-
-                                    values.Add(value);
-                                    keys.Add(key);
-                                }
+                            foreach (var expression in objectCreation.Initializer.Expressions)
+                            {
+                                if (expression is not AssignmentExpressionSyntax assignmentExpression) continue;
+                                
+                                var key = (Expression)visit(assignmentExpression.Left)!;
+                                var value = (Expression)visit(assignmentExpression.Right)!;
+                                values.Add(value);
+                                keys.Add(key);
                             }
                         }
 
