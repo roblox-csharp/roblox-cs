@@ -7,8 +7,6 @@ namespace RobloxCS
 {
     public static class Utility
     {
-        public const string RuntimeAssemblyName = "Roblox";
-
         public static string GetDefaultValueForType(string typeName)
         {
             if (INTEGER_TYPES.Contains(typeName) || DECIMAL_TYPES.Contains(typeName))
@@ -16,19 +14,12 @@ namespace RobloxCS
                 return "0";
             }
 
-            switch (typeName)
+            return typeName switch
             {
-                case "char":
-                case "Char":
-                case "string":
-                case "String":
-                    return "\"\"";
-                case "bool":
-                case "Boolean":
-                    return "false";
-                default:
-                    return "nil";
-            }
+                "char" or "Char" or "string" or "String" => "\"\"",
+                "bool" or "Boolean" => "false",
+                _ => "nil"
+            };
         }
 
         public static ISymbol? FindMember(INamespaceSymbol namespaceSymbol, string memberName)
@@ -75,17 +66,7 @@ namespace RobloxCS
         public static List<T> FilterDuplicates<T>(IEnumerable<T> items, IEqualityComparer<T> comparer) where T : notnull
         {
             var seen = new Dictionary<T, bool>(comparer);
-            var result = new List<T>();
-            foreach (var item in items)
-            {
-                if (!seen.ContainsKey(item))
-                {
-                    seen[item] = true;
-                    result.Add(item);
-                }
-            }
-
-            return result;
+            return items.Where(item => seen.TryAdd(item, true)).ToList();
         }
     }
 }

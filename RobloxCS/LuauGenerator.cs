@@ -1,6 +1,7 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RobloxCS.Luau;
 
 namespace RobloxCS
 {
@@ -584,6 +585,9 @@ namespace RobloxCS
                 new Luau.QualifiedName(new Luau.IdentifierName("self"), name)
                 : name;
         }
+
+        public override Luau.IdentifierName VisitGenericName(GenericNameSyntax node) =>
+            new Luau.IdentifierName(node.Identifier.Text);
 
         public override Luau.Break VisitBreakStatement(BreakStatementSyntax node) =>
             new Luau.Break();

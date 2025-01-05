@@ -1,63 +1,63 @@
-﻿using Microsoft.CodeAnalysis;
-using System.Reflection;
+﻿using System.Reflection;
 using System.Text.RegularExpressions;
+using Microsoft.CodeAnalysis;
 
-namespace RobloxCS
+namespace RobloxCS;
+
+public static class FileUtility
 {
-    public static class FileUtility
+    private const string _runtimeAssemblyName = "Roblox";
+
+    public static string? GetRbxcsDirectory()
     {
-        public static string FixPathSep(string path)
+        var directoryName = Path.GetDirectoryName(GetAssemblyDirectory()); // pretend like this isn't here lol
+        return directoryName == null ? null : FixPathSeparator(directoryName);
+    }
+    
+    public static List<PortableExecutableReference> GetCompilationReferences()
+    {
+        var runtimeLibAssemblyPath = string.Join('/', GetAssemblyDirectory(), _runtimeAssemblyName + ".dll");
+        Console.WriteLine($"Get assembly path: {runtimeLibAssemblyPath}");
+        if (!File.Exists(runtimeLibAssemblyPath))
         {
-            path = Path.TrimEndingDirectorySeparator(path);
-            return Regex.Replace(path.Replace("\\\\", "/").Replace('\\', '/').Replace("//", "/"), @"(?<!\.)\./", "");
+            var directoryName = Path.GetDirectoryName(runtimeLibAssemblyPath);
+            var location = directoryName == null ? "(could not find assembly directory)" : FixPathSeparator(directoryName);
+            Logger.Error($"Failed to find {_runtimeAssemblyName}.dll in {location}");
         }
 
-        public static string? GetRbxcsDirectory()
-        {
-            var directoryName = Path.GetDirectoryName(GetAssemblyDirectory()); // pretend like this isn't here lol
-            return directoryName == null ? null : FixPathSep(directoryName);
-        }
+        List<PortableExecutableReference> references = [
+            MetadataReference.CreateFromFile(runtimeLibAssemblyPath)
+        ];
+        
+        references.AddRange(GetCoreLibReferences());
+        return references;
+    }
 
-        public static string GetAssemblyDirectory()
-        {
-            var location = FixPathSep(Assembly.GetExecutingAssembly().Location);
-            var directoryName = Path.GetDirectoryName(location)!;
-            return FixPathSep(directoryName);
-        }
+    private static HashSet<PortableExecutableReference> GetCoreLibReferences()
+    {
+        var coreLib = typeof(object).GetTypeInfo().Assembly.Location;
+        HashSet<string> coreDlls = ["System.Runtime.dll", "System.Core.dll", "System.Collections.dll"];
+        HashSet<PortableExecutableReference> references = [MetadataReference.CreateFromFile(coreLib)];
 
-        public static List<PortableExecutableReference> GetCompilationReferences()
-        {
-            var runtimeLibAssemblyPath = string.Join('/', GetAssemblyDirectory(), Utility.RuntimeAssemblyName + ".dll");
-            if (!File.Exists(runtimeLibAssemblyPath))
-            {
-                var directoryName = Path.GetDirectoryName(runtimeLibAssemblyPath);
-                Logger.Error($"Failed to find {Utility.RuntimeAssemblyName}.dll in {(directoryName == null ? "(could not find assembly directory)" : FixPathSep(directoryName))}");
-            }
-
-            var references = new List<PortableExecutableReference>()
-            {
-                MetadataReference.CreateFromFile(runtimeLibAssemblyPath)
-            };
-
-            foreach (var coreLibReference in GetCoreLibReferences())
-            {
-                references.Add(coreLibReference);
-            }
-            return references;
-        }
-
-        public static HashSet<PortableExecutableReference> GetCoreLibReferences()
-        {
-            var coreLib = typeof(object).GetTypeInfo().Assembly.Location;
-            HashSet<string> coreDlls = ["System.Runtime.dll", "System.Core.dll", "System.Collections.dll"];
-            HashSet<PortableExecutableReference> references = [MetadataReference.CreateFromFile(coreLib)];
-
-            foreach (var coreDll in coreDlls)
-            {
-                var dllPath = Path.Combine(Path.GetDirectoryName(coreLib)!, coreDll);
-                references.Add(MetadataReference.CreateFromFile(dllPath));
-            }
-            return references;
-        }
+        foreach (var dllPath in coreDlls.Select(coreDll => Path.Combine(Path.GetDirectoryName(coreLib)!, coreDll)))
+            references.Add(MetadataReference.CreateFromFile(dllPath));
+        
+        return references;
+    }
+    private static string FixPathSeparator(string path)
+    {
+        var cleanedPath = Path.TrimEndingDirectorySeparator(path)
+            .Replace(@"\\", "/")
+            .Replace('\\', '/')
+            .Replace("//", "/");
+        
+        return Regex.Replace(cleanedPath, @"(?<!\.)\./", "");
+    }
+    
+    private static string GetAssemblyDirectory()
+    {
+        var location = FixPathSeparator(Assembly.GetExecutingAssembly().Location);
+        var directoryName = Path.GetDirectoryName(location)!;
+        return FixPathSeparator(directoryName);
     }
 }

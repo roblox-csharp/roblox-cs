@@ -43,9 +43,7 @@ namespace RobloxCS.Luau
 
             type ??= Type.GetType(fullyQualifiedName);
             if (type == null)
-            {
                 throw Logger.CodegenError(node, $"Unable to resolve type '{fullyQualifiedName}'.");
-            }
 
             return type;
         }

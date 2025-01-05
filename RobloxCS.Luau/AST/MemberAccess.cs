@@ -1,4 +1,6 @@
-﻿namespace RobloxCS.Luau
+﻿using System.Linq.Expressions;
+
+namespace RobloxCS.Luau
 {
     public class MemberAccess : AssignmentTarget
     {
@@ -8,6 +10,9 @@
 
         public MemberAccess(Expression expression, IdentifierName name, char @operator = '.')
         {
+            Console.WriteLine(expression.ToString());
+            Console.WriteLine(name.ToString());
+
             Expression = expression;
             Operator = @operator;
             Name = name;
@@ -17,7 +22,7 @@
         public override void Render(LuauWriter luau)
         {
             Expression.Render(luau);
-            luau.Write($"{Operator}");
+            luau.Write(Operator);
             Name.Render(luau);
         }
     }
