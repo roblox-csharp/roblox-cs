@@ -4,9 +4,9 @@
     {
         public Name Left { get; }
         public char Operator { get; }
-        public IdentifierName Right { get; }
+        public SimpleName Right { get; }
 
-        public QualifiedName(Name left, IdentifierName right, char @operator = '.')
+        public QualifiedName(Name left, SimpleName right, char @operator = '.')
         {
             Left = left;
             Right = right;

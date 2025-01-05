@@ -17,7 +17,6 @@ public static class FileUtility
     public static List<PortableExecutableReference> GetCompilationReferences()
     {
         var runtimeLibAssemblyPath = string.Join('/', GetAssemblyDirectory(), _runtimeAssemblyName + ".dll");
-        Console.WriteLine($"Get assembly path: {runtimeLibAssemblyPath}");
         if (!File.Exists(runtimeLibAssemblyPath))
         {
             var directoryName = Path.GetDirectoryName(runtimeLibAssemblyPath);

@@ -1,6 +1,6 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class IdentifierName(string text) : Name
+    public class IdentifierName(string text) : SimpleName
     {
         public string Text { get; } = text;
 

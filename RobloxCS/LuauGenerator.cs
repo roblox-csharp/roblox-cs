@@ -1,7 +1,6 @@
 ﻿using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using RobloxCS.Luau;
 
 namespace RobloxCS
 {
@@ -550,7 +549,7 @@ namespace RobloxCS
         public override Luau.Node VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
         {
             var expression = Visit<Luau.Expression>(node.Expression);
-            var name = Visit<Luau.IdentifierName>(node.Name);
+            var name = Visit<Luau.SimpleName>(node.Name);
             var memberAccess = new Luau.MemberAccess(expression, name);
             if (node.Parent is AssignmentExpressionSyntax assignment && assignment.Left == node)
                 return Luau.AstUtility.QualifiedNameFromMemberAccess(memberAccess);
@@ -586,8 +585,8 @@ namespace RobloxCS
                 : name;
         }
 
-        public override Luau.IdentifierName VisitGenericName(GenericNameSyntax node) =>
-            new Luau.IdentifierName(node.Identifier.Text);
+        public override Luau.GenericName VisitGenericName(GenericNameSyntax node) =>
+            new Luau.GenericName(node.Identifier.Text, node.TypeArgumentList.Arguments.Select(typeArg => typeArg.ToString()).ToList());
 
         public override Luau.Break VisitBreakStatement(BreakStatementSyntax node) =>
             new Luau.Break();

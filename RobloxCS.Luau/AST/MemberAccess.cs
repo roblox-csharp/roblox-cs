@@ -6,9 +6,9 @@ namespace RobloxCS.Luau
     {
         public Expression Expression { get; }
         public char Operator { get; set; }
-        public IdentifierName Name { get; }
+        public SimpleName Name { get; }
 
-        public MemberAccess(Expression expression, IdentifierName name, char @operator = '.')
+        public MemberAccess(Expression expression, SimpleName name, char @operator = '.')
         {
             Console.WriteLine(expression.ToString());
             Console.WriteLine(name.ToString());
