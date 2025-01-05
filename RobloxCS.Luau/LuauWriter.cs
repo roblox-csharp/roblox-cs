@@ -137,7 +137,7 @@
             if (node.Parent is not Variable && node is not Argument) {
                 if (node is Assignment assignment)
                 {
-                    node = assignment.Expression;
+                    node = assignment.Target;
                 }
                 else if (node is BinaryOperator binaryOperator && binaryOperator.Operator.Contains('='))
                 {
@@ -153,7 +153,7 @@
             {
                 if (node is Assignment assignment)
                 {
-                    new Variable(original, true, assignment.Expression).Render(this);
+                    new Variable(original, true, assignment.Target).Render(this);
                     new ExpressionStatement(assignment).Render(this);
                     node = original;
                 }
@@ -171,7 +171,7 @@
                 {
                     if (descendant is Assignment assignment)
                     {
-                        new Variable(original, true, assignment.Expression).Render(this);
+                        new Variable(original, true, assignment.Target).Render(this);
                         new ExpressionStatement(assignment).Render(this);
                     }
                     else if (descendant is BinaryOperator binaryOperator && binaryOperator.Operator.Contains('='))

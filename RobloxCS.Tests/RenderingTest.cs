@@ -71,6 +71,22 @@ public class RenderingTest
     }
     
     [Fact]
+    public void Renders_ElementAccess()
+    {
+        var elementAccess = new Luau.ElementAccess(new Luau.IdentifierName("a"), new Luau.Literal("123"));
+        var output = Render(elementAccess);
+        Assert.Equal("a[123]", output);
+    }
+    
+    [Fact]
+    public void Renders_MemberAccess()
+    {
+        var memberAccess = new Luau.MemberAccess(new Luau.IdentifierName("a"), new Luau.IdentifierName("b"));
+        var output = Render(memberAccess);
+        Assert.Equal("a.b", output);
+    }
+    
+    [Fact]
     public void Renders_UnaryOperators()
     {
         var operand = new Luau.IdentifierName("isActive");
@@ -87,6 +103,16 @@ public class RenderingTest
         var binaryOp = new Luau.BinaryOperator(left, "+", right);
         var output = Render(binaryOp);
         Assert.Equal("69 + 420", output);
+    }
+    
+    [Fact]
+    public void Renders_Assignment()
+    {
+        var target = new Luau.ElementAccess(new Luau.IdentifierName("a"), new Luau.Literal("69"));
+        var value = new Luau.Literal("420");
+        var assignment = new Luau.Assignment(target, value);
+        var output = Render(assignment);
+        Assert.Equal("a[69] = 420", output);
     }
     
     [Theory]

@@ -1,6 +1,6 @@
 ﻿namespace RobloxCS.Luau
 {
-    public sealed class ElementAccess : Expression
+    public sealed class ElementAccess : AssignmentTarget
     {
         public Expression Expression { get; }
         public Expression Index { get; set; }

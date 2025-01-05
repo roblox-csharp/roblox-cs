@@ -1,6 +1,6 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class MemberAccess : Expression
+    public class MemberAccess : AssignmentTarget
     {
         public Expression Expression { get; }
         public char Operator { get; set; }

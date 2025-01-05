@@ -476,7 +476,7 @@ namespace RobloxCS
 
         public override Luau.Node VisitAssignmentExpression(AssignmentExpressionSyntax node)
         {
-            var name = Visit<Luau.Expression>(node.Left);
+            var name = Visit<Luau.AssignmentTarget>(node.Left);
             var value = Visit<Luau.Expression>(node.Right);
             if (node.IsKind(SyntaxKind.SimpleAssignmentExpression))
                 return new Luau.Assignment(name, value);
