@@ -4,6 +4,8 @@
 Roblox CSharp to Lua compiler
 
 ## Contributing
+### This section only applies for the `rewrite` branch currently, I will not accept PRs on the `master` branch!
+
 1. [Fork it](https://github.com/roblox-csharp/roblox-cs/fork)
 2. Commit your changes (`git commit -m 'feat: add some feature'`)
 3. Test your code (`dotnet test` or Ctrl + R, A in Visual Studio)
