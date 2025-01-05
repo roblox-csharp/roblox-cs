@@ -511,7 +511,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             return newInstanceCall;
         var macro = _macro.Invocation(Visit, node);
             
-        return new Luau.Call(callee, argumentList);
+        return macro ?? new Luau.Call(callee, argumentList);
     }
 
     public override Luau.ArgumentList VisitArgumentList(ArgumentListSyntax node)
