@@ -11,11 +11,41 @@ public enum MacroKind
     DictionaryConstruction
 }
 
-public static class Macro
+public class Macro(SemanticModel semanticModel)
 {
+    private SemanticModel _semanticModel { get; } = semanticModel;
+    
+    public Name? GenericName(Func<SyntaxNode, Node?> visit, GenericNameSyntax genericName)
+    {
+        var typeInfo = _semanticModel.GetTypeInfo(genericName);
+        if (Utility.IsFromSystemNamespace(typeInfo.Type))
+        {
+            switch (genericName.Identifier.Text)
+            {
+                // lord i am sorry for my sins
+                // returning IdentifierName because when visiting GenericNameSyntax (C#) it expects a Name (luau)
+                
+                case "List":
+                {
+                    var elementTypeName = (IdentifierName)visit(genericName.TypeArgumentList.Arguments.First())!;
+                    return new IdentifierName($"{{ {Utility.GetMappedType(elementTypeName.Text)} }}");
+                }
+                
+                case "Dictionary":
+                {
+                    var keyTypeName = (IdentifierName)visit(genericName.TypeArgumentList.Arguments.First())!;
+                    var valueTypeName = (IdentifierName)visit(genericName.TypeArgumentList.Arguments.Last())!;
+                    return new IdentifierName($"{{ [{Utility.GetMappedType(keyTypeName.Text)}]: {Utility.GetMappedType(valueTypeName.Text)} }}");
+                }
+            }
+        }
+
+        return null;
+    }
+    
     /// <summary>Takes a C# member access and expands the macro into a Luau expression</summary>
     /// <returns>The expanded expression of the macro, or null if no macro was applied</returns>
-    public static Expression? MemberAccess(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess)
+    public Expression? MemberAccess(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess)
     {
         if (memberAccess is
             {
@@ -39,8 +69,9 @@ public static class Macro
         return null;
     }
 
-    // TODO: Emit types when constructing Lists and Dictionaries?
-    public static Expression? ObjectCreation(Func<SyntaxNode, Node?> visit, ObjectCreationExpressionSyntax objectCreation) {
+    /// <summary>Takes a C# object creation and expands the macro into a Luau expression</summary>
+    /// <returns>The expanded expression of the macro, or null if no macro was applied</returns>
+    public Expression? ObjectCreation(Func<SyntaxNode, Node?> visit, ObjectCreationExpressionSyntax objectCreation) {
         if (objectCreation.Type is GenericNameSyntax genericName) {
             switch (genericName.Identifier.Text) {
                 case "List":

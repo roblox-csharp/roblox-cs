@@ -293,15 +293,6 @@ namespace RobloxCS.Luau
                 .Skip(1)
                 .Aggregate(expression, (current, piece) => new QualifiedName(current, new IdentifierName(piece)));
         }
-
-        public static SimpleName CreateSimpleName(SyntaxNode node, bool registerIdentifier = false,
-            bool bypassReserved = false)
-        {
-            foreach (var name in Utility.GetNamesFromNode(node))
-                Console.WriteLine(name);
-            
-            return CreateSimpleName(node, string.Join("", Utility.GetNamesFromNode(node)), registerIdentifier, bypassReserved);
-        }
         
         public static TNameNode CreateSimpleName<TNameNode>(SyntaxNode node, bool registerIdentifier = false, bool bypassReserved = false) 
             where TNameNode : SimpleName
@@ -314,6 +305,15 @@ namespace RobloxCS.Luau
         {
             return (TNameNode)CreateSimpleName(node, name, registerIdentifier, bypassReserved);
         }
+        
+        public static SimpleName CreateSimpleName(SyntaxNode node, bool registerIdentifier = false,
+            bool bypassReserved = false)
+        {
+            foreach (var name in Utility.GetNamesFromNode(node))
+                Console.WriteLine(name);
+            
+            return CreateSimpleName(node, string.Join("", Utility.GetNamesFromNode(node)), registerIdentifier, bypassReserved);
+        }
 
         public static SimpleName CreateSimpleName(SyntaxNode node, string name, bool registerIdentifier = false, bool bypassReserved = false)
         {
@@ -322,11 +322,11 @@ namespace RobloxCS.Luau
 
             var text = registerIdentifier ? FixIdentifierNameText(node, name, registerIdentifier) : name;
             return name.Contains('<') && name.Contains('>')
-                    ? new Luau.GenericName(text.Split('<').First(), ExtractTypeArguments(text))
-                    : new Luau.IdentifierName(text);
+                    ? new GenericName(text.Split('<').First(), Utility.ExtractTypeArguments(text))
+                    : new IdentifierName(text);
         }
 
-        // TODO: reference the correct identifier names
+        // TODO: per-scope duplicate handling
         public static string FixIdentifierNameText(SyntaxNode node, string name, bool registerIdentifier = false)
         {
             _identifierDeclarations.TryAdd(node.SyntaxTree.FilePath, []);
@@ -348,7 +348,7 @@ namespace RobloxCS.Luau
             return name;
         }
 
-        public static TypeRef? CreateTypeRef(string typePath)
+        public static TypeRef? CreateTypeRef(string? typePath)
         {
             switch (typePath)
             {
@@ -379,14 +379,6 @@ namespace RobloxCS.Luau
 
         public static TypeRef AnyType() => new("any");
         
-        static List<string> ExtractTypeArguments(string input)
-        {
-            var match = Regex.Match(input, @"<([^>]+)>");
-            if (!match.Success)
-                return [];
-            
-            var arguments = match.Groups[1].Value.Split(',');
-            return arguments.Select(arg => arg.Trim()).ToList();
-        }
+        
     }
 }

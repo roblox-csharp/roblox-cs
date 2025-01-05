@@ -107,23 +107,23 @@ namespace RobloxCS.Luau
                     return op;
             }
         }
-
+        
+        public static bool IsFromSystemNamespace(ISymbol? typeSymbol)
+        {
+            if (typeSymbol is not { ContainingNamespace: not null })
+                return false;
+            
+            return typeSymbol.ContainingNamespace.Name == "System" || IsFromSystemNamespace(typeSymbol.ContainingNamespace);
+        }
+        
         public static List<string> ExtractTypeArguments(string input)
         {
-            var typeArguments = new List<string>();
-            var regex = new Regex(@"<(?<args>[^<>]+)>");
-            var match = regex.Match(input);
-            if (match.Success)
-            {
-                var args = match.Groups["args"].Value;
-                var argsArray = args.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (var arg in argsArray)
-                {
-                    typeArguments.Add(arg.Trim());
-                }
-            }
-
-            return typeArguments;
+            var match = Regex.Match(input, @"<([^>]+)>");
+            if (!match.Success)
+                return [];
+            
+            var arguments = match.Groups[1].Value.Split(',');
+            return arguments.Select(arg => arg.Trim()).ToList();
         }
 
         public static List<string> GetNamesFromNode(SyntaxNode? node)
