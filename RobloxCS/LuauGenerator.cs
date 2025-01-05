@@ -507,11 +507,19 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             memberAccess.Operator = methodSymbolInfo.Symbol!.IsStatic ? '.' : ':';
 
         var argumentList = Visit<Luau.ArgumentList>(node.ArgumentList);
-        if (callee.ExpandedByMacro == MacroKind.NewInstance && callee is Luau.Call newInstanceCall)
-            return newInstanceCall;
-        var macro = _macro.Invocation(Visit, node);
-            
-        return macro ?? new Luau.Call(callee, argumentList);
+        List<MacroKind> returnCalleeMacroKinds =
+        [
+            MacroKind.NewInstance,
+            MacroKind.IEnumerableMethod,
+            MacroKind.ListMethod,
+            MacroKind.DictionaryMethod
+        ];
+        
+        // dumb ass hack bc null warning suppression doesn't work here for some reason
+        if (callee.ExpandedByMacro != null && returnCalleeMacroKinds.Contains((MacroKind)callee.ExpandedByMacro))
+            return callee;
+        
+        return new Luau.Call(callee, argumentList);
     }
 
     public override Luau.ArgumentList VisitArgumentList(ArgumentListSyntax node)
@@ -584,7 +592,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             luauNode = Luau.AstUtility.QualifiedNameFromMemberAccess(memberAccess);
             
         var expandedExpression = _macro.MemberAccess(Visit, node);
-        if (expandedExpression is not null)
+        if (expandedExpression != null)
             luauNode = expandedExpression;
             
         return luauNode;

@@ -10,7 +10,10 @@ public enum MacroKind
     ListConstruction,
     DictionaryConstruction,
     IEnumerableType,
-    DictionaryType
+    DictionaryType,
+    IEnumerableMethod,
+    ListMethod,
+    DictionaryMethod
 }
 
 public class Macro(SemanticModel semanticModel)
@@ -25,7 +28,7 @@ public class Macro(SemanticModel semanticModel)
             switch (genericName.Identifier.Text)
             {
                 // lord i am sorry for my sins
-                // returning IdentifierName because when visiting GenericNameSyntax (C#) it expects a Name (luau)
+                // returning IdentifierName because when visiting GenericNameSyntax (C#) it expects that a Name (luau) is returned
                 
                 case "List":
                 case "IEnumerable":
@@ -56,23 +59,51 @@ public class Macro(SemanticModel semanticModel)
     /// <returns>The expanded expression of the macro, or null if no macro was applied</returns>
     public Expression? MemberAccess(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess)
     {
-        if (memberAccess is
-            {
-                Parent: InvocationExpressionSyntax invocation,
-                Name: GenericNameSyntax { Identifier.Text: "Create" } genericName
-            })
+        var expressionType = _semanticModel.GetTypeInfo(memberAccess.Expression).Type;
         {
-            var className = genericName.TypeArgumentList.Arguments.First().ToString();
-            var instanceConstructor = new MemberAccess(new IdentifierName("Instance"), new IdentifierName("new"));
+            if (memberAccess is
+                {
+                    Parent: InvocationExpressionSyntax invocation,
+                    Expression: IdentifierNameSyntax { Identifier.Text: "Instance" },
+                    Name: GenericNameSyntax { Identifier.Text: "Create" } genericName
+                } &&
+                expressionType?.ContainingNamespace.Name == "Roblox")
+            {
+                var className = genericName.TypeArgumentList.Arguments.First().ToString();
+                var instanceConstructor = new MemberAccess(new IdentifierName("Instance"), new IdentifierName("new"));
             
-            List<Argument> arguments = [new(new Literal($"\"{className}\""))];
-            var invocationArguments = (ArgumentList)visit(invocation.ArgumentList)!;
-            arguments.AddRange(invocationArguments.Arguments);
+                List<Argument> arguments = [new(new Literal($"\"{className}\""))];
+                var invocationArguments = (ArgumentList)visit(invocation.ArgumentList)!;
+                arguments.AddRange(invocationArguments.Arguments);
             
-            var expanded = new Call(instanceConstructor, new ArgumentList(arguments));
-            expanded.MarkExpanded(MacroKind.NewInstance);
+                var expanded = new Call(instanceConstructor, new ArgumentList(arguments));
+                expanded.MarkExpanded(MacroKind.NewInstance);
             
-            return expanded;
+                return expanded;
+            }
+        }
+        {
+            if (memberAccess is { Parent: InvocationExpressionSyntax invocation })
+            {
+                switch (expressionType?.Name)
+                {
+                    case "Dictionary":
+                    {
+                        if (DictionaryMethod(visit, memberAccess, invocation, out var expanded))
+                            return expanded;
+                        
+                        break;
+                    }
+
+                    case "List":
+                    {
+                        if (ListMethod(visit, memberAccess, invocation, out var expanded))
+                            return expanded;
+                        
+                        break;
+                    }
+                }
+            }
         }
 
         return null;
@@ -81,6 +112,7 @@ public class Macro(SemanticModel semanticModel)
     /// <summary>Takes a C# object creation and expands the macro into a Luau expression</summary>
     /// <returns>The expanded expression of the macro, or null if no macro was applied</returns>
     public Expression? ObjectCreation(Func<SyntaxNode, Node?> visit, ObjectCreationExpressionSyntax objectCreation) {
+        // generic objects
         if (objectCreation.Type is GenericNameSyntax genericName) {
             switch (genericName.Identifier.Text) {
                 case "List":
@@ -97,19 +129,29 @@ public class Macro(SemanticModel semanticModel)
                         var keys = new List<Expression>();
 
                         if (objectCreation.Initializer != null) {
-                            foreach (var expression in objectCreation.Initializer.Expressions) {
-                                if (expression is AssignmentExpressionSyntax assignmentExpression) {
-                                    var key = (Expression)visit(assignmentExpression.Left)!;
-                                    var value = (Expression)visit(assignmentExpression.Right)!;
+                            foreach (var expression in objectCreation.Initializer.Expressions)
+                            {
+                                switch (expression)
+                                {
+                                    case AssignmentExpressionSyntax assignmentExpression:
+                                    {
+                                        var key = (Expression)visit(assignmentExpression.Left)!;
+                                        var value = (Expression)visit(assignmentExpression.Right)!;
 
-                                    values.Add(value);
-                                    keys.Add(key);
-                                } else if (expression is InitializerExpressionSyntax initializerExpression) {
-                                    var key = (Expression)visit(initializerExpression.Expressions[0])!;
-                                    var value = (Expression)visit(initializerExpression.Expressions[1])!;
+                                        values.Add(value);
+                                        keys.Add(key);
+                                        break;
+                                    }
+                                    
+                                    case InitializerExpressionSyntax initializerExpression:
+                                    {
+                                        var key = (Expression)visit(initializerExpression.Expressions[0])!;
+                                        var value = (Expression)visit(initializerExpression.Expressions[1])!;
 
-                                    values.Add(value);
-                                    keys.Add(key);
+                                        values.Add(value);
+                                        keys.Add(key);
+                                        break;
+                                    }
                                 }
                             }
                         }
@@ -124,23 +166,47 @@ public class Macro(SemanticModel semanticModel)
 
         return null;
     }
+    
+    /// <summary>Macros <see cref="List"/> methods</summary>
+    private static bool ListMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
+        InvocationExpressionSyntax invocation, out Expression? expanded)
+    {
+        switch (memberAccess.Name.Identifier.Text) {
+            case "Add": {
+                var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
+                var self = (Expression)visit(memberAccess.Expression)!;
+                arguments.Arguments.Insert(0, new Argument(self));
+                                
+                expanded = new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("insert")), arguments);
+                expanded.MarkExpanded(MacroKind.ListMethod);
 
-    public Node? Invocation(Func<SyntaxNode, Node?> visit, InvocationExpressionSyntax node) {
-        if (node.Expression.Kind().ToString() == "SimpleMemberAccessExpression") { // TODO: Replace this cursed method when possible
-            var typeName = _semanticModel.GetTypeInfo(node.Expression).ToString();
-            var memberAccess = (MemberAccessExpressionSyntax)node.Expression;
-                if (typeName == "Dictionary") {
-                    switch (memberAccess.Name.Identifier.Text) {
-                        case "Add": {
-                                var arguments = (ArgumentList)visit(node.ArgumentList)!;
-                                arguments.Arguments.Insert(0, new Argument(new IdentifierName(node.Expression.ToString())));
-                                return new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("insert")), arguments);
-                            }
-                    }
-                } else if (typeName == "List") {
-                    
-                }
+                return true;
+            }
         }
-        return null;
+
+        expanded = null;
+        return false;
+    }
+
+    /// <summary>Macros <see cref="Dictionary"/> methods</summary>
+    private static bool DictionaryMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
+        InvocationExpressionSyntax invocation, out Expression? expanded)
+    {
+        switch (memberAccess.Name.Identifier.Text) {
+            case "Add": {
+                var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
+                var self = (Expression)visit(memberAccess.Expression)!;
+                var key = arguments.Arguments.First().Expression;
+                var value = arguments.Arguments.Last().Expression;
+                                
+                expanded = new Assignment(new ElementAccess(self, key), value);
+                expanded.MarkExpanded(MacroKind.DictionaryMethod);
+
+                return true;
+            }
+        }
+
+        expanded = null;
+        return false;
     }
 }

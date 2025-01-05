@@ -306,12 +306,8 @@ namespace RobloxCS.Luau
             return (TNameNode)CreateSimpleName(node, name, registerIdentifier, bypassReserved);
         }
         
-        public static SimpleName CreateSimpleName(SyntaxNode node, bool registerIdentifier = false,
-            bool bypassReserved = false)
+        public static SimpleName CreateSimpleName(SyntaxNode node, bool registerIdentifier = false,bool bypassReserved = false)
         {
-            foreach (var name in Utility.GetNamesFromNode(node))
-                Console.WriteLine(name);
-            
             return CreateSimpleName(node, string.Join("", Utility.GetNamesFromNode(node)), registerIdentifier, bypassReserved);
         }
 
