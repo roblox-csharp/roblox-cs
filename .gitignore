@@ -1,6 +1,8 @@
 .vs/
 .idea/
-**/Properties
+Properties/
+
+*.DotSettings.user
 test.cs
 
 obj/
