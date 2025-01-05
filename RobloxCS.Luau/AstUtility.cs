@@ -248,8 +248,13 @@ namespace RobloxCS.Luau
                 .Aggregate(expression, (current, piece) => new QualifiedName(current, new IdentifierName(piece)));
         }
 
-        public static IdentifierName CreateIdentifierName(SyntaxNode node, bool registerIdentifier = false, bool bypassReserved = false) =>
-            CreateIdentifierName(node, Utility.GetNamesFromNode(node).First(), registerIdentifier, bypassReserved);
+        public static IdentifierName CreateIdentifierName(SyntaxNode node, bool registerIdentifier = false,
+            bool bypassReserved = false)
+        {
+            foreach (var name in Utility.GetNamesFromNode(node))
+                Console.WriteLine(name);
+            return CreateIdentifierName(node, string.Join("", Utility.GetNamesFromNode(node)), registerIdentifier, bypassReserved);
+        }
 
         public static IdentifierName CreateIdentifierName(SyntaxNode node, string name, bool registerIdentifier = false, bool bypassReserved = false)
         {
