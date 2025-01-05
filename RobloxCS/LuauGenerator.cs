@@ -488,8 +488,9 @@ namespace RobloxCS
             var argumentList = Visit<Luau.ArgumentList>(node.ArgumentList);
             if (callee.ExpandedByMacro == MacroKind.NewInstance && callee is Luau.Call newInstanceCall)
                 return newInstanceCall;
+            var macro = Macro.Invocation(Visit, node, _semanticModel);
             
-            return new Luau.Call(callee, argumentList);
+            return macro != null ? macro : new Luau.Call(callee, argumentList);
         }
 
         public override Luau.ArgumentList VisitArgumentList(ArgumentListSyntax node)
