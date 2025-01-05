@@ -1,15 +1,10 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class TableInitializer : Expression
+    public class TableInitializer(List<Expression>? values = null, List<Expression>? keys = null)
+        : Expression
     {
-        public List<Expression> Values { get; }
-        public List<Expression> Keys { get; }
-
-        public TableInitializer(List<Expression>? values = null, List<Expression>? keys = null)
-        {
-            Values = values ?? [];
-            Keys = keys ?? [];
-        }
+        public List<Expression> Values { get; } = values ?? [];
+        public List<Expression> Keys { get; } = keys ?? [];
 
         public override void Render(LuauWriter luau)
         {
@@ -21,6 +16,7 @@
                 luau.WriteLine();
                 luau.PushIndent();
             }
+            
             foreach (var value in Values)
             {
                 var index = Values.IndexOf(value);
@@ -40,24 +36,21 @@
                 }
 
                 value.Render(luau);
-                if (value != Values.Last())
-                {
-                    luau.Write(',');
-                    if (hasAnyKeys && value is not AnonymousFunction)
-                    {
-                        luau.WriteLine();
-                    }
-                    else
-                    {
-                        luau.Write(' ');
-                    }
-                }
+                if (value == Values.Last()) continue;
+                
+                luau.Write(',');
+                if (hasAnyKeys && value is not AnonymousFunction)
+                    luau.WriteLine();
+                else
+                    luau.Write(' ');
             }
+            
             if (hasAnyKeys)
             { 
                 luau.PopIndent();
                 luau.WriteLine();
             }
+            
             luau.Write('}');
         }
     }

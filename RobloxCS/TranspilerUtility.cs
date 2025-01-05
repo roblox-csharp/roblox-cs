@@ -19,7 +19,6 @@ public static class TranspilerUtility
     public static CSharpCompilation GetCompiler(List<SyntaxTree> trees, ConfigData? config = null)
     {
         // config ??= ConfigReader.UnitTestingConfig;
-        config ??= new ConfigData();
         
         var compilationOptions = new CSharpCompilationOptions(OutputKind.ConsoleApplication);
         return CSharpCompilation.Create(

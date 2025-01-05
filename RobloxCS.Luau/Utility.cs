@@ -107,64 +107,73 @@ namespace RobloxCS.Luau
                     return op;
             }
         }
-
+        
+        public static bool IsFromSystemNamespace(ISymbol? typeSymbol)
+        {
+            if (typeSymbol is not { ContainingNamespace: not null })
+                return false;
+            
+            return typeSymbol.ContainingNamespace.Name == "System" || IsFromSystemNamespace(typeSymbol.ContainingNamespace);
+        }
+        
         public static List<string> ExtractTypeArguments(string input)
         {
-            var typeArguments = new List<string>();
-            var regex = new Regex(@"<(?<args>[^<>]+)>");
-            var match = regex.Match(input);
-            if (match.Success)
-            {
-                var args = match.Groups["args"].Value;
-                var argsArray = args.Split(new[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (var arg in argsArray)
-                {
-                    typeArguments.Add(arg.Trim());
-                }
-            }
-
-            return typeArguments;
+            var match = Regex.Match(input, @"<([^>]+)>");
+            if (!match.Success)
+                return [];
+            
+            var arguments = match.Groups[1].Value.Split(',');
+            return arguments.Select(arg => arg.Trim()).ToList();
         }
 
         public static List<string> GetNamesFromNode(SyntaxNode? node)
         {
             if (node is BaseExpressionSyntax baseExpression)
-            {
                 return [""];
-            }
 
-            var names = new List<string>();
-            if (node == null) return names;
+            List<string> names = [];
+            if (node == null)
+                return names;
+
+            List<string> addGenerics(List<string> currentNames)
+            {
+                var typeParametersProperty = node.GetType().GetProperty("TypeParameterList");
+                var typeParametersValue = typeParametersProperty?.GetValue(node);
+                if (typeParametersProperty != null && typeParametersValue is TypeParameterListSyntax typeParameterList)
+                    return currentNames.Append('<' + string.Join(", ", typeParameterList.Parameters.Select(p => GetNamesFromNode(p).First())) + '>').ToList();
+                
+                return currentNames;
+            }
+            
+            var nameProperty = node.GetType().GetProperty("Name");
+            var nameValue = nameProperty?.GetValue(node);
+            if (nameProperty != null && nameValue is NameSyntax nameNode)
+                return GetNamesFromNode(nameNode);
 
             var identifierProperty = node.GetType().GetProperty("Identifier");
             var identifierValue = identifierProperty?.GetValue(node);
-            if (identifierProperty != null && identifierValue != null && identifierValue is SyntaxToken)
+            if (identifierProperty != null && identifierValue is SyntaxToken token)
             {
-                names.Add(((SyntaxToken)identifierValue).ValueText.Trim());
-                return names;
+                names.Add(token.ValueText.Trim());
+                return addGenerics(names);
             }
 
-            var childNodes = node.ChildNodes();
-            var qualifiedNameNodes = node.IsKind(SyntaxKind.QualifiedName) ? [(QualifiedNameSyntax)node] : childNodes.OfType<QualifiedNameSyntax>();
-            var identifierNameNodes = node.IsKind(SyntaxKind.IdentifierName) ? [(IdentifierNameSyntax)node] : childNodes.OfType<IdentifierNameSyntax>();
+            var childNodes = node.ChildNodes().ToList();
+            var qualifiedNameNodes = node is QualifiedNameSyntax qualifiedName
+                ? [qualifiedName]
+                : childNodes.OfType<QualifiedNameSyntax>();
+            var simpleNameNodes = node is SimpleNameSyntax simpleName
+                ? [simpleName]
+                : childNodes.OfType<SimpleNameSyntax>();
+            
             foreach (var qualifiedNameNode in qualifiedNameNodes)
             {
-                foreach (var name in GetNamesFromNode(qualifiedNameNode.Left))
-                {
-                    names.Add(name.Trim());
-                }
-                foreach (var name in GetNamesFromNode(qualifiedNameNode.Right))
-                {
-                    names.Add(name.Trim());
-                }
+                names.AddRange(GetNamesFromNode(qualifiedNameNode.Left).Select(name => name.Trim()));
+                names.AddRange(GetNamesFromNode(qualifiedNameNode.Right).Select(name => name.Trim()));
             }
 
-            foreach (var identifierNameNode in identifierNameNodes)
-            {
-                names.Add(identifierNameNode.Identifier.ValueText.Trim());
-            }
-
-            return names;
+            names.AddRange(simpleNameNodes.Select(simpleNameNode => simpleNameNode.ToString().Trim()));
+            return addGenerics(names);
         }
     }
 }

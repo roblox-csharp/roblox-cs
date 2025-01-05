@@ -8,14 +8,53 @@ public enum MacroKind
 {
     NewInstance,
     ListConstruction,
-    DictionaryConstruction
+    DictionaryConstruction,
+    IEnumerableType,
+    DictionaryType
 }
 
-public static class Macro
+public class Macro(SemanticModel semanticModel)
 {
+    private SemanticModel _semanticModel { get; } = semanticModel;
+    
+    public Name? GenericName(Func<SyntaxNode, Node?> visit, GenericNameSyntax genericName)
+    {
+        var typeInfo = _semanticModel.GetTypeInfo(genericName);
+        if (Utility.IsFromSystemNamespace(typeInfo.Type))
+        {
+            switch (genericName.Identifier.Text)
+            {
+                // lord i am sorry for my sins
+                // returning IdentifierName because when visiting GenericNameSyntax (C#) it expects a Name (luau)
+                
+                case "List":
+                case "IEnumerable":
+                {
+                    var elementTypeName = (IdentifierName)visit(genericName.TypeArgumentList.Arguments.First())!;
+                    var expanded = new IdentifierName($"{{ {Utility.GetMappedType(elementTypeName.Text)} }}");
+                    expanded.MarkExpanded(MacroKind.IEnumerableType);
+                    
+                    return expanded;
+                }
+                
+                case "Dictionary":
+                {
+                    var keyTypeName = (IdentifierName)visit(genericName.TypeArgumentList.Arguments.First())!;
+                    var valueTypeName = (IdentifierName)visit(genericName.TypeArgumentList.Arguments.Last())!;
+                    var expanded = new IdentifierName($"{{ [{Utility.GetMappedType(keyTypeName.Text)}]: {Utility.GetMappedType(valueTypeName.Text)} }}");
+                    expanded.MarkExpanded(MacroKind.DictionaryType);
+                    
+                    return expanded;
+                }
+            }
+        }
+
+        return null;
+    }
+    
     /// <summary>Takes a C# member access and expands the macro into a Luau expression</summary>
     /// <returns>The expanded expression of the macro, or null if no macro was applied</returns>
-    public static Expression? MemberAccess(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess)
+    public Expression? MemberAccess(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess)
     {
         if (memberAccess is
             {
@@ -39,18 +78,20 @@ public static class Macro
         return null;
     }
 
-    // TODO: Emit types when constructing Lists and Dictionaries?
-    public static Expression? ObjectCreation(Func<SyntaxNode, Node?> visit, ObjectCreationExpressionSyntax objectCreation) {
+    /// <summary>Takes a C# object creation and expands the macro into a Luau expression</summary>
+    /// <returns>The expanded expression of the macro, or null if no macro was applied</returns>
+    public Expression? ObjectCreation(Func<SyntaxNode, Node?> visit, ObjectCreationExpressionSyntax objectCreation) {
         if (objectCreation.Type is GenericNameSyntax genericName) {
             switch (genericName.Identifier.Text) {
-                case "List": {
-                        if (objectCreation.Initializer == null)
-                            return new TableInitializer();
-
-                        var table = new Luau.TableInitializer(objectCreation.Initializer.Expressions.ToList().ConvertAll((expression) => (Expression)visit(expression)!)!);
-                        table.MarkExpanded(MacroKind.ListConstruction);
-                        return table;
-                    }
+                case "List":
+                {
+                    var expressions = objectCreation.Initializer?.Expressions.Select(expression => (Expression)visit(expression)!).ToList();
+                    var table = new TableInitializer(expressions ?? []);
+                    table.MarkExpanded(MacroKind.ListConstruction);
+                    
+                    return table;
+                }
+                
                 case "Dictionary": {
                         var values = new List<Expression>();
                         var keys = new List<Expression>();
@@ -58,7 +99,7 @@ public static class Macro
                         if (objectCreation.Initializer != null) {
                             foreach (var expression in objectCreation.Initializer.Expressions) {
                                 if (expression is AssignmentExpressionSyntax assignmentExpression) {
-                                           var key = new IdentifierName(assignmentExpression.Left.ToString()); // Visiting didn't seem to work here
+                                    var key = (Expression)visit(assignmentExpression.Left)!;
                                     var value = (Expression)visit(assignmentExpression.Right)!;
 
                                     values.Add(value);
@@ -84,9 +125,9 @@ public static class Macro
         return null;
     }
 
-    public static Node? Invocation(Func<SyntaxNode, Node?> visit, InvocationExpressionSyntax node, SemanticModel semanticModel) {
+    public Node? Invocation(Func<SyntaxNode, Node?> visit, InvocationExpressionSyntax node) {
         if (node.Expression.Kind().ToString() == "SimpleMemberAccessExpression") { // TODO: Replace this cursed method when possible
-            var typeName = semanticModel.GetTypeInfo(node.Expression).ToString();
+            var typeName = _semanticModel.GetTypeInfo(node.Expression).ToString();
             var memberAccess = (MemberAccessExpressionSyntax)node.Expression;
                 if (typeName == "Dictionary") {
                     switch (memberAccess.Name.Identifier.Text) {

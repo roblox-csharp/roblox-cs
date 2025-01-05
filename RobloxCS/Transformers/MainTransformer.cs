@@ -27,8 +27,6 @@ public sealed class MainTransformer(SyntaxTree tree, ConfigData config) : BaseTr
     public override SyntaxNode? VisitFileScopedNamespaceDeclaration(FileScopedNamespaceDeclarationSyntax node) =>
         VisitNamespaceDeclaration(SyntaxFactory.NamespaceDeclaration(node.AttributeLists, node.Modifiers, node.Name, node.Externs, node.Usings, node.Members));
     
-    public override SyntaxNode? VisitGlobalStatement(GlobalStatementSyntax node) => base.VisitGlobalStatement(node);
-    
     // Return an IsPatternExpression if the binary operator is `is`
     public override SyntaxNode? VisitBinaryExpression(BinaryExpressionSyntax node)
     {
@@ -73,7 +71,7 @@ public sealed class MainTransformer(SyntaxTree tree, ConfigData config) : BaseTr
                 SyntaxKind.SimpleMemberAccessExpression, expression, memberBinding.Name
             ),
             
-            // dumb hacky nested switch
+            // dumb nested switch
             InvocationExpressionSyntax invocation => invocation.WithExpression((invocation.Expression switch
             {
                 MemberAccessExpressionSyntax memberAccess => SyntaxFactory.MemberAccessExpression(
@@ -94,10 +92,8 @@ public sealed class MainTransformer(SyntaxTree tree, ConfigData config) : BaseTr
             })!),
             
             ConditionalAccessExpressionSyntax conditionalAccess => conditionalAccess
-                .WithExpression(ProcessWhenNotNull(expression, conditionalAccess.Expression) ??
-                                conditionalAccess.Expression)
-                .WithWhenNotNull(ProcessWhenNotNull(expression, conditionalAccess.WhenNotNull) ??
-                                 conditionalAccess.WhenNotNull),
+                .WithExpression(ProcessWhenNotNull(expression, conditionalAccess.Expression) ?? conditionalAccess.Expression)
+                .WithWhenNotNull(ProcessWhenNotNull(expression, conditionalAccess.WhenNotNull) ?? conditionalAccess.WhenNotNull),
             
             _ => null
         };

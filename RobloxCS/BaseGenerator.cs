@@ -8,8 +8,8 @@ namespace RobloxCS.Luau
     /// <summary>Basically just defines utility methods for LuauGenerator</summary>
     public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharpSyntaxVisitor<Node>
     {
-        protected readonly SyntaxTree _tree = tree;
-        protected readonly SemanticModel _semanticModel = compiler.GetSemanticModel(tree);
+        protected SyntaxTree _tree { get; } = tree;
+        protected SemanticModel _semanticModel { get; } = compiler.GetSemanticModel(tree);
 
         private readonly HashSet<SyntaxKind> multiLineCommentSyntaxes = [
             SyntaxKind.MultiLineCommentTrivia,
@@ -32,13 +32,13 @@ namespace RobloxCS.Luau
             Type? type;
             using (var memoryStream = new MemoryStream())
             {
-                var result = _semanticModel.Compilation.Emit(memoryStream);
+                _semanticModel.Compilation.Emit(memoryStream);
 
                 memoryStream.Seek(0, SeekOrigin.Begin);
                 var assembly = Assembly.Load(memoryStream.ToArray());
 
                 // get the type from the loaded assembly
-                type = assembly.GetType(fullyQualifiedName)!;
+                type = assembly.GetType(fullyQualifiedName);
             }
 
             type ??= Type.GetType(fullyQualifiedName);
@@ -48,9 +48,13 @@ namespace RobloxCS.Luau
             return type;
         }
 
+        /// <summary>
+        /// Generates a Luau class constructor from a C# class declaration
+        /// </summary>
         protected Function GenerateConstructor(ClassDeclarationSyntax classDeclaration, ParameterList parameterList, Block? body = null, List<AttributeList>? attributeLists = null)
         {
-            var className = AstUtility.CreateIdentifierName(classDeclaration);
+            var className = AstUtility.CreateSimpleName(classDeclaration);
+            var nonGenericName = AstUtility.GetNonGenericName(className);
             body ??= new Block([]);
 
             // visit fields/properties being assigned a value outside the constructor (aka non-static & with initializers)
@@ -72,7 +76,7 @@ namespace RobloxCS.Luau
                         new Assignment(
                             new MemberAccess(
                                 new IdentifierName("self"),
-                                AstUtility.CreateIdentifierName(declarator)
+                                AstUtility.CreateSimpleName(declarator)
                             ),
                             initializer
                         )
@@ -89,7 +93,7 @@ namespace RobloxCS.Luau
                     new Assignment(
                         new MemberAccess(
                             new IdentifierName("self"),
-                            AstUtility.CreateIdentifierName(property)
+                            AstUtility.CreateSimpleName(property)
                         ),
                         initializer
                     )
@@ -101,7 +105,7 @@ namespace RobloxCS.Luau
                 body.Statements.Add(new Return(AstUtility.Nil()));
 
             return new Function(
-                new AssignmentFunctionName(className, className, ':'),
+                new AssignmentFunctionName(nonGenericName, className, ':'),
                 false,
                 parameterList,
                 new OptionalType(AstUtility.CreateTypeRef(className.ToString())!),

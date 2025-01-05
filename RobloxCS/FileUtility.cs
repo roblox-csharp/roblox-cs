@@ -43,6 +43,7 @@ public static class FileUtility
         
         return references;
     }
+    
     private static string FixPathSeparator(string path)
     {
         var cleanedPath = Path.TrimEndingDirectorySeparator(path)

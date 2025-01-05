@@ -3,12 +3,16 @@ using Microsoft.CodeAnalysis.CSharp;
 
 namespace RobloxCS;
 
-public class Transpiler
+/// <summary>
+/// This class contains everything needed to transpile C# to Luau.
+/// In the future this class will not be static and will take in C# source files as well as ConfigData.
+/// </summary>
+public static class Transpiler
 {
     private const string _includeFolderName = "Include";
     private static readonly HashSet<string> _ignoredDiagnostics =
     [
-        "CS5001"
+        "CS5001" // more than 2 entry points
     ];
 
     public static string Transpile(string source)
