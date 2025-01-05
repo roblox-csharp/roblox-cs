@@ -14,8 +14,6 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
-      - name: Add nuget.org source to NuGet
-        run: dotnet nuget add source https://api.nuget.org/v3/index.json -n nuget.org
       - name: Add RobloxCS GitHub packages source to NuGet
         run: dotnet nuget add source --store-password-in-clear-text -u roblox-csharp -p ${{ secrets.GITHUB_TOKEN }} -n rbxcs "https://nuget.pkg.github.com/roblox-csharp/index.json"
       - name: Test
