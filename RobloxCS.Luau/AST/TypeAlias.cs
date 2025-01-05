@@ -2,10 +2,10 @@
 {
     public sealed class TypeAlias : Statement
     {
-        public IdentifierName Name { get; }
+        public SimpleName Name { get; }
         public TypeRef Type { get; }
 
-        public TypeAlias(IdentifierName name, TypeRef type)
+        public TypeAlias(SimpleName name, TypeRef type)
         {
             Name = name;
             Type = type;

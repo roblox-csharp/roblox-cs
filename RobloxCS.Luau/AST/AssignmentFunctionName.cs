@@ -4,9 +4,9 @@
     {
         public Name Left { get; }
         public char Operator { get; set; }
-        public IdentifierName Right { get; }
+        public SimpleName Right { get; }
 
-        public AssignmentFunctionName(Name left, IdentifierName right, char @operator = '.')
+        public AssignmentFunctionName(Name left, SimpleName right, char @operator = '.')
         {
             Left = left;
             Right = right;

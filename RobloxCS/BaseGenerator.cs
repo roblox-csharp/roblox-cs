@@ -50,7 +50,8 @@ namespace RobloxCS.Luau
 
         protected Function GenerateConstructor(ClassDeclarationSyntax classDeclaration, ParameterList parameterList, Block? body = null, List<AttributeList>? attributeLists = null)
         {
-            var className = AstUtility.CreateIdentifierName(classDeclaration);
+            var className = AstUtility.CreateSimpleName(classDeclaration);
+            var nonGenericName = AstUtility.GetNonGenericName(className);
             body ??= new Block([]);
 
             // visit fields/properties being assigned a value outside the constructor (aka non-static & with initializers)
@@ -72,7 +73,7 @@ namespace RobloxCS.Luau
                         new Assignment(
                             new MemberAccess(
                                 new IdentifierName("self"),
-                                AstUtility.CreateIdentifierName(declarator)
+                                AstUtility.CreateSimpleName(declarator)
                             ),
                             initializer
                         )
@@ -89,7 +90,7 @@ namespace RobloxCS.Luau
                     new Assignment(
                         new MemberAccess(
                             new IdentifierName("self"),
-                            AstUtility.CreateIdentifierName(property)
+                            AstUtility.CreateSimpleName(property)
                         ),
                         initializer
                     )
@@ -101,7 +102,7 @@ namespace RobloxCS.Luau
                 body.Statements.Add(new Return(AstUtility.Nil()));
 
             return new Function(
-                new AssignmentFunctionName(className, className, ':'),
+                new AssignmentFunctionName(nonGenericName, className, ':'),
                 false,
                 parameterList,
                 new OptionalType(AstUtility.CreateTypeRef(className.ToString())!),

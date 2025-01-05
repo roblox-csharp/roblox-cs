@@ -201,13 +201,13 @@ namespace RobloxCS.Luau
                     return null;
             }
 
-            var parentName = CreateIdentifierName(node.Parent);
+            var parentName = CreateSimpleName(node.Parent);
             var parentLocation = GetFullParentName(node.Parent);
             return parentLocation == null ?
                 (
                     node.Parent.SyntaxTree == node.SyntaxTree ?
                         parentName
-                        : CSCall("getGlobal", new Literal($"\"{parentName.Text}\""))
+                        : CSCall("getGlobal", new Literal($"\"{(parentName is GenericName genericName ? genericName.Text : parentName.ToString())}\""))
                 )
                 : new MemberAccess(parentLocation, parentName);
         }
@@ -234,7 +234,18 @@ namespace RobloxCS.Luau
                 : value;
 
         public static Variable DiscardVariable(SyntaxNode node, Expression value) =>
-            new Variable(CreateIdentifierName(node, "_"), true, value);
+            // shit hack
+            new(CreateSimpleName<IdentifierName>(node, "_"), true, value);
+
+        public static IdentifierName GetNonGenericName(SimpleName simpleName)
+        {
+            if (simpleName is IdentifierName identifierName)
+                return identifierName;
+            
+            return new IdentifierName(simpleName is GenericName genericName 
+                ? genericName.Text
+                : simpleName.ToString());
+        }
 
         public static Name CreateName(string text)
         {
@@ -248,20 +259,36 @@ namespace RobloxCS.Luau
                 .Aggregate(expression, (current, piece) => new QualifiedName(current, new IdentifierName(piece)));
         }
 
-        public static IdentifierName CreateIdentifierName(SyntaxNode node, bool registerIdentifier = false,
+        public static SimpleName CreateSimpleName(SyntaxNode node, bool registerIdentifier = false,
             bool bypassReserved = false)
         {
             foreach (var name in Utility.GetNamesFromNode(node))
                 Console.WriteLine(name);
-            return CreateIdentifierName(node, string.Join("", Utility.GetNamesFromNode(node)), registerIdentifier, bypassReserved);
+            
+            return CreateSimpleName(node, string.Join("", Utility.GetNamesFromNode(node)), registerIdentifier, bypassReserved);
+        }
+        
+        public static TNameNode CreateSimpleName<TNameNode>(SyntaxNode node, bool registerIdentifier = false, bool bypassReserved = false) 
+            where TNameNode : SimpleName
+        {
+            return (TNameNode)CreateSimpleName(node, registerIdentifier, bypassReserved);
         }
 
-        public static IdentifierName CreateIdentifierName(SyntaxNode node, string name, bool registerIdentifier = false, bool bypassReserved = false)
+        public static TNameNode CreateSimpleName<TNameNode>(SyntaxNode node, string name, bool registerIdentifier = false, bool bypassReserved = false) 
+            where TNameNode : SimpleName
+        {
+            return (TNameNode)CreateSimpleName(node, name, registerIdentifier, bypassReserved);
+        }
+
+        public static SimpleName CreateSimpleName(SyntaxNode node, string name, bool registerIdentifier = false, bool bypassReserved = false)
         {
             if (RESERVED_IDENTIFIERS.Contains(name) && !bypassReserved)
                 Logger.UnsupportedError(node, $"Using '{name}' as an identifier", useIs: true, useYet: false);
-            
-            return new IdentifierName(registerIdentifier ? FixIdentifierNameText(node, name, registerIdentifier) : name);
+
+            var text = registerIdentifier ? FixIdentifierNameText(node, name, registerIdentifier) : name;
+            return name.Contains('<') && name.Contains('>')
+                    ? new Luau.GenericName(text.Split('<').First(), ExtractTypeArguments(text))
+                    : new Luau.IdentifierName(text);
         }
 
         // TODO: reference the correct identifier names
@@ -286,7 +313,7 @@ namespace RobloxCS.Luau
             return name;
         }
 
-        public static TypeRef? CreateTypeRef(string? typePath)
+        public static TypeRef? CreateTypeRef(string typePath)
         {
             switch (typePath)
             {
@@ -302,35 +329,29 @@ namespace RobloxCS.Luau
             else if (arrayMatch.Success)
                 return new ArrayType(CreateTypeRef(arrayMatch.Value.Trim())!);
 
-            return new(mappedType, rawPath: true);
+            return new TypeRef(mappedType, rawPath: true);
         }
 
-        public static TypeRef? CreateTypeRef(TypeSyntax? type)
+        public static TypeRef? CreateTypeRef(TypeSyntax? type) => CreateTypeRef(type?.ToString());
+
+        public static Literal Vararg() => new("...");
+
+        public static Literal False() => new("false");
+
+        public static Literal True() => new("true");
+
+        public static Literal Nil() => new("nil");
+
+        public static TypeRef AnyType() => new("any");
+        
+        static List<string> ExtractTypeArguments(string input)
         {
-            return CreateTypeRef(type?.ToString());
+            var match = Regex.Match(input, @"<([^>]+)>");
+            if (!match.Success)
+                return [];
+            
+            var arguments = match.Groups[1].Value.Split(',');
+            return arguments.Select(arg => arg.Trim()).ToList();
         }
-
-        public static Literal Vararg()
-        {
-            return new Literal("...");
-        }
-
-        public static Literal False()
-        {
-            return new Literal("false");
-        }
-
-        public static Literal True()
-        {
-            return new Literal("true");
-        }
-
-        public static Literal Nil()
-        {
-            return new Literal("nil");
-        }
-
-        public static TypeRef AnyType() =>
-            new TypeRef("any");
     }
 }
