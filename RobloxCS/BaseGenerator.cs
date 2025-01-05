@@ -32,13 +32,13 @@ namespace RobloxCS.Luau
             Type? type;
             using (var memoryStream = new MemoryStream())
             {
-                var result = _semanticModel.Compilation.Emit(memoryStream);
+                _semanticModel.Compilation.Emit(memoryStream);
 
                 memoryStream.Seek(0, SeekOrigin.Begin);
                 var assembly = Assembly.Load(memoryStream.ToArray());
 
                 // get the type from the loaded assembly
-                type = assembly.GetType(fullyQualifiedName)!;
+                type = assembly.GetType(fullyQualifiedName);
             }
 
             type ??= Type.GetType(fullyQualifiedName);
@@ -48,6 +48,9 @@ namespace RobloxCS.Luau
             return type;
         }
 
+        /// <summary>
+        /// Generates a Luau class constructor from a C# class declaration
+        /// </summary>
         protected Function GenerateConstructor(ClassDeclarationSyntax classDeclaration, ParameterList parameterList, Block? body = null, List<AttributeList>? attributeLists = null)
         {
             var className = AstUtility.CreateSimpleName(classDeclaration);

@@ -121,7 +121,7 @@ namespace RobloxCS
         public override Luau.IdentifierName VisitThisExpression(ThisExpressionSyntax node) =>
             new Luau.IdentifierName("self");
 
-        // TODO: Support initializers?
+        // TODO: support initializers
         public override Luau.Call VisitArrayCreationExpression(ArrayCreationExpressionSyntax node) {
             var sizeExpression = node.Type.RankSpecifiers[0].Sizes[0];
             var translatedSize = Visit<Luau.Expression>(sizeExpression);

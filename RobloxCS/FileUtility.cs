@@ -39,10 +39,15 @@ public static class FileUtility
         HashSet<PortableExecutableReference> references = [MetadataReference.CreateFromFile(coreLib)];
 
         foreach (var dllPath in coreDlls.Select(coreDll => Path.Combine(Path.GetDirectoryName(coreLib)!, coreDll)))
+        {
+            // if (dllPath.Contains("System.Private.CoreLib")) continue;
+            Console.WriteLine(dllPath);
             references.Add(MetadataReference.CreateFromFile(dllPath));
+        }
         
         return references;
     }
+    
     private static string FixPathSeparator(string path)
     {
         var cleanedPath = Path.TrimEndingDirectorySeparator(path)

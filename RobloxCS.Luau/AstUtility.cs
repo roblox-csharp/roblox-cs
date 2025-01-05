@@ -12,6 +12,7 @@ namespace RobloxCS.Luau
         /// <summary>file path -> dictionary(identifier name, amount of times identifier is used)</summary>
         private static readonly Dictionary<string, Dictionary<string, uint>> _identifierDeclarations = [];
 
+        /// <summary>Adds one to the expression</summary>
         public static Expression AddOne(Expression expression)
         {
             return expression is Literal literal && int.TryParse(literal.ValueText, out var value)
@@ -19,6 +20,7 @@ namespace RobloxCS.Luau
                 : new BinaryOperator(expression, "+", new Literal("1"));
         }
         
+        /// <summary>Subtracts one from the expression</summary>
         public static Expression SubtractOne(Expression expression)
         {
             return expression is Literal literal && int.TryParse(literal.ValueText, out var value)
@@ -26,6 +28,9 @@ namespace RobloxCS.Luau
                 : new BinaryOperator(expression, "-", new Literal("1"));
         }
 
+        /// <summary>
+        /// Creates type info table for runtime type objects
+        /// </summary>
         public static TableInitializer CreateTypeInfo(Type type)
         {
             List<Expression> keys = [
@@ -153,6 +158,9 @@ namespace RobloxCS.Luau
             return new TableInitializer(values, keys);
         }
 
+        /// <summary>
+        /// Creates constructor info table for runtime type objects (via .GetType() and typeof())
+        /// </summary>
         public static TableInitializer CreateConstructorInfo(ConstructorInfo type)
         {
             List<Expression> keys = [
@@ -165,12 +173,17 @@ namespace RobloxCS.Luau
             return new TableInitializer(values, keys);
         }
 
+        /// <code>CS.defineGlobal(name, value)</code>
         public static Call DefineGlobal(Name name, Expression value) =>
             CSCall("defineGlobal", new Literal($"\"{name}\""), value);
 
+        /// <code>CS.getGlobal(name)</code>
         public static Call GetGlobal(Name name) =>
             CSCall("getGlobal", new Literal($"\"{name}\""));
 
+        /// <summary>
+        /// Creates a call to a CS library method
+        /// </summary>
         public static Call CSCall(string methodName, params Expression[] arguments) =>
             new Call(
                 new MemberAccess(
@@ -180,6 +193,9 @@ namespace RobloxCS.Luau
                 CreateArgumentList(arguments.ToList())
             );
 
+        /// <summary>
+        /// Creates a call to a bit32 library method
+        /// </summary>
         public static Call Bit32Call(string methodName, params Expression[] arguments) =>
             new Call(
                 new MemberAccess(
@@ -192,6 +208,11 @@ namespace RobloxCS.Luau
         public static ArgumentList CreateArgumentList(List<Expression> arguments) =>
             new ArgumentList(arguments.ConvertAll(expression => new Argument(expression)));
 
+        /// <summary>
+        /// Returns the full name of a C# node's parent.
+        /// This method is meant for getting the absolute location of classes, enums, etc.
+        /// For example a class under the namespace "Some.Namespace" would return a <see cref="MemberAccess"/> that transpiles to "Some.Namespace".
+        /// </summary>
         public static Expression? GetFullParentName(SyntaxNode node)
         {
             switch (node.Parent)
@@ -212,13 +233,21 @@ namespace RobloxCS.Luau
                 : new MemberAccess(parentLocation, parentName);
         }
 
+        /// <code>
+        /// if name == nil then
+        ///     name = initializer
+        /// end
+        /// </code>
         public static If Initializer(Name name, Expression initializer) =>
-            new If(
+            new(
                 new BinaryOperator(name, "==", Nil()),
                 new ExpressionStatement(new Assignment(name, initializer)),
                 null
             );
 
+        /// <summary>
+        /// Takes a <see cref="MemberAccess"/> and converts it into a <see cref="QualifiedName"/>, given that <see cref="MemberAccess.Expression"/> inherits from <see cref="Name"/>
+        /// </summary>
         public static QualifiedName QualifiedNameFromMemberAccess(MemberAccess memberAccess)
         {
             var left = memberAccess.Expression is MemberAccess leftMemberAccess ?
@@ -228,15 +257,21 @@ namespace RobloxCS.Luau
             return new QualifiedName(left, memberAccess.Name);
         }
 
+        /// <summary>
+        /// Creates a discard variable if <see cref="valueParent"/> is an <see cref="ExpressionStatementSyntax"/>
+        /// </summary>
         public static Node DiscardVariableIfExpressionStatement(SyntaxNode node, Node value, SyntaxNode? valueParent) =>
             valueParent is ExpressionStatementSyntax ?
                 DiscardVariable(node, (Expression)value)
                 : value;
 
+        /// <code>local _ = discardedValue</code>
         public static Variable DiscardVariable(SyntaxNode node, Expression value) =>
-            // shit hack
             new(CreateSimpleName<IdentifierName>(node, "_"), true, value);
 
+        /// <summary>
+        /// Takes a SimpleName (which GenericName extends from) and converts it into a standard IdentifierName
+        /// </summary>
         public static IdentifierName GetNonGenericName(SimpleName simpleName)
         {
             if (simpleName is IdentifierName identifierName)
