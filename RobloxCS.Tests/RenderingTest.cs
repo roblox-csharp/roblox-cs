@@ -7,12 +7,45 @@ public class RenderingTest
     private const string _tab = "  ";
     
     [Fact]
+    public void Renders_Repeat()
+    {
+        var condition = new Luau.IdentifierName("balls");
+        var body = new Luau.ExpressionStatement(Print(new Luau.Literal("\"rah\"")));
+        var whileStatement = new Luau.Repeat(condition, body);
+        var output = Render(whileStatement);
+        const string expectedOutput = """
+                                      repeat 
+                                        print("rah")
+                                      until balls
+
+                                      """;
+        
+        Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
+    }
+    
+    [Fact]
+    public void Renders_While()
+    {
+        var condition = new Luau.IdentifierName("balls");
+        var body = new Luau.ExpressionStatement(Print(new Luau.Literal("\"rah\"")));
+        var whileStatement = new Luau.While(condition, body);
+        var output = Render(whileStatement);
+        const string expectedOutput = """
+                                      while balls do
+                                        print("rah")
+                                      end
+
+                                      """;
+        
+        Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
+    }
+    
+    [Fact]
     public void Renders_ExpressionalIf()
     {
         var condition = new Luau.IdentifierName("runicIsCool");
         var body = new Luau.Literal("\"im tha best\"");
         var elseBranch = new Luau.Literal("\"im washed\"");
-        
         var ifExpression = new Luau.ExpressionalIf(condition, body, elseBranch, true);
         var output = Render(ifExpression);
         Assert.Equal("if runicIsCool then \"im tha best\" else \"im washed\"", output);
@@ -24,7 +57,6 @@ public class RenderingTest
         var condition = new Luau.IdentifierName("runicIsCool");
         var body = new Luau.ExpressionStatement(Print(new Luau.Literal("\"im tha best\"")));
         var elseBranch = new Luau.ExpressionStatement(Print(new Luau.Literal("\"im washed\"")));
-        
         var ifStatement = new Luau.If(condition, body, elseBranch);
         var output = Render(ifStatement);
         const string expectedOutput = """
