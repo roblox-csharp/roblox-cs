@@ -5,12 +5,14 @@
         public Expression Condition { get; }
         public Expression Body { get; }
         public Expression? ElseBranch { get; }
+        public bool IsCompact { get; }
 
-        public ExpressionalIf(Expression condition, Expression body, Expression? elseBranch = null)
+        public ExpressionalIf(Expression condition, Expression body, Expression? elseBranch = null, bool isCompact = false)
         {
             Condition = condition;
             Body = body;
             ElseBranch = elseBranch;
+            IsCompact = isCompact;
 
             AddChild(Condition);
             AddChild(Body);
@@ -24,25 +26,32 @@
         {
             luau.Write("if ");
             Condition.Render(luau);
-            luau.WriteLine(" then");
+            luau.Write(" then" + (IsCompact ? " " : '\n'));
             luau.PushIndent();
-            new ExpressionStatement(Body).Render(luau);
+
+            Node body = IsCompact ? Body : new ExpressionStatement(Body);
+            body.Render(luau);
 
             var isElseIf = ElseBranch is ExpressionalIf;
-            if (ElseBranch != null)
+            if (ElseBranch == null) return;
+            
+            luau.PopIndent();
+            if (IsCompact)
+                luau.Write(' ');
+            
+            luau.Write("else");
+            if (IsCompact && !isElseIf)
+                luau.Write(' ');
+            if (!isElseIf && !IsCompact)
             {
-                luau.PopIndent();
-                luau.Write("else" + (isElseIf ? "" : '\n'));
-                if (!isElseIf)
-                {
-                    luau.PushIndent();
-                }
-                new ExpressionStatement(ElseBranch).Render(luau);
-                if (!isElseIf)
-                {
-                    luau.PopIndent();
-                }
+                luau.WriteLine();
+                luau.PushIndent();
             }
+            
+            Node elseBranch = IsCompact ? ElseBranch : new ExpressionStatement(ElseBranch);
+            elseBranch.Render(luau);
+            if (!isElseIf)
+                luau.PopIndent();
         }
     }
 }

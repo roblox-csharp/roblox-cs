@@ -7,6 +7,39 @@ public class RenderingTest
     private const string _tab = "  ";
     
     [Fact]
+    public void Renders_ExpressionalIf()
+    {
+        var condition = new Luau.IdentifierName("runicIsCool");
+        var body = new Luau.Literal("\"im tha best\"");
+        var elseBranch = new Luau.Literal("\"im washed\"");
+        
+        var ifExpression = new Luau.ExpressionalIf(condition, body, elseBranch, true);
+        var output = Render(ifExpression);
+        Assert.Equal("if runicIsCool then \"im tha best\" else \"im washed\"", output);
+    }
+    
+    [Fact]
+    public void Renders_If()
+    {
+        var condition = new Luau.IdentifierName("runicIsCool");
+        var body = new Luau.ExpressionStatement(Print(new Luau.Literal("\"im tha best\"")));
+        var elseBranch = new Luau.ExpressionStatement(Print(new Luau.Literal("\"im washed\"")));
+        
+        var ifStatement = new Luau.If(condition, body, elseBranch);
+        var output = Render(ifStatement);
+        const string expectedOutput = """
+                                      if runicIsCool then
+                                        print("im tha best")
+                                      else
+                                        print("im washed")
+                                      end
+                                      
+                                      """;
+        
+        Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
+    }
+
+    [Fact]
     public void Renders_MappedTypes()
     {
         var mappedType = new Luau.MappedType(new Luau.TypeRef("string"), new Luau.TypeRef("number"));
@@ -212,6 +245,12 @@ public class RenderingTest
         
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
+    
+    private static Luau.Call Print(params List<Luau.Expression> args) =>
+        new Luau.Call(
+            new Luau.IdentifierName("print"),
+            new Luau.ArgumentList(args.ConvertAll(value => new Luau.Argument(value)))
+        );
 
     private static string Render(Luau.Node node)
     {
