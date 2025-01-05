@@ -7,12 +7,50 @@ public class RenderingTest
     private const string _tab = "  ";
     
     [Fact]
+    public void Renders_IterativeFor()
+    {
+        var name = new Luau.IdentifierName("value");
+        var iterable = new Luau.IdentifierName("abc");
+        var body = new Luau.ExpressionStatement(Print(name));
+        var forStatement = new Luau.For([name], iterable, body);
+        var output = Render(forStatement);
+        const string expectedOutput = """
+                                      for _, value in abc do
+                                        print(value)
+                                      end
+
+                                      """;
+        
+        Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
+    }
+    
+    [Fact]
+    public void Renders_NumericFor()
+    {
+        var name = new Luau.IdentifierName("i");
+        var minimum = new Luau.Literal("420");
+        var maximum = new Luau.Literal("69");
+        var increment = new Luau.Literal("-1");
+        var body = new Luau.ExpressionStatement(Print(new Luau.Literal("\"balls\"")));
+        var forStatement = new Luau.NumericFor(name, minimum, maximum, increment, body);
+        var output = Render(forStatement);
+        const string expectedOutput = """
+                                      for i = 420, 69, -1 do
+                                        print("balls")
+                                      end
+
+                                      """;
+        
+        Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
+    }
+    
+    [Fact]
     public void Renders_Repeat()
     {
         var condition = new Luau.IdentifierName("balls");
         var body = new Luau.ExpressionStatement(Print(new Luau.Literal("\"rah\"")));
-        var whileStatement = new Luau.Repeat(condition, body);
-        var output = Render(whileStatement);
+        var repeatStatement = new Luau.Repeat(condition, body);
+        var output = Render(repeatStatement);
         const string expectedOutput = """
                                       repeat 
                                         print("rah")

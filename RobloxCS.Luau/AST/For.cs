@@ -3,16 +3,16 @@ namespace RobloxCS.Luau
     public class For : Statement
     {
         public List<IdentifierName> Names { get; }
-        public Expression Iterator { get; }
+        public Expression Iterable { get; }
         public Statement Body { get; }
 
-        public For(List<IdentifierName> initializers, Expression iterator, Statement body)
+        public For(List<IdentifierName> initializers, Expression iterable, Statement body)
         {
             Names = initializers;
-            Iterator = iterator;
+            Iterable = iterable;
             Body = body;
             AddChildren(Names);
-            AddChild(Iterator);
+            AddChild(Iterable);
             AddChild(Body);
         }
 
@@ -29,7 +29,7 @@ namespace RobloxCS.Luau
                 luau.Write("_binding");
             }
             luau.Write(" in ");
-            Iterator.Render(luau);
+            Iterable.Render(luau);
             luau.WriteLine(" do");
             luau.PushIndent();
 
