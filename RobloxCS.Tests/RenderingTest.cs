@@ -5,6 +5,35 @@ namespace RobloxCS.Tests;
 public class RenderingTest
 {
     private const string _tab = "  ";
+
+    [Fact]
+    public void Renders_FunctionTypes()
+    {
+        var functionType = new Luau.FunctionType(
+            [new Luau.ParameterType("myParam", new Luau.TypeRef("number"))],
+            new Luau.TypeRef("boolean")
+        );
+        var output = Render(functionType);
+        Assert.Equal("(myParam: number) -> boolean", output);
+    }
+
+    [Fact]
+    public void Renders_ArrayTypes()
+    {
+        var arrayType = new Luau.ArrayType(new Luau.TypeRef("string"));
+        var output = Render(arrayType);
+        Assert.Equal("{ string }", output);
+    }
+    
+    [Fact]
+    public void Renders_TypeAliases()
+    {
+        var name = new Luau.IdentifierName("MyType");
+        var value = new Luau.TypeRef("string");
+        var typeAlias = new Luau.TypeAlias(name, value);
+        var output = Render(typeAlias);
+        Assert.Equal("type MyType = string\n", output);
+    }
     
     [Fact]
     public void Renders_UnaryOperators()
