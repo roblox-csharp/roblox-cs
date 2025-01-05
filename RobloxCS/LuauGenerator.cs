@@ -455,13 +455,14 @@ namespace RobloxCS
             return Luau.AstUtility.CreateTypeInfo(type);
         }
 
-        public override Luau.Call VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
+        public override Luau.Expression VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
         {
             // TODO: handle null node.Initializer
             var expression = Visit<Luau.Name>(node.Type);
             var argumentList = Visit<Luau.ArgumentList>(node.ArgumentList);
             var callee = new Luau.QualifiedName(expression, new Luau.IdentifierName("new"));
-            return new Luau.Call(callee, argumentList);
+            var macro = Macro.ObjectCreation(Visit, node);
+            return macro != null ? macro : new Luau.Call(callee, argumentList);
         }
 
         public override Luau.Node VisitInvocationExpression(InvocationExpressionSyntax node)

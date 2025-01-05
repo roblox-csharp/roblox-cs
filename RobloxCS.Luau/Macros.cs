@@ -6,7 +6,9 @@ namespace RobloxCS.Macros;
 
 public enum MacroKind
 {
-    NewInstance
+    NewInstance,
+    ListConstruction,
+    DictionaryConstruction
 }
 
 public static class Macro
@@ -32,6 +34,42 @@ public static class Macro
             expanded.MarkExpanded(MacroKind.NewInstance);
             
             return expanded;
+        }
+
+        return null;
+    }
+
+    // TODO: Emit types when constructing Lists and Dictionaries?
+    public static Expression? ObjectCreation(Func<SyntaxNode, Node?> visit, ObjectCreationExpressionSyntax objectCreation) {
+        if (objectCreation.Type is GenericNameSyntax genericName) {
+            switch (genericName.Identifier.Text) {
+                case "List": {
+                        var table = new Luau.TableInitializer(objectCreation.Initializer.Expressions.ToList().ConvertAll((expression) => (Expression)visit(expression)!)!);
+                        table.MarkExpanded(MacroKind.ListConstruction);
+                        return table;
+                    }
+                case "Dictionary": {
+                        var values = new List<Expression>();
+                        var keys = new List<Expression>();
+
+                        if (objectCreation.Initializer != null) {
+                            foreach (var expression in objectCreation.Initializer.Expressions) {
+                                if (expression is AssignmentExpressionSyntax assignmentExpression) {
+                                    var key = new IdentifierName(assignmentExpression.Left.ToString()); // Visiting didn't seem to work here
+                                    var value = (Expression)visit(assignmentExpression.Right)!;
+
+                                    values.Add(value);
+                                    keys.Add(key);
+                                }
+                            }
+                        }
+
+                        var table = new TableInitializer(values, keys);
+                        table.MarkExpanded(MacroKind.DictionaryConstruction);
+
+                        return table;
+                }
+            }
         }
 
         return null;
