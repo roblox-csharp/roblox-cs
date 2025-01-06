@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using System.Text;
+using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -980,7 +981,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
     public override Luau.Interpolation VisitInterpolation(InterpolationSyntax node) =>
         new(Visit<Luau.Expression>(node.Expression));
 
-    public override Luau.Literal VisitLiteralExpression(LiteralExpressionSyntax node)
+    public override Luau.Expression VisitLiteralExpression(LiteralExpressionSyntax node)
     {
         var valueText = "";
         switch (node.Kind())
@@ -988,8 +989,30 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             case SyntaxKind.StringLiteralExpression:
             case SyntaxKind.Utf8StringLiteralExpression:
             case SyntaxKind.CharacterLiteralExpression:
-                valueText = $"\"{(node.Token.Text.StartsWith('@') ? Regex.Escape(node.Token.ValueText) : node.Token.ValueText)}\"";
+            {
+                var fullText = node.Token.Text;
+                var stringContents = node.Token.ValueText;
+                if (fullText.StartsWith('@')) // verbatim strings
+                    stringContents = Regex.Escape(stringContents);
+                else if (fullText.StartsWith("\"\"\"")) // raw strings
+                {
+                    var lines = stringContents.Split("\r\n").ToList();
+                    var newStringContents = new StringBuilder();
+                    var index = 0;
+                    foreach (var line in lines)
+                    {
+                        newStringContents.Append(Regex.Escape(line));
+                        if (index++ != lines.Count - 1)
+                            newStringContents.Append("\\n");
+                    }
+                    
+                    valueText = $"\"{newStringContents}\"";
+                    break;
+                }
+                
+                valueText = $"\"{stringContents}\"";
                 break;
+            }
 
             case SyntaxKind.NullLiteralExpression:
                 valueText = "nil";
