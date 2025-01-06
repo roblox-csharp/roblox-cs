@@ -15,6 +15,9 @@ jobs:
         with:
           dotnet-version: 9.0.x
           
+      - name: Install xmllint
+        run: sudo apt-get update && sudo apt-get install -y libxml2-utils
+      
       - name: Add RobloxCS GitHub packages source to NuGet
         run: dotnet nuget add source --store-password-in-clear-text -u roblox-csharp -p ${{ secrets.GITHUB_TOKEN }} -n rbxcs "https://nuget.pkg.github.com/roblox-csharp/index.json"
         
