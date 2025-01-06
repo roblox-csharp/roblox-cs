@@ -775,6 +775,25 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             
         return new Luau.Block(blockStatements);
     }
+    
+    public override Luau.TypeAlias VisitDelegateDeclaration(DelegateDeclarationSyntax node) {
+        var parameterTypes = new List<Luau.ParameterType>();
+
+        foreach (var parameter in node.ParameterList.Parameters) {
+            if (parameter.Type == null) continue;
+            var pType = new Luau.ParameterType(
+                parameter.Identifier.Text,
+                new Luau.TypeRef(parameter.Type.ToString())
+            );
+
+            parameterTypes.Add(pType);
+        }
+
+        return new Luau.TypeAlias(
+            new Luau.IdentifierName(node.Identifier.Text),
+            new Luau.FunctionType(parameterTypes, new Luau.TypeRef(node.ReturnType.ToString()))
+        );
+    }
 
     private Luau.Expression HandlePattern(PatternSyntax node, Luau.Expression comparand)
     {
