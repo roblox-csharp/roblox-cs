@@ -21,7 +21,7 @@ jobs:
         run: dotnet tool install --global dotnet-reportgenerator-globaltool --version 5.*
 
       - name: Configure PATH for tools
-        run: echo "##[add-path]/home/runner/.dotnet/tools"
+        run: echo "/home/runner/.dotnet/tools" >> $GITHUB_PATH
 
       - name: Run tests and generate coverage
         run: |
