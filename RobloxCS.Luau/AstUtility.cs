@@ -32,7 +32,7 @@ namespace RobloxCS.Luau
         /// <summary>
         /// Creates type info table for runtime type objects
         /// </summary>
-        public static TableInitializer CreateTypeInfo(Type type)
+        public static Parenthesized CreateTypeInfo(Type type)
         {
             List<Expression> keys = [
                 new Literal("\"Name\""),
@@ -156,7 +156,7 @@ namespace RobloxCS.Luau
                 new Literal($"\"{type.GUID}\"")
             ];
 
-            return new TableInitializer(values, keys);
+            return new Parenthesized(new TableInitializer(values, keys));
         }
 
         /// <summary>

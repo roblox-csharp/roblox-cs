@@ -6,7 +6,7 @@ using RobloxCS.Shared;
 
 namespace RobloxCS;
 
-public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) : Luau.BaseGenerator(tree, compiler)
+public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) : BaseGenerator(tree, compiler)
 {
     private Macro _macro { get; } = new(compiler.GetSemanticModel(tree));
         
@@ -448,17 +448,13 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         return new Luau.VariableList(variableNodes);
     }
 
-    public override Luau.TableInitializer VisitTypeOfExpression(TypeOfExpressionSyntax node)
+    public override Luau.Parenthesized VisitTypeOfExpression(TypeOfExpressionSyntax node)
     {
         var typeSymbol = _semanticModel.GetTypeInfo(node.Type).Type;
         if (typeSymbol == null)
-        {
-            Logger.CodegenError(node, "Unable to resolve type symbol of the type provided to typeof()");
-            return null!;
-        }
+            throw Logger.CodegenError(node, "Unable to resolve type symbol of the type provided to typeof()");
 
-        var fullyQualifiedName = GetFullSymbolName(typeSymbol);
-        var type = GetRuntimeType(node, fullyQualifiedName);
+        var type = StandardUtility.GetRuntimeType(_semanticModel, node, typeSymbol);
         return Luau.AstUtility.CreateTypeInfo(type);
     }
 
@@ -524,7 +520,8 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             MacroKind.NewInstance,
             MacroKind.IEnumerableMethod,
             MacroKind.ListMethod,
-            MacroKind.DictionaryMethod
+            MacroKind.DictionaryMethod,
+            MacroKind.ObjectMethod
         ];
         
         // dumb ass hack bc null warning suppression doesn't work here for some reason

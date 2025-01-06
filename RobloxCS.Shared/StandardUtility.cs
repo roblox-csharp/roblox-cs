@@ -8,6 +8,48 @@ namespace RobloxCS.Shared;
 
 public static class StandardUtility
 {
+    public static Type GetRuntimeType(SemanticModel semanticModel, SyntaxNode node, ITypeSymbol typeSymbol)
+    {
+        var fullyQualifiedName = GetFullSymbolName(typeSymbol);
+            
+        Type? type;
+        using (var memoryStream = new MemoryStream())
+        {
+            semanticModel.Compilation.Emit(memoryStream);
+
+            memoryStream.Seek(0, SeekOrigin.Begin);
+            var assembly = Assembly.Load(memoryStream.ToArray());
+
+            // get the type from the loaded assembly
+            type = assembly.GetType(fullyQualifiedName);
+        }
+
+        type ??= Type.GetType(fullyQualifiedName);
+        if (type == null)
+            throw Logger.CodegenError(node, $"[GetRuntimeType()]: Unable to resolve type '{fullyQualifiedName}'.");
+
+        return type;
+    }
+    
+    public static string GetFullSymbolName(ISymbol symbol)
+    {
+        var containerName = symbol.ContainingNamespace != null || symbol.ContainingType != null
+            ? GetFullSymbolName(symbol.ContainingNamespace ?? (ISymbol)symbol.ContainingType)
+            : null;
+        
+        return (!string.IsNullOrEmpty(containerName) ? containerName + "." : "") + symbol.Name;
+    }
+
+    public static bool DoesTypeInheritFrom(ITypeSymbol? symbol, string typeName)
+    {
+        if (symbol == null)
+            return false;
+        
+        return symbol.BaseType != null
+            ? symbol.Name == typeName || symbol.BaseType.Name == typeName || DoesTypeInheritFrom(symbol.BaseType, typeName)
+            : symbol.Name == typeName;
+    }
+    
     public static string GetDefaultValueForType(string typeName)
     {
         if (INTEGER_TYPES.Contains(typeName) || DECIMAL_TYPES.Contains(typeName))

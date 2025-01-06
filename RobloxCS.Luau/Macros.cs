@@ -12,6 +12,7 @@ public enum MacroKind
     DictionaryConstruction,
     IEnumerableType,
     DictionaryType,
+    ObjectMethod,
     IEnumerableMethod,
     ListMethod,
     DictionaryMethod
@@ -86,6 +87,14 @@ public class Macro(SemanticModel semanticModel)
         {
             if (memberAccess is { Parent: InvocationExpressionSyntax invocation })
             {
+                {
+                    if (StandardUtility.DoesTypeInheritFrom(expressionType, "Object") &&
+                        ObjectMethod(visit, memberAccess, out var expanded))
+                    {
+                        return expanded;
+                    }
+                }
+                
                 switch (expressionType?.Name)
                 {
                     case "Dictionary":
@@ -172,10 +181,31 @@ public class Macro(SemanticModel semanticModel)
         return null;
     }
     
+    /// <summary>Macros <see cref="Object"/> methods</summary>
+    private bool ObjectMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess, out Expression? expanded)
+    {
+        expanded = null;
+        switch (memberAccess.Name.Identifier.Text) {
+            case "GetType": {
+                var typeSymbol = _semanticModel.GetTypeInfo(memberAccess.Expression).Type;
+                if (typeSymbol == null)
+                    throw Logger.CodegenError(memberAccess.Expression, "Unable to resolve type symbol of the expression that GetType() was called on");
+
+                var type = StandardUtility.GetRuntimeType(_semanticModel, memberAccess.Expression, typeSymbol);
+                expanded = AstUtility.CreateTypeInfo(type);
+                break;
+            }
+        }
+        
+        expanded?.MarkExpanded(MacroKind.ObjectMethod);
+        return expanded != null;
+    }
+    
     /// <summary>Macros <see cref="List"/> methods</summary>
     private static bool ListMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
         InvocationExpressionSyntax invocation, out Expression? expanded)
     {
+        expanded = null;
         switch (memberAccess.Name.Identifier.Text) {
             case "Add": {
                 var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
@@ -183,20 +213,19 @@ public class Macro(SemanticModel semanticModel)
                 arguments.Arguments.Insert(0, new Argument(self));
                                 
                 expanded = new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("insert")), arguments);
-                expanded.MarkExpanded(MacroKind.ListMethod);
-
-                return true;
+                break;
             }
         }
 
-        expanded = null;
-        return false;
+        expanded?.MarkExpanded(MacroKind.ListMethod);
+        return expanded != null;
     }
 
     /// <summary>Macros <see cref="Dictionary"/> methods</summary>
     private static bool DictionaryMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
         InvocationExpressionSyntax invocation, out Expression? expanded)
     {
+        expanded = null;
         switch (memberAccess.Name.Identifier.Text) {
             case "Add": {
                 var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
@@ -205,13 +234,11 @@ public class Macro(SemanticModel semanticModel)
                 var value = arguments.Arguments.Last().Expression;
                                 
                 expanded = new Assignment(new ElementAccess(self, key), value);
-                expanded.MarkExpanded(MacroKind.DictionaryMethod);
-
-                return true;
+                break;
             }
         }
 
-        expanded = null;
-        return false;
+        expanded?.MarkExpanded(MacroKind.DictionaryMethod);
+        return expanded != null;
     }
 }
