@@ -472,13 +472,21 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         
     public override Luau.Node? VisitImplicitObjectCreationExpression(ImplicitObjectCreationExpressionSyntax node)
     {
-        // TODO
-        return base.VisitImplicitObjectCreationExpression(node);
+        // TODO: handle non-null node.Initializer (prob won't be supported)
+        var classSymbol = (ITypeSymbol)_semanticModel.GetSymbolInfo(node).Symbol!.ContainingSymbol;
+        var name = Luau.AstUtility.TypeNameFromSymbol(classSymbol);
+        var nonGenericName = Luau.AstUtility.GetNonGenericName(name);
+        var argumentList = Visit<Luau.ArgumentList>(node.ArgumentList);
+        
+        var callee = new Luau.QualifiedName(nonGenericName, new Luau.IdentifierName("new"));
+        var expandedExpression = _macro.ObjectCreation(Visit, node);
+
+        return expandedExpression ?? new Luau.Call(callee, argumentList);
     }
 
     public override Luau.Expression VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
     {
-        // TODO: handle null node.Initializer
+        // TODO: handle non-null node.Initializer (prob won't be supported)
         var name = Visit<Luau.Name>(node.Type);
         var nonGenericName = Luau.AstUtility.GetNonGenericName(name);
         var argumentList = Visit<Luau.ArgumentList>(node.ArgumentList);

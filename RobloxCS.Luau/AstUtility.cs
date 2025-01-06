@@ -208,6 +208,17 @@ namespace RobloxCS.Luau
         public static ArgumentList CreateArgumentList(List<Expression> arguments) =>
             new ArgumentList(arguments.ConvertAll(expression => new Argument(expression)));
 
+        public static SimpleName TypeNameFromSymbol(ITypeSymbol symbol)
+        {
+            if (symbol is INamedTypeSymbol { TypeParameters.Length: > 0 } namedTypeSymbol)
+            {
+                var typeParameters = namedTypeSymbol.TypeParameters.Select(typeParameter => TypeNameFromSymbol(typeParameter).ToString()).ToList();
+                return new GenericName(symbol.Name, typeParameters);
+            }
+            
+            return new IdentifierName(symbol.Name);
+        }
+        
         /// <summary>
         /// Returns the full name of a C# node's parent.
         /// This method is meant for getting the absolute location of classes, enums, etc.

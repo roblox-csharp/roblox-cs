@@ -111,13 +111,17 @@ public class Macro(SemanticModel semanticModel)
 
     /// <summary>Takes a C# object creation and expands the macro into a Luau expression</summary>
     /// <returns>The expanded expression of the macro, or null if no macro was applied</returns>
-    public Expression? ObjectCreation(Func<SyntaxNode, Node?> visit, ObjectCreationExpressionSyntax objectCreation) {
+    public Expression? ObjectCreation(Func<SyntaxNode, Node?> visit, BaseObjectCreationExpressionSyntax baseObjectCreation) {
         // generic objects
-        if (objectCreation.Type is GenericNameSyntax genericName) {
-            switch (genericName.Identifier.Text) {
+        var type = (INamedTypeSymbol)(baseObjectCreation is ObjectCreationExpressionSyntax objectCreation
+            ? _semanticModel.GetSymbolInfo(objectCreation.Type)
+            : _semanticModel.GetSymbolInfo(baseObjectCreation)).Symbol!.ContainingSymbol;
+        
+        if (type.TypeParameters.Length > 0) {
+            switch (type.Name) {
                 case "List":
                 {
-                    var expressions = objectCreation.Initializer?.Expressions.Select(expression => (Expression)visit(expression)!).ToList();
+                    var expressions = baseObjectCreation.Initializer?.Expressions.Select(expression => (Expression)visit(expression)!).ToList();
                     var table = new TableInitializer(expressions ?? []);
                     table.MarkExpanded(MacroKind.ListConstruction);
                     
@@ -128,8 +132,8 @@ public class Macro(SemanticModel semanticModel)
                         var values = new List<Expression>();
                         var keys = new List<Expression>();
 
-                        if (objectCreation.Initializer != null) {
-                            foreach (var expression in objectCreation.Initializer.Expressions)
+                        if (baseObjectCreation.Initializer != null) {
+                            foreach (var expression in baseObjectCreation.Initializer.Expressions)
                             {
                                 switch (expression)
                                 {
