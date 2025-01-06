@@ -186,15 +186,8 @@ public class Macro(SemanticModel semanticModel)
     {
         expanded = null;
         switch (memberAccess.Name.Identifier.Text) {
-            case "GetType": {
-                var typeSymbol = _semanticModel.GetTypeInfo(memberAccess.Expression).Type;
-                if (typeSymbol == null)
-                    throw Logger.CodegenError(memberAccess.Expression, "Unable to resolve type symbol of the expression that GetType() was called on");
-
-                var type = StandardUtility.GetRuntimeType(_semanticModel, memberAccess.Expression, typeSymbol);
-                expanded = AstUtility.CreateTypeInfo(type);
-                break;
-            }
+            case "GetType":
+                throw Logger.UnsupportedError(memberAccess.Name, "Object.GetType()", useIs: true, useYet: false);
         }
         
         expanded?.MarkExpanded(MacroKind.ObjectMethod);

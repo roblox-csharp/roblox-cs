@@ -967,7 +967,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             : expressionNode;
     }
 
-    public override Node? VisitInterpolatedStringExpression(InterpolatedStringExpressionSyntax node)
+    public override Luau.InterpolatedString VisitInterpolatedStringExpression(InterpolatedStringExpressionSyntax node)
     {
         var parts = node.Contents.Select(Visit<Luau.Expression>).ToList();
         return new Luau.InterpolatedString(parts);

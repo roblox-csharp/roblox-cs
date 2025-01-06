@@ -40,7 +40,7 @@ namespace RobloxCS
 
         public static Exception UnsupportedError(SyntaxNode node, string subject, bool useIs = false, bool useYet = true)
         {
-            return CodegenError(node, $"{subject} {(useIs == true ? "is" : "are")} not {(useYet ? "yet " : "")} supported, sorry!");
+            return CodegenError(node, $"{subject} {(useIs == true ? "is" : "are")} not {(useYet ? "yet " : "")}supported, sorry!");
         }
 
         public static Exception CodegenError(SyntaxNode node, string message)
@@ -107,9 +107,7 @@ namespace RobloxCS
             Console.ForegroundColor = originalColor;
         }
 
-        private static string FormatLocation(FileLinePositionSpan lineSpan)
-        {
-            return $"{(lineSpan.Path == "" ? "<anonymous>" : lineSpan.Path)}:{lineSpan.StartLinePosition.Line + 1}:{lineSpan.StartLinePosition.Character + 1}";
-        }
+        private static string FormatLocation(FileLinePositionSpan lineSpan) =>
+            $"{(lineSpan.Path == "" ? "<anonymous>" : lineSpan.Path)}:{lineSpan.StartLinePosition.Line + 1}:{lineSpan.StartLinePosition.Character + 1}";
     }
 }

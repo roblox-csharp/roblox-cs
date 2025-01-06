@@ -1,6 +1,6 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class TableInitializer(List<Expression>? values = null, List<Expression>? keys = null)
+    public class TableInitializer(List<Expression>? values = null, List<Expression>? keys = null, bool treatIdentifiersAsKeyNames = false)
         : Expression
     {
         public List<Expression> Values { get; } = values ?? [];
@@ -23,12 +23,12 @@
                 var key = Keys.ElementAtOrDefault(index);
                 if (key != null)
                 {
-                    if (key is not IdentifierName)
+                    if (!(key is IdentifierName && !treatIdentifiersAsKeyNames))
                     {
                         luau.Write('[');
                     }
                     key.Render(luau);
-                    if (key is not IdentifierName)
+                    if (!(key is IdentifierName && !treatIdentifiersAsKeyNames))
                     {
                         luau.Write(']');
                     }
