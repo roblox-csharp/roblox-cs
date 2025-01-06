@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RobloxCS.Luau;
+using RobloxCS.Shared;
 
 namespace RobloxCS.Macros;
 
@@ -23,7 +24,7 @@ public class Macro(SemanticModel semanticModel)
     public Name? GenericName(Func<SyntaxNode, Node?> visit, GenericNameSyntax genericName)
     {
         var typeInfo = _semanticModel.GetTypeInfo(genericName);
-        if (Utility.IsFromSystemNamespace(typeInfo.Type))
+        if (StandardUtility.IsFromSystemNamespace(typeInfo.Type))
         {
             switch (genericName.Identifier.Text)
             {
@@ -34,7 +35,7 @@ public class Macro(SemanticModel semanticModel)
                 case "IEnumerable":
                 {
                     var elementTypeName = (IdentifierName)visit(genericName.TypeArgumentList.Arguments.First())!;
-                    var expanded = new IdentifierName($"{{ {Utility.GetMappedType(elementTypeName.Text)} }}");
+                    var expanded = new IdentifierName($"{{ {StandardUtility.GetMappedType(elementTypeName.Text)} }}");
                     expanded.MarkExpanded(MacroKind.IEnumerableType);
                     
                     return expanded;
@@ -44,7 +45,7 @@ public class Macro(SemanticModel semanticModel)
                 {
                     var keyTypeName = (IdentifierName)visit(genericName.TypeArgumentList.Arguments.First())!;
                     var valueTypeName = (IdentifierName)visit(genericName.TypeArgumentList.Arguments.Last())!;
-                    var expanded = new IdentifierName($"{{ [{Utility.GetMappedType(keyTypeName.Text)}]: {Utility.GetMappedType(valueTypeName.Text)} }}");
+                    var expanded = new IdentifierName($"{{ [{StandardUtility.GetMappedType(keyTypeName.Text)}]: {StandardUtility.GetMappedType(valueTypeName.Text)} }}");
                     expanded.MarkExpanded(MacroKind.DictionaryType);
                     
                     return expanded;

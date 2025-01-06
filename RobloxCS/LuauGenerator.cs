@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RobloxCS.Macros;
+using RobloxCS.Shared;
 
 namespace RobloxCS;
 
@@ -568,8 +569,8 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         if (node.IsKind(SyntaxKind.SimpleAssignmentExpression))
             return new Luau.Assignment(name, value);
             
-        var mappedOperator = Luau.Utility.GetMappedOperator(node.OperatorToken.Text);
-        var bit32MethodName = Luau.Utility.GetBit32MethodName(mappedOperator);
+        var mappedOperator = StandardUtility.GetMappedOperator(node.OperatorToken.Text);
+        var bit32MethodName = StandardUtility.GetBit32MethodName(mappedOperator);
         if (bit32MethodName != null)
             return new Luau.Assignment(name, Luau.AstUtility.Bit32Call(bit32MethodName, name, value));
             
@@ -642,7 +643,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
 
     public override Luau.Expression VisitGenericName(GenericNameSyntax node)
     {
-        var typeArguments = node.TypeArgumentList.Arguments.Select(typeArg => Luau.Utility.GetMappedType(Visit<Luau.Name>(typeArg).ToString())).ToList();
+        var typeArguments = node.TypeArgumentList.Arguments.Select(typeArg => StandardUtility.GetMappedType(Visit<Luau.Name>(typeArg).ToString())).ToList();
         Luau.Expression? expandedExpression = _macro.GenericName(Visit, node);
         
         return expandedExpression ?? new Luau.GenericName(node.Identifier.Text, typeArguments);
@@ -664,8 +665,8 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
     {
         var left = Visit<Luau.Expression>(node.Left);
         var right = Visit<Luau.Expression>(node.Right);
-        var mappedOperator = Luau.Utility.GetMappedOperator(node.OperatorToken.Text);
-        var bit32MethodName = Luau.Utility.GetBit32MethodName(mappedOperator);
+        var mappedOperator = StandardUtility.GetMappedOperator(node.OperatorToken.Text);
+        var bit32MethodName = StandardUtility.GetBit32MethodName(mappedOperator);
         if (bit32MethodName != null)
             return Luau.AstUtility.Bit32Call(bit32MethodName, left, right);
 
@@ -679,7 +680,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         if (node.OperatorToken.Text == "!")
             return new Luau.TypeCast(operand, Luau.AstUtility.CreateTypeRef(operandType.Name.Replace("?", ""))!);
 
-        var mappedOperator = Luau.Utility.GetMappedOperator(node.OperatorToken.Text);
+        var mappedOperator = StandardUtility.GetMappedOperator(node.OperatorToken.Text);
         return new Luau.BinaryOperator(operand, mappedOperator, new Luau.Literal("1"));
     }
 
@@ -696,8 +697,8 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         if (operatorText == "+")
             return operand;
 
-        var mappedOperator = Luau.Utility.GetMappedOperator(operatorText);
-        var bit32MethodName = Luau.Utility.GetBit32MethodName(mappedOperator);
+        var mappedOperator = StandardUtility.GetMappedOperator(operatorText);
+        var bit32MethodName = StandardUtility.GetBit32MethodName(mappedOperator);
         if (bit32MethodName != null)
             return Luau.AstUtility.Bit32Call(bit32MethodName, operand);
 
@@ -795,7 +796,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         var name = Visit<Luau.Name>(node.Type);
         var typeInfo = _semanticModel.GetTypeInfo(node.Type);
         if (typeInfo.Type is { ContainingNamespace: { Name: "System" } } && name is Luau.IdentifierName identifierName)
-            name = new Luau.IdentifierName('"' + Luau.Utility.GetMappedType(identifierName.Text) + '"');
+            name = new Luau.IdentifierName('"' + StandardUtility.GetMappedType(identifierName.Text) + '"');
             
         return Luau.AstUtility.CSCall("is", comparand, name);
     }
@@ -824,7 +825,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
 
     private Luau.BinaryOperator HandleRelationalPattern(RelationalPatternSyntax node, Luau.Expression comparand)
     {
-        var op = Luau.Utility.GetMappedOperator(node.OperatorToken.Text);
+        var op = StandardUtility.GetMappedOperator(node.OperatorToken.Text);
         var operand = Visit<Luau.Expression>(node.Expression);
         return new Luau.BinaryOperator(comparand, op, operand);
     }
@@ -988,7 +989,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
                 var typeSymbol = _semanticModel.GetTypeInfo(node).Type;
                 if (typeSymbol == null) break;
 
-                valueText = Utility.GetDefaultValueForType(typeSymbol.Name);
+                valueText = StandardUtility.GetDefaultValueForType(typeSymbol.Name);
                 break;
 
             default:

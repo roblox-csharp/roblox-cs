@@ -1,5 +1,6 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
+using RobloxCS.Shared;
 
 namespace RobloxCS.Transformers;
 
@@ -12,9 +13,9 @@ public abstract class BaseTransformer(SyntaxTree tree, ConfigData config) : CSha
     public SyntaxTree TransformTree() =>
         _tree.WithRootAndOptions(Visit(_root), _tree.Options);
     protected string? TryGetName(SyntaxNode node) =>
-        Luau.Utility.GetNamesFromNode(node).FirstOrDefault();
+        StandardUtility.GetNamesFromNode(node).FirstOrDefault();
     protected string GetName(SyntaxNode node) =>
-        Luau.Utility.GetNamesFromNode(node).First();
+        StandardUtility.GetNamesFromNode(node).First();
 
     protected SyntaxToken CreateIdentifierToken(string text, string? valueText = null, SyntaxTriviaList? trivia = null)
     {

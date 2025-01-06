@@ -2,6 +2,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Reflection;
+using RobloxCS.Shared;
 
 namespace RobloxCS.Luau
 {
@@ -115,10 +116,10 @@ namespace RobloxCS.Luau
         }
 
         protected string GetName(SyntaxNode node) =>
-            Utility.GetNamesFromNode(node).First();
+            StandardUtility.GetNamesFromNode(node).First();
 
         protected string? TryGetName(SyntaxNode? node) =>
-            Utility.GetNamesFromNode(node).FirstOrDefault();
+            StandardUtility.GetNamesFromNode(node).FirstOrDefault();
 
         protected string GetFullSymbolName(ISymbol symbol)
         {

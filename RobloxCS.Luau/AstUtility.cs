@@ -2,7 +2,8 @@
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using static RobloxCS.Luau.Constants;
+using RobloxCS.Shared;
+using static RobloxCS.Shared.Constants;
 
 namespace RobloxCS.Luau
 {
@@ -210,13 +211,11 @@ namespace RobloxCS.Luau
 
         public static SimpleName TypeNameFromSymbol(ITypeSymbol symbol)
         {
-            if (symbol is INamedTypeSymbol { TypeParameters.Length: > 0 } namedTypeSymbol)
-            {
-                var typeParameters = namedTypeSymbol.TypeParameters.Select(typeParameter => TypeNameFromSymbol(typeParameter).ToString()).ToList();
-                return new GenericName(symbol.Name, typeParameters);
-            }
+            if (symbol is not INamedTypeSymbol { TypeParameters.Length: > 0 } namedTypeSymbol)
+                return new IdentifierName(symbol.Name);
             
-            return new IdentifierName(symbol.Name);
+            var typeParameters = namedTypeSymbol.TypeParameters.Select(typeParameter => TypeNameFromSymbol(typeParameter).ToString()).ToList();
+            return new GenericName(symbol.Name, typeParameters);
         }
         
         /// <summary>
@@ -235,10 +234,10 @@ namespace RobloxCS.Luau
 
             var parentName = CreateSimpleName(node.Parent);
             var parentLocation = GetFullParentName(node.Parent);
-            return parentLocation == null ?
-                (
-                    node.Parent.SyntaxTree == node.SyntaxTree ?
-                        parentName
+            return parentLocation == null
+                ? (
+                    node.Parent.SyntaxTree == node.SyntaxTree
+                        ? parentName
                         : CSCall("getGlobal", new Literal($"\"{(parentName is GenericName genericName ? genericName.Text : parentName.ToString())}\""))
                 )
                 : new MemberAccess(parentLocation, parentName);
@@ -252,8 +251,7 @@ namespace RobloxCS.Luau
         public static If Initializer(Name name, Expression initializer) =>
             new(
                 new BinaryOperator(name, "==", Nil()),
-                new ExpressionStatement(new Assignment(name, initializer)),
-                null
+                new ExpressionStatement(new Assignment(name, initializer))
             );
 
         /// <summary>
@@ -350,7 +348,7 @@ namespace RobloxCS.Luau
         
         public static SimpleName CreateSimpleName(SyntaxNode node, bool registerIdentifier = false,bool bypassReserved = false)
         {
-            return CreateSimpleName(node, string.Join("", Utility.GetNamesFromNode(node)), registerIdentifier, bypassReserved);
+            return CreateSimpleName(node, string.Join("", StandardUtility.GetNamesFromNode(node)), registerIdentifier, bypassReserved);
         }
 
         public static SimpleName CreateSimpleName(SyntaxNode node, string name, bool registerIdentifier = false, bool bypassReserved = false)
@@ -360,7 +358,7 @@ namespace RobloxCS.Luau
 
             var text = registerIdentifier ? FixIdentifierNameText(node, name, registerIdentifier) : name;
             return name.Contains('<') && name.Contains('>')
-                    ? new GenericName(text.Split('<').First(), Utility.ExtractTypeArguments(text))
+                    ? new GenericName(text.Split('<').First(), StandardUtility.ExtractTypeArguments(text))
                     : new IdentifierName(text);
         }
 
@@ -395,7 +393,7 @@ namespace RobloxCS.Luau
                     return null;
             }
 
-            var mappedType = Utility.GetMappedType(typePath);
+            var mappedType = StandardUtility.GetMappedType(typePath);
             var arrayMatch = Regex.Match(mappedType, @"\{[a-zA-Z0-9]+\}");
             if (mappedType.EndsWith('?'))
                 return new OptionalType(CreateTypeRef(mappedType.Replace("?", ""))!);

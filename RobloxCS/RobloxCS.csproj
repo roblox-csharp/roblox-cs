@@ -12,6 +12,7 @@
     <PackageReference Include="Microsoft.CodeAnalysis" Version="4.12.0" />
     <PackageReference Include="RobloxCS.Types" Version="*" />
     <ProjectReference Include="..\RobloxCS.Luau\RobloxCS.Luau.csproj" />
+    <ProjectReference Include="..\RobloxCS.Shared\RobloxCS.Shared.csproj" />
     <Compile Remove="./RobloxCS/test.cs" />
   </ItemGroup>
 
