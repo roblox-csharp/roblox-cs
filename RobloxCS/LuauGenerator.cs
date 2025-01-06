@@ -967,6 +967,18 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             : expressionNode;
     }
 
+    public override Node? VisitInterpolatedStringExpression(InterpolatedStringExpressionSyntax node)
+    {
+        var parts = node.Contents.Select(Visit<Luau.Expression>).ToList();
+        return new Luau.InterpolatedString(parts);
+    }
+
+    public override Luau.Literal VisitInterpolatedStringText(InterpolatedStringTextSyntax node) =>
+        new(node.TextToken.Text);
+
+    public override Luau.Interpolation VisitInterpolation(InterpolationSyntax node) =>
+        new(Visit<Luau.Expression>(node.Expression));
+
     public override Luau.Literal VisitLiteralExpression(LiteralExpressionSyntax node)
     {
         var valueText = "";

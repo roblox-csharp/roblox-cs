@@ -1,17 +1,9 @@
 ﻿namespace RobloxCS.Luau
 {
-    public class Literal : Expression
+    public class Literal(string valueText) : Expression
     {
-        public string ValueText { get; }
+        public string ValueText { get; } = valueText;
 
-        public Literal(string valueText)
-        {
-            ValueText = valueText;
-        }
-
-        public override void Render(LuauWriter luau)
-        {
-            luau.Write(ValueText);
-        }
+        public override void Render(LuauWriter luau) => luau.Write(ValueText);
     }
 }
