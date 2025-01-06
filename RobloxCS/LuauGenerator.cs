@@ -1,4 +1,5 @@
-﻿using Microsoft.CodeAnalysis;
+﻿using System.Text.RegularExpressions;
+using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RobloxCS.Macros;
@@ -935,7 +936,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             
         return new Luau.VariableList(variables);
     }
-
+    
     public override Luau.Variable VisitVariableDeclarator(VariableDeclaratorSyntax node)
     {
         var typeRef = Luau.AstUtility.CreateTypeRef(node.Parent switch
@@ -987,7 +988,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             case SyntaxKind.StringLiteralExpression:
             case SyntaxKind.Utf8StringLiteralExpression:
             case SyntaxKind.CharacterLiteralExpression:
-                valueText = $"\"{node.Token.ValueText}\"";
+                valueText = $"\"{(node.Token.Text.StartsWith('@') ? Regex.Escape(node.Token.ValueText) : node.Token.ValueText)}\"";
                 break;
 
             case SyntaxKind.NullLiteralExpression:
