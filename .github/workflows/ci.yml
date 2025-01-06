@@ -17,11 +17,26 @@ jobs:
       - name: Add RobloxCS GitHub packages source to NuGet
         run: dotnet nuget add source --store-password-in-clear-text -u roblox-csharp -p ${{ secrets.GITHUB_TOKEN }} -n rbxcs "https://nuget.pkg.github.com/roblox-csharp/index.json"
 
-      - name: Run tests
-        run: dotnet test --verbosity normal
+      - name: Install ReportGenerator
+        run: dotnet tool install --global dotnet-reportgenerator-globaltool --version 5.*
+
+      - name: Configure PATH for tools
+        run: echo "##[add-path]/home/runner/.dotnet/tools"
+
+      - name: Run tests and generate coverage
+        run: |
+          dotnet test -c Release --collect:"XPlat Code Coverage"
+
+      - name: Convert coverage to LCOV
+        run: |
+          reportgenerator -reports:"**/TestResults/**/*.cobertura.xml" -targetdir:"coverage" -reporttypes:lcov
+        env:
+          DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+          DOTNET_CLI_TELEMETRY_OPTOUT: true
 
       - name: Report coverage
         continue-on-error: true
         uses: coverallsapp/github-action@v2.3.4
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          file: coverage/lcov.info
