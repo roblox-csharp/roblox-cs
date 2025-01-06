@@ -1,0 +1,44 @@
+name: CD
+on:
+  push:
+    branches: [ "master" ]
+  pull_request:
+    branches: [ "master" ]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 9.0.x
+          
+      - name: Add RobloxCS GitHub packages source to NuGet
+        run: dotnet nuget add source --store-password-in-clear-text -u roblox-csharp -p ${{ secrets.GITHUB_TOKEN }} -n rbxcs "https://nuget.pkg.github.com/roblox-csharp/index.json"
+        
+      - name: Extract version from .csproj
+        id: extract_version
+        run: |
+          VERSION=$(xmllint --xpath "string(//Project/PropertyGroup/Version)" RobloxCS/RobloxCS.csproj)
+          echo "PACKAGE_VERSION=$VERSION" >> $GITHUB_ENV
+
+      - name: Package the project
+        run: dotnet pack -c Release
+
+      - name: Check if version is already published
+        id: check_version
+        run: |
+          VERSION_EXISTS=$(dotnet nuget search roblox-cs --source "rbxcs" | grep -c "${{ env.PACKAGE_VERSION }}" || true)
+          echo "VERSION_EXISTS=$VERSION_EXISTS" >> $GITHUB_ENV
+
+      - name: Find and publish the latest package
+        if: env.VERSION_EXISTS == '0'
+        run: |
+          PACKAGE_PATH=$(find ./RobloxCS/bin/Release -name "*.nupkg" -type f -print0 | xargs -0 ls -1t | head -n 1)
+          dotnet nuget push "$PACKAGE_PATH" --api-key ${{ secrets.GITHUB_TOKEN }} --source "rbxcs" --skip-duplicate
+
+      - name: Version already published
+        if: env.VERSION_EXISTS != '0'
+        run: echo "The version is already published. Skipping publish step."
