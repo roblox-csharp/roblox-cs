@@ -1,9 +1,8 @@
 name: CI
 on:
-  push:
-    branches: [ "master" ]
   pull_request:
-    branches: [ "master" ]
+  push:
+    branches: ["master"]
 
 jobs:
   test:
@@ -14,7 +13,15 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
+
       - name: Add RobloxCS GitHub packages source to NuGet
         run: dotnet nuget add source --store-password-in-clear-text -u roblox-csharp -p ${{ secrets.GITHUB_TOKEN }} -n rbxcs "https://nuget.pkg.github.com/roblox-csharp/index.json"
-      - name: Test
+
+      - name: Run tests
         run: dotnet test --verbosity normal
+
+      - name: Report coverage
+        continue-on-error: true
+        uses: coverallsapp/github-action@v2.3.4
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}

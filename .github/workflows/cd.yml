@@ -1,9 +1,8 @@
 name: CD
 on:
-  push:
-    branches: [ "master" ]
   pull_request:
-    branches: [ "master" ]
+  push:
+    branches: ["master"]
 
 jobs:
   publish:
@@ -14,13 +13,13 @@ jobs:
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: 9.0.x
-          
+
       - name: Install xmllint
         run: sudo apt-get update && sudo apt-get install -y libxml2-utils
-      
+
       - name: Add RobloxCS GitHub packages source to NuGet
         run: dotnet nuget add source --store-password-in-clear-text -u roblox-csharp -p ${{ secrets.GITHUB_TOKEN }} -n rbxcs "https://nuget.pkg.github.com/roblox-csharp/index.json"
-        
+
       - name: Extract version from .csproj
         id: extract_version
         run: |
@@ -29,7 +28,7 @@ jobs:
 
       - name: Package the project
         run: dotnet pack -c Release
-        
+
       - name: Run tests
         run: dotnet test --verbosity normal
 
