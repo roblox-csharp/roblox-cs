@@ -29,6 +29,9 @@ jobs:
 
       - name: Package the project
         run: dotnet pack -c Release
+        
+      - name: Run tests
+        run: dotnet test --verbosity normal
 
       - name: Check if version is already published
         id: check_version
