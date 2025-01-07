@@ -10,12 +10,6 @@
             AddChildren(Variables);
         }
 
-        public override void Render(LuauWriter luau)
-        {
-            foreach (var variable in Variables)
-            {
-                variable.Render(luau);
-            }
-        }
+        public override void Render(LuauWriter luau) => luau.WriteNodes(Variables);
     }
 }
