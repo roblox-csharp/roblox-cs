@@ -191,7 +191,8 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
                                         new Luau.Return(new Luau.Literal($"\"{nonGenericName}\""))
                                     ])
                                 )],
-                                [new Luau.IdentifierName("__tostring")]
+                                [new Luau.IdentifierName("__tostring")],
+                                true
                             )
                         ])
                     )
