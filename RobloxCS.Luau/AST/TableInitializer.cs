@@ -23,12 +23,12 @@
                 var key = Keys.ElementAtOrDefault(index);
                 if (key != null)
                 {
-                    if (!(key is IdentifierName && !treatIdentifiersAsKeyNames))
+                    if (!treatIdentifiersAsKeyNames || key is not IdentifierName)
                     {
                         luau.Write('[');
                     }
                     key.Render(luau);
-                    if (!(key is IdentifierName && !treatIdentifiersAsKeyNames))
+                    if (!treatIdentifiersAsKeyNames || key is not IdentifierName)
                     {
                         luau.Write(']');
                     }

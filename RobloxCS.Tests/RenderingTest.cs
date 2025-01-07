@@ -196,6 +196,44 @@ public class RenderingTest
     }
     
     [Fact]
+    public void Renders_EmptyTableInitializer()
+    {
+        var tableInitializer = new TableInitializer();
+        var output = Render(tableInitializer);
+        
+        Assert.Equal("{}", output);
+    }
+    
+    [Fact]
+    public void Renders_ArrayTableInitializer()
+    {
+        var tableInitializer = new TableInitializer([new Literal("69"), new Literal("420"), AstUtility.String("abc")]);
+        var output = Render(tableInitializer);
+        
+        Assert.Equal("{69, 420, \"abc\"}", output);
+    }
+    
+    [Fact]
+    public void Renders_DictionaryTableInitializer()
+    {
+        var tableInitializer = new TableInitializer(
+            [new Literal("69"), new Literal("420"), AstUtility.String("abc")],
+            [new IdentifierName("foo"), new IdentifierName("bar"), AstUtility.String("baz")],
+            true
+        );
+        var output = Render(tableInitializer);
+        const string expectedOutput = """
+                                      {
+                                        foo = 69,
+                                        bar = 420,
+                                        ["baz"] = "abc"
+                                      }
+                                      """;
+        
+        Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
+    }
+    
+    [Fact]
     public void Renders_Calls()
     {
         var arguments = AstUtility.CreateArgumentList([new Literal("69"), new Literal("420"), AstUtility.String("abc")]);
