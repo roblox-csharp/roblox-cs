@@ -7,14 +7,9 @@
         public Block(List<Statement> statements)
         {
             Statements = statements;
+            AddChildren(Statements);
         }
 
-        public override void Render(LuauWriter luau)
-        {
-            foreach (var statement in Statements)
-            {
-                statement.Render(luau);
-            }
-        }
+        public override void Render(LuauWriter luau) => luau.WriteNodes(Statements);
     }
 }

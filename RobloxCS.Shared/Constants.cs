@@ -4,6 +4,8 @@ namespace RobloxCS.Shared;
 
 public static class Constants
 {
+    public const string HeaderComment = "Compiled with roblox-cs v2.0.0";
+    
     public static readonly HashSet<string> UNSUPPORTED_BITWISE_TYPES =
     [
         "UInt128",

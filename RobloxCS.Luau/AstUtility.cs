@@ -193,12 +193,18 @@ namespace RobloxCS.Luau
                 ),
                 CreateArgumentList(arguments.ToList())
             );
+        
+        public static Call PrintCall(params List<Luau.Expression> args) =>
+            new(
+                new IdentifierName("print"),
+                new ArgumentList(args.ConvertAll(value => new Luau.Argument(value)))
+            );
 
         /// <summary>
         /// Creates a call to a bit32 library method
         /// </summary>
         public static Call Bit32Call(string methodName, params Expression[] arguments) =>
-            new Call(
+            new(
                 new MemberAccess(
                     new IdentifierName("bit32"),
                     new IdentifierName(methodName)
@@ -207,7 +213,7 @@ namespace RobloxCS.Luau
             );
 
         public static ArgumentList CreateArgumentList(List<Expression> arguments) =>
-            new ArgumentList(arguments.ConvertAll(expression => new Argument(expression)));
+            new(arguments.ConvertAll(expression => new Argument(expression)));
 
         public static SimpleName TypeNameFromSymbol(ITypeSymbol symbol)
         {
@@ -404,6 +410,8 @@ namespace RobloxCS.Luau
         }
 
         public static TypeRef? CreateTypeRef(TypeSyntax? type) => CreateTypeRef(type?.ToString());
+        
+        public static Literal String(string text) => new($"\"{text}\"");
 
         public static Literal Vararg() => new("...");
 

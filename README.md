@@ -1,4 +1,4 @@
-<img width=35% src="https://i.imgur.com/6LjWow8.png">
+<img width=35% src="https://i.imgur.com/6LjWow8.png" alt="roblox-cs">
 
 <h1><a href="https://roblox-cs.com">roblox-cs</a></h1>
 <p>A C# to Luau transpiler for Roblox</p>

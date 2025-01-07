@@ -11,11 +11,7 @@
             Type = type;
         }
 
-        public override void Render(LuauWriter luau)
-        {
-            Expression.Render(luau);
-            luau.Write(" :: ");
-            Type.Render(luau);
-        }
+        public override void Render(LuauWriter luau) =>
+            luau.WriteTypeCast(Expression, Type);
     }
 }
