@@ -27,13 +27,16 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
     {
         List<Luau.Statement> statements = [
             new Luau.SingleLineComment(Shared.Constants.HeaderComment + "\n\n"),
-            new Luau.ExpressionStatement(
-                new Luau.Call(new Luau.IdentifierName("require"), new Luau.ArgumentList([
-                    new Luau.Argument(
-                        new Luau.Literal("\"Include\"")
-                    )
-                ]))
-            )
+            new Luau.Variable(
+                new Luau.IdentifierName("Signal"),
+                true,
+                // temporary until RojoReader
+                Luau.AstUtility.RequireCall(new Luau.QualifiedName(
+                    new Luau.IdentifierName("rbxcs_include"),
+                    new Luau.IdentifierName("GoodSignal")
+                ))
+            ),
+            new Luau.NoOp() // for the newline
         ];
 
         void visitStatement(MemberDeclarationSyntax member)

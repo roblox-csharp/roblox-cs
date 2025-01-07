@@ -194,10 +194,16 @@ namespace RobloxCS.Luau
                 CreateArgumentList(arguments.ToList())
             );
         
-        public static Call PrintCall(params List<Luau.Expression> args) =>
+        public static Call RequireCall(Expression modulePath) =>
+            new(
+                new IdentifierName("require"),
+                new ArgumentList([new Argument(modulePath)])
+            );
+        
+        public static Call PrintCall(params List<Expression> args) =>
             new(
                 new IdentifierName("print"),
-                new ArgumentList(args.ConvertAll(value => new Luau.Argument(value)))
+                new ArgumentList(args.ConvertAll(value => new Argument(value)))
             );
 
         /// <summary>
