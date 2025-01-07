@@ -25,6 +25,17 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
     public override Luau.AST VisitCompilationUnit(CompilationUnitSyntax node)
     {
         List<Luau.Statement> statements = [];
+        
+        statements.Add(
+            new Luau.ExpressionStatement(
+                new Luau.Call(new Luau.IdentifierName("require"), new Luau.ArgumentList([
+                    new Luau.Argument(
+                        new Luau.Literal("\"Include\"")
+                    )
+                ]))
+            )
+        );
+        
         void visitStatement(MemberDeclarationSyntax member)
         {
             var statement = Visit<Luau.Statement?>(member);
@@ -792,6 +803,23 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         return new Luau.TypeAlias(
             new Luau.IdentifierName(node.Identifier.Text),
             new Luau.FunctionType(parameterTypes, new Luau.TypeRef(node.ReturnType.ToString()))
+        );
+    }
+    
+    public override Luau.Statement VisitEventFieldDeclaration(EventFieldDeclarationSyntax node) {
+        var klass = (ClassDeclarationSyntax)node.Parent!;
+
+        return new Luau.ExpressionStatement(
+            new Luau.Assignment(
+                new Luau.MemberAccess(
+                    new Luau.IdentifierName(klass.Identifier.Text),
+                    new Luau.IdentifierName(node.Declaration.Variables[0].Identifier.Text)
+                ),
+                new Luau.Call(
+                    new Luau.QualifiedName(new Luau.IdentifierName("Signal"), new Luau.IdentifierName("new")),
+                    new Luau.ArgumentList([])
+                )
+            )
         );
     }
 
