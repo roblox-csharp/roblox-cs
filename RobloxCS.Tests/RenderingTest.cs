@@ -402,37 +402,45 @@ public class RenderingTest
     [Fact]
     public void Renders_AssignmentFunctionName()
     {
+        const string result = "Abc:myMethod";
         var functionName = new AssignmentFunctionName(new IdentifierName("Abc"), new IdentifierName("myMethod"), ':');
         var output = Render(functionName);
         
-        Assert.Equal("Abc:myMethod", output);
+        Assert.Equal(result, output);
+        Assert.Equal(result, functionName.ToString());
     }
     
     [Fact]
     public void Renders_QualifiedName()
     {
+        const string result = "Abc.myMethod";
         var name = new QualifiedName(new IdentifierName("Abc"), new IdentifierName("myMethod"));
         var output = Render(name);
         
-        Assert.Equal("Abc.myMethod", output);
+        Assert.Equal(result, output);
+        Assert.Equal(result, name.ToString());
     }
     
     [Fact]
     public void Renders_GenericName()
     {
+        const string result = "Abc<T, U>";
         var name = new GenericName("Abc", ["T", "U"]);
         var output = Render(name);
         
-        Assert.Equal("Abc<T, U>", output);
+        Assert.Equal(result, output);
+        Assert.Equal(result, name.ToString());
     }
     
     [Fact]
     public void Renders_IdentifierName()
     {
-        var name = new IdentifierName("Abc");
+        const string text = "Abc";
+        var name = new IdentifierName(text);
         var output = Render(name);
         
-        Assert.Equal("Abc", output);
+        Assert.Equal(text, output);
+        Assert.Equal(text, name.ToString());
     }
     
     [Fact]
