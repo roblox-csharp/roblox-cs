@@ -201,7 +201,7 @@ public class RenderingTest
         var arguments = AstUtility.CreateArgumentList([new Literal("69"), new Literal("420"), AstUtility.String("abc")]);
         var call = new Call(new IdentifierName("bigMen"), arguments);
         var output = Render(call);
-        Assert.Equal("bigMen(69, 420, \"abc\"", output);
+        Assert.Equal("bigMen(69, 420, \"abc\")", output);
     }
 
     [Fact]
