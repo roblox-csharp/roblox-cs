@@ -24,7 +24,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
 
     public override Luau.AST VisitCompilationUnit(CompilationUnitSyntax node)
     {
-        List<Luau.Statement> statements = [];
+        List<Luau.Statement> statements = [new Luau.SingleLineComment("Compiled with roblox-cs v2.0.0\n\n")];
         void visitStatement(MemberDeclarationSyntax member)
         {
             var statement = Visit<Luau.Statement?>(member);

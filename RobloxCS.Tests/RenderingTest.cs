@@ -4,7 +4,34 @@ namespace RobloxCS.Tests;
 
 public class RenderingTest
 {
-    private const string _tab = "  ";
+    [Fact]
+    public void MultiLineLineComment()
+    {
+        var comment = new MultiLineComment(string.Join('\n', Enumerable.Repeat("roblox-cs is the best!", 5)));
+        var output = Render(comment);
+        const string expectedOutput = """
+                                      --[[
+                                      roblox-cs is the best!
+                                      roblox-cs is the best!
+                                      roblox-cs is the best!
+                                      roblox-cs is the best!
+                                      roblox-cs is the best!
+                                      ]]
+                                      
+                                      """;
+        
+        Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
+    }
+    
+    [Fact]
+    public void Renders_SingleLineComment()
+    {
+        var comment = new SingleLineComment("roblox-cs is the best!");
+        var output = Render(comment);
+        const string expectedOutput = "-- roblox-cs is the best!";
+        
+        Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
+    }
     
     [Fact]
     public void Renders_IterativeFor()
