@@ -201,7 +201,35 @@ public class RenderingTest
         var arguments = AstUtility.CreateArgumentList([new Literal("69"), new Literal("420"), AstUtility.String("abc")]);
         var call = new Call(new IdentifierName("bigMen"), arguments);
         var output = Render(call);
+        
         Assert.Equal("bigMen(69, 420, \"abc\")", output);
+    }
+    
+    [Fact]
+    public void Renders_TypeOfCall()
+    {
+        var typeOfCall = new TypeOfCall(new IdentifierName("bigMen"));
+        var output = Render(typeOfCall);
+        
+        Assert.Equal("typeof(bigMen)", output);
+    }
+    
+    [Fact]
+    public void Renders_IndexCall()
+    {
+        var indexCall = new IndexCall(new TypeRef("MyRecord"), new TypeRef("string"));
+        var output = Render(indexCall);
+        
+        Assert.Equal("index<MyRecord, string>", output);
+    }
+    
+    [Fact]
+    public void Renders_KeyOfCall()
+    {
+        var keyOfCall = new KeyOfCall(new TypeRef("MyRecord"));
+        var output = Render(keyOfCall);
+        
+        Assert.Equal("keyof<MyRecord>", output);
     }
 
     [Fact]
@@ -209,6 +237,7 @@ public class RenderingTest
     {
         var arguments = AstUtility.CreateArgumentList([new Literal("69"), new Literal("420"), AstUtility.String("abc")]);
         var output = Render(arguments);
+        
         Assert.Equal("(69, 420, \"abc\")", output);
     }
 
