@@ -19,7 +19,8 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         SyntaxKind.NamespaceDeclaration,
         SyntaxKind.ClassDeclaration,
         SyntaxKind.InterfaceDeclaration,
-        SyntaxKind.EnumDeclaration
+        SyntaxKind.EnumDeclaration,
+        SyntaxKind.LocalFunctionStatement
     ];
 
     public override Luau.AST VisitCompilationUnit(CompilationUnitSyntax node)
@@ -44,8 +45,17 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             statements.Add(statement);
         }
 
-        var hoistedNodes = node.Members.Where(member => _hoistedSyntaxes.Contains(member.Kind()));
-        var regularNodes = node.Members.Where(member => !_hoistedSyntaxes.Contains(member.Kind()));
+        bool checkGlobalKind(MemberDeclarationSyntax memberDeclarationSyntax)
+        {
+            return _hoistedSyntaxes.Contains(
+                memberDeclarationSyntax is GlobalStatementSyntax globalStatement
+                    ? globalStatement.Statement.Kind()
+                    : memberDeclarationSyntax.Kind()
+            );
+        }
+
+        var hoistedNodes = node.Members.Where(checkGlobalKind);
+        var regularNodes = node.Members.Where(member => !checkGlobalKind(member));
         foreach (var member in hoistedNodes)
             visitStatement(member);
         foreach (var member in regularNodes)

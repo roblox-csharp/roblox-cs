@@ -123,11 +123,11 @@ public class Macro(SemanticModel semanticModel)
     /// <returns>The expanded expression of the macro, or null if no macro was applied</returns>
     public Expression? ObjectCreation(Func<SyntaxNode, Node?> visit, BaseObjectCreationExpressionSyntax baseObjectCreation) {
         // generic objects
-        var type = (INamedTypeSymbol)(baseObjectCreation is ObjectCreationExpressionSyntax objectCreation
+        var type = (baseObjectCreation is ObjectCreationExpressionSyntax objectCreation
             ? _semanticModel.GetSymbolInfo(objectCreation.Type)
-            : _semanticModel.GetSymbolInfo(baseObjectCreation)).Symbol!.ContainingSymbol;
+            : _semanticModel.GetSymbolInfo(baseObjectCreation)).Symbol!.ContainingSymbol as INamedTypeSymbol;
         
-        if (type.TypeParameters.Length > 0) {
+        if (type is { TypeParameters.Length: > 0 }) {
             switch (type.Name) {
                 case "List":
                 {
