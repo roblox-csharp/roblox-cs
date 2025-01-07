@@ -278,12 +278,22 @@ public class RenderingTest
         
         Assert.Equal("(69, 420, \"abc\")", output);
     }
+    
+    [Fact]
+    public void Renders_BuiltInAttributes()
+    {
+        var attribute = new BuiltInAttribute(new IdentifierName("native"));
+        var output = Render(attribute);
+        
+        Assert.Equal("@native", output);
+    }
 
     [Fact]
     public void Renders_MappedTypes()
     {
         var mappedType = new MappedType(new TypeRef("string"), new TypeRef("number"));
         var output = Render(mappedType);
+        
         Assert.Equal("{ [string]: number; }", output);
     }
     
@@ -311,6 +321,7 @@ public class RenderingTest
     {
         var optionalType = new OptionalType(new TypeRef("boolean"));
         var output = Render(optionalType);
+        
         Assert.Equal("boolean?", output);
     }
 
@@ -321,6 +332,7 @@ public class RenderingTest
             [new ParameterType("myParam", new TypeRef("number"))],
             new TypeRef("boolean")
         );
+        
         var output = Render(functionType);
         Assert.Equal("(myParam: number) -> boolean", output);
     }
@@ -330,6 +342,7 @@ public class RenderingTest
     {
         var arrayType = new ArrayType(new TypeRef("string"));
         var output = Render(arrayType);
+        
         Assert.Equal("{ string }", output);
     }
     
@@ -340,6 +353,7 @@ public class RenderingTest
         var value = new TypeRef("string");
         var typeAlias = new TypeAlias(name, value);
         var output = Render(typeAlias);
+        
         Assert.Equal("type MyType = string\n", output);
     }
     
@@ -359,6 +373,7 @@ public class RenderingTest
     {
         var elementAccess = new ElementAccess(new IdentifierName("a"), new Literal("123"));
         var output = Render(elementAccess);
+        
         Assert.Equal("a[123]", output);
     }
     
@@ -367,6 +382,7 @@ public class RenderingTest
     {
         var memberAccess = new MemberAccess(new IdentifierName("a"), new IdentifierName("b"));
         var output = Render(memberAccess);
+        
         Assert.Equal("a.b", output);
     }
     
@@ -376,6 +392,7 @@ public class RenderingTest
         var operand = new IdentifierName("isActive");
         var unaryOp = new UnaryOperator("not ", operand);
         var output = Render(unaryOp);
+        
         Assert.Equal("not isActive", output);
     }
     
@@ -386,6 +403,7 @@ public class RenderingTest
         var right = new Literal("420");
         var binaryOp = new BinaryOperator(left, "+", right);
         var output = Render(binaryOp);
+        
         Assert.Equal("69 + 420", output);
     }
     
