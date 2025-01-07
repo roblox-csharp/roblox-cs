@@ -1,11 +1,59 @@
 ﻿using RobloxCS.Luau;
+using RobloxCS.Shared;
 
 namespace RobloxCS.Tests;
 
 public class RenderingTest
 {
     [Fact]
-    public void MultiLineLineComment()
+    public void Renders_AST()
+    {
+        var statement = new ExpressionStatement(AstUtility.PrintCall(AstUtility.String("bruh")));
+        var ast = new AST([statement]);
+        var output = Render(ast);
+        var expectedOutput = $"""
+                              print("bruh")
+                              return nil
+
+                              """;
+    }
+    
+    [Fact]
+    public void Renders_Block()
+    {
+        var statements = Enumerable.Repeat(new ExpressionStatement(AstUtility.PrintCall(AstUtility.String("bruh"))), 5).ToList<Statement>();
+        var block = new Block(statements);
+        var output = Render(block);
+        var expectedOutput = $"""
+                              print("bruh")
+                              print("bruh")
+                              print("bruh")
+                              print("bruh")
+                              print("bruh")
+
+                              """;
+    }
+    
+    [Fact]
+    public void Renders_ScopedBlock()
+    {
+        var statements = Enumerable.Repeat(new ExpressionStatement(AstUtility.PrintCall(AstUtility.String("bruh"))), 5).ToList<Statement>();
+        var block = new ScopedBlock(statements);
+        var output = Render(block);
+        var expectedOutput = $"""
+                              do
+                                print("bruh")
+                                print("bruh")
+                                print("bruh")
+                                print("bruh")
+                                print("bruh")
+                              end
+
+                              """;
+    }
+    
+    [Fact]
+    public void Renders_MultiLineLineComment()
     {
         var comment = new MultiLineComment(string.Join('\n', Enumerable.Repeat("roblox-cs is the best!", 5)));
         var output = Render(comment);

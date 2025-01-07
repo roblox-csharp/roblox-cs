@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using RobloxCS.Shared;
 using RobloxCS.Transformers;
 
 namespace RobloxCS;
@@ -7,10 +8,8 @@ using TransformMethod = Func<SyntaxTree, ConfigData, SyntaxTree>;
 
 public static partial class BuiltInTransformers
 {
-    public static TransformMethod Main()
-    {
-        return (tree, config) => new MainTransformer(tree, config).TransformTree();
-    }
+    public static TransformMethod Main() =>
+        (tree, config) => new MainTransformer(tree, config).TransformTree();
 
     public static TransformMethod Get(string name)
     {

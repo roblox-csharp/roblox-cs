@@ -410,6 +410,8 @@ namespace RobloxCS.Luau
         }
 
         public static TypeRef? CreateTypeRef(TypeSyntax? type) => CreateTypeRef(type?.ToString());
+        
+        public static Literal String(string text) => new($"\"{text}\"");
 
         public static Literal Vararg() => new("...");
 
