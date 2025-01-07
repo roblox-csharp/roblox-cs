@@ -277,6 +277,17 @@ public class RenderingTest
     }
     
     [Fact]
+    public void Renders_TypeCasts()
+    {
+        var value = new IdentifierName("myValue");
+        var typeRef = new TypeRef("MyType");
+        var typeCast = new TypeCast(value, typeRef);
+        var output = Render(typeCast);
+        
+        Assert.Equal("myValue :: MyType", output);
+    }
+    
+    [Fact]
     public void Renders_ElementAccess()
     {
         var elementAccess = new ElementAccess(new IdentifierName("a"), new Literal("123"));
@@ -356,6 +367,15 @@ public class RenderingTest
         
         Assert.Equal("Abc", output);
     }
+    
+    [Fact]
+    public void Renders_Parenthesized()
+    {
+        var parenthesized = new Parenthesized(AstUtility.String("bruh"));
+        var output = Render(parenthesized);
+        
+        Assert.Equal("(\"bruh\")", output);
+    }
 
     [Fact]
     public void Renders_InterpolatedStrings()
@@ -381,6 +401,27 @@ public class RenderingTest
         var variable = new Variable(identifier, isLocal, value, typeRef);
         var output = Render(variable);
         Assert.Equal($"{(isLocal ? "local " : "")}abc: number = 69\n", output);
+    }
+    
+    [Fact]
+    public void Renders_VariableLists()
+    {
+        var identifier = new IdentifierName("abc");
+        var value = new Literal("69");
+        var typeRef = new TypeRef("number");
+        var variables = Enumerable.Repeat(new Variable(identifier, true, value, typeRef), 5).ToList();
+        var variableList = new VariableList(variables);
+        var output = Render(variableList);
+        const string expectedOutput = """
+                                      local abc: number = 69
+                                      local abc: number = 69
+                                      local abc: number = 69
+                                      local abc: number = 69
+                                      local abc: number = 69
+                                      
+                                      """;
+        
+        Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
     
     [Fact]
