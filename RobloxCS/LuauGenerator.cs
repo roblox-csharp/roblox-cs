@@ -817,21 +817,22 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         );
     }
 
-    public override Luau.Statement VisitEventFieldDeclaration(EventFieldDeclarationSyntax node) {
-        var klass = (ClassDeclarationSyntax)node.Parent!;
-
-        return new Luau.ExpressionStatement(
+    public override Luau.Block VisitEventFieldDeclaration(EventFieldDeclarationSyntax node) {
+        var classDeclaration = (ClassDeclarationSyntax)node.Parent!; // this should be temporary.
+        var statements = node.Declaration.Variables.Select(variable => new Luau.ExpressionStatement(
             new Luau.Assignment(
                 new Luau.MemberAccess(
-                    new Luau.IdentifierName(klass.Identifier.Text),
-                    new Luau.IdentifierName(node.Declaration.Variables[0].Identifier.Text)
+                    new Luau.IdentifierName(classDeclaration.Identifier.Text),
+                    new Luau.IdentifierName(variable.Identifier.Text) 
                 ),
                 new Luau.Call(
                     new Luau.QualifiedName(new Luau.IdentifierName("Signal"), new Luau.IdentifierName("new")),
                     new Luau.ArgumentList([])
                 )
             )
-        );
+        )).ToList<Luau.Statement>();
+
+        return new Luau.Block(statements);
     }
 
     private Luau.Expression HandlePattern(PatternSyntax node, Luau.Expression comparand)
