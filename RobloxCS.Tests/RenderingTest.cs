@@ -328,6 +328,20 @@ public class RenderingTest
         
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
+
+    [Fact]
+    public void Renders_AnonymousFunctions()
+    {
+        var body = new Block([new Return(new Literal("69"))]);
+        var function = new AnonymousFunction(new ParameterList([]), new TypeRef("number"), body);
+        var output = Render(function);
+        var expectedOutput = $"""
+                              function(): number
+                                return 69
+                              end
+
+                              """;
+    }
     
     [Theory]
     [InlineData(true)]

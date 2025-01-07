@@ -37,9 +37,7 @@
             AddChildren(AttributeLists);
         }
 
-        public override void Render(LuauWriter luau)
-        {
+        public override void Render(LuauWriter luau) =>
             luau.WriteFunction(Name, IsLocal, ParameterList, ReturnType, Body, AttributeLists);
-        }
     }
 }

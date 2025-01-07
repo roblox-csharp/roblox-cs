@@ -166,6 +166,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
                             new Luau.TableInitializer(
                                 [new Luau.AnonymousFunction(
                                     new Luau.ParameterList([]),
+                                    new Luau.TypeRef("string"),
                                     new Luau.Block([
                                         new Luau.Return(new Luau.Literal($"\"{nonGenericName}\""))
                                     ])
@@ -843,32 +844,50 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
 
     public override Luau.AnonymousFunction VisitParenthesizedLambdaExpression(ParenthesizedLambdaExpressionSyntax node)
     {
+        var typeSymbol = _semanticModel.GetTypeInfo(node.Body).Type;
+        var returnTypeName = typeSymbol != null
+            ? Luau.AstUtility.TypeNameFromSymbol(typeSymbol)
+            : null;
+        
+        var returnType = new Luau.TypeRef(returnTypeName?.ToString() ?? "nil");
         var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
         var body = node.ExpressionBody != null ?
             new Luau.Block([new Luau.ExpressionStatement(Visit<Luau.Expression>(node.ExpressionBody))])
             : Visit<Luau.Block?>(node.Block);
 
-        return new Luau.AnonymousFunction(parameterList, body);
+        return new Luau.AnonymousFunction(parameterList, returnType, body);
     }
 
     public override Luau.AnonymousFunction VisitSimpleLambdaExpression(SimpleLambdaExpressionSyntax node)
     {
+        var typeSymbol = _semanticModel.GetTypeInfo(node.Body).Type;
+        var returnTypeName = typeSymbol != null
+            ? Luau.AstUtility.TypeNameFromSymbol(typeSymbol)
+            : null;
+        
+        var returnType = new Luau.TypeRef(returnTypeName?.ToString() ?? "nil");
         var parameterList = new Luau.ParameterList([Visit<Luau.Parameter>(node.Parameter)]);
-        var body = node.ExpressionBody != null ?
-            new Luau.Block([new Luau.ExpressionStatement(Visit<Luau.Expression>(node.ExpressionBody))])
+        var body = node.ExpressionBody != null
+            ? new Luau.Block([new Luau.ExpressionStatement(Visit<Luau.Expression>(node.ExpressionBody))])
             : Visit<Luau.Block?>(node.Block);
 
-            return new Luau.AnonymousFunction(parameterList, body);
-        }
+        return new Luau.AnonymousFunction(parameterList, returnType, body);
+    }
 
     public override Luau.AnonymousFunction VisitAnonymousMethodExpression(AnonymousMethodExpressionSyntax node)
     {
+        var typeSymbol = _semanticModel.GetTypeInfo(node.Block).Type;
+        var returnTypeName = typeSymbol != null
+            ? Luau.AstUtility.TypeNameFromSymbol(typeSymbol)
+            : null;
+        
+        var returnType = new Luau.TypeRef(returnTypeName?.ToString() ?? "nil");
         var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
         var body = node.ExpressionBody != null ?
             new Luau.Block([new Luau.ExpressionStatement(Visit<Luau.Expression>(node.ExpressionBody))])
             : Visit<Luau.Block?>(node.Block);
 
-        return new Luau.AnonymousFunction(parameterList, body);
+        return new Luau.AnonymousFunction(parameterList, returnType, body);
     }
 
     public override Luau.Function VisitLocalFunctionStatement(LocalFunctionStatementSyntax node)
