@@ -1,4 +1,4 @@
-﻿using RobloxCS;
+﻿using RobloxCS.Luau;
 
 namespace RobloxCS.Tests;
 
@@ -9,10 +9,10 @@ public class RenderingTest
     [Fact]
     public void Renders_IterativeFor()
     {
-        var name = new Luau.IdentifierName("value");
-        var iterable = new Luau.IdentifierName("abc");
-        var body = new Luau.ExpressionStatement(Print(name));
-        var forStatement = new Luau.For([name], iterable, body);
+        var name = new IdentifierName("value");
+        var iterable = new IdentifierName("abc");
+        var body = new ExpressionStatement(AstUtility.PrintCall(name));
+        var forStatement = new For([name], iterable, body);
         var output = Render(forStatement);
         const string expectedOutput = """
                                       for _, value in abc do
@@ -27,12 +27,12 @@ public class RenderingTest
     [Fact]
     public void Renders_NumericFor()
     {
-        var name = new Luau.IdentifierName("i");
-        var minimum = new Luau.Literal("420");
-        var maximum = new Luau.Literal("69");
-        var increment = new Luau.Literal("-1");
-        var body = new Luau.ExpressionStatement(Print(new Luau.Literal("\"balls\"")));
-        var forStatement = new Luau.NumericFor(name, minimum, maximum, increment, body);
+        var name = new IdentifierName("i");
+        var minimum = new Literal("420");
+        var maximum = new Literal("69");
+        var increment = new Literal("-1");
+        var body = new ExpressionStatement(AstUtility.PrintCall(new Literal("\"balls\"")));
+        var forStatement = new NumericFor(name, minimum, maximum, increment, body);
         var output = Render(forStatement);
         const string expectedOutput = """
                                       for i = 420, 69, -1 do
@@ -47,9 +47,9 @@ public class RenderingTest
     [Fact]
     public void Renders_Repeat()
     {
-        var condition = new Luau.IdentifierName("balls");
-        var body = new Luau.ExpressionStatement(Print(new Luau.Literal("\"rah\"")));
-        var repeatStatement = new Luau.Repeat(condition, body);
+        var condition = new IdentifierName("balls");
+        var body = new ExpressionStatement(AstUtility.PrintCall(new Literal("\"rah\"")));
+        var repeatStatement = new Repeat(condition, body);
         var output = Render(repeatStatement);
         const string expectedOutput = """
                                       repeat 
@@ -64,9 +64,9 @@ public class RenderingTest
     [Fact]
     public void Renders_While()
     {
-        var condition = new Luau.IdentifierName("balls");
-        var body = new Luau.ExpressionStatement(Print(new Luau.Literal("\"rah\"")));
-        var whileStatement = new Luau.While(condition, body);
+        var condition = new IdentifierName("balls");
+        var body = new ExpressionStatement(AstUtility.PrintCall(new Literal("\"rah\"")));
+        var whileStatement = new While(condition, body);
         var output = Render(whileStatement);
         const string expectedOutput = """
                                       while balls do
@@ -81,10 +81,10 @@ public class RenderingTest
     [Fact]
     public void Renders_ExpressionalIf()
     {
-        var condition = new Luau.IdentifierName("runicIsCool");
-        var body = new Luau.Literal("\"im tha best\"");
-        var elseBranch = new Luau.Literal("\"im washed\"");
-        var ifExpression = new Luau.ExpressionalIf(condition, body, elseBranch, true);
+        var condition = new IdentifierName("runicIsCool");
+        var body = new Literal("\"im tha best\"");
+        var elseBranch = new Literal("\"im washed\"");
+        var ifExpression = new ExpressionalIf(condition, body, elseBranch, true);
         var output = Render(ifExpression);
         Assert.Equal("if runicIsCool then \"im tha best\" else \"im washed\"", output);
     }
@@ -92,16 +92,22 @@ public class RenderingTest
     [Fact]
     public void Renders_If()
     {
-        var condition = new Luau.IdentifierName("runicIsCool");
-        var body = new Luau.ExpressionStatement(Print(new Luau.Literal("\"im tha best\"")));
-        var elseBranch = new Luau.ExpressionStatement(Print(new Luau.Literal("\"im washed\"")));
-        var ifStatement = new Luau.If(condition, body, elseBranch);
+        var identifier = new IdentifierName("balls");
+        var condition1 = new BinaryOperator(identifier, "==", new Literal("69"));
+        var condition2 = new BinaryOperator(identifier, "==", new Literal("420"));
+        var body = new ExpressionStatement(AstUtility.PrintCall(new Literal("\"im tha best\"")));
+        var elseBody = new ExpressionStatement(AstUtility.PrintCall(new Literal("\"uhhhh\"")));
+        var elseifBody = new ExpressionStatement(AstUtility.PrintCall(new Literal("\"im washed\"")));
+        var elseifBranch = new If(condition2, elseifBody, elseBody);
+        var ifStatement = new If(condition1, body, elseifBranch);
         var output = Render(ifStatement);
         const string expectedOutput = """
-                                      if runicIsCool then
+                                      if balls == 69 then
                                         print("im tha best")
-                                      else
+                                      elseif balls == 420 then
                                         print("im washed")
+                                      else
+                                        print("uhhhh")
                                       end
                                       
                                       """;
@@ -112,7 +118,7 @@ public class RenderingTest
     [Fact]
     public void Renders_MappedTypes()
     {
-        var mappedType = new Luau.MappedType(new Luau.TypeRef("string"), new Luau.TypeRef("number"));
+        var mappedType = new MappedType(new TypeRef("string"), new TypeRef("number"));
         var output = Render(mappedType);
         Assert.Equal("{ [string]: number; }", output);
     }
@@ -120,8 +126,8 @@ public class RenderingTest
     [Fact]
     public void Renders_InterfaceTypes()
     {
-        var interfaceType = new Luau.InterfaceType(
-            [new Luau.FieldType("myField", new Luau.TypeRef("string"), true)],
+        var interfaceType = new InterfaceType(
+            [new FieldType("myField", new TypeRef("string"), true)],
             null,
             false
         );
@@ -139,7 +145,7 @@ public class RenderingTest
     [Fact]
     public void Renders_OptionalTypes()
     {
-        var optionalType = new Luau.OptionalType(new Luau.TypeRef("boolean"));
+        var optionalType = new OptionalType(new TypeRef("boolean"));
         var output = Render(optionalType);
         Assert.Equal("boolean?", output);
     }
@@ -147,9 +153,9 @@ public class RenderingTest
     [Fact]
     public void Renders_FunctionTypes()
     {
-        var functionType = new Luau.FunctionType(
-            [new Luau.ParameterType("myParam", new Luau.TypeRef("number"))],
-            new Luau.TypeRef("boolean")
+        var functionType = new FunctionType(
+            [new ParameterType("myParam", new TypeRef("number"))],
+            new TypeRef("boolean")
         );
         var output = Render(functionType);
         Assert.Equal("(myParam: number) -> boolean", output);
@@ -158,7 +164,7 @@ public class RenderingTest
     [Fact]
     public void Renders_ArrayTypes()
     {
-        var arrayType = new Luau.ArrayType(new Luau.TypeRef("string"));
+        var arrayType = new ArrayType(new TypeRef("string"));
         var output = Render(arrayType);
         Assert.Equal("{ string }", output);
     }
@@ -166,9 +172,9 @@ public class RenderingTest
     [Fact]
     public void Renders_TypeAliases()
     {
-        var name = new Luau.IdentifierName("MyType");
-        var value = new Luau.TypeRef("string");
-        var typeAlias = new Luau.TypeAlias(name, value);
+        var name = new IdentifierName("MyType");
+        var value = new TypeRef("string");
+        var typeAlias = new TypeAlias(name, value);
         var output = Render(typeAlias);
         Assert.Equal("type MyType = string\n", output);
     }
@@ -176,7 +182,7 @@ public class RenderingTest
     [Fact]
     public void Renders_ElementAccess()
     {
-        var elementAccess = new Luau.ElementAccess(new Luau.IdentifierName("a"), new Luau.Literal("123"));
+        var elementAccess = new ElementAccess(new IdentifierName("a"), new Literal("123"));
         var output = Render(elementAccess);
         Assert.Equal("a[123]", output);
     }
@@ -184,7 +190,7 @@ public class RenderingTest
     [Fact]
     public void Renders_MemberAccess()
     {
-        var memberAccess = new Luau.MemberAccess(new Luau.IdentifierName("a"), new Luau.IdentifierName("b"));
+        var memberAccess = new MemberAccess(new IdentifierName("a"), new IdentifierName("b"));
         var output = Render(memberAccess);
         Assert.Equal("a.b", output);
     }
@@ -192,8 +198,8 @@ public class RenderingTest
     [Fact]
     public void Renders_UnaryOperators()
     {
-        var operand = new Luau.IdentifierName("isActive");
-        var unaryOp = new Luau.UnaryOperator("not ", operand);
+        var operand = new IdentifierName("isActive");
+        var unaryOp = new UnaryOperator("not ", operand);
         var output = Render(unaryOp);
         Assert.Equal("not isActive", output);
     }
@@ -201,9 +207,9 @@ public class RenderingTest
     [Fact]
     public void Renders_BinaryOperators()
     {
-        var left = new Luau.Literal("69");
-        var right = new Luau.Literal("420");
-        var binaryOp = new Luau.BinaryOperator(left, "+", right);
+        var left = new Literal("69");
+        var right = new Literal("420");
+        var binaryOp = new BinaryOperator(left, "+", right);
         var output = Render(binaryOp);
         Assert.Equal("69 + 420", output);
     }
@@ -211,9 +217,9 @@ public class RenderingTest
     [Fact]
     public void Renders_Assignment()
     {
-        var target = new Luau.ElementAccess(new Luau.IdentifierName("a"), new Luau.Literal("69"));
-        var value = new Luau.Literal("420");
-        var assignment = new Luau.Assignment(target, value);
+        var target = new ElementAccess(new IdentifierName("a"), new Literal("69"));
+        var value = new Literal("420");
+        var assignment = new Assignment(target, value);
         var output = Render(assignment);
         Assert.Equal("a[69] = 420", output);
     }
@@ -223,10 +229,10 @@ public class RenderingTest
     [InlineData(false)]
     public void Renders_Variables(bool isLocal)
     {
-        var identifier = new Luau.IdentifierName("abc");
-        var value = new Luau.Literal("69");
-        var typeRef = new Luau.TypeRef("number");
-        var variable = new Luau.Variable(identifier, isLocal, value, typeRef);
+        var identifier = new IdentifierName("abc");
+        var value = new Literal("69");
+        var typeRef = new TypeRef("number");
+        var variable = new Variable(identifier, isLocal, value, typeRef);
         var output = Render(variable);
         Assert.Equal($"{(isLocal ? "local " : "")}abc: number = 69\n", output);
     }
@@ -234,14 +240,14 @@ public class RenderingTest
     [Fact]
     public void Renders_ParametersWithDefault()
     {
-        var identifier = new Luau.IdentifierName("myFunction");
-        var parameterIdentifier = new Luau.IdentifierName("x");
-        var parameterType = new Luau.TypeRef("number");
-        var parameterDefault = new Luau.Literal("69");
-        var body = new Luau.Block([]);
-        var parameter = new Luau.Parameter(parameterIdentifier, false, parameterDefault, parameterType);
-        var parameters = new Luau.ParameterList([parameter]);
-        var function = new Luau.Function(identifier, true, parameters, null, body);
+        var identifier = new IdentifierName("myFunction");
+        var parameterIdentifier = new IdentifierName("x");
+        var parameterType = new TypeRef("number");
+        var parameterDefault = new Literal("69");
+        var body = new Block([]);
+        var parameter = new Parameter(parameterIdentifier, false, parameterDefault, parameterType);
+        var parameters = new ParameterList([parameter]);
+        var function = new Function(identifier, true, parameters, null, body);
         var output = Render(function);
         const string expectedOutput = """
                                       local function myFunction(x: number?)
@@ -258,13 +264,13 @@ public class RenderingTest
     [Fact]
     public void Renders_StandardParameters()
     {
-        var identifier = new Luau.IdentifierName("myFunction");
-        var parameterIdentifier = new Luau.IdentifierName("x");
-        var parameterType = new Luau.TypeRef("number");
-        var body = new Luau.Block([]);
-        var parameter = new Luau.Parameter(parameterIdentifier, false, null, parameterType);
-        var parameters = new Luau.ParameterList([parameter]);
-        var function = new Luau.Function(identifier, true, parameters, null, body);
+        var identifier = new IdentifierName("myFunction");
+        var parameterIdentifier = new IdentifierName("x");
+        var parameterType = new TypeRef("number");
+        var body = new Block([]);
+        var parameter = new Parameter(parameterIdentifier, false, null, parameterType);
+        var parameters = new ParameterList([parameter]);
+        var function = new Function(identifier, true, parameters, null, body);
         var output = Render(function);
         const string expectedOutput = """
                                       local function myFunction(x: number)
@@ -278,13 +284,13 @@ public class RenderingTest
     [Fact]
     public void Renders_VarargParameters()
     {
-        var identifier = new Luau.IdentifierName("myFunction");
-        var parameterIdentifier = new Luau.IdentifierName("args");
-        var parameterType = new Luau.TypeRef("number");
-        var body = new Luau.Block([]);
-        var parameter = new Luau.Parameter(parameterIdentifier, true, null, parameterType);
-        var parameters = new Luau.ParameterList([parameter]);
-        var function = new Luau.Function(identifier, true, parameters, null, body);
+        var identifier = new IdentifierName("myFunction");
+        var parameterIdentifier = new IdentifierName("args");
+        var parameterType = new TypeRef("number");
+        var body = new Block([]);
+        var parameter = new Parameter(parameterIdentifier, true, null, parameterType);
+        var parameters = new ParameterList([parameter]);
+        var function = new Function(identifier, true, parameters, null, body);
         var output = Render(function);
         const string expectedOutput = """
                                       local function myFunction(...: number)
@@ -301,10 +307,10 @@ public class RenderingTest
     [InlineData(false)]
     public void Renders_Functions(bool isLocal)
     {
-        var identifier = new Luau.IdentifierName("myFunction");
-        var body = new Luau.Block([new Luau.Return(new Luau.Literal("69"))]);
-        var returnType = new Luau.TypeRef("number");
-        var function = new Luau.Function(identifier, isLocal, new Luau.ParameterList([]), returnType, body);
+        var identifier = new IdentifierName("myFunction");
+        var body = new Block([new Return(new Literal("69"))]);
+        var returnType = new TypeRef("number");
+        var function = new Function(identifier, isLocal, new ParameterList([]), returnType, body);
         var output = Render(function);
         var expectedOutput = $"""
                               {(isLocal ? "local " : "")}function myFunction(): number
@@ -315,16 +321,10 @@ public class RenderingTest
         
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
-    
-    private static Luau.Call Print(params List<Luau.Expression> args) =>
-        new Luau.Call(
-            new Luau.IdentifierName("print"),
-            new Luau.ArgumentList(args.ConvertAll(value => new Luau.Argument(value)))
-        );
 
-    private static string Render(Luau.Node node)
+    private static string Render(Node node)
     {
-        var writer = new Luau.LuauWriter();
+        var writer = new LuauWriter();
         node.Render(writer);
         return writer.ToString();
     }
