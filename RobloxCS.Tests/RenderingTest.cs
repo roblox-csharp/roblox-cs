@@ -356,6 +356,19 @@ public class RenderingTest
         
         Assert.Equal("Abc", output);
     }
+
+    [Fact]
+    public void Renders_InterpolatedStrings()
+    {
+        var stringInterpolation = new InterpolatedString([
+            new Literal("hello, "),
+            new Interpolation(new IdentifierName("name")),
+            new Literal("!"),
+        ]);
+        
+        var output = Render(stringInterpolation);
+        Assert.Equal("`hello, {name}!`", output);
+    }
     
     [Theory]
     [InlineData(true)]
