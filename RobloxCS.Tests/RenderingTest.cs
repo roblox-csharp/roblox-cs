@@ -43,7 +43,7 @@ public class RenderingTest
         var statements = Enumerable.Repeat(new ExpressionStatement(AstUtility.PrintCall(AstUtility.String("bruh"))), 5).ToList<Statement>();
         var block = new ScopedBlock(statements);
         var output = Render(block);
-        var expectedOutput = """
+        const string expectedOutput = """
                               do
                                 print("bruh")
                                 print("bruh")
@@ -53,6 +53,8 @@ public class RenderingTest
                               end
 
                               """;
+        
+        Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
     
     [Fact]
@@ -191,6 +193,15 @@ public class RenderingTest
                                       """;
         
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
+    }
+    
+    [Fact]
+    public void Renders_Calls()
+    {
+        var arguments = AstUtility.CreateArgumentList([new Literal("69"), new Literal("420"), AstUtility.String("abc")]);
+        var call = new Call(new IdentifierName("bigMen"), arguments);
+        var output = Render(call);
+        Assert.Equal("bigMen(69, 420, \"abc\"", output);
     }
 
     [Fact]
