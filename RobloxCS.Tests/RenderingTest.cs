@@ -1,5 +1,4 @@
 ﻿using RobloxCS.Luau;
-using RobloxCS.Shared;
 
 namespace RobloxCS.Tests;
 
@@ -11,11 +10,13 @@ public class RenderingTest
         var statement = new ExpressionStatement(AstUtility.PrintCall(AstUtility.String("bruh")));
         var ast = new AST([statement]);
         var output = Render(ast);
-        var expectedOutput = $"""
-                              print("bruh")
-                              return nil
+        const string expectedOutput = """
+                                       print("bruh")
+                                       return nil
 
-                              """;
+                                       """;
+        
+        Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
     
     [Fact]
@@ -24,14 +25,16 @@ public class RenderingTest
         var statements = Enumerable.Repeat(new ExpressionStatement(AstUtility.PrintCall(AstUtility.String("bruh"))), 5).ToList<Statement>();
         var block = new Block(statements);
         var output = Render(block);
-        var expectedOutput = $"""
-                              print("bruh")
-                              print("bruh")
-                              print("bruh")
-                              print("bruh")
-                              print("bruh")
+        const string expectedOutput = """
+                                       print("bruh")
+                                       print("bruh")
+                                       print("bruh")
+                                       print("bruh")
+                                       print("bruh")
 
-                              """;
+                                       """;
+        
+        Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
     
     [Fact]
@@ -40,7 +43,7 @@ public class RenderingTest
         var statements = Enumerable.Repeat(new ExpressionStatement(AstUtility.PrintCall(AstUtility.String("bruh"))), 5).ToList<Statement>();
         var block = new ScopedBlock(statements);
         var output = Render(block);
-        var expectedOutput = $"""
+        var expectedOutput = """
                               do
                                 print("bruh")
                                 print("bruh")
@@ -299,6 +302,42 @@ public class RenderingTest
         Assert.Equal("a[69] = 420", output);
     }
     
+    [Fact]
+    public void Renders_AssignmentFunctionName()
+    {
+        var functionName = new AssignmentFunctionName(new IdentifierName("Abc"), new IdentifierName("myMethod"), ':');
+        var output = Render(functionName);
+        
+        Assert.Equal("Abc:myMethod", output);
+    }
+    
+    [Fact]
+    public void Renders_QualifiedName()
+    {
+        var name = new QualifiedName(new IdentifierName("Abc"), new IdentifierName("myMethod"));
+        var output = Render(name);
+        
+        Assert.Equal("Abc.myMethod", output);
+    }
+    
+    [Fact]
+    public void Renders_GenericName()
+    {
+        var name = new GenericName("Abc", ["T", "U"]);
+        var output = Render(name);
+        
+        Assert.Equal("Abc<T, U>", output);
+    }
+    
+    [Fact]
+    public void Renders_IdentifierName()
+    {
+        var name = new IdentifierName("Abc");
+        var output = Render(name);
+        
+        Assert.Equal("Abc", output);
+    }
+    
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -383,12 +422,13 @@ public class RenderingTest
         var body = new Block([new Return(new Literal("69"))]);
         var function = new AnonymousFunction(new ParameterList([]), new TypeRef("number"), body);
         var output = Render(function);
-        var expectedOutput = $"""
+        const string expectedOutput = """
                               function(): number
                                 return 69
                               end
-
                               """;
+        
+        Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
     
     [Theory]
