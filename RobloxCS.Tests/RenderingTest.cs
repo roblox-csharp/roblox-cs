@@ -205,6 +205,14 @@ public class RenderingTest
     }
 
     [Fact]
+    public void Renders_ArgumentLists()
+    {
+        var arguments = AstUtility.CreateArgumentList([new Literal("69"), new Literal("420"), AstUtility.String("abc")]);
+        var output = Render(arguments);
+        Assert.Equal("(69, 420, \"abc\")", output);
+    }
+
+    [Fact]
     public void Renders_MappedTypes()
     {
         var mappedType = new MappedType(new TypeRef("string"), new TypeRef("number"));
