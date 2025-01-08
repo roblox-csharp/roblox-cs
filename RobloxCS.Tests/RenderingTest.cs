@@ -606,6 +606,24 @@ public class RenderingTest
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
 
+    [Fact]
+    public void Renders_Continue()
+    {
+        var @continue = new Continue();
+        var output = Render(@continue);
+        
+        Assert.Equal("continue", output);
+    }
+
+    [Fact]
+    public void Renders_Break()
+    {
+        var @break = new Break();
+        var output = Render(@break);
+        
+        Assert.Equal("break", output);
+    }
+
     private static string Render(Node node)
     {
         var writer = new LuauWriter();
