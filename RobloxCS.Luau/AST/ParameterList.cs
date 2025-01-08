@@ -1,20 +1,19 @@
-﻿namespace RobloxCS.Luau
+﻿namespace RobloxCS.Luau;
+
+public class ParameterList : Statement
 {
-    public class ParameterList : Statement
+    public List<Parameter> Parameters { get; }
+
+    public ParameterList(List<Parameter> parameters)
     {
-        public List<Parameter> Parameters { get; }
+        Parameters = parameters;
+        AddChildren(Parameters);
+    }
 
-        public ParameterList(List<Parameter> parameters)
-        {
-            Parameters = parameters;
-            AddChildren(Parameters);
-        }
-
-        public override void Render(LuauWriter luau)
-        {
-            luau.Write('(');
-            luau.WriteNodesCommaSeparated(Parameters);
-            luau.Write(')');
-        }
+    public override void Render(LuauWriter luau)
+    {
+        luau.Write('(');
+        luau.WriteNodesCommaSeparated(Parameters);
+        luau.Write(')');
     }
 }

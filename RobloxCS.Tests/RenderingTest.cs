@@ -285,7 +285,7 @@ public class RenderingTest
         var attribute = new BuiltInAttribute(new IdentifierName("native"));
         var output = Render(attribute);
         
-        Assert.Equal("@native", output);
+        Assert.Equal("@native\n", output);
     }
 
     [Fact]
@@ -418,21 +418,10 @@ public class RenderingTest
     }
     
     [Fact]
-    public void Renders_AssignmentFunctionName()
-    {
-        const string result = "Abc:myMethod";
-        var functionName = new AssignmentFunctionName(new IdentifierName("Abc"), new IdentifierName("myMethod"), ':');
-        var output = Render(functionName);
-        
-        Assert.Equal(result, output);
-        Assert.Equal(result, functionName.ToString());
-    }
-    
-    [Fact]
     public void Renders_QualifiedName()
     {
-        const string result = "Abc.myMethod";
-        var name = new QualifiedName(new IdentifierName("Abc"), new IdentifierName("myMethod"));
+        const string result = "Abc:myMethod";
+        var name = new QualifiedName(new IdentifierName("Abc"), new IdentifierName("myMethod"), ':');
         var output = Render(name);
         
         Assert.Equal(result, output);
@@ -615,6 +604,24 @@ public class RenderingTest
                               """;
         
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
+    }
+
+    [Fact]
+    public void Renders_Continue()
+    {
+        var @continue = new Continue();
+        var output = Render(@continue);
+        
+        Assert.Equal("continue\n", output);
+    }
+
+    [Fact]
+    public void Renders_Break()
+    {
+        var @break = new Break();
+        var output = Render(@break);
+        
+        Assert.Equal("break\n", output);
     }
 
     private static string Render(Node node)

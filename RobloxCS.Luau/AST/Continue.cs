@@ -1,10 +1,6 @@
-﻿namespace RobloxCS.Luau
+﻿namespace RobloxCS.Luau;
+
+public class Continue : Statement
 {
-    public class Continue : Statement
-    {
-        public override void Render(LuauWriter luau)
-        {
-            luau.WriteLine("continue");
-        }
-    }
+    public override void Render(LuauWriter luau) => luau.WriteLine("continue");
 }

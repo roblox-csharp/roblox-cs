@@ -1,10 +1,6 @@
-﻿namespace RobloxCS.Luau
+﻿namespace RobloxCS.Luau;
+
+public class Break : Statement
 {
-    public class Break : Statement
-    {
-        public override void Render(LuauWriter luau)
-        {
-            luau.WriteLine("break");
-        }
-    }
+    public override void Render(LuauWriter luau) => luau.WriteLine("break");
 }

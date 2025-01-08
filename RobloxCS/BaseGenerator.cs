@@ -85,7 +85,7 @@ public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharp
             body.Statements.Add(new Return(AstUtility.Nil()));
 
         return new Function(
-            new AssignmentFunctionName(nonGenericName, className, ':'),
+            new QualifiedName(nonGenericName, className, ':'),
             false,
             parameterList,
             new OptionalType(AstUtility.CreateTypeRef(className.ToString())!),

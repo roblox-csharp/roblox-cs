@@ -7,16 +7,21 @@ namespace RobloxCS;
 
 public static class TranspilerUtility
 {
-    public static string GenerateLua(SyntaxTree tree, CSharpCompilation compiler)
+    public static string GenerateLuau(SyntaxTree tree, CSharpCompilation compiler)
     {
-        var generator = new LuauGenerator(tree, compiler);
-        var luauAST = generator.GetLuauAST();
+        var luauAST = GetLuauAST(tree, compiler);
         var luau = new LuauWriter();
 
         return luau.Render(luauAST);
     }
+
+    public static AST GetLuauAST(SyntaxTree tree, CSharpCompilation compiler)
+    {
+        var generator = new LuauGenerator(tree, compiler);
+        return generator.GetLuauAST();
+    }
     
-    public static CSharpCompilation GetCompiler(List<SyntaxTree> trees, ConfigData? config = null)
+    public static CSharpCompilation GetCompiler(List<SyntaxTree> trees, ConfigData? config)
     {
         // config ??= ConfigReader.UnitTestingConfig;
         

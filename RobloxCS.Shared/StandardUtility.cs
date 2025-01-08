@@ -140,8 +140,10 @@ public static class StandardUtility
             "object" => "any",
             "void" or "null" => "nil",
             "char" or "Char" or "String" => "string",
-            "double" or "float" => "number",
-            _ => INTEGER_TYPES.Contains(csharpType) ? "number" : csharpType
+            "bool" => "boolean",
+            _ => INTEGER_TYPES.Contains(csharpType) || DECIMAL_TYPES.Contains(csharpType)
+                ? "number"
+                : csharpType
         };
     }
 
