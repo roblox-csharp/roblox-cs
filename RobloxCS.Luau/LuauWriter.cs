@@ -63,7 +63,7 @@
                 }
                 else if (parameter.Initializer != null)
                 {
-                    body.Statements.Insert(0, AstUtility.Initializer(parameter.Name, parameter.Initializer));
+                    body.Statements.Insert(0, AstUtility.DefaultValueInitializer(parameter.Name, parameter.Initializer));
                 }
             }
             body.Render(this);

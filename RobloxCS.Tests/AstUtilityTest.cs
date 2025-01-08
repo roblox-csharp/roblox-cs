@@ -4,13 +4,65 @@ namespace RobloxCS.Tests;
 
 public class AstUtilityTest
 {
+    [Fact]
+    public void AddOne()
+    {
+        var expression = AstUtility.AddOne(new IdentifierName("a"));
+        Assert.IsType<BinaryOperator>(expression);
+        
+        var binaryOperator = (BinaryOperator)expression;
+        Assert.IsType<IdentifierName>(binaryOperator.Left);
+        Assert.IsType<Literal>(binaryOperator.Right);
+        Assert.Equal("+", binaryOperator.Operator);
+
+        var identifier = (IdentifierName)binaryOperator.Left;
+        var literal = (Literal)binaryOperator.Right;
+        Assert.Equal("a", identifier.Text);
+        Assert.Equal("1", literal.ValueText);
+    }
+    
+    [Fact]
+    public void AddOne_AddsToLiteralValue()
+    {
+        var sum = AstUtility.AddOne(new Literal("1"));
+        Assert.IsType<Literal>(sum);
+        
+        var literal = (Literal)sum;
+        Assert.Equal("2", literal.ValueText);
+    }
+    
+    [Fact]
+    public void SubtractOne()
+    {
+        var expression = AstUtility.SubtractOne(new IdentifierName("a"));
+        Assert.IsType<BinaryOperator>(expression);
+        
+        var binaryOperator = (BinaryOperator)expression;
+        Assert.IsType<IdentifierName>(binaryOperator.Left);
+        Assert.IsType<Literal>(binaryOperator.Right);
+        Assert.Equal("-", binaryOperator.Operator);
+
+        var identifier = (IdentifierName)binaryOperator.Left;
+        var literal = (Literal)binaryOperator.Right;
+        Assert.Equal("a", identifier.Text);
+        Assert.Equal("1", literal.ValueText);
+    }
+    
+    [Fact]
+    public void SubtractOne_SubtractsFromLiteralValue()
+    {
+        var sum = AstUtility.SubtractOne(new Literal("2"));
+        Assert.IsType<Literal>(sum);
+        
+        var literal = (Literal)sum;
+        Assert.Equal("1", literal.ValueText);
+    }
+    
     [Theory]
     [InlineData("var")]
     [InlineData(null)]
-    public void CreateTypeRef_ReturnsNull(string? path)
-    {
+    public void CreateTypeRef_ReturnsNull(string? path) =>
         Assert.Null(AstUtility.CreateTypeRef(path));
-    }
     
     [Theory]
     [InlineData("string?", typeof(OptionalType))]

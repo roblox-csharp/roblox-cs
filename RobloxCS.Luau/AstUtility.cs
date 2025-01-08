@@ -162,7 +162,7 @@ public static class AstUtility
     /// <summary>
     /// Creates constructor info table for runtime type objects (via .GetType() and typeof())
     /// </summary>
-    public static TableInitializer CreateConstructorInfo(ConstructorInfo type)
+    private static TableInitializer CreateConstructorInfo(ConstructorInfo type)
     {
         List<Expression> keys = [
             new Literal("Name"),
@@ -176,11 +176,11 @@ public static class AstUtility
 
     /// <code>CS.defineGlobal(name, value)</code>
     public static Call DefineGlobal(Name name, Expression value) =>
-        CSCall("defineGlobal", new Literal($"\"{name}\""), value);
+        CSCall("defineGlobal", String(name.ToString()), value);
 
     /// <code>CS.getGlobal(name)</code>
     public static Call GetGlobal(Name name) =>
-        CSCall("getGlobal", new Literal($"\"{name}\""));
+        CSCall("getGlobal", String(name.ToString()));
 
     /// <summary>
     /// Creates a call to a CS library method
@@ -271,7 +271,7 @@ public static class AstUtility
     ///     name = initializer
     /// end
     /// </code>
-    public static If Initializer(Name name, Expression initializer) =>
+    public static If DefaultValueInitializer(Name name, Expression initializer) =>
         new(
             new BinaryOperator(name, "==", Nil()),
             new ExpressionStatement(new Assignment(name, initializer))
@@ -448,6 +448,4 @@ public static class AstUtility
     public static Literal Nil() => new("nil");
 
     public static TypeRef AnyType() => new("any");
-        
-        
 }
