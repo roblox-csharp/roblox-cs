@@ -416,14 +416,23 @@ public static class AstUtility
                 return null;
         }
 
-        var mappedType = StandardUtility.GetMappedType(typePath);
-        var arrayMatch = Regex.Match(mappedType, @"\{[a-zA-Z0-9]+\}");
-        if (mappedType.EndsWith('?'))
-            return new OptionalType(CreateTypeRef(mappedType.Replace("?", ""))!);
-        else if (arrayMatch.Success)
-            return new ArrayType(CreateTypeRef(arrayMatch.Value.Trim())!);
+        var mappedTypePath = StandardUtility.GetMappedType(typePath);
+        if (mappedTypePath.EndsWith('?'))
+            return new OptionalType(CreateTypeRef(mappedTypePath.TrimEnd('?'))!);
+        
+        var mappedTypeMatch = Regex.Match(mappedTypePath, @"\{\s*\[([a-zA-Z0-9]+)\]:\s*(.*)\s*\}");
+        if (mappedTypeMatch.Success)
+        {
+            var keyType = CreateTypeRef(mappedTypeMatch.Groups[1].Value)!;
+            var valueType = CreateTypeRef(mappedTypeMatch.Groups[2].Value)!;
+            return new MappedType(keyType, valueType);
+        }
+        
+        var arrayMatch = Regex.Match(mappedTypePath, @"\{\s*(.*)\s*\}");
+        if (arrayMatch.Success)
+            return new ArrayType(CreateTypeRef(arrayMatch.Groups[1].Value.Trim())!);
 
-        return new TypeRef(mappedType, rawPath: true);
+        return new TypeRef(mappedTypePath, rawPath: true);
     }
 
     public static TypeRef? CreateTypeRef(TypeSyntax? type) => CreateTypeRef(type?.ToString());
