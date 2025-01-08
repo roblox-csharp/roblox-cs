@@ -193,6 +193,17 @@ namespace RobloxCS.Luau
                 ),
                 CreateArgumentList(arguments.ToList())
             );
+
+        public static Variable SignalImport() =>
+            new(
+                new IdentifierName("Signal"),
+                true,
+                // temporary until RojoReader
+                RequireCall(new Luau.QualifiedName(
+                    new IdentifierName("rbxcs_include"),
+                    new IdentifierName("GoodSignal")
+                ))
+            );
         
         public static Call RequireCall(Expression modulePath) =>
             new(

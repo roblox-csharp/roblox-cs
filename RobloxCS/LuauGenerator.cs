@@ -25,19 +25,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
 
     public override Luau.AST VisitCompilationUnit(CompilationUnitSyntax node)
     {
-        List<Luau.Statement> statements = [
-            new Luau.SingleLineComment(Shared.Constants.HeaderComment + "\n\n"),
-            new Luau.Variable(
-                new Luau.IdentifierName("Signal"),
-                true,
-                // temporary until RojoReader
-                Luau.AstUtility.RequireCall(new Luau.QualifiedName(
-                    new Luau.IdentifierName("rbxcs_include"),
-                    new Luau.IdentifierName("GoodSignal")
-                ))
-            ),
-            new Luau.NoOp() // for the newline
-        ];
+        List<Luau.Statement> statements = [new Luau.SingleLineComment(Shared.Constants.HeaderComment + "\n\n")];
 
         void visitStatement(MemberDeclarationSyntax member)
         {
@@ -56,6 +44,14 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
                     : memberDeclarationSyntax.Kind()
             );
         }
+
+        if (node.DescendantNodes().Any(descendant =>
+                descendant.IsKind(SyntaxKind.EventDeclaration) || descendant.IsKind(SyntaxKind.EventFieldDeclaration)))
+        {
+            statements.Add(Luau.AstUtility.SignalImport());
+            statements.Add(new Luau.NoOp()); // for the newline
+        }
+        
 
         var hoistedNodes = node.Members.Where(checkGlobalKind);
         var regularNodes = node.Members.Where(member => !checkGlobalKind(member));
@@ -286,6 +282,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
                 )
             ));
 
+        statements.Add(new Luau.NoOp()); // for the newline
         return new Luau.Block(statements);
     }
 
@@ -338,26 +335,31 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         }
 
         return new Luau.Block([
-            new Luau.Variable(Luau.AstUtility.GetNonGenericName(name), true, null),
+            new Luau.Variable(Luau.AstUtility.GetNonGenericName(name), true),
             new Luau.ScopedBlock(statements),
-            new Luau.TypeAlias(name, finalType)
+            new Luau.TypeAlias(name, finalType),
+            new Luau.NoOp() // for the newline
         ]);
     }
     public override Luau.Block VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
     {
         var name = Luau.AstUtility.CreateSimpleName(node, registerIdentifier: true);
-        var members = new Luau.Block(node.Members.Select(Visit<Luau.Statement>).ToList());
         var typeRef = Luau.AstUtility.CreateTypeRef(name.ToString());
-        List<Luau.Statement> statements = [
+        var members = new Luau.Block(node.Members.Select(Visit<Luau.Statement>).ToList());
+        List<Luau.Statement> statements =
+        [
             new Luau.Variable(Luau.AstUtility.GetNonGenericName(name), true, new Luau.TableInitializer(), typeRef)
         ];
 
         if (IsGlobal(node))
             statements.Add(new Luau.ExpressionStatement(Luau.AstUtility.DefineGlobal(name, name)));
 
-        statements.Add(new Luau.ScopedBlock(members.Statements));
-        statements.Add(new Luau.TypeAlias(name, new Luau.TypeOfCall(name)));
-
+        statements.AddRange(
+            new Luau.ScopedBlock(members.Statements),
+            new Luau.TypeAlias(name, new Luau.TypeOfCall(name)),
+            new Luau.NoOp() // for the newline
+        );
+        
         return new Luau.Block(statements);
     }
 
