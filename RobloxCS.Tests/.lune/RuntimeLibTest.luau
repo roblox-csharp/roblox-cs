@@ -7,7 +7,7 @@ assert(true, CS.is(false, "boolean"))
 assert(true, CS.is(nil, "nil"))
 assert(true, CS.is(function() end, "function"))
 
-local MyClass: CS.Class = { __name = "MyClass" }
+local MyClass: CS.Class = { __className = "MyClass" }
 local myClass = { __className = "MyClass" }
 assert(true, CS.is(myClass, MyClass))
 

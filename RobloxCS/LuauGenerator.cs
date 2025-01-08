@@ -178,6 +178,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
 
         // TODO: maybe move this to AstUtility, this shit is huge
         var typeRef = Luau.AstUtility.CreateTypeRef(name.ToString())!;
+        var nameStringLiteral = Luau.AstUtility.String(nonGenericName.ToString());
         List<Luau.Statement> classMemberStatements = [
             new Luau.ExpressionStatement(
                 new Luau.Assignment(
@@ -190,9 +191,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
                                 [new Luau.AnonymousFunction(
                                     new Luau.ParameterList([]),
                                     new Luau.TypeRef("string"),
-                                    new Luau.Block([
-                                        new Luau.Return(new Luau.Literal($"\"{nonGenericName}\""))
-                                    ])
+                                    new Luau.Block([new Luau.Return(nameStringLiteral)])
                                 )],
                                 [new Luau.IdentifierName("__tostring")],
                                 true
@@ -208,6 +207,15 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
                         new Luau.IdentifierName("__index")
                     ),
                     nonGenericName
+                )
+            ),
+            new Luau.ExpressionStatement(
+                new Luau.Assignment(
+                    new Luau.MemberAccess(
+                        nonGenericName,
+                        new Luau.IdentifierName("__className")
+                    ),
+                    nameStringLiteral
                 )
             ),
             new Luau.Function(
