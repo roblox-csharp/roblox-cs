@@ -12,7 +12,12 @@ In no particular order:
 - [ ] a LOT more testing
 	- [ ] generation tests
     - [ ] luau rendering tests (mostly done)
+    - [ ] transformer tests
+    - [ ] runtime library tests
     - [ ] utility tests
+      - [ ] standard utility (started)
+      - [ ] ast utility
+      - [ ] file utility
 - [ ] save navigation (`a?.b?.c`)
 - [ ] macro `ToNumber()`, `ToUInt()`, `ToFloat()`, etc. (defined in Roblox.cs in RobloxCS.Types) to `tonumber()`
 - [ ] prefix increment/decrement (`++a`, `--a`)
