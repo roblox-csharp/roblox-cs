@@ -588,15 +588,15 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
 
     public override Luau.Node VisitAssignmentExpression(AssignmentExpressionSyntax node)
     {
+        var expanded = _macro.Assignment(Visit, node);
+        if (expanded != null)
+            return expanded;
+        
+        var mappedOperator = StandardUtility.GetMappedOperator(node.OperatorToken.Text);
         var name = Visit<Luau.AssignmentTarget>(node.Left);
         var value = Visit<Luau.Expression>(node.Right);
         if (node.IsKind(SyntaxKind.SimpleAssignmentExpression))
             return new Luau.Assignment(name, value);
-
-        var mappedOperator = StandardUtility.GetMappedOperator(node.OperatorToken.Text);
-        var bit32MethodName = StandardUtility.GetBit32MethodName(mappedOperator);
-        if (bit32MethodName != null)
-            return new Luau.Assignment(name, Luau.AstUtility.Bit32Call(bit32MethodName, name, value));
 
         return new Luau.BinaryOperator(name, mappedOperator, value);
     }
@@ -687,13 +687,13 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
 
     public override Luau.Node VisitBinaryExpression(BinaryExpressionSyntax node)
     {
+        var expanded = _macro.BinaryExpression(Visit, node);
+        if (expanded != null)
+            return expanded;
+
         var left = Visit<Luau.Expression>(node.Left);
         var right = Visit<Luau.Expression>(node.Right);
         var mappedOperator = StandardUtility.GetMappedOperator(node.OperatorToken.Text);
-        var bit32MethodName = StandardUtility.GetBit32MethodName(mappedOperator);
-        if (bit32MethodName != null)
-            return Luau.AstUtility.Bit32Call(bit32MethodName, left, right);
-
         return new Luau.BinaryOperator(left, mappedOperator, right);
     }
 

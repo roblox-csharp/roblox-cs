@@ -334,16 +334,16 @@ namespace RobloxCS.Luau
                 : simpleName.ToString());
         }
 
-        public static Name CreateName(string text)
+        public static Name CreateName(SyntaxNode node, string text, bool registerIdentifier = false, bool bypassReserved = false)
         {
-            Name expression = new IdentifierName(text);
+            Name name = CreateSimpleName(node, text, registerIdentifier, bypassReserved);
             var pieces = text.Split('.');
             if (pieces.Length <= 0)
-                return expression;
+                return name;
 
             return pieces
                 .Skip(1)
-                .Aggregate(expression, (current, piece) => new QualifiedName(current, new IdentifierName(piece)));
+                .Aggregate(name, (current, piece) => new QualifiedName(current, CreateSimpleName(node, piece)));
         }
         
         public static TNameNode CreateSimpleName<TNameNode>(SyntaxNode node, bool registerIdentifier = false, bool bypassReserved = false) 

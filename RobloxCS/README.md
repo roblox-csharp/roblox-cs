@@ -6,10 +6,13 @@ Key:
 - `?` -> will maybe be added
 
 In no particular order:
+- [ ] disallow method grouping with methods from objects/classes
 - [ ] only generate interface declarations & inherit from interfaces if they have methods with implementations
 - [ ] map `dynamic` to no type at all
 - [ ] a LOT more testing
 	- [ ] generation tests
+    - [ ] luau rendering tests (mostly done)
+    - [ ] utility tests
 - [ ] save navigation (`a?.b?.c`)
 - [ ] macro `ToNumber()`, `ToUInt()`, `ToFloat()`, etc. (defined in Roblox.cs in RobloxCS.Types) to `tonumber()`
 - [ ] prefix increment/decrement (`++a`, `--a`)
