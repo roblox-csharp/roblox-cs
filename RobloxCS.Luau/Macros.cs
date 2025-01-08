@@ -15,13 +15,83 @@ public enum MacroKind
     ObjectMethod,
     IEnumerableMethod,
     ListMethod,
-    DictionaryMethod
+    DictionaryMethod,
+    BitOperation
 }
 
 public class Macro(SemanticModel semanticModel)
 {
     private SemanticModel _semanticModel { get; } = semanticModel;
+
+    public Node? Assignment(Func<SyntaxNode, Node?> visit, AssignmentExpressionSyntax assignment)
+    {
+        var mappedOperator = StandardUtility.GetMappedOperator(assignment.OperatorToken.Text);
+        var bit32MethodName = StandardUtility.GetBit32MethodName(mappedOperator);
+        if (bit32MethodName != null)
+        {
+            var target = (AssignmentTarget)visit(assignment.Left)!;
+            var value = (Expression)visit(assignment.Right)!;
+            var bit32Call = AstUtility.Bit32Call(bit32MethodName, target, value);
+            bit32Call.MarkExpanded(MacroKind.BitOperation);
+            
+            return new Assignment(target, AstUtility.Bit32Call(bit32MethodName, target, value));
+        }
+
+        var leftSymbol = _semanticModel.GetSymbolInfo(assignment.Left).Symbol;
+        if (leftSymbol is IEventSymbol eventSymbol)
+        {
+            var symbolMetadata = SymbolMetadataManager.Get(eventSymbol);
+            symbolMetadata.EventConnectionName ??= AstUtility.CreateSimpleName<IdentifierName>(assignment, "conn_" + eventSymbol.Name, registerIdentifier: true);
+            
+            var connectionName = symbolMetadata.EventConnectionName;
+            switch (mappedOperator)
+            {
+                case "+=":
+                {
+                    var left = (Expression)visit(assignment.Left)!;
+                    var right = (Expression)visit(assignment.Right)!;
+                    return new Variable(
+                        connectionName,
+                        true,
+                        new Call(
+                            new MemberAccess(left, new IdentifierName("Connect"), ':'),
+                            new ArgumentList([new Argument(right)])
+                        )
+                    );
+                }
+                case "-=":
+                {
+                    return new Call(
+                        new MemberAccess(connectionName, new IdentifierName("Disconnect"), ':'),
+                        new ArgumentList([])
+                    );
+                }
+            }
+        }
+
+        return null;
+    }
+
+    public Expression? BinaryExpression(Func<SyntaxNode, Node?> visit, BinaryExpressionSyntax binaryExpression)
+    {
+        var mappedOperator = StandardUtility.GetMappedOperator(binaryExpression.OperatorToken.Text);
+        var bit32MethodName = StandardUtility.GetBit32MethodName(mappedOperator);
+        if (bit32MethodName != null)
+        {
+            var left = (Expression)visit(binaryExpression.Left)!;
+            var right = (Expression)visit(binaryExpression.Right)!;
+            var bit32Call = AstUtility.Bit32Call(bit32MethodName, left, right);
+            bit32Call.MarkExpanded(MacroKind.BitOperation);
+            
+            return bit32Call;
+        }
+
+        return null;
+    }
     
+    /// <summary>
+    /// Takes a C# generic name and expands the name into a macro'd type
+    /// </summary>
     public Name? GenericName(Func<SyntaxNode, Node?> visit, GenericNameSyntax genericName)
     {
         var typeInfo = _semanticModel.GetTypeInfo(genericName);
@@ -123,11 +193,11 @@ public class Macro(SemanticModel semanticModel)
     /// <returns>The expanded expression of the macro, or null if no macro was applied</returns>
     public Expression? ObjectCreation(Func<SyntaxNode, Node?> visit, BaseObjectCreationExpressionSyntax baseObjectCreation) {
         // generic objects
-        var type = (INamedTypeSymbol)(baseObjectCreation is ObjectCreationExpressionSyntax objectCreation
+        var type = (baseObjectCreation is ObjectCreationExpressionSyntax objectCreation
             ? _semanticModel.GetSymbolInfo(objectCreation.Type)
-            : _semanticModel.GetSymbolInfo(baseObjectCreation)).Symbol!.ContainingSymbol;
+            : _semanticModel.GetSymbolInfo(baseObjectCreation)).Symbol!.ContainingSymbol as INamedTypeSymbol;
         
-        if (type.TypeParameters.Length > 0) {
+        if (type is { TypeParameters.Length: > 0 }) {
             switch (type.Name) {
                 case "List":
                 {

@@ -25,6 +25,7 @@ jobs:
 
       - name: Run tests and generate coverage
         run: |
+          chmod +x ./RobloxCS.Tests/lune
           dotnet test -c Release --collect:"XPlat Code Coverage"
 
       - name: Convert coverage to LCOV

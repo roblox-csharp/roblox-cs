@@ -13,12 +13,12 @@ function CS.getGlobal<T>(name: string): T -- TODO: if getting namespace call get
 end
 
 export type Class = {
-    __name: string; -- prob temporary
+    __className: string; -- prob temporary
 } -- stub
 
 function CS.is(object: any, class: Class | string): boolean
-    if typeof(class) == "table" and type(class.__name) == "string" then
-		return typeof(object) == "table" and typeof(object.__className) == "string" and object.__className == class.__name
+    if typeof(class) == "table" and typeof(class.__className) == "string" then
+		return typeof(object) == "table" and typeof(object.__className) == "string" and object.__className == class.__className
 	end
 
 	-- metatable check
@@ -56,7 +56,7 @@ self.Message = message
 
 @native
 function mt.__tostring(): string
-    return `{self["$className"]}: {self.Message}`
+    return `{self.__className}: {self.Message}`
 end
 
 @native
@@ -75,10 +75,10 @@ function CS.try(block: () -> nil, finallyBlock: () -> nil, catchBlocks: { CatchB
     local success: boolean, ex: Exception | string | nil = pcall(block)
     if not success then
         if typeof(ex) == "string" then
-            ex = CS.getGlobal("Exception").new(ex, false)
+            ex = CS.getGlobal("Exception").new(ex, false) :: Exception
         end
         for _, catchBlock in catchBlocks do
-            if catchBlock.exceptionClass ~= nil and catchBlock.exceptionClass ~= (ex :: Exception)["$className"] then continue end
+            if catchBlock.exceptionClass ~= nil and catchBlock.exceptionClass ~= (ex :: Exception).__className then continue end
             catchBlock.block(ex :: Exception, (ex :: Exception).Throw)
         end
     end

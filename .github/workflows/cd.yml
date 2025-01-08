@@ -30,7 +30,9 @@ jobs:
         run: dotnet pack -c Release
 
       - name: Run tests
-        run: dotnet test --verbosity normal
+        run: |
+          chmod +x ./RobloxCS.Tests/lune
+          dotnet test
 
       - name: Check if version is already published
         id: check_version

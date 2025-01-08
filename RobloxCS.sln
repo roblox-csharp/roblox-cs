@@ -9,11 +9,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RobloxCS.Luau", "RobloxCS.L
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution", "Solution", "{44CF4B5D-C4EB-41BF-8D70-20D5213AFA4A}"
 	ProjectSection(SolutionItems) = preProject
-		.gitignore = .gitignore
 		.github\workflows\ci.yml = .github\workflows\ci.yml
 		test.cs = test.cs
 		.github\workflows\cd.yml = .github\workflows\cd.yml
 		README.md = README.md
+		.gitignore = .gitignore
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RobloxCS.Tests", "RobloxCS.Tests\RobloxCS.Tests.csproj", "{D63E7B66-97C2-4948-8BAE-FA548C066DCE}"
