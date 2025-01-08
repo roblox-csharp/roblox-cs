@@ -23,4 +23,8 @@
       <ProjectReference Include="..\RobloxCS\RobloxCS.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Content Include=".lune\RuntimeLibTest.luau" />
+    </ItemGroup>
+
 </Project>
