@@ -141,6 +141,7 @@ public static class StandardUtility
             "void" or "null" => "nil",
             "char" or "Char" or "String" => "string",
             "double" or "float" => "number",
+            "bool" or "Boolean" => "boolean",
             _ => INTEGER_TYPES.Contains(csharpType) ? "number" : csharpType
         };
     }
