@@ -1,6 +1,6 @@
 using Microsoft.CodeAnalysis;
 
-namespace RobloxCS;
+namespace RobloxCS.Luau;
 
 public class SymbolMetadata
 {

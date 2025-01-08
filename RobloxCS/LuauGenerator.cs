@@ -215,7 +215,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
                 )
             ),
             new Luau.Function(
-                new Luau.AssignmentFunctionName(nonGenericName, new Luau.IdentifierName("new")),
+                new Luau.QualifiedName(nonGenericName, new Luau.IdentifierName("new")),
                 false,
                 constructor.ParameterList,
                 typeRef,
@@ -992,16 +992,12 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
                 return new Luau.BuiltInAttribute(new Luau.IdentifierName("native"));
         }
 
-        Logger.UnsupportedError(node, "Non-builtin attributes");
+        Logger.UnsupportedError(node, "User-defined attributes");
         return null;
     }
 
-    public override Luau.AttributeList VisitAttributeList(AttributeListSyntax node)
-    {
-        var attributes = node.Attributes.Select(Visit<Luau.BaseAttribute>).ToList();
-
-        return new Luau.AttributeList(attributes);
-    }
+    public override Luau.AttributeList VisitAttributeList(AttributeListSyntax node) =>
+        new(node.Attributes.Select(Visit).Where(luauNode => luauNode != null)!.ToList<Luau.Node>());
 
     public override Luau.Statement VisitGlobalStatement(GlobalStatementSyntax node)
     {
@@ -1015,14 +1011,13 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
     }
 
     public override Luau.ParameterList VisitParameterList(ParameterListSyntax node) =>
-        new Luau.ParameterList(node.Parameters.Select(Visit).OfType<Luau.Parameter>().ToList());
+        new(node.Parameters.Select(Visit).OfType<Luau.Parameter>().ToList());
 
     public override Luau.Statement VisitLocalDeclarationStatement(LocalDeclarationStatementSyntax node) =>
         Visit<Luau.Statement>(node.Declaration);
 
     public override Luau.VariableList VisitVariableDeclaration(VariableDeclarationSyntax node)
     {
-        var typeRef = Luau.AstUtility.CreateTypeRef(node.Type);
         var variables = node.Variables.Select(Visit).OfType<Luau.Variable>().ToList();
 
         return new Luau.VariableList(variables);

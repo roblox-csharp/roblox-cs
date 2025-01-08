@@ -1,18 +1,8 @@
-﻿namespace RobloxCS.Luau
+﻿namespace RobloxCS.Luau;
+
+public class TypeRef(string path, bool rawPath = false) : Expression
 {
-    public class TypeRef : Expression
-    {
-        public string Path { get; protected set; }
-        public bool IsNullable { get; protected set; }
+    public string Path { get; protected init; } = rawPath ? path : AstUtility.CreateTypeRef(path)!.Path;
 
-        public TypeRef(string path, bool rawPath = false)
-        {
-            Path = rawPath ? path : AstUtility.CreateTypeRef(path)!.Path;
-        }
-
-        public override void Render(LuauWriter luau)
-        {
-            luau.Write(Path);
-        }
-    }
+    public override void Render(LuauWriter luau) => luau.Write(Path);
 }

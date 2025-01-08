@@ -418,21 +418,10 @@ public class RenderingTest
     }
     
     [Fact]
-    public void Renders_AssignmentFunctionName()
-    {
-        const string result = "Abc:myMethod";
-        var functionName = new AssignmentFunctionName(new IdentifierName("Abc"), new IdentifierName("myMethod"), ':');
-        var output = Render(functionName);
-        
-        Assert.Equal(result, output);
-        Assert.Equal(result, functionName.ToString());
-    }
-    
-    [Fact]
     public void Renders_QualifiedName()
     {
-        const string result = "Abc.myMethod";
-        var name = new QualifiedName(new IdentifierName("Abc"), new IdentifierName("myMethod"));
+        const string result = "Abc:myMethod";
+        var name = new QualifiedName(new IdentifierName("Abc"), new IdentifierName("myMethod"), ':');
         var output = Render(name);
         
         Assert.Equal(result, output);
