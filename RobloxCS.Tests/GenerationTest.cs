@@ -1,3 +1,4 @@
+using System.Linq.Expressions;
 using RobloxCS.Luau;
 
 namespace RobloxCS.Tests;
@@ -5,9 +6,62 @@ namespace RobloxCS.Tests;
 public class GenerationTest
 {
     [Fact]
+    public void Generates_MemberAssignment()
+    {
+        const string name = "ParentNamespace";
+        const string otherName = "ChildNamespace";
+        var ast = Generate($"namespace {name}.{otherName};");
+        Assert.NotEmpty(ast.Statements);
+        
+        var globalStatements = ast.Statements.Skip(1).ToList();
+        Assert.IsType<Block>(globalStatements.First());
+        
+        var block = (Block)globalStatements.First();
+        var statements = block.Statements;
+        Assert.Equal(5, statements.Count);
+        
+        var secondStatement = statements.Skip(1).First();
+        Assert.IsType<ScopedBlock>(secondStatement);
+        
+        var nestedBlock = (ScopedBlock)secondStatement;
+        Assert.Single(nestedBlock.Statements);
+        
+        var nestedStatement = nestedBlock.Statements.First();
+        Assert.IsType<Block>(nestedStatement);
+        
+        var doubleNestedBlock = (Block)nestedStatement;
+        Assert.Equal(4, doubleNestedBlock.Statements.Count); // 3
+        
+        var doubleNestedStatement = doubleNestedBlock.Statements.Skip(1).First();
+        Assert.IsType<ScopedBlock>(doubleNestedStatement);
+            
+        var memberAssignment = doubleNestedBlock.Statements.SkipLast(1).Last();
+        Assert.IsType<ExpressionStatement>(memberAssignment);
+        
+        var expressionStatement = (ExpressionStatement)memberAssignment;
+        Assert.IsType<Assignment>(expressionStatement.Expression);
+        
+        var assignment = (Assignment)expressionStatement.Expression;
+        Assert.IsType<MemberAccess>(assignment.Target);
+        Assert.IsType<IdentifierName>(assignment.Value);
+
+        var memberAccess = (MemberAccess)assignment.Target;
+        Assert.IsType<IdentifierName>(memberAccess.Expression);
+        Assert.IsType<IdentifierName>(memberAccess.Name);
+        
+        var left = (IdentifierName)memberAccess.Expression;
+        var right = (IdentifierName)memberAccess.Name;
+        Assert.Equal(name, left.ToString());
+        Assert.Equal(otherName, right.ToString());
+        
+        var value = (IdentifierName)assignment.Value;
+        Assert.Equal(otherName, value.ToString());
+    }
+    
+    [Fact]
     public void Generates_GlobalAssignment()
     {
-        const string name = "MyNamespace";
+        const string name = "Xyz";
         var ast = Generate($"namespace {name};");
         Assert.NotEmpty(ast.Statements);
         
@@ -16,7 +70,7 @@ public class GenerationTest
         
         var block = (Block)globalStatements.First();
         var statements = block.Statements;
-        Assert.Equal(5, statements.Count); // 5
+        Assert.Equal(5, statements.Count); // 4
         
         var globalAssignment = statements.SkipLast(2).Last();
         Assert.IsType<ExpressionStatement>(globalAssignment);
