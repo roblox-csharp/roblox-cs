@@ -255,7 +255,7 @@ public static class AstUtility
     public static ArgumentList CreateArgumentList(List<Expression> arguments) =>
         new(arguments.ConvertAll(expression => new Argument(expression)));
 
-    public static SimpleName TypeNameFromSymbol(ITypeSymbol symbol)
+    public static SimpleName TypeNameFromSymbol(ISymbol symbol)
     {
         if (symbol is not INamedTypeSymbol { TypeParameters.Length: > 0 } namedTypeSymbol)
             return new IdentifierName(symbol.Name);

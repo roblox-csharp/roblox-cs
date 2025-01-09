@@ -4,7 +4,7 @@ public class TableInitializer : Expression
 {
     public List<Expression> Values { get; }
     public List<Expression> Keys { get; }
-    public List<KeyValuePair<Expression, Expression>> Entries { get; }
+    public List<KeyValuePair<Expression, Expression>> KeyValuePairs { get; }
     public bool TreatIdentifiersAsKeyNames { get; }
 
     public TableInitializer(List<Expression>? values = null,
@@ -15,14 +15,14 @@ public class TableInitializer : Expression
         Values = values ?? [];
         Keys = keys ?? [];
 
-        Entries = [];
+        KeyValuePairs = [];
         for (var i = 0; i < Math.Max(Values.Count, Keys.Count); i++)
         {
             var key = Keys.ElementAtOrDefault(i);
             var value = Values.ElementAtOrDefault(i);
             if (key == null || value == null) continue;
             
-            Entries.Add(KeyValuePair.Create(key, value));
+            KeyValuePairs.Add(KeyValuePair.Create(key, value));
         }
             
         AddChildren(Values);

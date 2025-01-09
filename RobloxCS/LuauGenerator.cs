@@ -489,7 +489,11 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
     public override Luau.Node? VisitImplicitObjectCreationExpression(ImplicitObjectCreationExpressionSyntax node)
     {
         // TODO: handle non-null node.Initializer (prob won't be supported)
-        var classSymbol = (ITypeSymbol)_semanticModel.GetSymbolInfo(node).Symbol!.ContainingSymbol;
+        var baseSymbol = _semanticModel.GetSymbolInfo(node).Symbol;
+        var classSymbol = baseSymbol?.ContainingSymbol ?? baseSymbol;
+        if (classSymbol == null)
+            throw Logger.CodegenError(node, "Unable to resolve class symbol for implicit object creation");
+        
         var name = Luau.AstUtility.TypeNameFromSymbol(classSymbol);
         var nonGenericName = Luau.AstUtility.GetNonGenericName(name);
         var argumentList = Visit<Luau.ArgumentList>(node.ArgumentList);

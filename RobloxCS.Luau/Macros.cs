@@ -195,7 +195,7 @@ public class Macro(SemanticModel semanticModel)
         // generic objects
         var type = (baseObjectCreation is ObjectCreationExpressionSyntax objectCreation
             ? _semanticModel.GetSymbolInfo(objectCreation.Type)
-            : _semanticModel.GetSymbolInfo(baseObjectCreation)).Symbol!.ContainingSymbol as INamedTypeSymbol;
+            : _semanticModel.GetSymbolInfo(baseObjectCreation)).Symbol?.ContainingSymbol as INamedTypeSymbol;
         
         if (type is { TypeParameters.Length: > 0 }) {
             switch (type.Name) {
