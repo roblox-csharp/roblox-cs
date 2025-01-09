@@ -305,22 +305,22 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
                 true,
                 new Luau.TableInitializer(enumValues, enumKeys, true)
             ),
-            Luau.AstUtility.DefineGlobalOrMember(node, name)
+            Luau.AstUtility.DefineGlobalOrMember(node, name),
+            new Luau.TypeAlias(name, finalType)
         ];
 
         if (node.Parent is CompilationUnitSyntax)
             statements.Add(new Luau.NoOp()); // for the newline
-
-        statements.Add(new Luau.TypeAlias(name, finalType));
+        
         return new Luau.Block(statements);
     }
     public override Luau.Block VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
     {
-        var name = Luau.AstUtility.CreateSimpleName(node, registerIdentifier: true);
+        var name = Luau.AstUtility.CreateSimpleName<Luau.IdentifierName>(node, registerIdentifier: true);
         var members = new Luau.Block(node.Members.Select(Visit<Luau.Statement>).ToList());
         List<Luau.Statement> statements =
         [
-            new Luau.Variable(Luau.AstUtility.GetNonGenericName(name), true, new Luau.TableInitializer()),
+            new Luau.Variable(name, true, new Luau.TableInitializer()),
             new Luau.ScopedBlock(members.Statements),
             Luau.AstUtility.DefineGlobalOrMember(node, name),
             new Luau.TypeAlias(name, new Luau.TypeOfCall(name))
@@ -336,6 +336,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
     {
         var condition = Visit<Luau.Expression>(node.Condition);
         var body = Visit<Luau.Statement>(node.Statement);
+        
         return new Luau.Repeat(new Luau.UnaryOperator("not ", condition), body);
     }
 
@@ -343,6 +344,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
     {
         var condition = Visit<Luau.Expression>(node.Condition);
         var body = Visit<Luau.Statement>(node.Statement);
+        
         return new Luau.While(condition, body);
     }
 
@@ -351,7 +353,18 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         var condition = Visit<Luau.Expression>(node.Condition);
         var body = Visit<Luau.Expression>(node.WhenTrue);
         var elseBranch = Visit<Luau.Expression>(node.WhenFalse);
+        
         return new Luau.ExpressionalIf(condition, body, elseBranch);
+    }
+
+    public override Luau.ExpressionalIf VisitConditionalAccessExpression(ConditionalAccessExpressionSyntax node)
+    {
+        var comparand = Visit<Luau.Expression>(node.Expression);
+        var nil = Luau.AstUtility.Nil();
+        var condition = new Luau.BinaryOperator(comparand, "==", nil);
+        var elseBranch = Visit<Luau.Expression>(node.WhenNotNull);
+        
+        return new Luau.ExpressionalIf(condition, nil, elseBranch);
     }
 
     public override Luau.If VisitIfStatement(IfStatementSyntax node)
@@ -359,6 +372,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         var condition = Visit<Luau.Expression>(node.Condition);
         var body = Visit<Luau.Statement>(node.Statement);
         var elseBranch = Visit<Luau.Statement?>(node.Else?.Statement);
+        
         return new Luau.If(condition, body, elseBranch);
     }
 
@@ -475,7 +489,11 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
     public override Luau.Node? VisitImplicitObjectCreationExpression(ImplicitObjectCreationExpressionSyntax node)
     {
         // TODO: handle non-null node.Initializer (prob won't be supported)
-        var classSymbol = (ITypeSymbol)_semanticModel.GetSymbolInfo(node).Symbol!.ContainingSymbol;
+        var baseSymbol = _semanticModel.GetSymbolInfo(node).Symbol;
+        var classSymbol = baseSymbol?.ContainingSymbol ?? baseSymbol;
+        if (classSymbol == null)
+            throw Logger.CodegenError(node, "Unable to resolve class symbol for implicit object creation");
+        
         var name = Luau.AstUtility.TypeNameFromSymbol(classSymbol);
         var nonGenericName = Luau.AstUtility.GetNonGenericName(name);
         var argumentList = Visit<Luau.ArgumentList>(node.ArgumentList);

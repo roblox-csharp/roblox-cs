@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RobloxCS.Shared;
 
 namespace RobloxCS.Transformers;
 
@@ -26,7 +27,26 @@ public sealed class MainTransformer(SyntaxTree tree, ConfigData config) : BaseTr
     // Turn file-scoped namespaces into regular namespaces (to reduce code duplication)
     public override SyntaxNode? VisitFileScopedNamespaceDeclaration(FileScopedNamespaceDeclarationSyntax node) =>
         VisitNamespaceDeclaration(SyntaxFactory.NamespaceDeclaration(node.AttributeLists, node.Modifiers, node.Name, node.Externs, node.Usings, node.Members));
-    
+
+    public override SyntaxNode? VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
+    {
+        if (node.Name is QualifiedNameSyntax qualifiedName)
+        {
+            var pieces = StandardUtility.GetNamesFromNode(qualifiedName);
+            var firstName = pieces.First();
+            var newFullName = StandardUtility.GetNameNode(pieces.Skip(1).ToList());
+            var childNamespace = node.WithName(newFullName);
+            
+            node = node
+                .WithName(SyntaxFactory.IdentifierName(firstName))
+                .WithExterns([])
+                .WithUsings([])
+                .WithMembers([childNamespace]);
+        }
+        
+        return base.VisitNamespaceDeclaration(node);
+    }
+
     // Return an IsPatternExpression if the binary operator is `is`
     public override SyntaxNode? VisitBinaryExpression(BinaryExpressionSyntax node)
     {
@@ -45,16 +65,24 @@ public sealed class MainTransformer(SyntaxTree tree, ConfigData config) : BaseTr
         return base.VisitConditionalAccessExpression(newNode);
     }
 
-    private static ExpressionSyntax? ProcessWhenNotNull(ExpressionSyntax expression, ExpressionSyntax? whenNotNull)
+    private ExpressionSyntax? ProcessWhenNotNull(ExpressionSyntax expression, ExpressionSyntax? whenNotNull)
     {
         if (whenNotNull == null)
             return null;
 
         return whenNotNull switch
         {
+            MemberAccessExpressionSyntax memberAccess => SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression, expression, memberAccess.Name
+            ),
+                
             MemberBindingExpressionSyntax memberBinding => SyntaxFactory.MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression, expression, memberBinding.Name
             ),
+            
+            ConditionalAccessExpressionSyntax conditionalAccess => conditionalAccess
+                .WithExpression(ProcessWhenNotNull(expression, conditionalAccess.Expression) ?? conditionalAccess.Expression)
+                .WithWhenNotNull(ProcessWhenNotNull(expression, conditionalAccess.WhenNotNull) ?? conditionalAccess.WhenNotNull),
             
             // dumb nested switch
             InvocationExpressionSyntax invocation => invocation.WithExpression((invocation.Expression switch
@@ -63,22 +91,18 @@ public sealed class MainTransformer(SyntaxTree tree, ConfigData config) : BaseTr
                     SyntaxKind.SimpleMemberAccessExpression, expression, memberAccess.Name
                 ),
                 
+                MemberBindingExpressionSyntax memberBinding => SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression, expression, memberBinding.Name
+                ),
+                
                 ConditionalAccessExpressionSyntax nestedConditional => ProcessWhenNotNull(
                     nestedConditional.WhenNotNull, expression
                 ),
                 
-                MemberBindingExpressionSyntax memberBinding => SyntaxFactory.MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression, expression, memberBinding.Name
-               ),
-                
                 _ => SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, expression,
-                    SyntaxFactory.IdentifierName(invocation.Expression.ToString())
+                    (Visit(invocation.Expression) as SimpleNameSyntax)!
                 )
             })!),
-            
-            ConditionalAccessExpressionSyntax conditionalAccess => conditionalAccess
-                .WithExpression(ProcessWhenNotNull(expression, conditionalAccess.Expression) ?? conditionalAccess.Expression)
-                .WithWhenNotNull(ProcessWhenNotNull(expression, conditionalAccess.WhenNotNull) ?? conditionalAccess.WhenNotNull),
             
             _ => null
         };

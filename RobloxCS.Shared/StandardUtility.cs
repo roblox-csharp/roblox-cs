@@ -84,27 +84,6 @@ public static class StandardUtility
         return member;
     }
 
-    public static void PrettyPrint(object? obj)
-    {
-        if (obj == null)
-        {
-            Console.WriteLine("null");
-            return;
-        }
-
-        var type = obj.GetType();
-        var properties = type.GetProperties(BindingFlags.Public | BindingFlags.Instance);
-        var result = $"{type.Name}:\n";
-
-        foreach (var property in properties)
-        {
-            var value = property.GetValue(obj, null);
-            result += $"  {property.Name}: {value}\n";
-        }
-
-        Console.WriteLine(result);
-    }
-
     public static List<T> FilterDuplicates<T>(IEnumerable<T> items, IEqualityComparer<T> comparer) where T : notnull
     {
         var seen = new Dictionary<T, bool>(comparer);
@@ -133,6 +112,7 @@ public static class StandardUtility
             var typeArgs = ExtractTypeArguments(csharpType).ConvertAll(GetMappedType);
             var returnType = typeArgs.Last();
             typeArgs = typeArgs.SkipLast(1).ToList();
+            
             return $"({string.Join(", ", typeArgs)}) -> {returnType}";
         }
 
@@ -141,7 +121,7 @@ public static class StandardUtility
             "object" => "any",
             "void" or "null" => "nil",
             "char" or "Char" or "String" => "string",
-            "bool" => "boolean",
+            "Boolean" or "bool" => "boolean",
             _ => INTEGER_TYPES.Contains(csharpType) || DECIMAL_TYPES.Contains(csharpType)
                 ? "number"
                 : csharpType
@@ -198,6 +178,16 @@ public static class StandardUtility
     public static bool IsGlobal(SyntaxNode node) =>
         node.Parent.IsKind(SyntaxKind.GlobalStatement) || node.Parent.IsKind(SyntaxKind.CompilationUnit);
 
+    public static NameSyntax GetNameNode(List<string> pieces)
+    {
+        if (pieces.Count <= 1)
+            return SyntaxFactory.IdentifierName(pieces.FirstOrDefault() ?? "");
+        
+        var left = GetNameNode(pieces.SkipLast(1).ToList());
+        var right = SyntaxFactory.IdentifierName(pieces.Last());
+        return SyntaxFactory.QualifiedName(left, right);
+    }
+
     public static List<string> GetNamesFromNode(SyntaxNode? node)
     {
         if (node is BaseExpressionSyntax)
@@ -231,20 +221,23 @@ public static class StandardUtility
         }
 
         var childNodes = node.ChildNodes().ToList();
-        var qualifiedNameNodes = node is QualifiedNameSyntax qualifiedName
+        var qualifiedNameNodes = (node is QualifiedNameSyntax qualifiedName
             ? [qualifiedName]
-            : childNodes.OfType<QualifiedNameSyntax>();
-        var simpleNameNodes = node is SimpleNameSyntax simpleName
+            : childNodes.OfType<QualifiedNameSyntax>()).ToList();
+        var simpleNameNodes = (node is SimpleNameSyntax simpleName
             ? [simpleName]
-            : childNodes.OfType<SimpleNameSyntax>();
-            
-        foreach (var qualifiedNameNode in qualifiedNameNodes)
-        {
-            names.AddRange(GetNamesFromNode(qualifiedNameNode.Left).Select(name => name.Trim()));
-            names.AddRange(GetNamesFromNode(qualifiedNameNode.Right).Select(name => name.Trim()));
-        }
+            : childNodes.OfType<SimpleNameSyntax>()).ToList();
+        
+        if (simpleNameNodes.Count <= 1)
+            foreach (var qualifiedNameNode in qualifiedNameNodes)
+            {
+                names.AddRange(GetNamesFromNode(qualifiedNameNode.Left).Select(name => name.Trim()));
+                names.AddRange(GetNamesFromNode(qualifiedNameNode.Right).Select(name => name.Trim()));
+            }
 
-        names.AddRange(simpleNameNodes.Select(simpleNameNode => simpleNameNode.ToString().Trim()));
+        if (qualifiedNameNodes.Count <= 1)
+            names.AddRange(simpleNameNodes.Select(simpleNameNode => simpleNameNode.ToString().Trim()));
+        
         return addGenerics(names);
     }
 }

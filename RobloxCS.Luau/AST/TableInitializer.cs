@@ -1,12 +1,35 @@
 ﻿namespace RobloxCS.Luau;
 
-public class TableInitializer(
-    List<Expression>? values = null,
-    List<Expression>? keys = null,
-    bool treatIdentifiersAsKeyNames = false) : Expression
+public class TableInitializer : Expression
 {
-    public List<Expression> Values { get; } = values ?? [];
-    public List<Expression> Keys { get; } = keys ?? [];
+    public List<Expression> Values { get; }
+    public List<Expression> Keys { get; }
+    public List<KeyValuePair<Expression, Expression>> KeyValuePairs { get; }
+    public bool TreatIdentifiersAsKeyNames { get; }
+
+    public TableInitializer(List<Expression>? values = null,
+        List<Expression>? keys = null,
+        bool treatIdentifiersAsKeyNames = false)
+    {
+        TreatIdentifiersAsKeyNames = treatIdentifiersAsKeyNames;
+        Values = values ?? [];
+        Keys = keys ?? [];
+
+        KeyValuePairs = [];
+        for (var i = 0; i < Math.Max(Values.Count, Keys.Count); i++)
+        {
+            var key = Keys.ElementAtOrDefault(i);
+            var value = Values.ElementAtOrDefault(i);
+            if (key == null || value == null) continue;
+            
+            KeyValuePairs.Add(KeyValuePair.Create(key, value));
+        }
+            
+        AddChildren(Values);
+        AddChildren(Keys);
+    }
+
+    
 
     public override void Render(LuauWriter luau)
     {
@@ -25,11 +48,11 @@ public class TableInitializer(
             var key = Keys.ElementAtOrDefault(index);
             if (key != null)
             {
-                if (!treatIdentifiersAsKeyNames || key is not IdentifierName)
+                if (!TreatIdentifiersAsKeyNames || key is not IdentifierName)
                     luau.Write('[');
                 
                 key.Render(luau);
-                if (!treatIdentifiersAsKeyNames || key is not IdentifierName)
+                if (!TreatIdentifiersAsKeyNames || key is not IdentifierName)
                     luau.Write(']');
                 
                 luau.Write(" = ");

@@ -255,7 +255,7 @@ public static class AstUtility
     public static ArgumentList CreateArgumentList(List<Expression> arguments) =>
         new(arguments.ConvertAll(expression => new Argument(expression)));
 
-    public static SimpleName TypeNameFromSymbol(ITypeSymbol symbol)
+    public static SimpleName TypeNameFromSymbol(ISymbol symbol)
     {
         if (symbol is not INamedTypeSymbol { TypeParameters.Length: > 0 } namedTypeSymbol)
             return new IdentifierName(symbol.Name);
@@ -366,6 +366,11 @@ public static class AstUtility
         return new IdentifierName(simpleName is GenericName genericName 
             ? genericName.Text
             : simpleName.ToString());
+    }
+
+    public static Name CreateName(SyntaxNode node, bool registerIdentifier = false, bool bypassReserved = false)
+    {
+        return CreateName(node, string.Join("", StandardUtility.GetNamesFromNode(node)), registerIdentifier, bypassReserved);
     }
 
     public static Name CreateName(SyntaxNode node, string text, bool registerIdentifier = false, bool bypassReserved = false)

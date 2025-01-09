@@ -5,9 +5,329 @@ namespace RobloxCS.Tests;
 public class GenerationTest
 {
     [Fact]
+    public void Generates_ListType()
+    {
+        var ast = Generate("using System.Collections.Generic;\nList<int> l = [];");
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<VariableList>(statement);
+        
+        var variableList = (VariableList)statement;
+        var variable = variableList.Variables.First();
+        Assert.Equal("l", variable.Name.ToString()); // temp
+        Assert.IsType<TableInitializer>(variable.Initializer);
+        Assert.IsType<ArrayType>(variable.Type);
+        
+        var arrayType = (ArrayType)variable.Type;
+        Assert.Equal("number", arrayType.ElementType.Path);
+    }
+    
+    [Theory]
+    [InlineData("var list = new List<int>();")]
+    [InlineData("var list = new List<int>() { };")]
+    [InlineData("List<int> list = [];")]
+    [InlineData("List<int> list = new();")]
+    public void Generates_ListCreation(string source)
+    {
+        var ast = Generate("using System.Collections.Generic;\n" + source);
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<VariableList>(statement);
+        
+        var variableList = (VariableList)statement;
+        var variable = variableList.Variables.First();
+        Assert.StartsWith("list", variable.Name.ToString()); // temp
+        Assert.IsType<TableInitializer>(variable.Initializer);
+        
+        var table = (TableInitializer)variable.Initializer;
+        Assert.Empty(table.KeyValuePairs);
+    }
+    
+    [Fact]
+    public void Generates_SafeNavigation()
+    {
+        var ast = Generate("a?.b?.c;");
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<ExpressionStatement>(statement);
+        
+        var expressionStatement = (ExpressionStatement)statement;
+        Assert.IsType<ExpressionalIf>(expressionStatement.Expression);
+        
+        var expressionalIf = (ExpressionalIf)expressionStatement.Expression;
+        Assert.IsType<Literal>(expressionalIf.Body);
+        
+        var body = (Literal)expressionalIf.Body;
+        Assert.Equal("nil", body.ValueText);
+        Assert.IsType<BinaryOperator>(expressionalIf.Condition);
+        
+        var condition = (BinaryOperator)expressionalIf.Condition;
+        Assert.IsType<IdentifierName>(condition.Left);
+        Assert.IsType<Literal>(condition.Right);
+        Assert.Equal("==", condition.Operator);
+        
+        var conditionName = (IdentifierName)condition.Left;
+        var conditionValue = (Literal)condition.Right;
+        Assert.Equal("a", conditionName.ToString());
+        Assert.Equal("nil", conditionValue.ValueText);
+        Assert.IsType<ExpressionalIf>(expressionalIf.ElseBranch);
+        
+        var nestedExpressionalIf = (ExpressionalIf)expressionalIf.ElseBranch;
+        Assert.Equal("nil", body.ValueText);
+        Assert.IsType<BinaryOperator>(expressionalIf.Condition);
+        
+        var nestedCondition = (BinaryOperator)nestedExpressionalIf.Condition;
+        Assert.IsType<MemberAccess>(nestedCondition.Left);
+        Assert.IsType<Literal>(nestedCondition.Right);
+        Assert.Equal("==", nestedCondition.Operator);
+        
+        var nestedConditionExpression = (MemberAccess)nestedCondition.Left;
+        Assert.IsType<IdentifierName>(nestedConditionExpression.Expression);
+        Assert.IsType<IdentifierName>(nestedConditionExpression.Name);
+
+        var leftName = (IdentifierName)nestedConditionExpression.Expression;
+        var rightName = (IdentifierName)nestedConditionExpression.Name;
+        Assert.Equal("a", leftName.ToString());
+        Assert.Equal("b", rightName.ToString());
+        
+        var nestedConditionValue = (Literal)nestedCondition.Right;
+        Assert.Equal("nil", nestedConditionValue.ValueText);
+        Assert.IsType<MemberAccess>(nestedExpressionalIf.ElseBranch);
+        
+        var memberAccess = (MemberAccess)nestedExpressionalIf.ElseBranch;
+        Assert.IsType<MemberAccess>(memberAccess.Expression);
+        Assert.IsType<IdentifierName>(memberAccess.Name);
+        
+        var leftMemberAccess = (MemberAccess)memberAccess.Expression;
+        Assert.IsType<IdentifierName>(leftMemberAccess.Expression);
+        Assert.IsType<IdentifierName>(leftMemberAccess.Name);
+        
+        var finalNameLeft = (IdentifierName)leftMemberAccess.Expression;
+        var finalNameMiddle = (IdentifierName)leftMemberAccess.Name;
+        var finalNameRight = (IdentifierName)memberAccess.Name;
+        Assert.Equal("a", finalNameLeft.ToString());
+        Assert.Equal("b", finalNameMiddle.ToString());
+        Assert.Equal("c", finalNameRight.ToString());
+    }
+    
+    [Fact]
+    public void Generates_ShorthandNumericFor()
+    {
+        var ast = Generate("for (var i = 0; i < 10; i++) continue;");
+        Assert.NotEmpty(ast.Statements);
+        
+        var statements = ast.Statements.Skip(1).ToList();
+        Assert.Single(statements);
+        Assert.IsType<NumericFor>(statements.First());
+        
+        var numericFor = (NumericFor)statements.First();
+        Assert.IsType<Literal>(numericFor.Minimum);
+        Assert.IsType<Literal>(numericFor.Maximum);
+        Assert.Null(numericFor.IncrementBy);
+        
+        var minimum = (Literal)numericFor.Minimum;
+        var maximum = (Literal)numericFor.Maximum;
+        Assert.Equal("0", minimum.ValueText);
+        Assert.Equal("9", maximum.ValueText);
+        Assert.Equal("i", numericFor.Name.ToString());
+
+        var statement = numericFor.Body;
+        Assert.IsType<Continue>(statement);
+    }
+
+    [Fact]
+    public void Generates_NativeAttribute()
+    {
+        var ast = Generate("[Native] void abc() {}");
+        Assert.NotEmpty(ast.Statements);
+        
+        var statements = ast.Statements.Skip(1).ToList();
+        Assert.Single(statements);
+        Assert.IsType<Function>(statements.First());
+        
+        var function = (Function)statements.First();
+        Assert.Single(function.AttributeLists);
+
+        var attributeList = function.AttributeLists.First();
+        Assert.Single(attributeList.Attributes);
+        Assert.IsType<BuiltInAttribute>(attributeList.Attributes.First());
+        
+        var attribute = (BuiltInAttribute)attributeList.Attributes.First();
+        Assert.Equal("native", attribute.Name.ToString());
+    }
+    
+    // TODO: uncomment when complex expressions are macro'd
+    // [Fact]
+    // public void Generates_ExpressionalIncrement()
+    // {
+    //     var ast = Generate("var x = a++;");
+    //     Assert.NotEmpty(ast.Statements);
+    //     
+    //     var statements = ast.Statements.Skip(1).ToList();
+    //     Assert.Equal(3, statements.Count);
+    //     
+    //     var firstStatement = statements[0];
+    //     var secondStatement = statements[1];
+    //     var thirdStatement = statements[2];
+    //     Assert.IsType<Variable>(firstStatement);
+    //     Assert.IsType<ExpressionStatement>(secondStatement);
+    //     Assert.IsType<VariableList>(thirdStatement);
+    //     
+    //     var tempVariable = (Variable)firstStatement;
+    //     Assert.Equal("_original", tempVariable.Name.ToString());
+    //     Assert.IsType<IdentifierName>(tempVariable.Initializer);
+    //     
+    //     var tempInitializer = (IdentifierName)tempVariable.Initializer;
+    //     Assert.Equal("a", tempInitializer.ToString());
+    //     
+    //     var expressionStatement = (ExpressionStatement)secondStatement;
+    //     Assert.IsType<BinaryOperator>(expressionStatement.Expression);
+    //     
+    //     var binaryOperator = (BinaryOperator)expressionStatement.Expression;
+    //     Assert.IsType<IdentifierName>(binaryOperator.Left);
+    //     Assert.IsType<Literal>(binaryOperator.Right);
+    //     
+    //     var left = (IdentifierName)binaryOperator.Left;
+    //     var right = (Literal)binaryOperator.Right;
+    //     Assert.Equal("a", left.ToString());
+    //     Assert.Equal("1", right.ValueText);
+    //     
+    //     var variableList = (VariableList)thirdStatement;
+    //     Assert.Single(variableList.Variables);
+    //     
+    //     var variable = variableList.Variables.First();
+    //     Assert.Equal("x", variable.Name.ToString());
+    //     Assert.IsType<IdentifierName>(variable.Initializer);
+    //     
+    //     var initializer = (IdentifierName)variable.Initializer;
+    //     Assert.Equal("_original", initializer.ToString());
+    // }
+    
+    [Fact]
+    public void Generates_Increment()
+    {
+        var ast = Generate("a++;");
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<ExpressionStatement>(statement);
+        
+        var expressionStatement = (ExpressionStatement)statement;
+        Assert.IsType<BinaryOperator>(expressionStatement.Expression);
+        
+        var binaryOperator = (BinaryOperator)expressionStatement.Expression;
+        Assert.IsType<IdentifierName>(binaryOperator.Left);
+        Assert.IsType<Literal>(binaryOperator.Right);
+        Assert.Equal("+=", binaryOperator.Operator);
+        
+        var left = (IdentifierName)binaryOperator.Left;
+        var right = (Literal)binaryOperator.Right;
+        Assert.Equal("a", left.ToString());
+        Assert.Equal("1", right.ValueText);
+    }
+    
+    [Fact]
+    public void Generates_MemberAssignment()
+    {
+        const string name = "ParentNamespace";
+        const string otherName = "ChildNamespace";
+        var ast = Generate($"namespace {name}.{otherName};");
+        Assert.NotEmpty(ast.Statements);
+        
+        var globalStatements = ast.Statements.Skip(1).ToList();
+        Assert.IsType<Block>(globalStatements.First());
+        
+        var block = (Block)globalStatements.First();
+        var statements = block.Statements;
+        Assert.Equal(5, statements.Count);
+        
+        var secondStatement = statements.Skip(1).First();
+        Assert.IsType<ScopedBlock>(secondStatement);
+        
+        var nestedBlock = (ScopedBlock)secondStatement;
+        Assert.Single(nestedBlock.Statements);
+        
+        var nestedStatement = nestedBlock.Statements.First();
+        Assert.IsType<Block>(nestedStatement);
+        
+        var doubleNestedBlock = (Block)nestedStatement;
+        Assert.Equal(4, doubleNestedBlock.Statements.Count); // 3
+        
+        var doubleNestedStatement = doubleNestedBlock.Statements.Skip(1).First();
+        Assert.IsType<ScopedBlock>(doubleNestedStatement);
+            
+        var memberAssignment = doubleNestedBlock.Statements.SkipLast(1).Last();
+        Assert.IsType<ExpressionStatement>(memberAssignment);
+        
+        var expressionStatement = (ExpressionStatement)memberAssignment;
+        Assert.IsType<Assignment>(expressionStatement.Expression);
+        
+        var assignment = (Assignment)expressionStatement.Expression;
+        Assert.IsType<MemberAccess>(assignment.Target);
+        Assert.IsType<IdentifierName>(assignment.Value);
+
+        var memberAccess = (MemberAccess)assignment.Target;
+        Assert.IsType<IdentifierName>(memberAccess.Expression);
+        Assert.IsType<IdentifierName>(memberAccess.Name);
+        
+        var left = (IdentifierName)memberAccess.Expression;
+        var right = (IdentifierName)memberAccess.Name;
+        Assert.Equal(name, left.ToString());
+        Assert.Equal(otherName, right.ToString());
+        
+        var value = (IdentifierName)assignment.Value;
+        Assert.Equal(otherName, value.ToString());
+    }
+    
+    [Fact]
+    public void Generates_GlobalAssignment()
+    {
+        const string name = "Xyz";
+        var ast = Generate($"namespace {name};");
+        Assert.NotEmpty(ast.Statements);
+        
+        var globalStatements = ast.Statements.Skip(1).ToList();
+        Assert.IsType<Block>(globalStatements.First());
+        
+        var block = (Block)globalStatements.First();
+        var statements = block.Statements;
+        Assert.Equal(5, statements.Count); // 4
+        
+        var globalAssignment = statements.SkipLast(2).Last();
+        Assert.IsType<ExpressionStatement>(globalAssignment);
+        
+        var expressionStatement = (ExpressionStatement)globalAssignment;
+        Assert.IsType<Call>(expressionStatement.Expression);
+        
+        var call = (Call)expressionStatement.Expression;
+        Assert.IsType<MemberAccess>(call.Callee);
+        
+        var memberAccess = (MemberAccess)call.Callee;
+        Assert.IsType<IdentifierName>(memberAccess.Expression);
+        Assert.IsType<IdentifierName>(memberAccess.Name);
+        
+        var left = (IdentifierName)memberAccess.Expression;
+        var right = (IdentifierName)memberAccess.Name;
+        Assert.Equal("CS", left.ToString());
+        Assert.Equal("defineGlobal", right.ToString());
+        Assert.NotEmpty(call.ArgumentList.Arguments);
+        Assert.IsType<Literal>(call.ArgumentList.Arguments.First().Expression);
+        Assert.IsType<IdentifierName>(call.ArgumentList.Arguments.Last().Expression);
+        
+        var nameLiteral = (Literal)call.ArgumentList.Arguments.First().Expression;
+        var value = (IdentifierName)call.ArgumentList.Arguments.Last().Expression;
+        Assert.Equal($"\"{name}\"", nameLiteral.ValueText);
+        Assert.Equal(name, value.ToString());
+    }
+    
+    [Fact]
     public void Generates_Namespaces()
     {
-        var ast = Generate("namespace MyNamespace { enum Abc { A } }");
+        const string name = "MyNamespace";
+        var ast = Generate($"namespace {name} {{ enum Abc {{ A }} }}");
         Assert.NotEmpty(ast.Statements);
         
         var globalStatements = ast.Statements.Skip(1).ToList();
@@ -29,7 +349,7 @@ public class GenerationTest
         var initialDeclaration = (Variable)firstStatement;
         Assert.Null(initialDeclaration.Type);
         Assert.IsType<TableInitializer>(initialDeclaration.Initializer);
-        Assert.Equal("MyNamespace", initialDeclaration.Name.ToString());
+        Assert.Equal(name, initialDeclaration.Name.ToString());
         
         var scopedBlock = (ScopedBlock)secondStatement;
         Assert.NotEmpty(scopedBlock.Statements);
@@ -46,8 +366,68 @@ public class GenerationTest
         Assert.IsType<Call>(expressionStatement.Expression);
 
         var typeAlias = (TypeAlias)fourthStatement;
-        Assert.Equal("MyNamespace", typeAlias.Name.ToString());
+        Assert.Equal(name, typeAlias.Name.ToString());
         Assert.IsType<TypeOfCall>(typeAlias.Type);
+    }
+    
+    [Fact]
+    public void Generates_Enums()
+    {
+        const string name = "Abc";
+        var ast = Generate($"enum {name} {{ A, B, C = 5, D, E = 10, F }}");
+        Assert.NotEmpty(ast.Statements);
+        
+        var globalStatements = ast.Statements.Skip(1).ToList();
+        Assert.IsType<Block>(globalStatements.First());
+        
+        var block = (Block)globalStatements.First();
+        var statements = block.Statements;
+        Assert.Equal(4, statements.Count);
+        Assert.IsType<Variable>(statements[0]);
+        
+        var variable = (Variable)statements[0];
+        Assert.Equal(name, variable.Name.ToString());
+        Assert.IsType<TableInitializer>(variable.Initializer);
+
+        var expectedTable = new Dictionary<string, string>()
+        {
+            { "A", "0" },
+            { "B", "1" },
+            { "C", "5" },
+            { "D", "6" },
+            { "E", "10" },
+            { "F", "11" },
+        };
+        
+        var table = (TableInitializer)variable.Initializer;
+        Assert.Equal(expectedTable.Count, table.KeyValuePairs.Count);
+        Assert.True(table.TreatIdentifiersAsKeyNames);
+        
+        var index = 0;
+        foreach (var (expectedKey, expectedValueText) in expectedTable)
+        {
+            var actualEntry = table.KeyValuePairs.ElementAtOrDefault(index++);
+            Assert.IsType<IdentifierName>(actualEntry.Key);
+            Assert.IsType<Literal>(actualEntry.Value);
+            
+            var keyName = (IdentifierName)actualEntry.Key;
+            Assert.Equal(expectedKey, keyName.ToString());
+            
+            var literal = (Literal)actualEntry.Value;
+            Assert.Equal(expectedValueText, literal.ValueText);
+        }
+        
+        Assert.IsType<ExpressionStatement>(statements[1]);
+        
+        var expressionStatement = (ExpressionStatement)statements[1];
+        Assert.IsType<Call>(expressionStatement.Expression);
+        
+        Assert.IsType<TypeAlias>(statements[2]);
+        var typeAlias = (TypeAlias)statements[2];
+        Assert.Equal(name, typeAlias.Name.ToString());
+        Assert.IsType<IndexCall>(typeAlias.Type);
+        
+        Assert.IsType<NoOp>(statements[3]);
     }
     
     [Theory]
@@ -128,7 +508,7 @@ public class GenerationTest
     [Theory]
     [InlineData("object abc123;", "abc123")]
     [InlineData("object @bruh;", "bruh")]
-    [InlineData("object abc;", "abc")]
+    [InlineData("object yang;", "yang")]
     public void Generates_Identifiers(string csharpSource, string expectedLuauIdentifier)
     {
         var ast = Generate(csharpSource);
