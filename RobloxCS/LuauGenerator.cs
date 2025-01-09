@@ -316,11 +316,11 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
     }
     public override Luau.Block VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
     {
-        var name = Luau.AstUtility.CreateSimpleName(node, registerIdentifier: true);
+        var name = Luau.AstUtility.CreateSimpleName<Luau.IdentifierName>(node, registerIdentifier: true);
         var members = new Luau.Block(node.Members.Select(Visit<Luau.Statement>).ToList());
         List<Luau.Statement> statements =
         [
-            new Luau.Variable(Luau.AstUtility.GetNonGenericName(name), true, new Luau.TableInitializer()),
+            new Luau.Variable(name, true, new Luau.TableInitializer()),
             new Luau.ScopedBlock(members.Statements),
             Luau.AstUtility.DefineGlobalOrMember(node, name),
             new Luau.TypeAlias(name, new Luau.TypeOfCall(name))

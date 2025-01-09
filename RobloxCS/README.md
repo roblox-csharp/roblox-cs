@@ -10,13 +10,14 @@ In no particular order:
 - [ ] only generate interface declarations & inherit from interfaces if they have methods with implementations
 - [ ] map `dynamic` to no type at all
 - [ ] a LOT more testing
-	- [ ] generation tests
+	- [ ] generation tests (started)
     - [ ] luau rendering tests (mostly done)
     - [ ] transformer tests
-    - [ ] runtime library tests
+      - [ ] main transformer (started)
+    - [ ] runtime library tests (started)
     - [ ] utility tests
       - [ ] standard utility (started)
-      - [ ] ast utility
+      - [ ] ast utility (started)
       - [ ] file utility
 - [ ] save navigation (`a?.b?.c`)
 - [ ] macro `ToNumber()`, `ToUInt()`, `ToFloat()`, etc. (defined in Roblox.cs in RobloxCS.Types) to `tonumber()`

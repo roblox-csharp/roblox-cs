@@ -5,6 +5,76 @@ namespace RobloxCS.Tests;
 
 public class GenerationTest
 {
+    // TODO: uncomment when complex expressions are macro'd
+    // [Fact]
+    // public void Generates_ExpressionalIncrement()
+    // {
+    //     var ast = Generate("var x = a++;");
+    //     Assert.NotEmpty(ast.Statements);
+    //     
+    //     var statements = ast.Statements.Skip(1).ToList();
+    //     Assert.Equal(3, statements.Count);
+    //     
+    //     var firstStatement = statements[0];
+    //     var secondStatement = statements[1];
+    //     var thirdStatement = statements[2];
+    //     Assert.IsType<Variable>(firstStatement);
+    //     Assert.IsType<ExpressionStatement>(secondStatement);
+    //     Assert.IsType<VariableList>(thirdStatement);
+    //     
+    //     var tempVariable = (Variable)firstStatement;
+    //     Assert.Equal("_original", tempVariable.Name.ToString());
+    //     Assert.IsType<IdentifierName>(tempVariable.Initializer);
+    //     
+    //     var tempInitializer = (IdentifierName)tempVariable.Initializer;
+    //     Assert.Equal("a", tempInitializer.ToString());
+    //     
+    //     var expressionStatement = (ExpressionStatement)secondStatement;
+    //     Assert.IsType<BinaryOperator>(expressionStatement.Expression);
+    //     
+    //     var binaryOperator = (BinaryOperator)expressionStatement.Expression;
+    //     Assert.IsType<IdentifierName>(binaryOperator.Left);
+    //     Assert.IsType<Literal>(binaryOperator.Right);
+    //     
+    //     var left = (IdentifierName)binaryOperator.Left;
+    //     var right = (Literal)binaryOperator.Right;
+    //     Assert.Equal("a", left.ToString());
+    //     Assert.Equal("1", right.ValueText);
+    //     
+    //     var variableList = (VariableList)thirdStatement;
+    //     Assert.Single(variableList.Variables);
+    //     
+    //     var variable = variableList.Variables.First();
+    //     Assert.Equal("x", variable.Name.ToString());
+    //     Assert.IsType<IdentifierName>(variable.Initializer);
+    //     
+    //     var initializer = (IdentifierName)variable.Initializer;
+    //     Assert.Equal("_original", initializer.ToString());
+    // }
+    
+    [Fact]
+    public void Generates_Increment()
+    {
+        var ast = Generate("a++;");
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<ExpressionStatement>(statement);
+        
+        var expressionStatement = (ExpressionStatement)statement;
+        Assert.IsType<BinaryOperator>(expressionStatement.Expression);
+        
+        var binaryOperator = (BinaryOperator)expressionStatement.Expression;
+        Assert.IsType<IdentifierName>(binaryOperator.Left);
+        Assert.IsType<Literal>(binaryOperator.Right);
+        Assert.Equal("+=", binaryOperator.Operator);
+        
+        var left = (IdentifierName)binaryOperator.Left;
+        var right = (Literal)binaryOperator.Right;
+        Assert.Equal("a", left.ToString());
+        Assert.Equal("1", right.ValueText);
+    }
+    
     [Fact]
     public void Generates_MemberAssignment()
     {
