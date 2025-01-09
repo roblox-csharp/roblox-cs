@@ -4,6 +4,28 @@ namespace RobloxCS.Tests;
 
 public class GenerationTest
 {
+    [Theory]
+    [InlineData("var list = new List<int>();")]
+    [InlineData("var list = new List<int>() { };")]
+    [InlineData("List<int> list = [];")]
+    [InlineData("List<int> list = new();")]
+    public void Generates_ListCreation(string source)
+    {
+        var ast = Generate("using System.Collections.Generic;\n" + source);
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<VariableList>(statement);
+        
+        var variableList = (VariableList)statement;
+        var variable = variableList.Variables.First();
+        Assert.StartsWith("list", variable.Name.ToString()); // temp
+        Assert.IsType<TableInitializer>(variable.Initializer);
+        
+        var table = (TableInitializer)variable.Initializer;
+        Assert.Empty(table.KeyValuePairs);
+    }
+    
     [Fact]
     public void Generates_SafeNavigation()
     {
@@ -359,13 +381,13 @@ public class GenerationTest
         };
         
         var table = (TableInitializer)variable.Initializer;
-        Assert.Equal(expectedTable.Count, table.Entries.Count);
+        Assert.Equal(expectedTable.Count, table.KeyValuePairs.Count);
         Assert.True(table.TreatIdentifiersAsKeyNames);
         
         var index = 0;
         foreach (var (expectedKey, expectedValueText) in expectedTable)
         {
-            var actualEntry = table.Entries.ElementAtOrDefault(index++);
+            var actualEntry = table.KeyValuePairs.ElementAtOrDefault(index++);
             Assert.IsType<IdentifierName>(actualEntry.Key);
             Assert.IsType<Literal>(actualEntry.Value);
             
