@@ -5,6 +5,40 @@ namespace RobloxCS.Tests;
 
 public class GenerationTest
 {
+    [Theory]
+    [InlineData("int getInt() => 69;")]
+    [InlineData("""
+                int getInt()
+                {
+                  return 69;
+                }
+                """)]
+    public void Generates_LocalFunctions(string csharpSource)
+    {
+        var ast = Generate(csharpSource);
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<Function>(statement);
+        
+        var function = (Function)statement;
+        Assert.Equal("getInt", function.Name.ToString());
+        Assert.NotNull(function.ReturnType);
+        Assert.Equal("number", function.ReturnType.ToString());
+        Assert.Empty(function.ParameterList.Parameters);
+        Assert.NotNull(function.Body);
+        Assert.NotEmpty(function.Body.Statements);
+
+        var bodyStatement = function.Body.Statements.First();
+        Assert.IsType<Return>(statement);
+        
+        var returnStatement = (Return)bodyStatement;
+        Assert.IsType<Literal>(returnStatement.Expression);
+        
+        var literal = (Literal)returnStatement.Expression;
+        Assert.Equal("69", literal.ValueText);
+    }
+    
     [Fact]
     public void Generates_MultipleVariableDeclarations()
     {
