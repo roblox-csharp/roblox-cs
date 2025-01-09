@@ -169,7 +169,7 @@ public class GenerationTest
 
     private static AST Generate(string source)
     {
-        var tree = SyntaxFactory.ParseSyntaxTree(source);
+        var tree = TranspilerUtility.ParseAndTransformTree(source, null);
         var compiler = TranspilerUtility.GetCompiler([tree], null);
         
         return TranspilerUtility.GetLuauAST(tree, compiler);

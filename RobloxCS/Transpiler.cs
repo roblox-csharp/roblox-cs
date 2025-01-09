@@ -10,8 +10,6 @@ namespace RobloxCS;
 /// </summary>
 public static class Transpiler
 {
-    
-    
     private static readonly HashSet<string> _ignoredDiagnostics =
     [
         "CS5001" // more than 2 entry points
@@ -21,7 +19,7 @@ public static class Transpiler
     {
         try
         {
-            var tree = ParseSource(source);
+            var tree = TranspilerUtility.ParseAndTransformTree(source, null); // temporary null config!!!1
             var compiler = TranspilerUtility.GetCompiler([tree], null); // temporary null config!!!1
             foreach (var diagnostic in compiler.GetDiagnostics()
                          .Where(diagnostic => !_ignoredDiagnostics.Contains(diagnostic.Id)))
@@ -33,13 +31,5 @@ public static class Transpiler
         {
             return "";
         }
-    }
-
-    private static SyntaxTree ParseSource(string source)
-    {
-        var tree = TranspilerUtility.ParseTree(source);
-        HashSet<Func<SyntaxTree, ConfigData, SyntaxTree>> transformers = [BuiltInTransformers.Main()];
-        
-        return TranspilerUtility.TransformTree(tree, transformers);
     }
 }

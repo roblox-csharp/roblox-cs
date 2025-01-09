@@ -22,7 +22,6 @@ public static partial class BuiltInTransformers
 
     private static TransformMethod FailedToGetTransformer(string name)
     {
-        Logger.Error($"No built-in transformer \"{name}\" exists (roblox-cs.yml)");
-        return null!; // hack
+        throw Logger.Error($"No built-in transformer \"{name}\" exists (roblox-cs.yml)");
     }
 }
