@@ -368,6 +368,11 @@ public static class AstUtility
             : simpleName.ToString());
     }
 
+    public static Name CreateName(SyntaxNode node, bool registerIdentifier = false, bool bypassReserved = false)
+    {
+        return CreateName(node, string.Join("", StandardUtility.GetNamesFromNode(node)), registerIdentifier, bypassReserved);
+    }
+
     public static Name CreateName(SyntaxNode node, string text, bool registerIdentifier = false, bool bypassReserved = false)
     {
         Name name = CreateSimpleName(node, text, registerIdentifier, bypassReserved);

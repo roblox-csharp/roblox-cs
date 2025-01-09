@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RobloxCS.Shared;
 
 namespace RobloxCS.Transformers;
 
@@ -26,7 +27,26 @@ public sealed class MainTransformer(SyntaxTree tree, ConfigData config) : BaseTr
     // Turn file-scoped namespaces into regular namespaces (to reduce code duplication)
     public override SyntaxNode? VisitFileScopedNamespaceDeclaration(FileScopedNamespaceDeclarationSyntax node) =>
         VisitNamespaceDeclaration(SyntaxFactory.NamespaceDeclaration(node.AttributeLists, node.Modifiers, node.Name, node.Externs, node.Usings, node.Members));
-    
+
+    public override SyntaxNode? VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
+    {
+        if (node.Name is QualifiedNameSyntax qualifiedName)
+        {
+            var pieces = StandardUtility.GetNamesFromNode(qualifiedName);
+            var firstName = pieces.First();
+            var newFullName = StandardUtility.GetNameNode(pieces.Skip(1).ToList());
+            var childNamespace = node.WithName(newFullName);
+            
+            node = node
+                .WithName(SyntaxFactory.IdentifierName(firstName))
+                .WithExterns([])
+                .WithUsings([])
+                .WithMembers([childNamespace]);
+        }
+        
+        return base.VisitNamespaceDeclaration(node);
+    }
+
     // Return an IsPatternExpression if the binary operator is `is`
     public override SyntaxNode? VisitBinaryExpression(BinaryExpressionSyntax node)
     {
