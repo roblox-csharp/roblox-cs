@@ -305,13 +305,13 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
                 true,
                 new Luau.TableInitializer(enumValues, enumKeys, true)
             ),
-            Luau.AstUtility.DefineGlobalOrMember(node, name)
+            Luau.AstUtility.DefineGlobalOrMember(node, name),
+            new Luau.TypeAlias(name, finalType)
         ];
 
         if (node.Parent is CompilationUnitSyntax)
             statements.Add(new Luau.NoOp()); // for the newline
-
-        statements.Add(new Luau.TypeAlias(name, finalType));
+        
         return new Luau.Block(statements);
     }
     public override Luau.Block VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)

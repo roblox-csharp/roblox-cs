@@ -50,6 +50,65 @@ public class GenerationTest
         Assert.IsType<TypeOfCall>(typeAlias.Type);
     }
     
+    [Fact]
+    public void Generates_Enums()
+    {
+        var ast = Generate("enum Abc { A, B, C = 5, D, E = 10, F }");
+        Assert.NotEmpty(ast.Statements);
+        
+        var globalStatements = ast.Statements.Skip(1).ToList();
+        Assert.IsType<Block>(globalStatements.First());
+        
+        var block = (Block)globalStatements.First();
+        var statements = block.Statements;
+        Assert.Equal(4, statements.Count);
+        Assert.IsType<Variable>(statements[0]);
+        
+        var variable = (Variable)statements[0];
+        Assert.Equal("Abc", variable.Name.ToString());
+        Assert.IsType<TableInitializer>(variable.Initializer);
+
+        var expectedTable = new Dictionary<string, string>()
+        {
+            { "A", "0" },
+            { "B", "1" },
+            { "C", "5" },
+            { "D", "6" },
+            { "E", "10" },
+            { "F", "11" },
+        };
+        
+        var table = (TableInitializer)variable.Initializer;
+        Assert.Equal(expectedTable.Count, table.Entries.Count);
+        Assert.True(table.TreatIdentifiersAsKeyNames);
+        
+        var index = 0;
+        foreach (var (expectedKey, expectedValueText) in expectedTable)
+        {
+            var actualEntry = table.Entries.ElementAtOrDefault(index++);
+            Assert.IsType<IdentifierName>(actualEntry.Key);
+            Assert.IsType<Literal>(actualEntry.Value);
+            
+            var name = (IdentifierName)actualEntry.Key;
+            Assert.Equal(expectedKey, name.ToString());
+            
+            var literal = (Literal)actualEntry.Value;
+            Assert.Equal(expectedValueText, literal.ValueText);
+        }
+        
+        Assert.IsType<ExpressionStatement>(statements[1]);
+        
+        var expressionStatement = (ExpressionStatement)statements[1];
+        Assert.IsType<Call>(expressionStatement.Expression);
+        
+        Assert.IsType<TypeAlias>(statements[2]);
+        var typeAlias = (TypeAlias)statements[2];
+        Assert.Equal("Abc", typeAlias.Name.ToString());
+        Assert.IsType<IndexCall>(typeAlias.Type);
+        
+        Assert.IsType<NoOp>(statements[3]);
+    }
+    
     [Theory]
     [InlineData("int getInt() => 69;")]
     [InlineData("""
