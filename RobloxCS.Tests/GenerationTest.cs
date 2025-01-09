@@ -4,6 +4,25 @@ namespace RobloxCS.Tests;
 
 public class GenerationTest
 {
+    [Fact]
+    public void Generates_ListType()
+    {
+        var ast = Generate("using System.Collections.Generic;\nList<int> l = [];");
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<VariableList>(statement);
+        
+        var variableList = (VariableList)statement;
+        var variable = variableList.Variables.First();
+        Assert.Equal("l", variable.Name.ToString()); // temp
+        Assert.IsType<TableInitializer>(variable.Initializer);
+        Assert.IsType<ArrayType>(variable.Type);
+        
+        var arrayType = (ArrayType)variable.Type;
+        Assert.Equal("number", arrayType.ElementType.Path);
+    }
+    
     [Theory]
     [InlineData("var list = new List<int>();")]
     [InlineData("var list = new List<int>() { };")]
