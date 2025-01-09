@@ -288,7 +288,9 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
                 )
             ));
 
-        statements.Add(new Luau.NoOp()); // for the newline
+        if (node.Parent is CompilationUnitSyntax)
+            statements.Add(new Luau.NoOp()); // for the newline
+        
         return new Luau.Block(statements);
     }
 
@@ -339,22 +341,26 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
                 ));
 
         }
+        
+        if (node.Parent is CompilationUnitSyntax)
+            statements.Add(new Luau.NoOp()); // for the newline
 
-        return new Luau.Block([
+        List<Luau.Statement> blockStatements =
+        [
             new Luau.Variable(Luau.AstUtility.GetNonGenericName(name), true),
             new Luau.ScopedBlock(statements),
-            new Luau.TypeAlias(name, finalType),
-            new Luau.NoOp() // for the newline
-        ]);
+            new Luau.TypeAlias(name, finalType)
+        ];
+        
+        return new Luau.Block(blockStatements);
     }
     public override Luau.Block VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
     {
         var name = Luau.AstUtility.CreateSimpleName(node, registerIdentifier: true);
-        var typeRef = Luau.AstUtility.CreateTypeRef(name.ToString());
         var members = new Luau.Block(node.Members.Select(Visit<Luau.Statement>).ToList());
         List<Luau.Statement> statements =
         [
-            new Luau.Variable(Luau.AstUtility.GetNonGenericName(name), true, new Luau.TableInitializer(), typeRef)
+            new Luau.Variable(Luau.AstUtility.GetNonGenericName(name), true, new Luau.TableInitializer())
         ];
 
         if (IsGlobal(node))
@@ -362,9 +368,11 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
 
         statements.AddRange(
             new Luau.ScopedBlock(members.Statements),
-            new Luau.TypeAlias(name, new Luau.TypeOfCall(name)),
-            new Luau.NoOp() // for the newline
+            new Luau.TypeAlias(name, new Luau.TypeOfCall(name))
         );
+        
+        if (node.Parent is CompilationUnitSyntax)
+            statements.Add(new Luau.NoOp()); // for the newline
         
         return new Luau.Block(statements);
     }
