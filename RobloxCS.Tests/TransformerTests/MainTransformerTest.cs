@@ -1,0 +1,41 @@
+using Microsoft.CodeAnalysis.CSharp;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
+
+namespace RobloxCS.Tests.TransformerTests;
+
+public class MainTransformerTest
+{
+    [Fact]
+    public void Transforms_FileScopedNamespaces()
+    {
+        var compilationUnit = Transform("namespace Abc;");
+        Assert.Single(compilationUnit.Members);
+        Assert.IsType<NamespaceDeclarationSyntax>(compilationUnit.Members.First());
+        
+        var @namespace = (NamespaceDeclarationSyntax)compilationUnit.Members.First();
+        Assert.Equal("Abc", @namespace.Name.ToString());
+    }
+    
+    [Fact]
+    public void AddsRobloxImports()
+    {
+        var compilationUnit = Transform("");
+        Assert.Equal(2, compilationUnit.Usings.Count);
+
+        var usingRoblox = compilationUnit.Usings.First();
+        var usingRobloxGlobals = compilationUnit.Usings.Last();
+        Assert.Equal("Roblox", usingRoblox.Name?.ToString());
+#pragma warning disable xUnit2002
+        Assert.NotNull(usingRobloxGlobals.StaticKeyword);
+#pragma warning restore xUnit2002
+        Assert.Equal("Roblox.Globals", usingRobloxGlobals.Name?.ToString());
+    }
+    
+    private static CompilationUnitSyntax Transform(string source)
+    {
+        var cleanTree = SyntaxFactory.ParseSyntaxTree(source);
+        var transform = BuiltInTransformers.Main();
+        var transformedTree = transform(cleanTree, new ConfigData());
+        return transformedTree.GetCompilationUnitRoot();
+    }
+}

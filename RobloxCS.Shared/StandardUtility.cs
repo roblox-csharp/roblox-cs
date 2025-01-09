@@ -1,6 +1,7 @@
 ﻿using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using static RobloxCS.Shared.Constants;
 
@@ -193,10 +194,13 @@ public static class StandardUtility
         var arguments = match.Groups[1].Value.Split(',');
         return arguments.Select(arg => arg.Trim()).ToList();
     }
+    
+    public static bool IsGlobal(SyntaxNode node) =>
+        node.Parent.IsKind(SyntaxKind.GlobalStatement) || node.Parent.IsKind(SyntaxKind.CompilationUnit);
 
     public static List<string> GetNamesFromNode(SyntaxNode? node)
     {
-        if (node is BaseExpressionSyntax baseExpression)
+        if (node is BaseExpressionSyntax)
             return [""];
 
         List<string> names = [];

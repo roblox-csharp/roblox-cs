@@ -6,20 +6,27 @@ namespace RobloxCS.Transformers;
 
 public abstract class BaseTransformer(SyntaxTree tree, ConfigData config) : CSharpSyntaxRewriter
 {
-    protected SyntaxNode _root = tree.GetRoot();
+    protected readonly SyntaxNode _root = tree.GetRoot();
     protected readonly SyntaxTree _tree = tree;
     protected readonly ConfigData _config = config;
 
     public SyntaxTree TransformTree() =>
         _tree.WithRootAndOptions(Visit(_root), _tree.Options);
-    protected string? TryGetName(SyntaxNode node) =>
+    protected static string? TryGetName(SyntaxNode node) =>
         StandardUtility.GetNamesFromNode(node).FirstOrDefault();
-    protected string GetName(SyntaxNode node) =>
+    protected static string GetName(SyntaxNode node) =>
         StandardUtility.GetNamesFromNode(node).First();
+    protected static bool HasSyntax(SyntaxTokenList tokens, SyntaxKind syntax) =>
+        tokens.Any(token => token.IsKind(syntax));
 
-    protected SyntaxToken CreateIdentifierToken(string text, string? valueText = null, SyntaxTriviaList? trivia = null)
+    protected static SyntaxToken CreateIdentifierToken(string text, string? valueText = null,
+        SyntaxTriviaList? leadingTrivia = null, SyntaxTriviaList? trailingTrivia = null)
     {
-        var triviaList = trivia ?? SyntaxFactory.TriviaList();
-        return SyntaxFactory.VerbatimIdentifier(triviaList, text, valueText ?? text, triviaList);
+        return SyntaxFactory.VerbatimIdentifier(
+            leadingTrivia ?? SyntaxFactory.TriviaList(),
+            text,
+            valueText ?? text,
+            trailingTrivia ?? SyntaxFactory.TriviaList()
+        );
     }
 }

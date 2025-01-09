@@ -259,9 +259,6 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             )
         ];
 
-        if (IsGlobal(node))
-            classMemberStatements.Insert(2, new Luau.ExpressionStatement(Luau.AstUtility.DefineGlobal(nonGenericName, nonGenericName)));
-
         if (explicitConstructor == null)
             classMemberStatements.Add(constructor);
 
@@ -270,40 +267,28 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         List<Luau.Statement> statements = [
             new Luau.Variable(nonGenericName, true, null),
             new Luau.ScopedBlock(classMemberStatements),
+            Luau.AstUtility.DefineGlobalOrMember(node, nonGenericName),
             new Luau.TypeAlias(name, new Luau.TypeOfCall(nonGenericName))
         ];
 
-        if (IsGlobal(node))
-            return new Luau.Block(statements);
-
-        var fullParentName = Luau.AstUtility.GetFullParentName(node);
-        if (fullParentName != null)
-            statements.Add(new Luau.ExpressionStatement(
-                new Luau.Assignment(
-                    new Luau.MemberAccess(
-                        fullParentName,
-                        nonGenericName
-                    ),
-                    nonGenericName
-                )
-            ));
-
-        statements.Add(new Luau.NoOp()); // for the newline
+        if (node.Parent is CompilationUnitSyntax)
+            statements.Add(new Luau.NoOp()); // for the newline
+        
         return new Luau.Block(statements);
     }
 
     public override Luau.Block VisitEnumDeclaration(EnumDeclarationSyntax node)
     {
-        var enumKeys = new List<Luau.Expression>();
-        var enumValues = new List<Luau.Expression>();
-        var enumTypes = new List<Luau.TypeRef>();
+        List<Luau.Expression> enumKeys = [];
+        List<Luau.Expression> enumValues = [];
+        // List<Luau.TypeRef> enumTypes = [];
         var index = 0;
 
         foreach (var member in node.Members)
         {
             var explicitValue = member.EqualsValue?.Value;
             var value = explicitValue?.ToString() ?? index.ToString();
-            enumTypes.Add(new Luau.TypeRef(value));
+            // enumTypes.Add(new Luau.TypeRef(value));
             enumKeys.Add(Luau.AstUtility.CreateSimpleName(member, member.Identifier.Text));
             enumValues.Add(new Luau.Literal(value));
 
@@ -313,58 +298,36 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         var name = Luau.AstUtility.CreateSimpleName(node, node.Identifier.Text, registerIdentifier: true);
         var enumType = new Luau.TypeOfCall(name);
         var finalType = new Luau.IndexCall(enumType, new Luau.KeyOfCall(enumType));
-        List<Luau.Statement> statements = [
-            new Luau.ExpressionStatement(
-                new Luau.Assignment(
-                    new Luau.IdentifierName(node.Identifier.Text),
-                    new Luau.TableInitializer(enumValues, enumKeys)
-                )
-            )
+        List<Luau.Statement> statements =
+        [
+            new Luau.Variable(
+                Luau.AstUtility.GetNonGenericName(name),
+                true,
+                new Luau.TableInitializer(enumValues, enumKeys, true)
+            ),
+            Luau.AstUtility.DefineGlobalOrMember(node, name)
         ];
 
-        if (IsGlobal(node))
-            statements.Add(new Luau.ExpressionStatement(Luau.AstUtility.DefineGlobal(name, name)));
-        else
-        {
-            var fullParentName = Luau.AstUtility.GetFullParentName(node);
-            if (fullParentName != null)
-                statements.Add(new Luau.ExpressionStatement(
-                    new Luau.Assignment(
-                        new Luau.MemberAccess(
-                            fullParentName,
-                            name
-                        ),
-                        name
-                    )
-                ));
+        if (node.Parent is CompilationUnitSyntax)
+            statements.Add(new Luau.NoOp()); // for the newline
 
-        }
-
-        return new Luau.Block([
-            new Luau.Variable(Luau.AstUtility.GetNonGenericName(name), true),
-            new Luau.ScopedBlock(statements),
-            new Luau.TypeAlias(name, finalType),
-            new Luau.NoOp() // for the newline
-        ]);
+        statements.Add(new Luau.TypeAlias(name, finalType));
+        return new Luau.Block(statements);
     }
     public override Luau.Block VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
     {
         var name = Luau.AstUtility.CreateSimpleName(node, registerIdentifier: true);
-        var typeRef = Luau.AstUtility.CreateTypeRef(name.ToString());
         var members = new Luau.Block(node.Members.Select(Visit<Luau.Statement>).ToList());
         List<Luau.Statement> statements =
         [
-            new Luau.Variable(Luau.AstUtility.GetNonGenericName(name), true, new Luau.TableInitializer(), typeRef)
+            new Luau.Variable(Luau.AstUtility.GetNonGenericName(name), true, new Luau.TableInitializer()),
+            new Luau.ScopedBlock(members.Statements),
+            Luau.AstUtility.DefineGlobalOrMember(node, name),
+            new Luau.TypeAlias(name, new Luau.TypeOfCall(name))
         ];
 
-        if (IsGlobal(node))
-            statements.Add(new Luau.ExpressionStatement(Luau.AstUtility.DefineGlobal(name, name)));
-
-        statements.AddRange(
-            new Luau.ScopedBlock(members.Statements),
-            new Luau.TypeAlias(name, new Luau.TypeOfCall(name)),
-            new Luau.NoOp() // for the newline
-        );
+        if (node.Parent is CompilationUnitSyntax)
+            statements.Add(new Luau.NoOp()); // for the newline
         
         return new Luau.Block(statements);
     }
@@ -455,7 +418,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         return new Luau.For(names, iterator, body);
     }
 
-    public override Luau.Node? VisitForEachVariableStatement(ForEachVariableStatementSyntax node)
+    public override Luau.For VisitForEachVariableStatement(ForEachVariableStatementSyntax node)
     {
         var variableList = Visit<Luau.Statement>(node.Variable);
         if (variableList is Luau.Variable variable)
@@ -481,9 +444,8 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             .SelectMany(variableNode =>
             {
                 if (variableNode is Luau.VariableList variableList)
-                {
                     return variableList.Variables;
-                }
+                
                 return [(Luau.Variable)variableNode];
             })
             .ToList();

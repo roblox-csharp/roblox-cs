@@ -174,6 +174,29 @@ public static class AstUtility
         return new TableInitializer(values, keys);
     }
 
+    /// <summary>
+    /// CS.defineGlobal(name, "name") or parentName.name = "name"
+    /// </summary>
+    public static Statement DefineGlobalOrMember(SyntaxNode node, SimpleName name)
+    {
+        if (StandardUtility.IsGlobal(node))
+            return new ExpressionStatement(DefineGlobal(name, name));
+        
+        var fullParentName = GetFullParentName(node);
+        if (fullParentName != null)
+            return new ExpressionStatement(
+                new Assignment(
+                    new MemberAccess(
+                        fullParentName,
+                        name
+                    ),
+                    name
+                )
+            );
+
+        return new NoOp();
+    }
+
     /// <code>CS.defineGlobal(name, value)</code>
     public static Call DefineGlobal(Name name, Expression value) =>
         CSCall("defineGlobal", String(name.ToString()), value);
@@ -377,7 +400,7 @@ public static class AstUtility
     public static SimpleName CreateSimpleName(SyntaxNode node, string name, bool registerIdentifier = false, bool bypassReserved = false)
     {
         if (RESERVED_IDENTIFIERS.Contains(name) && !bypassReserved)
-            Logger.UnsupportedError(node, $"Using '{name}' as an identifier", useIs: true, useYet: false);
+            throw Logger.UnsupportedError(node, $"Using '{name}' as an identifier", useIs: true, useYet: false);
 
         var text = registerIdentifier ? FixIdentifierNameText(node, name, registerIdentifier) : name;
         return name.Contains('<') && name.Contains('>')
@@ -404,7 +427,7 @@ public static class AstUtility
             name += '_';
             
         name += useCount;
-        return name;
+        return name.Replace("@", "");
     }
 
     public static TypeRef? CreateTypeRef(string? typePath)
