@@ -5,9 +5,51 @@ namespace RobloxCS.Tests;
 public class GenerationTest
 {
     [Fact]
+    public void Generates_GlobalAssignment()
+    {
+        const string name = "MyNamespace";
+        var ast = Generate($"namespace {name};");
+        Assert.NotEmpty(ast.Statements);
+        
+        var globalStatements = ast.Statements.Skip(1).ToList();
+        Assert.IsType<Block>(globalStatements.First());
+        
+        var block = (Block)globalStatements.First();
+        var statements = block.Statements;
+        Assert.Equal(5, statements.Count); // 5
+        
+        var globalAssignment = statements.SkipLast(2).Last();
+        Assert.IsType<ExpressionStatement>(globalAssignment);
+        
+        var expressionStatement = (ExpressionStatement)globalAssignment;
+        Assert.IsType<Call>(expressionStatement.Expression);
+        
+        var call = (Call)expressionStatement.Expression;
+        Assert.IsType<MemberAccess>(call.Callee);
+        
+        var memberAccess = (MemberAccess)call.Callee;
+        Assert.IsType<IdentifierName>(memberAccess.Expression);
+        Assert.IsType<IdentifierName>(memberAccess.Name);
+        
+        var left = (IdentifierName)memberAccess.Expression;
+        var right = (IdentifierName)memberAccess.Name;
+        Assert.Equal("CS", left.ToString());
+        Assert.Equal("defineGlobal", right.ToString());
+        Assert.NotEmpty(call.ArgumentList.Arguments);
+        Assert.IsType<Literal>(call.ArgumentList.Arguments.First().Expression);
+        Assert.IsType<IdentifierName>(call.ArgumentList.Arguments.Last().Expression);
+        
+        var nameLiteral = (Literal)call.ArgumentList.Arguments.First().Expression;
+        var value = (IdentifierName)call.ArgumentList.Arguments.Last().Expression;
+        Assert.Equal($"\"{name}\"", nameLiteral.ValueText);
+        Assert.Equal(name, value.ToString());
+    }
+    
+    [Fact]
     public void Generates_Namespaces()
     {
-        var ast = Generate("namespace MyNamespace { enum Abc { A } }");
+        const string name = "MyNamespace";
+        var ast = Generate($"namespace {name} {{ enum Abc {{ A }} }}");
         Assert.NotEmpty(ast.Statements);
         
         var globalStatements = ast.Statements.Skip(1).ToList();
@@ -29,7 +71,7 @@ public class GenerationTest
         var initialDeclaration = (Variable)firstStatement;
         Assert.Null(initialDeclaration.Type);
         Assert.IsType<TableInitializer>(initialDeclaration.Initializer);
-        Assert.Equal("MyNamespace", initialDeclaration.Name.ToString());
+        Assert.Equal(name, initialDeclaration.Name.ToString());
         
         var scopedBlock = (ScopedBlock)secondStatement;
         Assert.NotEmpty(scopedBlock.Statements);
@@ -46,14 +88,15 @@ public class GenerationTest
         Assert.IsType<Call>(expressionStatement.Expression);
 
         var typeAlias = (TypeAlias)fourthStatement;
-        Assert.Equal("MyNamespace", typeAlias.Name.ToString());
+        Assert.Equal(name, typeAlias.Name.ToString());
         Assert.IsType<TypeOfCall>(typeAlias.Type);
     }
     
     [Fact]
     public void Generates_Enums()
     {
-        var ast = Generate("enum Abc { A, B, C = 5, D, E = 10, F }");
+        const string name = "Abc";
+        var ast = Generate($"enum {name} {{ A, B, C = 5, D, E = 10, F }}");
         Assert.NotEmpty(ast.Statements);
         
         var globalStatements = ast.Statements.Skip(1).ToList();
@@ -65,7 +108,7 @@ public class GenerationTest
         Assert.IsType<Variable>(statements[0]);
         
         var variable = (Variable)statements[0];
-        Assert.Equal("Abc", variable.Name.ToString());
+        Assert.Equal(name, variable.Name.ToString());
         Assert.IsType<TableInitializer>(variable.Initializer);
 
         var expectedTable = new Dictionary<string, string>()
@@ -89,8 +132,8 @@ public class GenerationTest
             Assert.IsType<IdentifierName>(actualEntry.Key);
             Assert.IsType<Literal>(actualEntry.Value);
             
-            var name = (IdentifierName)actualEntry.Key;
-            Assert.Equal(expectedKey, name.ToString());
+            var keyName = (IdentifierName)actualEntry.Key;
+            Assert.Equal(expectedKey, keyName.ToString());
             
             var literal = (Literal)actualEntry.Value;
             Assert.Equal(expectedValueText, literal.ValueText);
@@ -103,7 +146,7 @@ public class GenerationTest
         
         Assert.IsType<TypeAlias>(statements[2]);
         var typeAlias = (TypeAlias)statements[2];
-        Assert.Equal("Abc", typeAlias.Name.ToString());
+        Assert.Equal(name, typeAlias.Name.ToString());
         Assert.IsType<IndexCall>(typeAlias.Type);
         
         Assert.IsType<NoOp>(statements[3]);
