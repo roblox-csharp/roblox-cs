@@ -455,7 +455,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         return new Luau.For(names, iterator, body);
     }
 
-    public override Luau.Node? VisitForEachVariableStatement(ForEachVariableStatementSyntax node)
+    public override Luau.For VisitForEachVariableStatement(ForEachVariableStatementSyntax node)
     {
         var variableList = Visit<Luau.Statement>(node.Variable);
         if (variableList is Luau.Variable variable)
@@ -481,9 +481,8 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             .SelectMany(variableNode =>
             {
                 if (variableNode is Luau.VariableList variableList)
-                {
                     return variableList.Variables;
-                }
+                
                 return [(Luau.Variable)variableNode];
             })
             .ToList();

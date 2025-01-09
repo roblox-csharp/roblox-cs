@@ -5,6 +5,29 @@ namespace RobloxCS.Tests;
 
 public class GenerationTest
 {
+    [Fact]
+    public void Generates_MultipleVariableDeclarations()
+    {
+        const string source = """
+                              int a = 1,
+                                  b = 2,
+                                  c = 3;
+                              """;
+        
+        var ast = Generate(source);
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<VariableList>(statement);
+        
+        var variableList = (VariableList)statement;
+        Assert.NotEmpty(variableList.Variables);
+        Assert.Equal(3, variableList.Variables.Count);
+
+        var index = 1;
+        foreach (var variable in variableList.Variables)
+            Assert.Equal((index++).ToString(), (variable.Initializer as Literal)?.ValueText);
+    }
     [Theory]
     [InlineData("var a = 1;", null, "1")]
     [InlineData("int b = 2;", "number", "2")]

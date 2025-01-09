@@ -285,7 +285,7 @@ public class RenderingTest
         var attribute = new BuiltInAttribute(new IdentifierName("native"));
         var output = Render(attribute);
         
-        Assert.Equal("@native\n", output);
+        Assert.Equal("@native\n", output.Replace("\r", ""));
     }
 
     [Fact]
@@ -612,7 +612,7 @@ public class RenderingTest
         var @continue = new Continue();
         var output = Render(@continue);
         
-        Assert.Equal("continue\n", output);
+        Assert.Equal("continue\n", output.Replace("\r", ""));
     }
 
     [Fact]
@@ -621,7 +621,7 @@ public class RenderingTest
         var @break = new Break();
         var output = Render(@break);
         
-        Assert.Equal("break\n", output);
+        Assert.Equal("break\n", output.Replace("\r", ""));
     }
 
     private static string Render(Node node)

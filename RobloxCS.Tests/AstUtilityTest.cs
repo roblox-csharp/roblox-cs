@@ -1,9 +1,26 @@
+using Microsoft.CodeAnalysis.CSharp;
 using RobloxCS.Luau;
 
 namespace RobloxCS.Tests;
 
 public class AstUtilityTest
 {
+    [Theory]
+    [InlineData("then")]
+    [InlineData("and")]
+    [InlineData("end")]
+    [InlineData("do")]
+    [InlineData("typeof")]
+    [InlineData("type")]
+    [InlineData("export")]
+
+    public void ThrowsWithReservedIdentifier(string identifier)
+    {
+        Assert.Throws<Exception>(() =>
+            AstUtility.CreateSimpleName(SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression), identifier)
+        );
+    }
+    
     [Fact]
     public void AddOne()
     {

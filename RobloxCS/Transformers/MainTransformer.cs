@@ -56,9 +56,6 @@ public sealed class MainTransformer(SyntaxTree tree, ConfigData config) : BaseTr
         var newNode = whenNotNull != null ? node.WithWhenNotNull(whenNotNull) : node;
         return base.VisitConditionalAccessExpression(newNode);
     }
-    
-    private static bool HasSyntax(SyntaxTokenList tokens, SyntaxKind syntax) =>
-        tokens.Any(token => token.IsKind(syntax));
 
     private static ExpressionSyntax? ProcessWhenNotNull(ExpressionSyntax expression, ExpressionSyntax? whenNotNull)
     {
