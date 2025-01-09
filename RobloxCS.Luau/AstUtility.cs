@@ -427,7 +427,7 @@ public static class AstUtility
             name += '_';
             
         name += useCount;
-        return name;
+        return name.Replace("@", "");
     }
 
     public static TypeRef? CreateTypeRef(string? typePath)

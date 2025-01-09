@@ -37,18 +37,6 @@ public sealed class MainTransformer(SyntaxTree tree, ConfigData config) : BaseTr
         return SyntaxFactory.IsPatternExpression(node.Left, pattern);
     }
     
-    // Transform `@` out of identifier names
-    public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
-    {
-        var identifierText = node.Identifier.Text;
-        if (!identifierText.Contains('@') || identifierText == "var")
-            return base.VisitIdentifierName(node);
-
-        var fixedIdentifierText = identifierText.Replace("@", "");
-        var newToken = CreateIdentifierToken(fixedIdentifierText);
-        return base.VisitIdentifierName(node.WithIdentifier(newToken));
-    }
-    
     // Fix conditional accesses so that they return the AST you expect them to
     public override SyntaxNode? VisitConditionalAccessExpression(ConditionalAccessExpressionSyntax node)
     {
