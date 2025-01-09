@@ -467,7 +467,7 @@ public class GenerationTest
     [Theory]
     [InlineData("object abc123;", "abc123")]
     [InlineData("object @bruh;", "bruh")]
-    [InlineData("object abc;", "abc")]
+    [InlineData("object yang;", "yang")]
     public void Generates_Identifiers(string csharpSource, string expectedLuauIdentifier)
     {
         var ast = Generate(csharpSource);
