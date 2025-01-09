@@ -336,6 +336,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
     {
         var condition = Visit<Luau.Expression>(node.Condition);
         var body = Visit<Luau.Statement>(node.Statement);
+        
         return new Luau.Repeat(new Luau.UnaryOperator("not ", condition), body);
     }
 
@@ -343,6 +344,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
     {
         var condition = Visit<Luau.Expression>(node.Condition);
         var body = Visit<Luau.Statement>(node.Statement);
+        
         return new Luau.While(condition, body);
     }
 
@@ -351,7 +353,18 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         var condition = Visit<Luau.Expression>(node.Condition);
         var body = Visit<Luau.Expression>(node.WhenTrue);
         var elseBranch = Visit<Luau.Expression>(node.WhenFalse);
+        
         return new Luau.ExpressionalIf(condition, body, elseBranch);
+    }
+
+    public override Luau.ExpressionalIf VisitConditionalAccessExpression(ConditionalAccessExpressionSyntax node)
+    {
+        var comparand = Visit<Luau.Expression>(node.Expression);
+        var nil = Luau.AstUtility.Nil();
+        var condition = new Luau.BinaryOperator(comparand, "==", nil);
+        var elseBranch = Visit<Luau.Expression>(node.WhenNotNull);
+        
+        return new Luau.ExpressionalIf(condition, nil, elseBranch);
     }
 
     public override Luau.If VisitIfStatement(IfStatementSyntax node)
@@ -359,6 +372,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         var condition = Visit<Luau.Expression>(node.Condition);
         var body = Visit<Luau.Statement>(node.Statement);
         var elseBranch = Visit<Luau.Statement?>(node.Else?.Statement);
+        
         return new Luau.If(condition, body, elseBranch);
     }
 

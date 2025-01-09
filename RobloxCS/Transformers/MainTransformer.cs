@@ -65,16 +65,24 @@ public sealed class MainTransformer(SyntaxTree tree, ConfigData config) : BaseTr
         return base.VisitConditionalAccessExpression(newNode);
     }
 
-    private static ExpressionSyntax? ProcessWhenNotNull(ExpressionSyntax expression, ExpressionSyntax? whenNotNull)
+    private ExpressionSyntax? ProcessWhenNotNull(ExpressionSyntax expression, ExpressionSyntax? whenNotNull)
     {
         if (whenNotNull == null)
             return null;
 
         return whenNotNull switch
         {
+            MemberAccessExpressionSyntax memberAccess => SyntaxFactory.MemberAccessExpression(
+                SyntaxKind.SimpleMemberAccessExpression, expression, memberAccess.Name
+            ),
+                
             MemberBindingExpressionSyntax memberBinding => SyntaxFactory.MemberAccessExpression(
                 SyntaxKind.SimpleMemberAccessExpression, expression, memberBinding.Name
             ),
+            
+            ConditionalAccessExpressionSyntax conditionalAccess => conditionalAccess
+                .WithExpression(ProcessWhenNotNull(expression, conditionalAccess.Expression) ?? conditionalAccess.Expression)
+                .WithWhenNotNull(ProcessWhenNotNull(expression, conditionalAccess.WhenNotNull) ?? conditionalAccess.WhenNotNull),
             
             // dumb nested switch
             InvocationExpressionSyntax invocation => invocation.WithExpression((invocation.Expression switch
@@ -83,22 +91,18 @@ public sealed class MainTransformer(SyntaxTree tree, ConfigData config) : BaseTr
                     SyntaxKind.SimpleMemberAccessExpression, expression, memberAccess.Name
                 ),
                 
+                MemberBindingExpressionSyntax memberBinding => SyntaxFactory.MemberAccessExpression(
+                    SyntaxKind.SimpleMemberAccessExpression, expression, memberBinding.Name
+                ),
+                
                 ConditionalAccessExpressionSyntax nestedConditional => ProcessWhenNotNull(
                     nestedConditional.WhenNotNull, expression
                 ),
                 
-                MemberBindingExpressionSyntax memberBinding => SyntaxFactory.MemberAccessExpression(
-                    SyntaxKind.SimpleMemberAccessExpression, expression, memberBinding.Name
-               ),
-                
                 _ => SyntaxFactory.MemberAccessExpression(SyntaxKind.SimpleMemberAccessExpression, expression,
-                    SyntaxFactory.IdentifierName(invocation.Expression.ToString())
+                    (Visit(invocation.Expression) as SimpleNameSyntax)!
                 )
             })!),
-            
-            ConditionalAccessExpressionSyntax conditionalAccess => conditionalAccess
-                .WithExpression(ProcessWhenNotNull(expression, conditionalAccess.Expression) ?? conditionalAccess.Expression)
-                .WithWhenNotNull(ProcessWhenNotNull(expression, conditionalAccess.WhenNotNull) ?? conditionalAccess.WhenNotNull),
             
             _ => null
         };
