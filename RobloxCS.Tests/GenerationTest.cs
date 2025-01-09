@@ -1,10 +1,77 @@
-using System.Linq.Expressions;
 using RobloxCS.Luau;
 
 namespace RobloxCS.Tests;
 
 public class GenerationTest
 {
+    [Fact]
+    public void Generates_SafeNavigation()
+    {
+        var ast = Generate("a?.b?.c;");
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<ExpressionStatement>(statement);
+        
+        var expressionStatement = (ExpressionStatement)statement;
+        Assert.IsType<ExpressionalIf>(expressionStatement.Expression);
+        
+        var expressionalIf = (ExpressionalIf)expressionStatement.Expression;
+        Assert.IsType<Literal>(expressionalIf.Body);
+        
+        var body = (Literal)expressionalIf.Body;
+        Assert.Equal("nil", body.ValueText);
+        Assert.IsType<BinaryOperator>(expressionalIf.Condition);
+        
+        var condition = (BinaryOperator)expressionalIf.Condition;
+        Assert.IsType<IdentifierName>(condition.Left);
+        Assert.IsType<Literal>(condition.Right);
+        Assert.Equal("==", condition.Operator);
+        
+        var conditionName = (IdentifierName)condition.Left;
+        var conditionValue = (Literal)condition.Right;
+        Assert.Equal("a", conditionName.ToString());
+        Assert.Equal("nil", conditionValue.ValueText);
+        Assert.IsType<ExpressionalIf>(expressionalIf.ElseBranch);
+        
+        var nestedExpressionalIf = (ExpressionalIf)expressionalIf.ElseBranch;
+        Assert.Equal("nil", body.ValueText);
+        Assert.IsType<BinaryOperator>(expressionalIf.Condition);
+        
+        var nestedCondition = (BinaryOperator)nestedExpressionalIf.Condition;
+        Assert.IsType<MemberAccess>(nestedCondition.Left);
+        Assert.IsType<Literal>(nestedCondition.Right);
+        Assert.Equal("==", nestedCondition.Operator);
+        
+        var nestedConditionExpression = (MemberAccess)nestedCondition.Left;
+        Assert.IsType<IdentifierName>(nestedConditionExpression.Expression);
+        Assert.IsType<IdentifierName>(nestedConditionExpression.Name);
+
+        var leftName = (IdentifierName)nestedConditionExpression.Expression;
+        var rightName = (IdentifierName)nestedConditionExpression.Name;
+        Assert.Equal("a", leftName.ToString());
+        Assert.Equal("b", rightName.ToString());
+        
+        var nestedConditionValue = (Literal)nestedCondition.Right;
+        Assert.Equal("nil", nestedConditionValue.ValueText);
+        Assert.IsType<MemberAccess>(nestedExpressionalIf.ElseBranch);
+        
+        var memberAccess = (MemberAccess)nestedExpressionalIf.ElseBranch;
+        Assert.IsType<MemberAccess>(memberAccess.Expression);
+        Assert.IsType<IdentifierName>(memberAccess.Name);
+        
+        var leftMemberAccess = (MemberAccess)memberAccess.Expression;
+        Assert.IsType<IdentifierName>(leftMemberAccess.Expression);
+        Assert.IsType<IdentifierName>(leftMemberAccess.Name);
+        
+        var finalNameLeft = (IdentifierName)leftMemberAccess.Expression;
+        var finalNameMiddle = (IdentifierName)leftMemberAccess.Name;
+        var finalNameRight = (IdentifierName)memberAccess.Name;
+        Assert.Equal("a", finalNameLeft.ToString());
+        Assert.Equal("b", finalNameMiddle.ToString());
+        Assert.Equal("c", finalNameRight.ToString());
+    }
+    
     [Fact]
     public void Generates_ShorthandNumericFor()
     {
