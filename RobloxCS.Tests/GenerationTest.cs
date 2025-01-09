@@ -5,6 +5,29 @@ namespace RobloxCS.Tests;
 
 public class GenerationTest
 {
+    [Fact]
+    public void Generates_NativeAttribute()
+    {
+        var ast = Generate("[Native] void abc() {}");
+        Assert.NotEmpty(ast.Statements);
+        
+        var statements = ast.Statements.Skip(1).ToList();
+        Assert.Single(statements);
+        
+        var statement = statements.First();
+        Assert.IsType<Function>(statement);
+        
+        var function = (Function)statement;
+        Assert.Single(function.AttributeLists);
+
+        var attributeList = function.AttributeLists.First();
+        Assert.Single(attributeList.Attributes);
+        Assert.IsType<BuiltInAttribute>(attributeList.Attributes.First());
+        
+        var attribute = (BuiltInAttribute)attributeList.Attributes.First();
+        Assert.Equal("native", attribute.Name.ToString());
+    }
+    
     // TODO: uncomment when complex expressions are macro'd
     // [Fact]
     // public void Generates_ExpressionalIncrement()
