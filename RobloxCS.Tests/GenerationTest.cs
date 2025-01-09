@@ -6,6 +6,31 @@ namespace RobloxCS.Tests;
 public class GenerationTest
 {
     [Fact]
+    public void Generates_ShorthandNumericFor()
+    {
+        var ast = Generate("for (var i = 0; i < 10; i++) continue;");
+        Assert.NotEmpty(ast.Statements);
+        
+        var statements = ast.Statements.Skip(1).ToList();
+        Assert.Single(statements);
+        Assert.IsType<NumericFor>(statements.First());
+        
+        var numericFor = (NumericFor)statements.First();
+        Assert.IsType<Literal>(numericFor.Minimum);
+        Assert.IsType<Literal>(numericFor.Maximum);
+        Assert.Null(numericFor.IncrementBy);
+        
+        var minimum = (Literal)numericFor.Minimum;
+        var maximum = (Literal)numericFor.Maximum;
+        Assert.Equal("0", minimum.ValueText);
+        Assert.Equal("9", maximum.ValueText);
+        Assert.Equal("i", numericFor.Name.ToString());
+
+        var statement = numericFor.Body;
+        Assert.IsType<Continue>(statement);
+    }
+
+    [Fact]
     public void Generates_NativeAttribute()
     {
         var ast = Generate("[Native] void abc() {}");
@@ -13,11 +38,9 @@ public class GenerationTest
         
         var statements = ast.Statements.Skip(1).ToList();
         Assert.Single(statements);
+        Assert.IsType<Function>(statements.First());
         
-        var statement = statements.First();
-        Assert.IsType<Function>(statement);
-        
-        var function = (Function)statement;
+        var function = (Function)statements.First();
         Assert.Single(function.AttributeLists);
 
         var attributeList = function.AttributeLists.First();
