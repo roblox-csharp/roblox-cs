@@ -100,9 +100,6 @@ public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharp
     protected string? TryGetName(SyntaxNode? node) =>
         StandardUtility.GetNamesFromNode(node).FirstOrDefault();
 
-    protected bool IsGlobal(SyntaxNode node) =>
-        node.Parent.IsKind(SyntaxKind.GlobalStatement) || node.Parent.IsKind(SyntaxKind.CompilationUnit);
-
     protected bool IsStatic(MemberDeclarationSyntax node) =>
         IsParentClassStatic(node) || HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
 

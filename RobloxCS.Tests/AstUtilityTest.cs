@@ -13,7 +13,6 @@ public class AstUtilityTest
     [InlineData("typeof")]
     [InlineData("type")]
     [InlineData("export")]
-
     public void ThrowsWithReservedIdentifier(string identifier)
     {
         Assert.Throws<Exception>(() =>

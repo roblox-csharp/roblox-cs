@@ -174,6 +174,29 @@ public static class AstUtility
         return new TableInitializer(values, keys);
     }
 
+    /// <summary>
+    /// CS.defineGlobal(name, "name") or parentName.name = "name"
+    /// </summary>
+    public static Statement DefineGlobalOrMember(SyntaxNode node, SimpleName name)
+    {
+        if (StandardUtility.IsGlobal(node))
+            return new ExpressionStatement(DefineGlobal(name, name));
+        
+        var fullParentName = GetFullParentName(node);
+        if (fullParentName != null)
+            return new ExpressionStatement(
+                new Assignment(
+                    new MemberAccess(
+                        fullParentName,
+                        name
+                    ),
+                    name
+                )
+            );
+
+        return new NoOp();
+    }
+
     /// <code>CS.defineGlobal(name, value)</code>
     public static Call DefineGlobal(Name name, Expression value) =>
         CSCall("defineGlobal", String(name.ToString()), value);
