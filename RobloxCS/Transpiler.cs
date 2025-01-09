@@ -19,13 +19,20 @@ public static class Transpiler
 
     public static string Transpile(string source)
     {
-        var tree = ParseSource(source);
-        var compiler = TranspilerUtility.GetCompiler([tree], null); // temporary null config!!!1
-        foreach (var diagnostic in compiler.GetDiagnostics().Where(diagnostic => !_ignoredDiagnostics.Contains(diagnostic.Id)))
-            Logger.HandleDiagnostic(diagnostic);
-        
-        
-        return TranspilerUtility.GenerateLuau(tree, compiler);
+        try
+        {
+            var tree = ParseSource(source);
+            var compiler = TranspilerUtility.GetCompiler([tree], null); // temporary null config!!!1
+            foreach (var diagnostic in compiler.GetDiagnostics()
+                         .Where(diagnostic => !_ignoredDiagnostics.Contains(diagnostic.Id)))
+                Logger.HandleDiagnostic(diagnostic);
+
+            return TranspilerUtility.GenerateLuau(tree, compiler);
+        }
+        catch (CleanExitException)
+        {
+            return "";
+        }
     }
 
     private static SyntaxTree ParseSource(string source)

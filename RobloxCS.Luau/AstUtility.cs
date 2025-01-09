@@ -400,7 +400,7 @@ public static class AstUtility
     public static SimpleName CreateSimpleName(SyntaxNode node, string name, bool registerIdentifier = false, bool bypassReserved = false)
     {
         if (RESERVED_IDENTIFIERS.Contains(name) && !bypassReserved)
-            Logger.UnsupportedError(node, $"Using '{name}' as an identifier", useIs: true, useYet: false);
+            throw Logger.UnsupportedError(node, $"Using '{name}' as an identifier", useIs: true, useYet: false);
 
         var text = registerIdentifier ? FixIdentifierNameText(node, name, registerIdentifier) : name;
         return name.Contains('<') && name.Contains('>')

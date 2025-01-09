@@ -23,8 +23,8 @@ public class GenerationTest
         var thirdStatement = statements[2];
         var fourthStatement = statements[3];
         Assert.IsType<Variable>(firstStatement);
-        Assert.IsType<ExpressionStatement>(secondStatement);
-        Assert.IsType<ScopedBlock>(thirdStatement);
+        Assert.IsType<ScopedBlock>(secondStatement);
+        Assert.IsType<ExpressionStatement>(thirdStatement);
         Assert.IsType<TypeAlias>(fourthStatement);
         
         var initialDeclaration = (Variable)firstStatement;
@@ -32,18 +32,19 @@ public class GenerationTest
         Assert.IsType<TableInitializer>(initialDeclaration.Initializer);
         Assert.Equal("MyNamespace", initialDeclaration.Name.ToString());
         
-        var expressionStatement = (ExpressionStatement)secondStatement;
-        Assert.IsType<Call>(expressionStatement.Expression);
-        
-        var scopedBlock = (ScopedBlock)thirdStatement;
+        var scopedBlock = (ScopedBlock)secondStatement;
         Assert.NotEmpty(scopedBlock.Statements);
         Assert.IsType<Block>(scopedBlock.Statements.First());
             
         var enumBlock = (Block)scopedBlock.Statements.First();
         Assert.Equal(3, enumBlock.Statements.Count);
         Assert.IsType<Variable>(enumBlock.Statements[0]);
-        Assert.IsType<ScopedBlock>(enumBlock.Statements[1]);
+        Assert.IsType<ExpressionStatement>(enumBlock.Statements[1]);
+        Assert.IsType<Assignment>(((ExpressionStatement)enumBlock.Statements[1]).Expression);
         Assert.IsType<TypeAlias>(enumBlock.Statements[2]);
+        
+        var expressionStatement = (ExpressionStatement)thirdStatement;
+        Assert.IsType<Call>(expressionStatement.Expression);
 
         var typeAlias = (TypeAlias)fourthStatement;
         Assert.Equal("MyNamespace", typeAlias.Name.ToString());
@@ -75,7 +76,7 @@ public class GenerationTest
         Assert.NotEmpty(function.Body.Statements);
 
         var bodyStatement = function.Body.Statements.First();
-        Assert.IsType<Return>(statement);
+        Assert.IsType<Return>(bodyStatement);
         
         var returnStatement = (Return)bodyStatement;
         Assert.IsType<Literal>(returnStatement.Expression);

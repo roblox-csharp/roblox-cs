@@ -1,11 +1,13 @@
 using Microsoft.CodeAnalysis.CSharp;
 using RobloxCS.Luau;
+using RobloxCS.Shared;
 
 namespace RobloxCS.Tests;
 
 public class AstUtilityTest
 {
     [Theory]
+    [InlineData("CS")]
     [InlineData("then")]
     [InlineData("and")]
     [InlineData("end")]
@@ -15,7 +17,7 @@ public class AstUtilityTest
     [InlineData("export")]
     public void ThrowsWithReservedIdentifier(string identifier)
     {
-        Assert.Throws<Exception>(() =>
+        Assert.Throws<CleanExitException>(() =>
             AstUtility.CreateSimpleName(SyntaxFactory.LiteralExpression(SyntaxKind.NullLiteralExpression), identifier)
         );
     }
