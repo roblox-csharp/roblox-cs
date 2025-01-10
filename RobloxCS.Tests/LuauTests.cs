@@ -5,14 +5,14 @@ using Xunit.Abstractions;
 
 namespace RobloxCS.Tests;
 
-public class RuntimeLibTest(ITestOutputHelper testOutputHelper)
+public class LuauTests(ITestOutputHelper testOutputHelper)
 {
     private readonly string _cwd =
         Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))))!;
             
     [Theory]
     [InlineData("RuntimeLibTest")]
-    public void RuntimeLib_PassesTests(string scriptName)
+    public void LuauTests_Pass(string scriptName)
     {
         var lunePath = Path.GetFullPath("lune" + (RuntimeInformation.IsOSPlatform(OSPlatform.Windows) ? ".exe" : ""), _cwd);
         var runScriptArguments = $"run {scriptName}";

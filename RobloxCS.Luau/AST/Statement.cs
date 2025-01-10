@@ -1,6 +1,3 @@
-﻿namespace RobloxCS.Luau
-{
-    public abstract class Statement : Node
-    {
-    }
-}
+﻿namespace RobloxCS.Luau;
+
+public abstract class Statement : Node;

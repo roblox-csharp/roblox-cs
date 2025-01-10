@@ -19,8 +19,5 @@
             luau.WriteNodesCommaSeparated(ArgumentList.Arguments);
             luau.Write(')');
         }
-
-        public Call WithArgumentList(ArgumentList argumentList) => new(Callee, argumentList);
-        public Call WithCallee(Expression callee) => new(callee, ArgumentList);
     }
 }

@@ -1,70 +1,54 @@
 ﻿using System.Text;
 
-namespace RobloxCS.Luau
+namespace RobloxCS.Luau;
+
+public class BaseWriter
 {
-    public class BaseWriter
+    public const int IndentSize = 2;
+    private readonly StringBuilder _output = new();
+    private int _indent;
+
+    public override string ToString()
     {
-        public static readonly int IndentSize = 2;
-        private readonly StringBuilder _output = new();
-        private int _indent = 0;
+        return _output.ToString();
+    }
 
-        public override string ToString()
+    public void PushIndent() => _indent++;
+
+    public void PopIndent() => _indent--;
+
+    public void WriteLine() => Write('\n');
+
+    public void WriteLine(string text)
+    {
+        if (string.IsNullOrEmpty(text))
         {
-            return _output.ToString();
+            _output.AppendLine();
+            return;
         }
 
-        public void PushIndent()
-        {
-            _indent++;
-        }
+        WriteIndent();
+        _output.AppendLine(text);
+    }
 
-        public void PopIndent()
-        {
-            _indent--;
-        }
+    public void WriteLine(char text) => WriteLine(text.ToString());
 
-        public void WriteLine()
-        {
-            Write('\n');
-        }
+    public void Write(string text)
+    {
+        WriteIndent();
+        _output.Append(text);
+    }
 
-        public void WriteLine(string text)
-        {
-            if (string.IsNullOrEmpty(text))
-            {
-                _output.AppendLine();
-                return;
-            }
+    public void Write(char text) => Write(text.ToString());
 
-            WriteIndent();
-            _output.AppendLine(text);
-        }
+    private void WriteIndent() =>
+        _output.Append(MatchLastCharacter('\n') ? string.Concat(Enumerable.Repeat(" ", IndentSize * _indent)) : "");
 
-        public void WriteLine(char text)
-        {
-            WriteLine(text.ToString());
-        }
-
-        public void Write(string text)
-        {
-            WriteIndent();
-            _output.Append(text);
-        }
-
-        public void Write(char text)
-        {
-            Write(text.ToString());
-        }
-
-        private void WriteIndent()
-        {
-            _output.Append(MatchLastCharacter('\n') ? string.Concat(Enumerable.Repeat(" ", IndentSize * _indent)) : "");
-        }
-
-        private bool MatchLastCharacter(char character)
-        {
-            if (_output.Length == 0) return false;
-            return _output[^1] == character;
-        }
+    private bool MatchLastCharacter(char character)
+    {
+        if (_output.Length == 0)
+            return false;
+            
+        return _output[^1] == character;
     }
 }

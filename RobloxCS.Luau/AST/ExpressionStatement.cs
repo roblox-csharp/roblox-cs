@@ -1,19 +1,18 @@
-﻿namespace RobloxCS.Luau
+﻿namespace RobloxCS.Luau;
+
+public class ExpressionStatement : Statement
 {
-    public class ExpressionStatement : Statement
+    public Expression Expression { get; }
+
+    public ExpressionStatement(Expression expression)
     {
-        public Expression Expression { get; }
+        Expression = expression;
+        AddChild(Expression);
+    }
 
-        public ExpressionStatement(Expression expression)
-        {
-            Expression = expression;
-            AddChild(Expression);
-        }
-
-        public override void Render(LuauWriter luau)
-        {
-            Expression.Render(luau);
-            luau.WriteLine();
-        }
+    public override void Render(LuauWriter luau)
+    {
+        Expression.Render(luau);
+        luau.WriteLine();
     }
 }

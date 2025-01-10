@@ -105,8 +105,8 @@ public class Macro(SemanticModel semanticModel)
                 case "List":
                 case "IEnumerable":
                 {
-                    var elementTypeName = (IdentifierName)visit(genericName.TypeArgumentList.Arguments.First())!;
-                    var expanded = new IdentifierName($"{{ {StandardUtility.GetMappedType(elementTypeName.Text)} }}");
+                    var elementTypeName = visit(genericName.TypeArgumentList.Arguments.First())!;
+                    var expanded = new IdentifierName($"{{ {StandardUtility.GetMappedType(elementTypeName.ToString()!)} }}");
                     expanded.MarkExpanded(MacroKind.IEnumerableType);
                     
                     return expanded;
@@ -114,9 +114,9 @@ public class Macro(SemanticModel semanticModel)
                 
                 case "Dictionary":
                 {
-                    var keyTypeName = (IdentifierName)visit(genericName.TypeArgumentList.Arguments.First())!;
-                    var valueTypeName = (IdentifierName)visit(genericName.TypeArgumentList.Arguments.Last())!;
-                    var expanded = new IdentifierName($"{{ [{StandardUtility.GetMappedType(keyTypeName.Text)}]: {StandardUtility.GetMappedType(valueTypeName.Text)} }}");
+                    var keyTypeName = visit(genericName.TypeArgumentList.Arguments.First())!;
+                    var valueTypeName = visit(genericName.TypeArgumentList.Arguments.Last())!;
+                    var expanded = new IdentifierName($"{{ [{StandardUtility.GetMappedType(keyTypeName.ToString()!)}]: {StandardUtility.GetMappedType(valueTypeName.ToString()!)} }}");
                     expanded.MarkExpanded(MacroKind.DictionaryType);
                     
                     return expanded;
@@ -193,58 +193,59 @@ public class Macro(SemanticModel semanticModel)
     /// <returns>The expanded expression of the macro, or null if no macro was applied</returns>
     public Expression? ObjectCreation(Func<SyntaxNode, Node?> visit, BaseObjectCreationExpressionSyntax baseObjectCreation) {
         // generic objects
-        var type = (baseObjectCreation is ObjectCreationExpressionSyntax objectCreation
-            ? _semanticModel.GetSymbolInfo(objectCreation.Type)
-            : _semanticModel.GetSymbolInfo(baseObjectCreation)).Symbol!.ContainingSymbol as INamedTypeSymbol;
+        var symbol = baseObjectCreation is ObjectCreationExpressionSyntax objectCreation
+            ? _semanticModel.GetSymbolInfo(objectCreation.Type).Symbol
+            : _semanticModel.GetSymbolInfo(baseObjectCreation).Symbol?.ContainingSymbol;
+        
+        if (symbol is not INamedTypeSymbol { TypeParameters.Length: > 0 } namedTypeSymbol)
+            return null;
 
-        if (type is { TypeParameters.Length: > 0 }) {
-            switch (type.Name) {
-                case "List":
-                {
-                    var expressions = baseObjectCreation.Initializer?.Expressions.Select(expression => (Expression)visit(expression)!).ToList();
-                    var table = new TableInitializer(expressions ?? []);
-                    table.MarkExpanded(MacroKind.ListConstruction);
+        switch (namedTypeSymbol.Name) {
+            case "List":
+            {
+                var expressions = baseObjectCreation.Initializer?.Expressions.Select(expression => (Expression)visit(expression)!).ToList();
+                var table = new TableInitializer(expressions ?? []);
+                table.MarkExpanded(MacroKind.ListConstruction);
                     
-                    return table;
-                }
+                return table;
+            }
                 
-                case "Dictionary": {
-                        var values = new List<Expression>();
-                        var keys = new List<Expression>();
+            case "Dictionary": {
+                var values = new List<Expression>();
+                var keys = new List<Expression>();
 
-                        if (baseObjectCreation.Initializer != null) {
-                            foreach (var expression in baseObjectCreation.Initializer.Expressions)
+                if (baseObjectCreation.Initializer != null) {
+                    foreach (var expression in baseObjectCreation.Initializer.Expressions)
+                    {
+                        switch (expression)
+                        {
+                            case AssignmentExpressionSyntax assignmentExpression:
                             {
-                                switch (expression)
-                                {
-                                    case AssignmentExpressionSyntax assignmentExpression:
-                                    {
-                                        var key = (Expression)visit(assignmentExpression.Left)!;
-                                        var value = (Expression)visit(assignmentExpression.Right)!;
+                                var key = (Expression)visit(assignmentExpression.Left)!;
+                                var value = (Expression)visit(assignmentExpression.Right)!;
 
-                                        values.Add(value);
-                                        keys.Add(key);
-                                        break;
-                                    }
+                                values.Add(value);
+                                keys.Add(key);
+                                break;
+                            }
                                     
-                                    case InitializerExpressionSyntax initializerExpression:
-                                    {
-                                        var key = (Expression)visit(initializerExpression.Expressions[0])!;
-                                        var value = (Expression)visit(initializerExpression.Expressions[1])!;
+                            case InitializerExpressionSyntax initializerExpression:
+                            {
+                                var key = (Expression)visit(initializerExpression.Expressions[0])!;
+                                var value = (Expression)visit(initializerExpression.Expressions[1])!;
 
-                                        values.Add(value);
-                                        keys.Add(key);
-                                        break;
-                                    }
-                                }
+                                values.Add(value);
+                                keys.Add(key);
+                                break;
                             }
                         }
-
-                        var table = new TableInitializer(values, keys);
-                        table.MarkExpanded(MacroKind.DictionaryConstruction);
-
-                        return table;
+                    }
                 }
+
+                var table = new TableInitializer(values, keys);
+                table.MarkExpanded(MacroKind.DictionaryConstruction);
+
+                return table;
             }
         }
 
