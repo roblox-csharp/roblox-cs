@@ -725,10 +725,6 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         return new Luau.UnaryOperator(mappedOperator, operand);
     }
 
-    public override Luau.BinaryOperator VisitConditionalAccessExpression(ConditionalAccessExpressionSyntax node) {
-        return new Luau.BinaryOperator(new Luau.BinaryOperator(Visit<Luau.Expression>(node.Expression), "~=", Luau.AstUtility.Nil()), "and", Visit<Luau.Expression>(node.WhenNotNull));
-    }
-
     public override Luau.Call VisitSwitchExpression(SwitchExpressionSyntax node) {
         var statements = new List<Luau.Statement>();
         var createTempVariable = node.GoverningExpression is not IdentifierNameSyntax && node.GoverningExpression is not LiteralExpressionSyntax;

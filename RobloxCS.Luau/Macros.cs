@@ -315,6 +315,20 @@ public class Macro(SemanticModel semanticModel)
                 expanded = new Assignment(new ElementAccess(self, key), value);
                 break;
             }
+            case "ContainsKey": {
+                var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
+                var self = (Expression)visit(memberAccess.Expression)!;
+                var key = arguments.Arguments.First().Expression;
+
+                expanded = new BinaryOperator(new ElementAccess(self, key), "~=", AstUtility.Nil());
+                break;
+            }
+            case "Clear": {
+                    var self = (Expression)visit(memberAccess.Expression)!;
+
+                    expanded = new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("clear")), new ArgumentList([new Argument(self)]));
+                    break;
+                }
         }
 
         expanded?.MarkExpanded(MacroKind.DictionaryMethod);
