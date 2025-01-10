@@ -725,6 +725,36 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         return new Luau.UnaryOperator(mappedOperator, operand);
     }
 
+    public override Luau.Call VisitSwitchExpression(SwitchExpressionSyntax node) {
+        var statements = new List<Luau.Statement>();
+        var createTempVariable = node.GoverningExpression is not IdentifierNameSyntax && node.GoverningExpression is not LiteralExpressionSyntax;
+        var condition = Visit<Luau.Expression>(node.GoverningExpression);
+        var comparand = createTempVariable ?
+            Luau.AstUtility.CreateSimpleName(node.GoverningExpression, "_exp", registerIdentifier: true)
+            : condition;
+
+        SwitchExpressionArmSyntax? discardPattern = null;
+        foreach (var section in node.Arms) {
+            if (section.Pattern is DiscardPatternSyntax) {
+                discardPattern = section;
+                continue;
+            }
+
+            var binaryOp = HandlePattern(section.Pattern, comparand);
+
+            statements.Add(new Luau.If(binaryOp, new Luau.Return(Visit<Luau.Expression>(section.Expression))));
+        }
+
+        if (createTempVariable)
+            statements.Insert(0, new Luau.Variable((Luau.IdentifierName)comparand, true, condition));
+
+        if (discardPattern != null)
+            statements.Add(new Luau.Return(Visit<Luau.Expression>(discardPattern.Expression)));
+
+        return new Luau.Call(new Luau.Parenthesized(new Luau.AnonymousFunction(new([]), body: new Luau.Block(statements)
+            )), new([]));
+    }
+
     // TODO: create VisitCaseSwitchLabel, VisitCasePatternSwitchLabel, VisitDefaultSwitchLabel methods
     public override Luau.Block VisitSwitchStatement(SwitchStatementSyntax node)
     {
