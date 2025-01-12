@@ -89,10 +89,10 @@ public class RenderingTest
     [Fact]
     public void Renders_IterativeFor()
     {
-        var name = new IdentifierName("value");
+        var valueName = new IdentifierName("value");
         var iterable = new IdentifierName("abc");
-        var body = new ExpressionStatement(AstUtility.PrintCall(name));
-        var forStatement = new For([name], iterable, body);
+        var body = new ExpressionStatement(AstUtility.PrintCall(valueName));
+        var forStatement = new For([AstUtility.DiscardName, valueName], iterable, body);
         var output = Render(forStatement);
         const string expectedOutput = """
                                       for _, value in abc do
