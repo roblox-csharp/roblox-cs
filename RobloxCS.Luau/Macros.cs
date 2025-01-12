@@ -270,6 +270,7 @@ public class Macro(SemanticModel semanticModel)
         InvocationExpressionSyntax invocation, out Expression? expanded)
     {
         expanded = null;
+        Console.WriteLine(memberAccess.Expression is IdentifierNameSyntax);
         switch (memberAccess.Name.Identifier.Text) {
             case "Add": {
                 var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
@@ -279,6 +280,20 @@ public class Macro(SemanticModel semanticModel)
                 expanded = new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("insert")), arguments);
                 break;
             }
+            case "Contains": {
+                    var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
+                    var self = (Expression)visit(memberAccess.Expression)!;
+                    arguments.Arguments.Insert(0, new Argument(self));
+
+                    expanded = new BinaryOperator(new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("find")), arguments), "~=", AstUtility.Nil());
+                    break;
+                }
+            case "Clear": {
+                    var self = (Expression)visit(memberAccess.Expression)!;
+
+                    expanded = new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("clear")), new ArgumentList([new Argument(self)]));
+                    break;
+                }
         }
 
         expanded?.MarkExpanded(MacroKind.ListMethod);
@@ -300,6 +315,20 @@ public class Macro(SemanticModel semanticModel)
                 expanded = new Assignment(new ElementAccess(self, key), value);
                 break;
             }
+            case "ContainsKey": {
+                var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
+                var self = (Expression)visit(memberAccess.Expression)!;
+                var key = arguments.Arguments.First().Expression;
+
+                expanded = new BinaryOperator(new ElementAccess(self, key), "~=", AstUtility.Nil());
+                break;
+            }
+            case "Clear": {
+                    var self = (Expression)visit(memberAccess.Expression)!;
+
+                    expanded = new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("clear")), new ArgumentList([new Argument(self)]));
+                    break;
+                }
         }
 
         expanded?.MarkExpanded(MacroKind.DictionaryMethod);
