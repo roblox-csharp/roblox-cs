@@ -6,9 +6,9 @@ public class For : Statement
     public Expression Iterable { get; }
     public Statement Body { get; }
 
-    public For(List<IdentifierName> initializers, Expression iterable, Statement body)
+    public For(List<IdentifierName> names, Expression iterable, Statement body)
     {
-        Names = initializers;
+        Names = names;
         Iterable = iterable;
         Body = body;
         AddChildren(Names);
@@ -18,27 +18,13 @@ public class For : Statement
 
     public override void Render(LuauWriter luau)
     {
-        var singleValueIteration = Names.Count == 1;
-        luau.Write("for _, ");
-        if (singleValueIteration)
-            Names.First().Render(luau);
-        else
-            luau.Write("_binding");
+        luau.Write("for ");
+        luau.WriteNodesCommaSeparated(Names);
         
         luau.Write(" in ");
         Iterable.Render(luau);
         luau.WriteLine(" do");
         luau.PushIndent();
-
-        if (!singleValueIteration)
-        {
-            var index = 0;
-            foreach (var name in Names)
-            {
-                var indexLiteral = new Literal((++index).ToString());
-                luau.WriteVariable(name, true, new ElementAccess(new IdentifierName("_binding"), indexLiteral));
-            }
-        }
         
         Body.Render(luau);
         luau.PopIndent();
