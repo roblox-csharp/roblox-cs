@@ -9,6 +9,8 @@ namespace RobloxCS.Luau;
 
 public static class AstUtility
 {
+    public static readonly IdentifierName DiscardName = new("_");
+    
     // TODO: make per-scope
     /// <summary>file path -> dictionary(identifier name, amount of times identifier is used)</summary>
     private static readonly Dictionary<string, Dictionary<string, uint>> _identifierDeclarations = [];
@@ -322,7 +324,7 @@ public static class AstUtility
 
     /// <code>local _ = discardedValue</code>
     public static Variable DiscardVariable(SyntaxNode node, Expression value) =>
-        new(CreateSimpleName<IdentifierName>(node, "_"), true, value);
+        new(DiscardName, true, value);
         
     public static GenericName? GetGenericName(Name name) =>
         name switch
