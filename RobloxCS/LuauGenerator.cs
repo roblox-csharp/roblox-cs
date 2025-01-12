@@ -939,7 +939,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         var returnType = new Luau.TypeRef(returnTypeName?.ToString() ?? "nil");
         var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
         var body = node.ExpressionBody != null ?
-            new Luau.Block([new Luau.ExpressionStatement(Visit<Luau.Expression>(node.ExpressionBody))])
+            new Luau.Block([new Luau.Return(Visit<Luau.Expression>(node.ExpressionBody))])
             : Visit<Luau.Block?>(node.Block);
 
         return new Luau.AnonymousFunction(parameterList, returnType, body);
@@ -993,7 +993,9 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
     public override Luau.Parameter VisitParameter(ParameterSyntax node)
     {
         var name = Luau.AstUtility.CreateSimpleName<Luau.IdentifierName>(node, registerIdentifier: true);
-        var returnType = Luau.AstUtility.CreateTypeRef(Visit<Luau.Name>(node.Type).ToString());
+        Luau.TypeRef returnType = null;
+        if (node.Type != null) 
+            Luau.AstUtility.CreateTypeRef(Visit<Luau.Name>(node.Type).ToString());
         var initializer = Visit<Luau.Expression?>(node.Default);
         var isParams = HasSyntax(node.Modifiers, SyntaxKind.ParamsKeyword);
 
