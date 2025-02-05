@@ -111,11 +111,13 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         var className = Luau.AstUtility.CreateSimpleName(node.Parent!);
         var fullName = new Luau.QualifiedName(className, name, IsStatic(node) ? '.' : ':');
         var parameterList = Visit<Luau.ParameterList>(node.ParameterList);
+  
+
         var returnType = Luau.AstUtility.CreateTypeRef(Visit<Luau.Name>(node.ReturnType).ToString());
         var body = node.ExpressionBody != null ? 
             Visit<Luau.Block>(node.ExpressionBody)
             : Visit<Luau.Block?>(node.Body);
-            
+
         var attributeLists = node.AttributeLists.Select(Visit<Luau.AttributeList>).ToList();
         return new Luau.Function(fullName, false, parameterList, returnType, body, attributeLists);
     }
@@ -516,7 +518,25 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         if (callee is Luau.MemberAccess memberAccess)
             memberAccess.Operator = methodSymbolInfo.Symbol!.IsStatic ? '.' : ':';
 
-        var argumentList = Visit<Luau.ArgumentList>(node.ArgumentList);
+        var statements = new List<Luau.Statement>();
+        List<Luau.Argument> arguments = node.ArgumentList.Arguments.Select((arg) => {
+            if (arg.RefKindKeyword.IsKind(SyntaxKind.RefKeyword) || arg.RefKindKeyword.IsKind(SyntaxKind.OutKeyword)) {
+                Luau.Variable? variable = null;
+
+                if (arg.Expression.IsKind(SyntaxKind.DeclarationExpression)) {
+                    variable = Visit<Luau.Variable>(((arg.Expression as DeclarationExpressionSyntax)!.Designation as SingleVariableDesignationSyntax));
+                    statements.Add(variable);
+                }
+
+                return new Luau.Argument(new Luau.AnonymousFunction(new Luau.ParameterList(new([new Luau.Parameter(new Luau.IdentifierName("_val"))])), new Luau.Block([
+                new Luau.If(new Luau.BinaryOperator(new Luau.IdentifierName("_val"), "~=", Luau.AstUtility.Nil()), new Luau.ExpressionStatement(new Luau.Assignment(variable?.Name ?? Visit<Luau.IdentifierName>(arg.Expression), new Luau.IdentifierName("_val")))),
+                    new Luau.Return(new Luau.IdentifierName("_val"))
+                ])));
+            }
+
+            return Visit<Luau.Argument>(arg);
+        }).ToList();
+        var argumentList = new Luau.ArgumentList(arguments);
         List<MacroKind> returnCalleeMacroKinds =
         [
             MacroKind.NewInstance,
@@ -529,7 +549,12 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         // dumb ass hack bc null warning suppression doesn't work here for some reason
         if (callee.ExpandedByMacro != null && returnCalleeMacroKinds.Contains((MacroKind)callee.ExpandedByMacro))
             return callee;
-        
+
+        if (statements.Count > 0) {
+            statements.Add(new Luau.ExpressionStatement(new Luau.Call(callee, argumentList)));
+            return new Luau.Block(statements);
+        }
+
         return new Luau.Call(callee, argumentList);
     }
 
@@ -565,6 +590,20 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
     {
         var name = Visit<Luau.AssignmentTarget>(node.Left);
         var value = Visit<Luau.Expression>(node.Right);
+        var method = FindFirstAncestor<MethodDeclarationSyntax>(node);
+
+        if (method != null) {
+            var refKinds = method.ParameterList.Parameters.Select((parameter) => {
+                if (parameter.Modifiers.Any(SyntaxKind.RefKeyword) || parameter.Modifiers.Any(SyntaxKind.OutKeyword))
+                    return parameter.Identifier.Text.ToString();
+
+                return null;
+            }).ToHashSet();
+
+            if (refKinds.Contains(name.ToString()))
+                return new Luau.Call(name, new([new(value)]));
+        }
+
         if (node.IsKind(SyntaxKind.SimpleAssignmentExpression))
             return new Luau.Assignment(name, value);
             
@@ -627,8 +666,22 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         return new Luau.QualifiedName(left, right);
     }
 
-    public override Luau.Name VisitIdentifierName(IdentifierNameSyntax node)
+    public override Luau.Node VisitIdentifierName(IdentifierNameSyntax node)
     {
+        var method = FindFirstAncestor<MethodDeclarationSyntax>(node);
+
+        if (method != null && node.Parent is not AssignmentExpressionSyntax) {
+            var refKinds = method.ParameterList.Parameters.Select((parameter) => {
+                if (parameter.Modifiers.Any(SyntaxKind.RefKeyword) || parameter.Modifiers.Any(SyntaxKind.OutKeyword))
+                    return parameter.Identifier.Text.ToString();
+
+                return null;
+            }).ToHashSet();
+
+            if (refKinds.Contains(node.Identifier.Text))
+                return new Luau.Call(new Luau.IdentifierName(node.Identifier.Text), new([]));
+        }
+
         var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node);
         var isClassMember = classDeclaration != null &&
                             classDeclaration.Members.Any(member => member is not ConstructorDeclarationSyntax && TryGetName(member) == GetName(node)) &&
@@ -890,7 +943,9 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         var returnType = Luau.AstUtility.CreateTypeRef(node.Type);
         var initializer = Visit<Luau.Expression?>(node.Default);
         var isParams = HasSyntax(node.Modifiers, SyntaxKind.ParamsKeyword);
-            
+        if (returnType != null && node.Modifiers.Any(SyntaxKind.RefKeyword) || node.Modifiers.Any(SyntaxKind.OutKeyword))
+            returnType = new Luau.TypeRef($"({returnType!.Path}?) -> {returnType.Path}", true);
+
         return new Luau.Parameter(name, isParams, initializer, returnType);
     }
 

@@ -7,6 +7,7 @@
         public Block(List<Statement> statements)
         {
             Statements = statements;
+            AddChildren(statements);
         }
 
         public override void Render(LuauWriter luau)
