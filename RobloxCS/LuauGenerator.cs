@@ -586,19 +586,22 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         return new Luau.Variable(name, true, value);
     }
 
-    public override Luau.Node VisitAssignmentExpression(AssignmentExpressionSyntax node)
+    private HashSet<string?> GetRefKindParameters(ParameterListSyntax parameterList) {
+        return parameterList.Parameters.Select((parameter) => {
+            if (parameter.Modifiers.Any(SyntaxKind.RefKeyword) || parameter.Modifiers.Any(SyntaxKind.OutKeyword))
+                return parameter.Identifier.Text.ToString();
+            return null;
+        }).ToHashSet();
+    }
+
+    public override Luau.Expression VisitAssignmentExpression(AssignmentExpressionSyntax node)
     {
         var name = Visit<Luau.AssignmentTarget>(node.Left);
         var value = Visit<Luau.Expression>(node.Right);
         var method = FindFirstAncestor<MethodDeclarationSyntax>(node);
 
         if (method != null) {
-            var refKinds = method.ParameterList.Parameters.Select((parameter) => {
-                if (parameter.Modifiers.Any(SyntaxKind.RefKeyword) || parameter.Modifiers.Any(SyntaxKind.OutKeyword))
-                    return parameter.Identifier.Text.ToString();
-
-                return null;
-            }).ToHashSet();
+            var refKinds = GetRefKindParameters(method.ParameterList);
 
             if (refKinds.Contains(name.ToString()))
                 return new Luau.Call(name, new([new(value)]));
@@ -671,12 +674,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         var method = FindFirstAncestor<MethodDeclarationSyntax>(node);
 
         if (method != null && node.Parent is not AssignmentExpressionSyntax) {
-            var refKinds = method.ParameterList.Parameters.Select((parameter) => {
-                if (parameter.Modifiers.Any(SyntaxKind.RefKeyword) || parameter.Modifiers.Any(SyntaxKind.OutKeyword))
-                    return parameter.Identifier.Text.ToString();
-
-                return null;
-            }).ToHashSet();
+            var refKinds = GetRefKindParameters(method.ParameterList);
 
             if (refKinds.Contains(node.Identifier.Text))
                 return new Luau.Call(new Luau.IdentifierName(node.Identifier.Text), new([]));
