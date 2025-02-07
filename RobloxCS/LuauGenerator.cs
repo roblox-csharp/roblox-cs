@@ -528,9 +528,10 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
                     statements.Add(variable);
                 }
 
-                return new Luau.Argument(new Luau.AnonymousFunction(new Luau.ParameterList(new([new Luau.Parameter(new Luau.IdentifierName("_val"))])), new Luau.Block([
-                new Luau.If(new Luau.BinaryOperator(new Luau.IdentifierName("_val"), "~=", Luau.AstUtility.Nil()), new Luau.ExpressionStatement(new Luau.Assignment(variable?.Name ?? Visit<Luau.IdentifierName>(arg.Expression), new Luau.IdentifierName("_val")))),
-                    new Luau.Return(new Luau.IdentifierName("_val"))
+                return new Luau.Argument(new Luau.AnonymousFunction(new Luau.ParameterList(new([new Luau.Parameter(new Luau.IdentifierName("..."))])), new Luau.Block([
+                    new Luau.Variable(new Luau.IdentifierName("_val"), true, new Luau.IdentifierName("...")),
+                new Luau.If(new Luau.BinaryOperator(new Luau.Call(new Luau.IdentifierName("select"), new ([new (new Luau.Literal("#")), new (new Luau.IdentifierName("..."))])), "~=", new Luau.Literal("0")), new Luau.ExpressionStatement(new Luau.Assignment(variable?.Name ?? Visit<Luau.IdentifierName>(arg.Expression), new Luau.IdentifierName("_val")))),
+                    new Luau.Return(variable?.Name ?? Visit<Luau.IdentifierName>(arg.Expression))
                 ])));
             }
 
