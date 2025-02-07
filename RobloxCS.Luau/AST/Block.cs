@@ -1,21 +1,10 @@
-﻿namespace RobloxCS.Luau
-{
-    public class Block : Statement
+﻿namespace RobloxCS.Luau;
+
+    public Block(List<Statement> statements)
     {
-        public List<Statement> Statements { get; }
-
-        public Block(List<Statement> statements)
-        {
-            Statements = statements;
-            AddChildren(statements);
-        }
-
-        public override void Render(LuauWriter luau)
-        {
-            foreach (var statement in Statements)
-            {
-                statement.Render(luau);
-            }
-        }
+        Statements = statements;
+        AddChildren(Statements);
     }
+
+    public override void Render(LuauWriter luau) => luau.WriteNodes(Statements);
 }

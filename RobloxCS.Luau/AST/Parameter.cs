@@ -1,69 +1,66 @@
-﻿using System.Text.RegularExpressions;
+﻿namespace RobloxCS.Luau;
 
-namespace RobloxCS.Luau
+public class Parameter : Statement
 {
-    public class Parameter : Statement
+
+    public IdentifierName Name { get; }
+    public Expression? Initializer { get; }
+    public TypeRef? Type { get; }
+    public bool IsVararg { get; }
+
+    public Parameter(IdentifierName name, bool isVararg = false, Expression? initializer = null, TypeRef? type = null)
     {
+        Name = name;
+        Initializer = initializer;
+        Type = type;
+        IsVararg = isVararg;
 
-        public IdentifierName Name { get; }
-        public Expression? Initializer { get; }
-        public TypeRef? Type { get; }
-        public bool IsVararg { get; }
-
-        public Parameter(IdentifierName name, bool isVararg = false, Expression? initializer = null, TypeRef? type = null)
+        AddChild(Name);
+        if (Initializer != null)
         {
-            Name = name;
-            Initializer = initializer;
-            Type = type;
-            IsVararg = isVararg;
-
-            AddChild(Name);
-            if (Initializer != null)
-            {
-                AddChild(Initializer);
-            }
-            if (Type != null)
-            {
-                Type = FixType(Type);
-                AddChild(Type);
-            }
+            AddChild(Initializer);
         }
-
-        public override void Render(LuauWriter luau)
+        if (Type != null)
         {
-            if (IsVararg)
-            {
-                luau.Write("...");
-            }
-            else
-            {
-                Name.Render(luau);
-            }
-            if (Type != null)
-            {
-                luau.Write(": ");
-                Type.Render(luau);
-            }
+            Type = FixType(Type);
+            AddChild(Type);
         }
+    }
 
-        private TypeRef FixType(TypeRef type)
+    public override void Render(LuauWriter luau)
+    {
+        if (IsVararg)
         {
-            while (true)
+            luau.Write("...");
+        }
+        else
+        {
+            Name.Render(luau);
+        }
+        if (Type != null)
+        {
+            luau.Write(": ");
+            Type.Render(luau);
+        }
+    }
+
+    private TypeRef FixType(TypeRef type)
+    {
+        while (true)
+        {
+            if (type is ArrayType arrayType && IsVararg)
             {
-                if (type is ArrayType arrayType && IsVararg)
-                {
-                    type = arrayType.ElementType;
-                    continue;
-                }
-
-                var isOptional = type is OptionalType;
-                if (Initializer != null || isOptional)
-                {
-                    return isOptional ? type : new OptionalType(type);
-                }
-
-                return type;
+                type = arrayType.ElementType;
+                continue;
             }
+
+            var isOptional = type is OptionalType;
+            if (Initializer != null || isOptional)
+            {
+                return isOptional ? type : new OptionalType(type);
+            }
+
+            return type;
         }
     }
 }

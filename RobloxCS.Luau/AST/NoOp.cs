@@ -1,10 +1,11 @@
-﻿namespace RobloxCS.Luau
+﻿namespace RobloxCS.Luau;
+
+/// <summary>Optionally renders a newline.</summary>
+public sealed class NoOp(bool createNewline = true) : Statement
 {
-    /// <summary>Simply renders nothing.</summary>
-    public sealed class NoOp : Statement
+    public override void Render(LuauWriter luau)
     {
-        public override void Render(LuauWriter luau)
-        {
-        }
+        if (!createNewline) return;
+        luau.WriteLine();
     }
 }

@@ -10,23 +10,20 @@
 
         public void WriteNodesCommaSeparated<TNode>(List<TNode> nodes) where TNode : Node
         {
+            var index = 0;
             foreach (var node in nodes)
             {
                 node.Render(this);
-                if (node != nodes.Last())
-                {
+                if (index++ != nodes.Count - 1)
                     Write(", ");
-                }
             }
         }
+        
         public void WriteNodes<TNode>(List<TNode> nodes) where TNode : Node
         {
             foreach (var node in nodes)
-            {
                 node.Render(this);
-            }
         }
-
 
         public void WriteRequire(string requirePath)
         {
@@ -66,7 +63,7 @@
                 }
                 else if (parameter.Initializer != null)
                 {
-                    body.Statements.Insert(0, AstUtility.Initializer(parameter.Name, parameter.Initializer));
+                    body.Statements.Insert(0, AstUtility.DefaultValueInitializer(parameter.Name, parameter.Initializer));
                 }
             }
             body.Render(this);
@@ -132,7 +129,10 @@
             type.Render(this);
         }
 
-        // wtf is this for??? i literally forgot
+        /// <summary>
+        /// Writes statements are descendants of <see cref="node"/>.
+        /// This is used in cases like a[b++] where the indexer has code that needs to be rendered outside the brackets.
+        /// </summary> 
         public void WriteDescendantStatements(ref Node node)
         {
             if (node.Parent is not Variable && node is not Argument)

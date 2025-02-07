@@ -1,27 +1,26 @@
-﻿namespace RobloxCS.Luau
+﻿namespace RobloxCS.Luau;
+
+public sealed class ElementAccess : AssignmentTarget
 {
-    public sealed class ElementAccess : AssignmentTarget
+    public Expression Expression { get; }
+    public Expression Index { get; set; }
+
+    public ElementAccess(Expression expression, Expression index)
     {
-        public Expression Expression { get; }
-        public Expression Index { get; set; }
+        Expression = expression;
+        Index = index;
+        AddChildren([Expression, Index]);
+    }
 
-        public ElementAccess(Expression expression, Expression index)
-        {
-            Expression = expression;
-            Index = index;
-            AddChildren([Expression, Index]);
-        }
+    public override void Render(LuauWriter luau)
+    {
+        Node index = Index;
+        luau.WriteDescendantStatements(ref index);
+        Index = (Expression)index;
 
-        public override void Render(LuauWriter luau)
-        {
-            Node index = Index;
-            luau.WriteDescendantStatements(ref index);
-            Index = (Expression)index;
-
-            Expression.Render(luau);
-            luau.Write('[');
-            Index.Render(luau);
-            luau.Write(']');
-        }
+        Expression.Render(luau);
+        luau.Write('[');
+        Index.Render(luau);
+        luau.Write(']');
     }
 }

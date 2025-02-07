@@ -4,6 +4,9 @@ namespace RobloxCS.Shared;
 
 public static class Constants
 {
+    public const string HeaderComment = "Compiled with roblox-cs v2.0.0";
+    public const string IncludeFolderName = "Include";
+    
     public static readonly HashSet<string> UNSUPPORTED_BITWISE_TYPES =
     [
         "UInt128",
@@ -81,11 +84,6 @@ public static class Constants
         "__metatable",
     ];
 
-    public static readonly HashSet<string> RESERVED_IDENTIFIERS =
-    [
-        "CS"
-    ];
-
     public static readonly HashSet<string> LUAU_KEYWORDS =
     [
         "local",
@@ -104,6 +102,12 @@ public static class Constants
         "export",
         "type",
         "typeof"
+    ];
+    
+    public static readonly HashSet<string> RESERVED_IDENTIFIERS =
+    [
+        "CS",
+        ..LUAU_KEYWORDS
     ];
 
     public static readonly HashSet<string> DECIMAL_TYPES =

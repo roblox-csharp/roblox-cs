@@ -1,19 +1,23 @@
-﻿namespace RobloxCS.Luau
+﻿namespace RobloxCS.Luau;
+
+public class BuiltInAttribute : Statement
 {
-    public class BuiltInAttribute : BaseAttribute
+    public Name Name { get; }
+    public bool Inline { get; }
+
+    public BuiltInAttribute(Name name, bool inline = false)
     {
-        public Name Name { get; }
+        Name = name;
+        Inline = inline;
+        AddChild(name);
+    }
 
-        public BuiltInAttribute(Name name)
-        {
-            Name = name;
-            AddChild(name);
-        }
+    public override void Render(LuauWriter luau)
+    {
+        luau.Write('@');
+        Name.Render(luau);
 
-        public override void Render(LuauWriter luau)
-        {
-            luau.Write('@');
-            Name.Render(luau);
-        }
+        if (Inline) return;
+        luau.WriteLine();
     }
 }
