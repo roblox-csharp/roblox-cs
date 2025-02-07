@@ -1,5 +1,4 @@
-﻿using System.Linq;
-using System.Text;
+﻿using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
@@ -70,7 +69,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         return new Luau.AST(statements);
     }
 
-    public override Luau.Name? VisitPredefinedType(PredefinedTypeSyntax node) =>
+    public override Luau.TypeRef? VisitPredefinedType(PredefinedTypeSyntax node) =>
         Luau.AstUtility.CreateTypeRef(node.Keyword.Text);
 
     public override Luau.ArrayType VisitArrayType(ArrayTypeSyntax node) =>
@@ -542,7 +541,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
             }
         }
 
-        var callee = Visit<Luau.Node>(node.Expression);
+        var callee = Visit<Luau.Expression>(node.Expression);
         if (callee is Luau.MemberAccess memberAccess)
             memberAccess.Operator = methodSymbolInfo.Symbol!.IsStatic ? '.' : ':';
 
@@ -556,7 +555,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
                     statements.Add(variable);
                 }
 
-                return new Luau.Argument(new Luau.AnonymousFunction(new Luau.ParameterList(new([new Luau.Parameter(new Luau.IdentifierName("..."))])), new Luau.Block([
+                return new Luau.Argument(new Luau.AnonymousFunction(new Luau.ParameterList(new([new Luau.Parameter(new Luau.IdentifierName("..."))])), body: new Luau.Block([
                     new Luau.Variable(new Luau.IdentifierName("_val"), true, new Luau.IdentifierName("...")),
                 new Luau.If(new Luau.BinaryOperator(new Luau.Call(new Luau.IdentifierName("select"), new ([new (new Luau.Literal("#")), new (new Luau.IdentifierName("..."))])), "~=", new Luau.Literal("0")), new Luau.ExpressionStatement(new Luau.Assignment(variable?.Name ?? Visit<Luau.IdentifierName>(arg.Expression), new Luau.IdentifierName("_val")))),
                     new Luau.Return(variable?.Name ?? Visit<Luau.IdentifierName>(arg.Expression))
@@ -623,7 +622,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         }).ToHashSet();
     }
 
-    public override Luau.Expression VisitAssignmentExpression(AssignmentExpressionSyntax node)
+    public override Luau.Node VisitAssignmentExpression(AssignmentExpressionSyntax node)
     {
         var expanded = _macro.Assignment(Visit, node);
         if (expanded != null)
@@ -1097,7 +1096,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
     }
 
     public override Luau.AttributeList VisitAttributeList(AttributeListSyntax node) =>
-        new(node.Attributes.Select(Visit).Where(luauNode => luauNode != null)!.ToList<Luau.Node>());
+     new(node.Attributes.Select(Visit).Where(luauNode => luauNode != null)!.ToList<Luau.Node>());
 
     public override Luau.Statement VisitGlobalStatement(GlobalStatementSyntax node)
     {
