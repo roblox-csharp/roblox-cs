@@ -273,13 +273,13 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
     {
         expanded = null;
         var listExpression = visit(memberAccess.Expression)!;
-        Expression self;
+        IdentifierName self;
         
         if (listExpression is not IdentifierName) {
             self = new IdentifierName("_exp");
-            transformState.prereq(new Variable((IdentifierName)self, true, (Expression)listExpression));
+            transformState.prereq(new Variable(self, true, (IdentifierName)listExpression));
         } else
-            self = (Expression)listExpression;
+            self = (IdentifierName)listExpression;
 
 
         switch (memberAccess.Name.Identifier.Text) {

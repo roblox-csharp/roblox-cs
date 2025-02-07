@@ -622,6 +622,23 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         }).ToHashSet();
     }
 
+    private ParameterListSyntax? GetParameterList(SyntaxNode node) {
+        var ancestors = node.Ancestors();
+        SyntaxNode? funcNode = null;
+        foreach (var ancestorNode in ancestors)
+            if (ancestorNode is MethodDeclarationSyntax or LocalFunctionStatementSyntax or AnonymousMethodExpressionSyntax) {
+                funcNode = ancestorNode;
+                break;
+            }
+
+        return funcNode switch {
+            MethodDeclarationSyntax method => method.ParameterList,
+            LocalFunctionStatementSyntax localFunction => localFunction.ParameterList,
+            AnonymousMethodExpressionSyntax anonymousFunction => anonymousFunction.ParameterList,
+            _ => null
+        };
+    }
+
     public override Luau.Node VisitAssignmentExpression(AssignmentExpressionSyntax node)
     {
         var expanded = _macro.Assignment(Visit, node);
@@ -631,10 +648,10 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         var mappedOperator = StandardUtility.GetMappedOperator(node.OperatorToken.Text);
         var name = Visit<Luau.AssignmentTarget>(node.Left);
         var value = Visit<Luau.Expression>(node.Right);
-        var method = FindFirstAncestor<MethodDeclarationSyntax>(node);
+        var method = GetParameterList(node);
 
         if (method != null) {
-            var refKinds = GetRefKindParameters(method.ParameterList);
+            var refKinds = GetRefKindParameters(method);
 
             if (refKinds.Contains(name.ToString()))
                 return new Luau.Call(name, new([new(value)]));
@@ -1073,7 +1090,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         var name = Luau.AstUtility.CreateSimpleName<Luau.IdentifierName>(node, registerIdentifier: true);
         Luau.TypeRef returnType = null;
         if (node.Type != null) 
-            Luau.AstUtility.CreateTypeRef(Visit<Luau.Name>(node.Type).ToString());
+            returnType = Luau.AstUtility.CreateTypeRef(Visit<Luau.Name>(node.Type).ToString());
         var initializer = Visit<Luau.Expression?>(node.Default);
         var isParams = HasSyntax(node.Modifiers, SyntaxKind.ParamsKeyword);
 
