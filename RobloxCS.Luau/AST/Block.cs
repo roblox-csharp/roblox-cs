@@ -1,7 +1,9 @@
 ﻿namespace RobloxCS.Luau;
 
-    public Block(List<Statement> statements)
-    {
+public class Block : Statement {
+    public List<Statement> Statements { get; }
+
+    public Block(List<Statement> statements) {
         Statements = statements;
         AddChildren(Statements);
     }
