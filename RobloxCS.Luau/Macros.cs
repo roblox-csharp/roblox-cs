@@ -159,7 +159,7 @@ public class Macro(SemanticModel semanticModel)
             {
                 {
                     if (StandardUtility.DoesTypeInheritFrom(expressionType, "Object") &&
-                        ObjectMethod(visit, memberAccess, out var expanded))
+                        TryGetObjectMethod(visit, memberAccess, out var expanded))
                     {
                         return expanded;
                     }
@@ -169,7 +169,7 @@ public class Macro(SemanticModel semanticModel)
                 {
                     case "Dictionary":
                     {
-                        if (DictionaryMethod(visit, memberAccess, invocation, out var expanded))
+                        if (TryGetDictionaryMethod(visit, memberAccess, invocation, out var expanded))
                             return expanded;
                         
                         break;
@@ -177,7 +177,7 @@ public class Macro(SemanticModel semanticModel)
 
                     case "List":
                     {
-                        if (ListMethod(visit, memberAccess, invocation, out var expanded))
+                        if (TryGetListMethod(visit, memberAccess, invocation, out var expanded))
                             return expanded;
                         
                         break;
@@ -253,10 +253,15 @@ public class Macro(SemanticModel semanticModel)
     }
     
     /// <summary>Macros <see cref="Object"/> methods</summary>
-    private bool ObjectMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess, out Expression? expanded)
+    private static bool TryGetObjectMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess, out Expression? expanded)
     {
         expanded = null;
         switch (memberAccess.Name.Identifier.Text) {
+            case "ToString":{
+                var self = (Expression)visit(memberAccess.Expression)!;
+                expanded = new Call(new IdentifierName("tostring"), new ArgumentList([new Argument(self)]));
+                break;
+            }
             case "GetType":
                 throw Logger.UnsupportedError(memberAccess.Name, "Object.GetType()", useIs: true, useYet: false);
         }
@@ -266,11 +271,10 @@ public class Macro(SemanticModel semanticModel)
     }
     
     /// <summary>Macros <see cref="List"/> methods</summary>
-    private static bool ListMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
+    private static bool TryGetListMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
         InvocationExpressionSyntax invocation, out Expression? expanded)
     {
         expanded = null;
-        Console.WriteLine(memberAccess.Expression is IdentifierNameSyntax);
         switch (memberAccess.Name.Identifier.Text) {
             case "Add": {
                 var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
@@ -285,7 +289,11 @@ public class Macro(SemanticModel semanticModel)
                     var self = (Expression)visit(memberAccess.Expression)!;
                     arguments.Arguments.Insert(0, new Argument(self));
 
-                    expanded = new BinaryOperator(new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("find")), arguments), "~=", AstUtility.Nil());
+                    expanded = new BinaryOperator(
+                        new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("find")), arguments),
+                        "~=",
+                        AstUtility.Nil()
+                    );
                     break;
                 }
             case "Clear": {
@@ -301,7 +309,7 @@ public class Macro(SemanticModel semanticModel)
     }
 
     /// <summary>Macros <see cref="Dictionary"/> methods</summary>
-    private static bool DictionaryMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
+    private static bool TryGetDictionaryMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
         InvocationExpressionSyntax invocation, out Expression? expanded)
     {
         expanded = null;

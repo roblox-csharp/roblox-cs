@@ -6,7 +6,7 @@ namespace RobloxCS;
 
 using TransformMethod = Func<SyntaxTree, ConfigData, SyntaxTree>;
 
-public static partial class BuiltInTransformers
+public static class BuiltInTransformers
 {
     public static TransformMethod Main() =>
         (tree, config) => new MainTransformer(tree, config).TransformTree();
@@ -20,8 +20,6 @@ public static partial class BuiltInTransformers
         };
     }
 
-    private static TransformMethod FailedToGetTransformer(string name)
-    {
+    private static TransformMethod FailedToGetTransformer(string name) =>
         throw Logger.Error($"No built-in transformer \"{name}\" exists (roblox-cs.yml)");
-    }
 }
