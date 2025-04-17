@@ -47,7 +47,7 @@ public static class Logger
 
     public static CleanExitException UnsupportedError(SyntaxNode node, string subject, bool useIs = false, bool useYet = true)
     {
-        return CodegenError(node, $"{subject} {(useIs == true ? "is" : "are")} not {(useYet ? "yet " : "")}supported, sorry!");
+        return CodegenError(node, $"{subject} {(useIs ? "is" : "are")} not {(useYet ? "yet " : "")}supported, sorry!");
     }
 
     public static CleanExitException CodegenError(SyntaxNode node, string message)

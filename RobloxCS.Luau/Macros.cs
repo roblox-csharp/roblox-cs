@@ -255,7 +255,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
     }
     
     /// <summary>Macros <see cref="Object"/> methods</summary>
-    private bool ObjectMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess, out Expression? expanded)
+    private static bool ObjectMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess, out Expression? expanded)
     {
         expanded = null;
         switch (memberAccess.Name.Identifier.Text) {

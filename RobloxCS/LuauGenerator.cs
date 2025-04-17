@@ -31,7 +31,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         {
             var statement = Visit<Luau.Statement?>(member);
             if (statement == null)
-                throw Logger.CompilerError($"Unhandled syntax node within {member.Kind()}:\n{member}");
+                throw Logger.CompilerError($"Unhandled syntax node within {member.Kind()}", node);
 
             if (transformState.PreReqStatementStack.Count > 0) {
 
@@ -952,7 +952,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
             ParenthesizedPatternSyntax parenthesizedPattern => HandleParenthesizedPattern(parenthesizedPattern, comparand),
             ConstantPatternSyntax constantPattern => HandleConstantPattern(constantPattern, comparand),
             TypePatternSyntax typePattern => HandleTypePattern(typePattern, comparand),
-            _ => throw Logger.CompilerError($"Unhandled pattern type: {node.GetType().Name}")
+            _ => throw Logger.CompilerError($"Unhandled pattern type: {node.GetType().Name}", node)
         };
     }
 
