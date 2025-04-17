@@ -511,7 +511,7 @@ public class RenderingTest
     {
         var identifier = new IdentifierName("myFunction");
         var parameterIdentifier = new IdentifierName("x");
-        var parameterType = new TypeRef("number");
+        var parameterType = new OptionalType(new TypeRef("number"));
         var parameterDefault = new Literal("69");
         var body = new Block([]);
         var parameter = new Parameter(parameterIdentifier, false, parameterDefault, parameterType);

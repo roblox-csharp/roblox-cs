@@ -519,6 +519,31 @@ public class GenerationTest
     }
     
     [Fact]
+    public void Generates_DefaultParameters_WithNullableTypes()
+    {
+        const string source = "void blah(int y = 69) {}";
+        
+        var ast = Generate(source);
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<Function>(statement);
+        
+        var function = (Function)statement;
+        Assert.Equal("blah", function.Name.ToString());
+        Assert.NotNull(function.ReturnType);
+        Assert.Equal("()", function.ReturnType.ToString());
+        Assert.NotNull(function.Body);
+        Assert.Empty(function.Body.Statements);
+        Assert.Single(function.ParameterList.Parameters);
+        
+        var parameter = function.ParameterList.Parameters.First();
+        Assert.StartsWith("y", parameter.Name.ToString());
+        Assert.IsType<OptionalType>(parameter.Type);
+        Assert.Equal("number?", parameter.Type.ToString());
+    }
+    
+    [Fact]
     public void Generates_MultipleVariableDeclarations()
     {
         const string source = """

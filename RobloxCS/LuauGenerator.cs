@@ -1000,11 +1000,16 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
     public override Luau.Parameter VisitParameter(ParameterSyntax node)
     {
         var name = Luau.AstUtility.CreateSimpleName<Luau.IdentifierName>(node, registerIdentifier: true);
-        var returnType = node.Type != null ? Luau.AstUtility.CreateTypeRef(Visit<Luau.Name>(node.Type).ToString()) : null;
+        var type = node.Type != null
+            ? Luau.AstUtility.CreateTypeRef(Visit<Luau.Name>(node.Type).ToString())
+            : null;
+        
         var initializer = Visit<Luau.Expression?>(node.Default);
+        if (initializer != null && type != null)
+            type = new Luau.OptionalType(type);
+        
         var isParams = HasSyntax(node.Modifiers, SyntaxKind.ParamsKeyword);
-
-        return new Luau.Parameter(name, isParams, initializer, returnType);
+        return new Luau.Parameter(name, isParams, initializer, type);
     }
 
     public override Luau.Node? VisitAttribute(AttributeSyntax node)
@@ -1056,8 +1061,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             ParameterSyntax parameter => Visit<Luau.Name?>(parameter.Type)?.ToString(),
             _ => null
         } ?? "unknown");
-
-
+        
         var initializer = Visit<Luau.Expression?>(node.Initializer);
         return new Luau.Variable(
             Luau.AstUtility.CreateSimpleName<Luau.IdentifierName>(node, registerIdentifier: true),

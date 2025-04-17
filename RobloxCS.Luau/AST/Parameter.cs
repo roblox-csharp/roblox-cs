@@ -20,24 +20,19 @@ public class Parameter : Statement
         if (Initializer != null)
             AddChild(Initializer);
         if (Type != null)
-            AddChild(FixType(Type!));
+            AddChild(FixType(Type));
     }
 
     public override void Render(LuauWriter luau)
     {
         if (IsVararg)
-        {
             luau.Write("...");
-        }
         else
-        {
             Name.Render(luau);
-        }
-        if (Type != null)
-        {
-            luau.Write(": ");
-            Type.Render(luau);
-        }
+
+        if (Type == null) return;
+        luau.Write(": ");
+        Type.Render(luau);
     }
 
     private TypeRef FixType(TypeRef type)
