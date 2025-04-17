@@ -17,14 +17,9 @@ public class Parameter : Statement
 
         AddChild(Name);
         if (Initializer != null)
-        {
             AddChild(Initializer);
-        }
         if (Type != null)
-        {
-            Type = FixType(Type);
-            AddChild(Type);
-        }
+            AddChild(FixType(Type!));
     }
 
     public override void Render(LuauWriter luau)

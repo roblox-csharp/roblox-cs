@@ -10,10 +10,6 @@ namespace RobloxCS;
 
 public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) : BaseGenerator(tree, compiler)
 {
-    private Macro _macro { get; } = new(compiler.GetSemanticModel(tree));
-
-    public Luau.AST GetLuauAST() => Visit<Luau.AST>(_tree.GetRoot());
-
     private readonly HashSet<SyntaxKind> _hoistedSyntaxes =
     [
         SyntaxKind.NamespaceDeclaration,
@@ -22,7 +18,11 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         SyntaxKind.EnumDeclaration,
         SyntaxKind.LocalFunctionStatement
     ];
+    
+    private Macro _macro { get; } = new(compiler.GetSemanticModel(tree));
 
+    public Luau.AST GetLuauAST() => Visit<Luau.AST>(_tree.GetRoot());
+    
     public override Luau.AST VisitCompilationUnit(CompilationUnitSyntax node)
     {
         List<Luau.Statement> statements = [new Luau.SingleLineComment(Shared.Constants.HeaderComment + "\n\n")];
@@ -31,7 +31,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         {
             var statement = Visit<Luau.Statement?>(member);
             if (statement == null)
-                throw Logger.CompilerError($"Unhandled syntax node within {member.Kind()}:\n{member}");
+                throw Logger.CompilerError($"Unhandled syntax node within {member.Kind()}", member);
 
             statements.Add(statement);
         }
@@ -741,7 +741,6 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             }
 
             var binaryOp = HandlePattern(section.Pattern, comparand);
-
             statements.Add(new Luau.If(binaryOp, new Luau.Return(Visit<Luau.Expression>(section.Expression))));
         }
 
@@ -863,6 +862,12 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
 
         return new Luau.Block(statements);
     }
+    
+    public override Luau.Node? VisitIsPatternExpression(IsPatternExpressionSyntax node)
+    {
+        var expression = Visit<Luau.Expression>(node.Expression);
+        return HandlePattern(node.Pattern, expression);
+    }
 
     private Luau.Expression HandlePattern(PatternSyntax node, Luau.Expression comparand)
     {
@@ -874,7 +879,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             ParenthesizedPatternSyntax parenthesizedPattern => HandleParenthesizedPattern(parenthesizedPattern, comparand),
             ConstantPatternSyntax constantPattern => HandleConstantPattern(constantPattern, comparand),
             TypePatternSyntax typePattern => HandleTypePattern(typePattern, comparand),
-            _ => throw Logger.CompilerError($"Unhandled pattern type: {node.GetType().Name}")
+            _ => throw Logger.CompilerError($"Unhandled pattern type: {node.GetType().Name}", node)
         };
     }
 
@@ -895,7 +900,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
     }
 
     private Luau.Parenthesized HandleParenthesizedPattern(ParenthesizedPatternSyntax node, Luau.Expression comparand) =>
-        new Luau.Parenthesized(HandlePattern(node.Pattern, comparand));
+        new(HandlePattern(node.Pattern, comparand));
 
     private Luau.UnaryOperator HandleUnaryPattern(UnaryPatternSyntax node, Luau.Expression comparand)
     {
@@ -993,7 +998,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
     public override Luau.Parameter VisitParameter(ParameterSyntax node)
     {
         var name = Luau.AstUtility.CreateSimpleName<Luau.IdentifierName>(node, registerIdentifier: true);
-        var returnType = Luau.AstUtility.CreateTypeRef(Visit<Luau.Name>(node.Type).ToString());
+        var returnType = node.Type != null ? Luau.AstUtility.CreateTypeRef(Visit<Luau.Name>(node.Type).ToString()) : null;
         var initializer = Visit<Luau.Expression?>(node.Default);
         var isParams = HasSyntax(node.Modifiers, SyntaxKind.ParamsKeyword);
 
