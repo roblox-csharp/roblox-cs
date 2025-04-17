@@ -146,10 +146,9 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
     }
 
     public override Luau.Block VisitArrowExpressionClause(ArrowExpressionClauseSyntax node) =>
-        new Luau.Block([new Luau.Return(Visit<Luau.Expression>(node.Expression))]);
+        new([new Luau.Return(Visit<Luau.Expression>(node.Expression))]);
 
-    public override Luau.IdentifierName VisitThisExpression(ThisExpressionSyntax node) =>
-        new Luau.IdentifierName("self");
+    public override Luau.IdentifierName VisitThisExpression(ThisExpressionSyntax node) => new("self");
 
     // TODO: support initializers
     public override Luau.Call VisitArrayCreationExpression(ArrayCreationExpressionSyntax node) {
@@ -990,8 +989,8 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         var name = Luau.AstUtility.CreateSimpleName(node, registerIdentifier: true);
         var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
         var returnType = Luau.AstUtility.CreateTypeRef(node.ReturnType);
-        var body = node.ExpressionBody != null ?
-            Visit<Luau.Block>(node.ExpressionBody)
+        var body = node.ExpressionBody != null
+            ? Visit<Luau.Block>(node.ExpressionBody)
             : Visit<Luau.Block?>(node.Body);
 
         var attributeLists = node.AttributeLists.Select(Visit<Luau.AttributeList>).ToList();
@@ -1033,6 +1032,8 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
 
         return luauNode;
     }
+
+    public override Luau.NoOp VisitEmptyStatement(EmptyStatementSyntax node) => new();
 
     public override Luau.ParameterList VisitParameterList(ParameterListSyntax node) =>
         new(node.Parameters.Select(Visit).OfType<Luau.Parameter>().ToList());
