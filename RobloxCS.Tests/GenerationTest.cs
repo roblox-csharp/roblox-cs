@@ -494,6 +494,31 @@ public class GenerationTest
     }
     
     [Fact]
+    public void Generates_Parameters()
+    {
+        const string source = "void blahrah(int x) {}";
+        
+        var ast = Generate(source);
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<Function>(statement);
+        
+        var function = (Function)statement;
+        Assert.Equal("blahrah", function.Name.ToString());
+        Assert.NotNull(function.ReturnType);
+        Assert.Equal("()", function.ReturnType.ToString());
+        Assert.NotNull(function.Body);
+        Assert.Empty(function.Body.Statements);
+        Assert.Single(function.ParameterList.Parameters);
+        
+        var parameter = function.ParameterList.Parameters.First();
+        Assert.Equal("x", parameter.Name.ToString());
+        Assert.NotNull(parameter.Type);
+        Assert.Equal("number", parameter.Type.ToString());
+    }
+    
+    [Fact]
     public void Generates_MultipleVariableDeclarations()
     {
         const string source = """

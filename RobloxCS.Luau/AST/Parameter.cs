@@ -8,6 +8,7 @@ public class Parameter : Statement
     public TypeRef? Type { get; }
     public bool IsVararg { get; }
 
+    // parameter initializers are not true to luau, but we have not used prerequisite statements anywhere yet. so when we do, this will likely be phased out.
     public Parameter(IdentifierName name, bool isVararg = false, Expression? initializer = null, TypeRef? type = null)
     {
         Name = name;
