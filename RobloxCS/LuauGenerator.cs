@@ -434,10 +434,17 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
 
     public override Luau.For VisitForEachStatement(ForEachStatementSyntax node)
     {
+        var iterableSymbol = _semanticModel.GetTypeInfo(node.Expression).Type;
+        var isList = StandardUtility.DoesTypeInheritFrom(iterableSymbol, "Array")
+                     || StandardUtility.DoesTypeInheritFrom(iterableSymbol, "List");
+        
         List<Luau.IdentifierName> names = [Luau.AstUtility.CreateSimpleName<Luau.IdentifierName>(node)];
-        var iterator = Visit<Luau.Expression>(node.Expression);
+        if (isList)
+            names = names.Prepend(Luau.AstUtility.DiscardName).ToList();
+        
+        var iterable = Visit<Luau.Expression>(node.Expression);
         var body = Visit<Luau.Statement>(node.Statement);
-        return new Luau.For(names, iterator, body);
+        return new Luau.For(names, iterable, body);
     }
 
     public override Luau.For VisitForEachVariableStatement(ForEachVariableStatementSyntax node)
