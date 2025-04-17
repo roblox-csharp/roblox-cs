@@ -30,20 +30,20 @@ public sealed class MainTransformer(SyntaxTree tree, ConfigData config) : BaseTr
 
     public override SyntaxNode? VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
     {
-        if (node.Name is QualifiedNameSyntax qualifiedName)
-        {
-            var pieces = StandardUtility.GetNamesFromNode(qualifiedName);
-            var firstName = pieces.First();
-            var newFullName = StandardUtility.GetNameNode(pieces.Skip(1).ToList());
-            var childNamespace = node.WithName(newFullName);
-            
-            node = node
-                .WithName(SyntaxFactory.IdentifierName(firstName))
-                .WithExterns([])
-                .WithUsings([])
-                .WithMembers([childNamespace]);
-        }
+        if (node.Name is not QualifiedNameSyntax qualifiedName)
+            return base.VisitNamespaceDeclaration(node);
         
+        var pieces = StandardUtility.GetNamesFromNode(qualifiedName);
+        var firstName = pieces.First();
+        var newFullName = StandardUtility.GetNameNode(pieces.Skip(1).ToList());
+        var childNamespace = node.WithName(newFullName);
+            
+        node = node
+            .WithName(SyntaxFactory.IdentifierName(firstName))
+            .WithExterns([])
+            .WithUsings([])
+            .WithMembers([childNamespace]);
+
         return base.VisitNamespaceDeclaration(node);
     }
 

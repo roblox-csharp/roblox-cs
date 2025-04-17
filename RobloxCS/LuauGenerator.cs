@@ -33,10 +33,10 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
             if (statement == null)
                 throw Logger.CompilerError($"Unhandled syntax node within {member.Kind()}:\n{member}");
 
-            if (transformState.preReqStatementStack.Count > 0) {
+            if (transformState.PreReqStatementStack.Count > 0) {
 
-                statements.AddRange(transformState.preReqStatementStack);
-                transformState.preReqStatementStack.Clear();
+                statements.AddRange(transformState.PreReqStatementStack);
+                transformState.PreReqStatementStack.Clear();
             }
 
             statements.Add(statement);
@@ -736,11 +736,11 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         var statements = node.Statements.Select((statement) => {
             var visitedStatement = Visit(statement);
 
-            if (transformState.preReqStatementStack.Count > 0) {
+            if (transformState.PreReqStatementStack.Count > 0) {
                 var preReqStatements = new List<Luau.Statement>([(Luau.Statement)visitedStatement!]);
-                preReqStatements.InsertRange(0, transformState.preReqStatementStack);
+                preReqStatements.InsertRange(0, transformState.PreReqStatementStack);
                 var block = new Luau.Block(preReqStatements);
-                transformState.preReqStatementStack.Clear();
+                transformState.PreReqStatementStack.Clear();
                 return block;
             } else
                 return visitedStatement;
@@ -828,7 +828,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
             statements.Add(new Luau.ExpressionStatement(new Luau.Assignment(expression, Visit<Luau.Expression>(discardPattern.Expression))));
         prereqStatements.Add(new Luau.Repeat(Luau.AstUtility.True(), new Luau.Block(statements)));
 
-        transformState.prereqList(prereqStatements);
+        transformState.PrereqList(prereqStatements);
 
         return expression;
     }
@@ -1071,16 +1071,20 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
     public override Luau.Parameter VisitParameter(ParameterSyntax node)
     {
         var name = Luau.AstUtility.CreateSimpleName<Luau.IdentifierName>(node, registerIdentifier: true);
-        Luau.TypeRef returnType = null;
+        Luau.TypeRef? type = null;
         if (node.Type != null) 
-            Luau.AstUtility.CreateTypeRef(Visit<Luau.Name>(node.Type).ToString());
+            type = Luau.AstUtility.CreateTypeRef(Visit<Luau.Name>(node.Type).ToString());
+        
         var initializer = Visit<Luau.Expression?>(node.Default);
         var isParams = HasSyntax(node.Modifiers, SyntaxKind.ParamsKeyword);
 
-        if (returnType != null && node.Modifiers.Any(SyntaxKind.RefKeyword) || node.Modifiers.Any(SyntaxKind.OutKeyword))
-            returnType = new Luau.TypeRef($"({returnType!.Path}?) -> {returnType.Path}", true);
+        if (type != null && node.Modifiers.Any(SyntaxKind.RefKeyword) || node.Modifiers.Any(SyntaxKind.OutKeyword))
+            type = new Luau.TypeRef($"({type!.Path}?) -> {type.Path}", true);
 
-        return new Luau.Parameter(name, isParams, initializer, returnType);
+        if (initializer != null && type != null)
+            type = new Luau.OptionalType(type);
+
+        return new Luau.Parameter(name, isParams, initializer, type);
     }
 
     public override Luau.Node? VisitAttribute(AttributeSyntax node)

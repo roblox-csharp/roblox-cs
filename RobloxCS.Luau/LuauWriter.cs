@@ -38,9 +38,8 @@
                 attributeList.Render(this);
             }
             if (isLocal)
-            {
                 Write("local ");
-            }
+            
             Write("function");
             if (name != null)
             {
@@ -52,7 +51,7 @@
             WriteLine();
             PushIndent();
 
-            body ??= new Block([new Luau.Return(Luau.AstUtility.Nil())]);
+            body ??= new Block([]);
             foreach (var parameter in parameterList.Parameters)
             {
                 if (parameter.IsVararg)
@@ -62,9 +61,7 @@
                     body.Statements.Insert(0, new Variable(parameter.Name, true, value, type));
                 }
                 else if (parameter.Initializer != null)
-                {
                     body.Statements.Insert(0, AstUtility.DefaultValueInitializer(parameter.Name, parameter.Initializer));
-                }
             }
             body.Render(this);
 

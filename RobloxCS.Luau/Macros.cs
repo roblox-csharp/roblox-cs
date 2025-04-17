@@ -259,6 +259,12 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
     {
         expanded = null;
         switch (memberAccess.Name.Identifier.Text) {
+            case "ToString":
+            {
+                var self = (Expression)visit(memberAccess.Expression)!;
+                expanded = new Call(new IdentifierName("tostring"), new ArgumentList([new Argument(self)]));
+                break;
+            }
             case "GetType":
                 throw Logger.UnsupportedError(memberAccess.Name, "Object.GetType()", useIs: true, useYet: false);
         }
@@ -272,16 +278,15 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
         InvocationExpressionSyntax invocation, out Node? expanded, TransformState transformState)
     {
         expanded = null;
-        var listExpression = visit(memberAccess.Expression)!;
+        var listExpression = (Expression)visit(memberAccess.Expression)!;
         Expression self;
         
-        if (listExpression is not IdentifierName) {
-            self = new IdentifierName("_exp");
-            transformState.prereq(new Variable((IdentifierName)self, true, (Expression)listExpression));
+        if (listExpression is not IdentifierName name) {
+            self = AstUtility.CreateSimpleName(memberAccess.Expression, "_exp", registerIdentifier: true);
+            transformState.Prereq(new Variable((IdentifierName)self, true, listExpression));
         } else
-            self = (Expression)listExpression;
-
-
+            self = name;
+        
         switch (memberAccess.Name.Identifier.Text) {
             case "Add": {
                 var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
@@ -311,7 +316,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
                     var key = new IdentifierName("_");
                     var value = new IdentifierName("_v");
 
-                    transformState.prereq(new Block([
+                    transformState.Prereq(new Block([
                             new Variable(new IdentifierName("_FilterFunc"), true, FilterFunc.Arguments.First()),
                             new Variable(expression, true, AstUtility.False()),
                             new For([key, value], self, new Block([
@@ -329,7 +334,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
                     var key = new IdentifierName("_");
                     var value = new IdentifierName("_v");
 
-                    transformState.prereq(new Block([
+                    transformState.Prereq(new Block([
                             new Variable(expression, true, AstUtility.Nil()),
                             new Variable(new IdentifierName("_FilterFunc"), true, filterFunc.Arguments.First()),
                             new For([key, value], self, new Block([
@@ -348,7 +353,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
                     var key = new IdentifierName("_");
                     var value = new IdentifierName("_v");
 
-                    transformState.prereq(new Block([
+                    transformState.Prereq(new Block([
                             new Variable(new IdentifierName("_FilterFunc"), true, filterFunc.Arguments.First()),
                             new Variable(expression, true),
                             new For([key, value], self, new Block([
@@ -367,7 +372,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
                     var key = new IdentifierName("_");
                     var value = new IdentifierName("_v");
 
-                    transformState.prereq(new Block([
+                    transformState.Prereq(new Block([
                             new Variable(new IdentifierName("_FilterFunc"), true, filterFunc.Arguments.First()),
                             new Variable(expression, true, new TableInitializer()),
                             new For([key, value], self, new Block([
@@ -406,7 +411,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
                     var key = new IdentifierName("_");
                     var value = new IdentifierName("_v");
 
-                    transformState.prereq(new Block([
+                    transformState.Prereq(new Block([
                             new Variable(new IdentifierName("_ConvertFunc"), true, convertFunc.Arguments.First()),
                             new Variable(expression, true, new Call(new MemberAccess(new IdentifierName("table"), new IdentifierName("create")), new ArgumentList([new (new UnaryOperator("#", self))]))),
                             new For([key, value], self, new Block([
@@ -423,7 +428,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
                     var value = new IdentifierName("_v");
 
                     if (invocation.ArgumentList.Arguments.Count == 1)
-                        transformState.prereq(new Block([
+                        transformState.Prereq(new Block([
                                new Variable(new IdentifierName("_FilterFunc"), true, filterFunc.Arguments.First()),
                                 new Variable(expression, true),
                                 new For([key, value], self, new Block([
@@ -436,7 +441,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
                     else if (invocation.ArgumentList.Arguments.Count >= 2) {
                         Expression max = invocation.ArgumentList.Arguments.Count == 3 ? new BinaryOperator(filterFunc.Arguments.First(), "+", filterFunc.Arguments.ElementAt(1)) : new UnaryOperator("#", self);
 
-                        transformState.prereq(new Block([
+                        transformState.Prereq(new Block([
                                new Variable(new IdentifierName("_FilterFunc"), true, invocation.ArgumentList.Arguments.Count == 2 ? filterFunc.Arguments.ElementAt(1) : filterFunc.Arguments.ElementAt(2)),
                                 new NumericFor(new IdentifierName("_i"), filterFunc.Arguments.First().Expression, max, null, new Block([
                                         new Variable(value, true, new ElementAccess(self, new IdentifierName("_i"))),
@@ -458,7 +463,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
                     var value = new IdentifierName("_v");
 
                     if (invocation.ArgumentList.Arguments.Count == 1)
-                        transformState.prereq(new Block([
+                        transformState.Prereq(new Block([
                                new Variable(new IdentifierName("_FilterFunc"), true, filterFunc.Arguments.First()),
                                 new Variable(expression, true),
                                 new For([key, value], self, new Block([
@@ -470,7 +475,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
                     else if (invocation.ArgumentList.Arguments.Count >= 2) {
                         Expression max = invocation.ArgumentList.Arguments.Count == 3 ? new BinaryOperator(filterFunc.Arguments.First(), "+", filterFunc.Arguments.ElementAt(1)) : new UnaryOperator("#", self);
 
-                        transformState.prereq(new Block([
+                        transformState.Prereq(new Block([
                                new Variable(new IdentifierName("_FilterFunc"), true, invocation.ArgumentList.Arguments.Count == 2 ? filterFunc.Arguments.ElementAt(1) : filterFunc.Arguments.ElementAt(2)),
                                 new NumericFor(new IdentifierName("_i"), filterFunc.Arguments.First().Expression, max, null, new Block([
                                         new Variable(value, true, new ElementAccess(self, new IdentifierName("_i"))),
@@ -504,7 +509,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
                     if (shouldCreateVariable)
                         block.Insert(0, new Variable(new("_val"), true, arguments.Arguments.First()));
 
-                    transformState.prereq(new Block(block));
+                    transformState.Prereq(new Block(block));
 
                     expanded = expression;
                     break;
@@ -528,7 +533,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
                     if (shouldCreateVariable)
                         block.Insert(0, new Variable(new("_val"), true, arguments.Arguments.First()));
 
-                    transformState.prereqList(block);
+                    transformState.PrereqList(block);
 
                     expanded = expression;
                     break;

@@ -31,16 +31,13 @@ public class If : Statement
             luau.PopIndent();
             luau.Write("else" + (isElseIf ? "" : '\n'));
             if (!isElseIf)
-            {
                 luau.PushIndent();
-            }
+            
             ElseBranch.Render(luau);
         }
 
         luau.PopIndent();
-        if (!isElseIf)
-        {
-            luau.WriteLine("end");
-        }
+        if (isElseIf) return;
+        luau.WriteLine("end");
     }
 }

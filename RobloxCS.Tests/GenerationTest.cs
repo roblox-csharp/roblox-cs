@@ -1,9 +1,38 @@
 using RobloxCS.Luau;
+using RobloxCS.Macros;
 
 namespace RobloxCS.Tests;
 
 public class GenerationTest
 {
+    [Fact]
+    public void Macros_ToString()
+    {
+        var ast = Generate("(123).ToString();");
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<ExpressionStatement>(statement);
+        
+        var expression = ((ExpressionStatement)statement).Expression;
+        var call = (Call)expression;
+        Assert.NotNull(call.ExpandedByMacro);
+        Assert.Equal(MacroKind.ObjectMethod, call.ExpandedByMacro);
+        Assert.IsType<IdentifierName>(call.Callee);
+        
+        var identifierName = (IdentifierName)call.Callee;
+        Assert.Equal("tostring", identifierName.ToString());
+        
+        var argument = call.ArgumentList.Arguments.First().Expression;
+        Assert.IsType<Parenthesized>(argument);
+        
+        var parenthesized = (Parenthesized)argument;
+        Assert.IsType<Literal>(parenthesized.Expression);
+        
+        var literal = (Literal)parenthesized.Expression;
+        Assert.Equal("123", literal.ValueText);
+    }
+    
     [Fact]
     public void Generates_ListType()
     {
@@ -462,6 +491,56 @@ public class GenerationTest
         
         var literal = (Literal)returnStatement.Expression;
         Assert.Equal("69", literal.ValueText);
+    }
+    
+    [Fact]
+    public void Generates_Parameters()
+    {
+        const string source = "void blahrah(int x) {}";
+        
+        var ast = Generate(source);
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<Function>(statement);
+        
+        var function = (Function)statement;
+        Assert.Equal("blahrah", function.Name.ToString());
+        Assert.NotNull(function.ReturnType);
+        Assert.Equal("()", function.ReturnType.ToString());
+        Assert.NotNull(function.Body);
+        Assert.Empty(function.Body.Statements);
+        Assert.Single(function.ParameterList.Parameters);
+        
+        var parameter = function.ParameterList.Parameters.First();
+        Assert.Equal("x", parameter.Name.ToString());
+        Assert.NotNull(parameter.Type);
+        Assert.Equal("number", parameter.Type.ToString());
+    }
+    
+    [Fact]
+    public void Generates_DefaultParameters_WithNullableTypes()
+    {
+        const string source = "void blah(int y = 69) {}";
+        
+        var ast = Generate(source);
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<Function>(statement);
+        
+        var function = (Function)statement;
+        Assert.Equal("blah", function.Name.ToString());
+        Assert.NotNull(function.ReturnType);
+        Assert.Equal("()", function.ReturnType.ToString());
+        Assert.NotNull(function.Body);
+        Assert.Empty(function.Body.Statements);
+        Assert.Single(function.ParameterList.Parameters);
+        
+        var parameter = function.ParameterList.Parameters.First();
+        Assert.StartsWith("y", parameter.Name.ToString());
+        Assert.IsType<OptionalType>(parameter.Type);
+        Assert.Equal("number?", parameter.Type.ToString());
     }
     
     [Fact]

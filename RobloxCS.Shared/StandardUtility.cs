@@ -119,7 +119,8 @@ public static class StandardUtility
         return csharpType switch
         {
             "object" => "any",
-            "void" or "null" => "nil",
+            "void" => "()",
+            "null" => "nil",
             "char" or "Char" or "String" => "string",
             "Boolean" or "bool" => "boolean",
             _ => INTEGER_TYPES.Contains(csharpType) || DECIMAL_TYPES.Contains(csharpType)
