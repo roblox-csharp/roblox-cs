@@ -48,6 +48,9 @@ public class IfExpression : Expression
             
         Node elseBranch = IsCompact ? ElseBranch : new ExpressionStatement(ElseBranch);
         elseBranch.Render(luau);
+        if (elseBranch is Statement)
+            luau.Remove(1);
+        
         if (isElseIf) return;
         luau.PopIndent();
     }
