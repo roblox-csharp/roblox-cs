@@ -1,24 +1,15 @@
 using Microsoft.CodeAnalysis;
+using RobloxCS.Luau;
 using RobloxCS.Shared;
-using RobloxCS.Transformers;
 
-namespace RobloxCS;
+namespace RobloxCS.Transformers;
 
-using TransformMethod = Func<SyntaxTree, ConfigData, SyntaxTree>;
+using TransformMethod = Func<SyntaxTree, TransformState, ConfigData, SyntaxTree>;
 
 public static class BuiltInTransformers
 {
     public static TransformMethod Main() =>
-        (tree, config) => new MainTransformer(tree, config).TransformTree();
-
-    public static TransformMethod Get(string name)
-    {
-        return name.ToLower() switch
-        {
-            // "debug" => (tree, config) => new DebugTransformer(tree, config).TransformTree(),
-            _ => FailedToGetTransformer(name)
-        };
-    }
+        (tree, state, config) => new MainTransformer(tree, state, config).TransformTree();
 
     private static TransformMethod FailedToGetTransformer(string name) =>
         throw Logger.Error($"No built-in transformer \"{name}\" exists (roblox-cs.yml)");

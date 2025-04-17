@@ -1,11 +1,12 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RobloxCS.Luau;
 using RobloxCS.Shared;
 
 namespace RobloxCS.Transformers;
 
-public sealed class MainTransformer(SyntaxTree tree, ConfigData config) : BaseTransformer(tree, config)
+public sealed class MainTransformer(SyntaxTree tree, TransformState state, ConfigData config) : BaseTransformer(tree, state, config)
 {
     // Add `using Roblox` and `using static Roblox.Globals` to top of file
     public override SyntaxNode? VisitCompilationUnit(CompilationUnitSyntax node)
