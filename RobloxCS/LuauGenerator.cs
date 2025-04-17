@@ -386,7 +386,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         if (isNumericLoop &&
             node.Condition is BinaryExpressionSyntax
             {
-                OperatorToken: { Text: "<=" or "<" }
+                OperatorToken.Text: "<=" or "<"
             } binaryOp &&
             incrementByExpression is Luau.BinaryOperator { Operator: "+=" or "-=" } incrementBinaryOp)
         {
@@ -395,7 +395,8 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             if (binaryOp.OperatorToken.Text == "<")
                 maximum = Luau.AstUtility.SubtractOne(maximum);
 
-            return new Luau.NumericFor(initializer.Name, minimum, maximum, incrementBinaryOp.Operator == "-=" ? new Luau.Literal("-1") : null, body);
+            var incrementByNumeric = incrementBinaryOp.Operator == "-=" ? new Luau.UnaryOperator("-", new Luau.Literal("1")) : null;
+            return new Luau.NumericFor(initializer.Name, minimum, maximum, incrementByNumeric, body);
         }
 
         Luau.Statement? incrementBy = incrementByExpression != null ? new Luau.ExpressionStatement(incrementByExpression) : null;
@@ -408,19 +409,21 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
         if (incrementBy != null)
             statements.Add(new Luau.Variable(shouldIncrementIdentifier, true, Luau.AstUtility.False()));
 
-        List<Luau.Statement> whileStatements = [body];
+        List<Luau.Statement> whileLoopStatements = [body];
         if (incrementBy != null)
         {
-            if (incrementBy is Luau.ExpressionStatement { Expression: Luau.BinaryOperator binaryOperator } expressionStatement &&
-                !binaryOperator.Operator.Contains('='))
+            if (incrementBy is Luau.ExpressionStatement { Expression: Luau.BinaryOperator binaryOperator } expressionStatement 
+                && !binaryOperator.Operator.Contains('='))
             {
                 incrementBy = new Luau.Variable(new Luau.IdentifierName("_"), true, expressionStatement.Expression);
             }
-            whileStatements.Add(new Luau.If(shouldIncrementIdentifier, incrementBy, new Luau.ExpressionStatement(new Luau.Assignment(shouldIncrementIdentifier, Luau.AstUtility.True()))));
+
+            var elseBranch = new Luau.ExpressionStatement(new Luau.Assignment(shouldIncrementIdentifier, Luau.AstUtility.True()));
+            whileLoopStatements.Add(new Luau.If(shouldIncrementIdentifier, incrementBy, elseBranch));
         }
 
-        whileStatements.Add(new Luau.If(new Luau.UnaryOperator("not ", new Luau.Parenthesized(condition)), new Luau.Break()));
-        statements.Add(new Luau.While(Luau.AstUtility.True(), new Luau.Block(whileStatements)));
+        whileLoopStatements.Add(new Luau.If(new Luau.UnaryOperator("not ", new Luau.Parenthesized(condition)), new Luau.Break()));
+        statements.Add(new Luau.While(Luau.AstUtility.True(), new Luau.Block(whileLoopStatements)));
         return new Luau.ScopedBlock(statements);
     }
 
@@ -941,7 +944,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             ? Luau.AstUtility.TypeNameFromSymbol(typeSymbol)
             : null;
 
-        var returnType = new Luau.TypeRef(returnTypeName?.ToString() ?? "nil");
+        var returnType = new Luau.TypeRef(returnTypeName?.ToString() ?? "()");
         var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
         var body = node.ExpressionBody != null ?
             new Luau.Block([new Luau.ExpressionStatement(Visit<Luau.Expression>(node.ExpressionBody))])
@@ -957,7 +960,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             ? Luau.AstUtility.TypeNameFromSymbol(typeSymbol)
             : null;
 
-        var returnType = new Luau.TypeRef(returnTypeName?.ToString() ?? "nil");
+        var returnType = new Luau.TypeRef(returnTypeName?.ToString() ?? "()");
         var parameterList = new Luau.ParameterList([Visit<Luau.Parameter>(node.Parameter)]);
         var body = node.ExpressionBody != null
             ? new Luau.Block([new Luau.ExpressionStatement(Visit<Luau.Expression>(node.ExpressionBody))])
@@ -973,7 +976,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler) :
             ? Luau.AstUtility.TypeNameFromSymbol(typeSymbol)
             : null;
 
-        var returnType = new Luau.TypeRef(returnTypeName?.ToString() ?? "nil");
+        var returnType = new Luau.TypeRef(returnTypeName?.ToString() ?? "()");
         var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
         var body = node.ExpressionBody != null ?
             new Luau.Block([new Luau.ExpressionStatement(Visit<Luau.Expression>(node.ExpressionBody))])
