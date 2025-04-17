@@ -11,7 +11,7 @@ public static class FileUtility
 
     public static string? GetRbxcsDirectory()
     {
-        var directoryName = Path.GetDirectoryName(GetAssemblyDirectory()); // pretend like this isn't here lol
+        var directoryName = Path.GetDirectoryName(GetAssemblyDirectory());
         return directoryName == null ? null : FixPathSeparator(directoryName);
     }
     

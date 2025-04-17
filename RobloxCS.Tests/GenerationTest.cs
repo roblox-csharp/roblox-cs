@@ -84,9 +84,9 @@ public class GenerationTest
         Assert.IsType<ExpressionStatement>(statement);
         
         var expressionStatement = (ExpressionStatement)statement;
-        Assert.IsType<ExpressionalIf>(expressionStatement.Expression);
+        Assert.IsType<IfExpression>(expressionStatement.Expression);
         
-        var expressionalIf = (ExpressionalIf)expressionStatement.Expression;
+        var expressionalIf = (IfExpression)expressionStatement.Expression;
         Assert.IsType<Literal>(expressionalIf.Body);
         
         var body = (Literal)expressionalIf.Body;
@@ -102,9 +102,9 @@ public class GenerationTest
         var conditionValue = (Literal)condition.Right;
         Assert.Equal("a", conditionName.ToString());
         Assert.Equal("nil", conditionValue.ValueText);
-        Assert.IsType<ExpressionalIf>(expressionalIf.ElseBranch);
+        Assert.IsType<IfExpression>(expressionalIf.ElseBranch);
         
-        var nestedExpressionalIf = (ExpressionalIf)expressionalIf.ElseBranch;
+        var nestedExpressionalIf = (IfExpression)expressionalIf.ElseBranch;
         Assert.Equal("nil", body.ValueText);
         Assert.IsType<BinaryOperator>(expressionalIf.Condition);
         

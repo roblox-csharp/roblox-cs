@@ -41,14 +41,28 @@ public static class StandardUtility
         return (!string.IsNullOrEmpty(containerName) ? containerName + "." : "") + symbol.Name;
     }
 
-    public static bool DoesTypeInheritFrom(ITypeSymbol? symbol, string typeName)
+    public static bool DoesTypeInheritFrom(ITypeSymbol? derived, string typeName)
     {
-        if (symbol == null)
+        if (derived == null)
             return false;
         
-        return symbol.BaseType != null
-            ? symbol.Name == typeName || symbol.BaseType.Name == typeName || DoesTypeInheritFrom(symbol.BaseType, typeName)
-            : symbol.Name == typeName;
+        return derived.BaseType != null
+            ? derived.Name == typeName || derived.BaseType.Name == typeName || DoesTypeInheritFrom(derived.BaseType, typeName)
+            : derived.Name == typeName;
+    }
+    
+    public static bool DoesTypeInheritFrom(ITypeSymbol derived, ITypeSymbol baseType)
+    {
+        var current = derived;
+        while (current != null)
+        {
+            if (SymbolEqualityComparer.Default.Equals(current, baseType))
+                return true;
+
+            current = current.BaseType;
+        }
+
+        return false;
     }
     
     public static string GetDefaultValueForType(string typeName)
@@ -119,7 +133,7 @@ public static class StandardUtility
         return csharpType switch
         {
             "object" => "any",
-            "void" => "()",
+            "void" or "Void" => "()",
             "null" => "nil",
             "char" or "Char" or "String" => "string",
             "Boolean" or "bool" => "boolean",
