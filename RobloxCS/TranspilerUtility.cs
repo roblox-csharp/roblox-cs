@@ -17,7 +17,7 @@ public static class TranspilerUtility
 
     public static AST GetLuauAST(SyntaxTree tree, CSharpCompilation compiler)
     {
-        var generator = new LuauGenerator(tree, compiler);
+        var generator = new LuauGenerator(tree, compiler, new TransformState());
         return generator.GetLuauAST();
     }
     

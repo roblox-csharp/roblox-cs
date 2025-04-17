@@ -2,6 +2,8 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RobloxCS.Luau;
 using RobloxCS.Shared;
+using RobloxCS;
+using System.Xml.Linq;
 
 namespace RobloxCS.Macros;
 
@@ -19,7 +21,7 @@ public enum MacroKind
     BitOperation
 }
 
-public class Macro(SemanticModel semanticModel)
+public class Macro(SemanticModel semanticModel, TransformState transformState)
 {
     private SemanticModel _semanticModel { get; } = semanticModel;
 
@@ -129,7 +131,7 @@ public class Macro(SemanticModel semanticModel)
     
     /// <summary>Takes a C# member access and expands the macro into a Luau expression</summary>
     /// <returns>The expanded expression of the macro, or null if no macro was applied</returns>
-    public Expression? MemberAccess(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess)
+    public Node? MemberAccess(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess)
     {
         var expressionType = _semanticModel.GetTypeInfo(memberAccess.Expression).Type;
         {
@@ -159,7 +161,7 @@ public class Macro(SemanticModel semanticModel)
             {
                 {
                     if (StandardUtility.DoesTypeInheritFrom(expressionType, "Object") &&
-                        TryGetObjectMethod(visit, memberAccess, out var expanded))
+                        ObjectMethod(visit, memberAccess, out var expanded))
                     {
                         return expanded;
                     }
@@ -169,7 +171,7 @@ public class Macro(SemanticModel semanticModel)
                 {
                     case "Dictionary":
                     {
-                        if (TryGetDictionaryMethod(visit, memberAccess, invocation, out var expanded))
+                        if (DictionaryMethod(visit, memberAccess, invocation, out var expanded))
                             return expanded;
                         
                         break;
@@ -177,7 +179,7 @@ public class Macro(SemanticModel semanticModel)
 
                     case "List":
                     {
-                        if (TryGetListMethod(visit, memberAccess, invocation, out var expanded))
+                        if (ListMethod(visit, memberAccess, invocation, out var expanded, transformState))
                             return expanded;
                         
                         break;
@@ -253,11 +255,12 @@ public class Macro(SemanticModel semanticModel)
     }
     
     /// <summary>Macros <see cref="Object"/> methods</summary>
-    private static bool TryGetObjectMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess, out Expression? expanded)
+    private bool ObjectMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess, out Expression? expanded)
     {
         expanded = null;
         switch (memberAccess.Name.Identifier.Text) {
-            case "ToString":{
+            case "ToString":
+            {
                 var self = (Expression)visit(memberAccess.Expression)!;
                 expanded = new Call(new IdentifierName("tostring"), new ArgumentList([new Argument(self)]));
                 break;
@@ -271,35 +274,283 @@ public class Macro(SemanticModel semanticModel)
     }
     
     /// <summary>Macros <see cref="List"/> methods</summary>
-    private static bool TryGetListMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
-        InvocationExpressionSyntax invocation, out Expression? expanded)
+    private static bool ListMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
+        InvocationExpressionSyntax invocation, out Node? expanded, TransformState transformState)
     {
         expanded = null;
+        var listExpression = (Expression)visit(memberAccess.Expression)!;
+        Expression self;
+        
+        if (listExpression is not IdentifierName name) {
+            self = AstUtility.CreateSimpleName(memberAccess.Expression, "_exp", registerIdentifier: true);
+            transformState.Prereq(new Variable((IdentifierName)self, true, listExpression));
+        } else
+            self = name;
+        
         switch (memberAccess.Name.Identifier.Text) {
             case "Add": {
                 var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
-                var self = (Expression)visit(memberAccess.Expression)!;
                 arguments.Arguments.Insert(0, new Argument(self));
                                 
                 expanded = new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("insert")), arguments);
                 break;
             }
+            case "AsReadOnly": {
+                    expanded = new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("freze")), new([new(self)]));
+                    break;
+                }
             case "Contains": {
                     var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
-                    var self = (Expression)visit(memberAccess.Expression)!;
                     arguments.Arguments.Insert(0, new Argument(self));
 
-                    expanded = new BinaryOperator(
-                        new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("find")), arguments),
-                        "~=",
-                        AstUtility.Nil()
-                    );
+                    expanded = new BinaryOperator(new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("find")), arguments), "~=", AstUtility.Nil());
                     break;
                 }
             case "Clear": {
-                    var self = (Expression)visit(memberAccess.Expression)!;
-
                     expanded = new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("clear")), new ArgumentList([new Argument(self)]));
+                    break;
+                }
+            case "Exists": {
+                    var FilterFunc = (ArgumentList)visit(invocation.ArgumentList)!;
+                    var expression = new IdentifierName("_newValue");
+                    var key = new IdentifierName("_");
+                    var value = new IdentifierName("_v");
+
+                    transformState.Prereq(new Block([
+                            new Variable(new IdentifierName("_FilterFunc"), true, FilterFunc.Arguments.First()),
+                            new Variable(expression, true, AstUtility.False()),
+                            new For([key, value], self, new Block([
+                                    new If(new Call(new IdentifierName("_FilterFunc"), new ArgumentList([new Argument(value)])), new Block([
+                                            new ExpressionStatement(new Assignment(expression, AstUtility.True())),
+                                            new Break()
+                                        ])),
+                                ]))]));
+                    expanded = expression;
+                    break;
+                }
+            case "Find": {
+                    var filterFunc = (ArgumentList)visit(invocation.ArgumentList)!;
+                    var expression = new IdentifierName("_newValue");
+                    var key = new IdentifierName("_");
+                    var value = new IdentifierName("_v");
+
+                    transformState.Prereq(new Block([
+                            new Variable(expression, true, AstUtility.Nil()),
+                            new Variable(new IdentifierName("_FilterFunc"), true, filterFunc.Arguments.First()),
+                            new For([key, value], self, new Block([
+                                    new If(new Call(new IdentifierName("_FilterFunc"), new ArgumentList([new Argument(value)])), new Block([
+                                            new ExpressionStatement(new Assignment(expression, value)),
+                                            new Break()
+                                        ])),
+                                ])),
+                        ]));
+                    expanded = expression;
+                    break;
+                }
+            case "FindLast": {
+                    var filterFunc = (ArgumentList)visit(invocation.ArgumentList)!;
+                    var expression = new IdentifierName("_newValue");
+                    var key = new IdentifierName("_");
+                    var value = new IdentifierName("_v");
+
+                    transformState.Prereq(new Block([
+                            new Variable(new IdentifierName("_FilterFunc"), true, filterFunc.Arguments.First()),
+                            new Variable(expression, true),
+                            new For([key, value], self, new Block([
+                                    new If(new Call(new IdentifierName("_FilterFunc"), new ArgumentList([new Argument(value)])), new Block([
+                                            new ExpressionStatement(new Assignment(expression, value))
+                                        ]))
+                                ])),
+                        ]));
+
+                    expanded = expression;
+                    break;
+                }
+            case "FindAll": {
+                    var filterFunc = (ArgumentList)visit(invocation.ArgumentList)!;
+                    var expression = new IdentifierName("_newValue");
+                    var key = new IdentifierName("_");
+                    var value = new IdentifierName("_v");
+
+                    transformState.Prereq(new Block([
+                            new Variable(new IdentifierName("_FilterFunc"), true, filterFunc.Arguments.First()),
+                            new Variable(expression, true, new TableInitializer()),
+                            new For([key, value], self, new Block([
+                                    new If(new Call(new IdentifierName("_FilterFunc"), new ArgumentList([new Argument(value)])), new Block([
+                                            new ExpressionStatement(new Call(new MemberAccess(new IdentifierName("table"), new IdentifierName("insert")), new ArgumentList([new Argument(expression), new Argument(value)])))
+                                        ])),
+                                ])),
+                        ]));
+                    expanded = expression;
+                    break;
+                }
+            case "AddRange": {
+                    var table = (ArgumentList)visit(invocation.ArgumentList)!;
+                    var key = new IdentifierName("_");
+                    var value = new IdentifierName("_v");
+
+                    expanded = new Block([
+                            new For([key, value], table.Arguments.First(), new Block([
+                                    new ExpressionStatement(new Call(new MemberAccess(new IdentifierName("table"), new IdentifierName("insert")), new ArgumentList([new Argument(self), new Argument(value)])))
+                                ])),
+                        ]);
+                    break;
+                }
+            case "ForEach": {
+                    var args = (ArgumentList)visit(invocation.ArgumentList)!;
+                    var funcBody = (AnonymousFunction)(args.Arguments.First().Expression)!;
+                    var key = new IdentifierName("_");
+
+                    expanded =
+                            new For([key, funcBody.ParameterList.Parameters.First().Name], self, funcBody.Body!);
+                    break;
+                }
+            case "ConvertAll": {
+                    var convertFunc = (ArgumentList)visit(invocation.ArgumentList)!;
+                    var expression = new IdentifierName("_newValue");
+                    var key = new IdentifierName("_");
+                    var value = new IdentifierName("_v");
+
+                    transformState.Prereq(new Block([
+                            new Variable(new IdentifierName("_ConvertFunc"), true, convertFunc.Arguments.First()),
+                            new Variable(expression, true, new Call(new MemberAccess(new IdentifierName("table"), new IdentifierName("create")), new ArgumentList([new (new UnaryOperator("#", self))]))),
+                            new For([key, value], self, new Block([
+                                    new ExpressionStatement(new Call(new MemberAccess(new IdentifierName("table"), new IdentifierName("insert")), new ArgumentList([new Argument(expression), new Argument(new Call(new IdentifierName("_ConvertFunc"), new([new(value)])))])))
+                                ])),
+                        ]));
+                    expanded = expression;
+                    break;
+                }
+            case "FindIndex": {
+                    var filterFunc = (ArgumentList)visit(invocation.ArgumentList)!;
+                    var expression = new IdentifierName("_newValue");
+                    var key = new IdentifierName("_k");
+                    var value = new IdentifierName("_v");
+
+                    if (invocation.ArgumentList.Arguments.Count == 1)
+                        transformState.Prereq(new Block([
+                               new Variable(new IdentifierName("_FilterFunc"), true, filterFunc.Arguments.First()),
+                                new Variable(expression, true),
+                                new For([key, value], self, new Block([
+                                        new If(new Call(new IdentifierName("_FilterFunc"), new ArgumentList([new Argument(value)])), new Block([
+                                                new ExpressionStatement(new Assignment(expression, key)),
+                                                new Break()
+                                            ]))
+                                    ])),
+                            ]));
+                    else if (invocation.ArgumentList.Arguments.Count >= 2) {
+                        Expression max = invocation.ArgumentList.Arguments.Count == 3 ? new BinaryOperator(filterFunc.Arguments.First(), "+", filterFunc.Arguments.ElementAt(1)) : new UnaryOperator("#", self);
+
+                        transformState.Prereq(new Block([
+                               new Variable(new IdentifierName("_FilterFunc"), true, invocation.ArgumentList.Arguments.Count == 2 ? filterFunc.Arguments.ElementAt(1) : filterFunc.Arguments.ElementAt(2)),
+                                new NumericFor(new IdentifierName("_i"), filterFunc.Arguments.First().Expression, max, null, new Block([
+                                        new Variable(value, true, new ElementAccess(self, new IdentifierName("_i"))),
+                                        new If(new Call(new IdentifierName("_FilterFunc"), new ArgumentList([new Argument(value)])), new Block([
+                                                new ExpressionStatement(new Assignment(expression, key)),
+                                                new Break()
+                                            ]))
+                                    ])),
+                            ]));
+                    }
+
+                    expanded = expression;
+                    break;
+                }
+            case "FindIndexLast": {
+                    var filterFunc = (ArgumentList)visit(invocation.ArgumentList)!;
+                    var expression = new IdentifierName("_newValue");
+                    var key = new IdentifierName("_k");
+                    var value = new IdentifierName("_v");
+
+                    if (invocation.ArgumentList.Arguments.Count == 1)
+                        transformState.Prereq(new Block([
+                               new Variable(new IdentifierName("_FilterFunc"), true, filterFunc.Arguments.First()),
+                                new Variable(expression, true),
+                                new For([key, value], self, new Block([
+                                        new If(new Call(new IdentifierName("_FilterFunc"), new ArgumentList([new Argument(value)])), new Block([
+                                                new ExpressionStatement(new Assignment(expression, key)),
+                                            ]))
+                                    ])),
+                            ]));
+                    else if (invocation.ArgumentList.Arguments.Count >= 2) {
+                        Expression max = invocation.ArgumentList.Arguments.Count == 3 ? new BinaryOperator(filterFunc.Arguments.First(), "+", filterFunc.Arguments.ElementAt(1)) : new UnaryOperator("#", self);
+
+                        transformState.Prereq(new Block([
+                               new Variable(new IdentifierName("_FilterFunc"), true, invocation.ArgumentList.Arguments.Count == 2 ? filterFunc.Arguments.ElementAt(1) : filterFunc.Arguments.ElementAt(2)),
+                                new NumericFor(new IdentifierName("_i"), filterFunc.Arguments.First().Expression, max, null, new Block([
+                                        new Variable(value, true, new ElementAccess(self, new IdentifierName("_i"))),
+                                        new If(new Call(new IdentifierName("_FilterFunc"), new ArgumentList([new Argument(value)])), new Block([
+                                                new ExpressionStatement(new Assignment(expression, key)),
+                                            ]))
+                                    ])),
+                            ]));
+                    }
+
+                    expanded = expression;
+                    break;
+                }
+            case "IndexOf": {
+                    var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
+                    var expression = new IdentifierName("_newValue");
+                    var key = new IdentifierName("_k");
+                    var value = new IdentifierName("_v");
+                    var shouldCreateVariable = invocation.ArgumentList.Arguments.First().Expression is not LiteralExpressionSyntax;
+
+                    List <Statement> block = [
+                            new Variable(expression, true),
+                            new For([key, value], self, new Block([
+                                    new If(new BinaryOperator(shouldCreateVariable ? new IdentifierName("_val") : arguments.Arguments.First().Expression, "==", value), new Block([
+                                            new ExpressionStatement(new Assignment(expression, key)),
+                                            new Break()
+                                        ])),
+                                ])),
+                        ];
+
+                    if (shouldCreateVariable)
+                        block.Insert(0, new Variable(new("_val"), true, arguments.Arguments.First()));
+
+                    transformState.Prereq(new Block(block));
+
+                    expanded = expression;
+                    break;
+                }
+            case "IndexOfLast": {
+                    var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
+                    var expression = new IdentifierName("_newValue");
+                    var key = new IdentifierName("_k");
+                    var value = new IdentifierName("_v");
+                    var shouldCreateVariable = invocation.ArgumentList.Arguments.First().Expression is not LiteralExpressionSyntax;
+
+                    List<Statement> block = [
+                            new Variable(expression, true),
+                            new For([key, value], self, new Block([
+                                    new If(new BinaryOperator(shouldCreateVariable ? new IdentifierName("_val") : arguments.Arguments.First().Expression, "==", value), new Block([
+                                            new ExpressionStatement(new Assignment(expression, key))
+                                        ])),
+                                ])),
+                        ];
+
+                    if (shouldCreateVariable)
+                        block.Insert(0, new Variable(new("_val"), true, arguments.Arguments.First()));
+
+                    transformState.PrereqList(block);
+
+                    expanded = expression;
+                    break;
+                }
+            case "Insert": {
+                    var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
+
+                    expanded = new Call(new MemberAccess(new IdentifierName("table"), new IdentifierName("insert")), new ArgumentList([new(self), arguments.Arguments.First(), arguments.Arguments.Last()]));
+                    break;
+                }
+            case "Remove": {
+                    var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
+
+                    expanded = new Call(new MemberAccess(new IdentifierName("table"), new IdentifierName("remove")), new ArgumentList([new(self), 
+                        new(new Call(new MemberAccess(new IdentifierName("table"), new IdentifierName("find")), new([
+                            new(self), arguments.Arguments.First()
+                            ])))]));
                     break;
                 }
         }
@@ -309,7 +560,7 @@ public class Macro(SemanticModel semanticModel)
     }
 
     /// <summary>Macros <see cref="Dictionary"/> methods</summary>
-    private static bool TryGetDictionaryMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
+    private static bool DictionaryMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
         InvocationExpressionSyntax invocation, out Expression? expanded)
     {
         expanded = null;
