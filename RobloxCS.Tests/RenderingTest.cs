@@ -282,7 +282,7 @@ public class RenderingTest
     [Fact]
     public void Renders_BuiltInAttributes()
     {
-        var attribute = new BuiltInAttribute(new IdentifierName("native"));
+        var attribute = new AttributeList([new BuiltInAttribute(new IdentifierName("native"))]);
         var output = Render(attribute);
         
         Assert.Equal("@native\n", output.Replace("\r", ""));

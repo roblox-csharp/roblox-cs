@@ -6,6 +6,8 @@ namespace RobloxCS.Tests;
 
 public class AstUtilityTest
 {
+    public AstUtilityTest() => Logger.Exit = false;
+    
     [Theory]
     [InlineData("CS")]
     [InlineData("then")]

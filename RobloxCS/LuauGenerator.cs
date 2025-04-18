@@ -10,7 +10,7 @@ namespace RobloxCS;
 
 public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, Luau.TransformState transformState) : BaseGenerator(tree, compiler)
 {
-    private Macro _macro { get; } = new(compiler.GetSemanticModel(tree), transformState);
+    private MacroManager _macro { get; } = new(compiler.GetSemanticModel(tree), transformState);
 
     public Luau.AST GetLuauAST() => Visit<Luau.AST>(_tree.GetRoot());
 
@@ -25,21 +25,18 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
 
     public override Luau.AST VisitCompilationUnit(CompilationUnitSyntax node)
     {
-        List<Luau.Statement> statements = [new Luau.SingleLineComment(Shared.Constants.HeaderComment + "\n\n")];
+        List<Luau.Statement> result = [new Luau.SingleLineComment(Shared.Constants.HeaderComment + "\n\n")];
 
         void visitStatement(MemberDeclarationSyntax member)
         {
-            var statement = Visit<Luau.Statement?>(member);
+            var (statement, prereqStatements) = transformState.Capture(() => Visit<Luau.Statement?>(member));
             if (statement == null)
                 throw Logger.CompilerError($"Unhandled syntax node within {member.Kind()}", node);
 
-            if (transformState.PrereqStatements.Count > 0) {
+            if (prereqStatements.Count > 0)
+                result.AddRange(prereqStatements);
 
-                statements.AddRange(transformState.PrereqStatements);
-                transformState.PrereqStatements.Clear();
-            }
-
-            statements.Add(statement);
+            result.Add(statement);
         }
 
         bool checkGlobalKind(MemberDeclarationSyntax memberDeclarationSyntax)
@@ -54,8 +51,8 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         if (node.DescendantNodes().Any(descendant =>
                 descendant.IsKind(SyntaxKind.EventDeclaration) || descendant.IsKind(SyntaxKind.EventFieldDeclaration)))
         {
-            statements.Add(Luau.AstUtility.SignalImport());
-            statements.Add(new Luau.NoOp()); // for the newline
+            result.Add(Luau.AstUtility.SignalImport());
+            result.Add(new Luau.NoOp()); // for the newline
         }
 
 
@@ -66,7 +63,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         foreach (var member in regularNodes)
             visitStatement(member);
 
-        return new Luau.AST(statements);
+        return new Luau.AST(result);
     }
 
     public override Luau.TypeRef? VisitPredefinedType(PredefinedTypeSyntax node) =>
@@ -392,17 +389,18 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
 
     public override Luau.Statement VisitForStatement(ForStatementSyntax node)
     {
-        var initializer = Visit<Luau.VariableList?>(node.Declaration)?.Variables.FirstOrDefault();
+        var (initializer, initializerPrereqs) = transformState.Capture(() => Visit<Luau.VariableList?>(node.Declaration)?.Variables.FirstOrDefault());
         var condition = Visit<Luau.Expression?>(node.Condition) ?? Luau.AstUtility.True();
         var isNumericLoop = initializer is { Initializer: Luau.Literal literal } && int.TryParse(literal.ValueText, out _);
         var incrementByExpression = Visit<Luau.Expression?>(node.Incrementors.FirstOrDefault());
         var body = Visit<Luau.Statement>(node.Statement);
-        if (isNumericLoop &&
-            node.Condition is BinaryExpressionSyntax
+        if (isNumericLoop
+            && node.Condition is BinaryExpressionSyntax
             {
                 OperatorToken.Text: "<=" or "<"
-            } binaryOp &&
-            incrementByExpression is Luau.BinaryOperator { Operator: "+=" or "-=" } incrementBinaryOp)
+            } binaryOp
+            && incrementByExpression is Luau.BinaryOperator { Operator: "+=" or "-=" } incrementBinaryOp
+            && initializerPrereqs.Count == 0)
         {
             var minimum = initializer!.Initializer!;
             var maximum = ((Luau.BinaryOperator)condition).Right;
@@ -413,8 +411,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         }
 
         Luau.Statement? incrementBy = incrementByExpression != null ? new Luau.ExpressionStatement(incrementByExpression) : null;
-        List<Luau.Statement> statements = [];
-
+        var statements = initializerPrereqs;
         if (initializer != null)
             statements.Add(initializer);
 
@@ -555,8 +552,8 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         }
 
         var callee = Visit<Luau.Expression>(node.Expression);
-        if (callee is Luau.MemberAccess memberAccess)
-            memberAccess.Operator = methodSymbolInfo.Symbol!.IsStatic ? '.' : ':';
+        if (methodSymbolInfo.Symbol != null && callee is Luau.MemberAccess memberAccess)
+            memberAccess.Operator = methodSymbolInfo.Symbol.IsStatic ? '.' : ':';
 
         var statements = new List<Luau.Statement>();
         var arguments = node.ArgumentList.Arguments.Select((arg) => {
@@ -715,7 +712,8 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
     {
         var expression = Visit<Luau.Expression>(node.Expression);
         var index = Visit<Luau.Expression>(node.ArgumentList.Arguments.First().Expression);
-        var elementAccess = new Luau.ElementAccess(expression, Luau.AstUtility.AddOne(index));
+        var indexPlusOne = Luau.AstUtility.AddOne(index);
+        var elementAccess = new Luau.ElementAccess(expression, indexPlusOne);
         return Luau.AstUtility.DiscardVariableIfExpressionStatement(node, elementAccess, node.Parent);
     }
 
@@ -762,18 +760,18 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
 
     public override Luau.Block VisitBlock(BlockSyntax node)
     {
-        var statements = node.Statements.Select((statement) => {
-            var visitedStatement = Visit(statement);
+        var statements = node.Statements.Select(statement => {
+            var (visitedStatement, prereqStatements) = transformState.Capture(() => Visit<Luau.Statement>(statement));
 
-            if (transformState.PrereqStatements.Count > 0) {
-                var preReqStatements = new List<Luau.Statement>([(Luau.Statement)visitedStatement!]);
-                preReqStatements.InsertRange(0, transformState.PrereqStatements);
-                var block = new Luau.Block(preReqStatements);
-                transformState.PrereqStatements.Clear();
-                return block;
-            } else
-                return visitedStatement;
-        }).OfType<Luau.Statement>().ToList();
+            if (prereqStatements.Count > 0) {
+                var newStatements = prereqStatements.ToList();
+                newStatements.Add(visitedStatement);
+                return new Luau.Block(newStatements);
+            }
+            
+            return visitedStatement;
+        }).ToList();
+        
         return node.Parent is BlockSyntax or GlobalStatementSyntax or null
             ? new Luau.ScopedBlock(statements)
             : new Luau.Block(statements);
@@ -794,12 +792,25 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
     public override Luau.Node VisitPostfixUnaryExpression(PostfixUnaryExpressionSyntax node)
     {
         var operand = Visit<Luau.Expression>(node.Operand);
-        var operandType = _semanticModel.GetTypeInfo(node.Operand).Type!;
+        var operandType = _semanticModel.GetTypeInfo(node.Operand).Type;
         if (node.OperatorToken.Text == "!")
-            return new Luau.TypeCast(operand, Luau.AstUtility.CreateTypeRef(operandType.Name.Replace("?", ""))!);
+        {
+            var nonOptionalType = Luau.AstUtility.CreateTypeRef(operandType != null ? operandType.Name.Replace("?", "") : "any")!;
+            return new Luau.TypeCast(operand, nonOptionalType);
+        }
 
+
+        var originalIdentifier = (Luau.IdentifierName)Luau.AstUtility.CreateSimpleName(node, "_original", registerIdentifier: true);
         var mappedOperator = StandardUtility.GetMappedOperator(node.OperatorToken.Text);
-        return new Luau.BinaryOperator(operand, mappedOperator, new Luau.Literal("1"));
+        var increment = new Luau.BinaryOperator(operand, mappedOperator, new Luau.Literal("1"));
+        var isAlone = node.Parent is ExpressionStatementSyntax or ForStatementSyntax;
+        if (!isAlone)
+            transformState.PrereqList([
+                new Luau.Variable(originalIdentifier, true, operand),
+                new Luau.ExpressionStatement(increment)
+            ]);
+        
+        return isAlone ? increment : originalIdentifier;
     }
 
     public override Luau.Node? VisitPrefixUnaryExpression(PrefixUnaryExpressionSyntax node)
@@ -815,6 +826,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         if (operatorText == "+")
             return operand;
 
+        // TODO: prefix increment/decrement
         var mappedOperator = StandardUtility.GetMappedOperator(operatorText);
         var bit32MethodName = StandardUtility.GetBit32MethodName(mappedOperator);
         if (bit32MethodName != null)

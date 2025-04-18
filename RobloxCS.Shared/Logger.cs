@@ -2,10 +2,18 @@
 
 namespace RobloxCS.Shared;
 
-public class CleanExitException(string message) : Exception(message);
+public class CleanExitException : Exception
+{
+    public CleanExitException(string message) : base(message)
+    {
+        if (!Logger.Exit) return;
+        Environment.Exit(1);
+    }
+}
 
 public static class Logger
 {
+    public static bool Exit { get; set; } = true;
     private const string _compilerError = " (roblox-cs compiler error)";
     
     public static void Ok(string message)

@@ -12,11 +12,5 @@ public sealed class Assignment : Expression
         AddChildren([Target, Value]);
     }
 
-    public override void Render(LuauWriter luau)
-    {
-        Node value = Value;
-        luau.WriteDescendantStatements(ref value);
-        Value = (Expression)value;
-        luau.WriteAssignment(Target, Value);
-    }
+    public override void Render(LuauWriter luau) => luau.WriteAssignment(Target, Value);
 }
