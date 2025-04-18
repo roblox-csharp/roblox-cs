@@ -16,8 +16,5 @@ public class BuiltInAttribute : Statement
     {
         luau.Write('@');
         Name.Render(luau);
-
-        if (Inline) return;
-        luau.WriteLine();
     }
 }

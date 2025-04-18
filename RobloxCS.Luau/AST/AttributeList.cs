@@ -2,10 +2,10 @@
 
 public class AttributeList : Statement
 {
-    public List<Node> Attributes { get; }
+    public List<Statement> Attributes { get; }
     public bool Inline { get; set; } = false;
 
-    public AttributeList(List<Node> attributes)
+    public AttributeList(List<Statement> attributes)
     {
         Attributes = attributes;
         AddChildren(Attributes);
@@ -13,13 +13,13 @@ public class AttributeList : Statement
 
     public override void Render(LuauWriter luau)
     {
-        foreach (var attribute in Attributes)
+        foreach (var attributeNode in Attributes)
         {
-            if (attribute is BuiltInAttribute)
+            if (attributeNode is BuiltInAttribute attribute)
             {
                 attribute.Render(luau);
             
-                if (Inline) continue;
+                if (Inline || attribute.Inline) continue;
                 luau.WriteLine();
             }
             else
