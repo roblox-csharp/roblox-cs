@@ -394,6 +394,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         var isNumericLoop = initializer is { Initializer: Luau.Literal literal } && int.TryParse(literal.ValueText, out _);
         var incrementByExpression = Visit<Luau.Expression?>(node.Incrementors.FirstOrDefault());
         var body = Visit<Luau.Statement>(node.Statement);
+        
         if (isNumericLoop
             && node.Condition is BinaryExpressionSyntax
             {
@@ -419,7 +420,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         if (incrementBy != null)
             statements.Add(new Luau.Variable(shouldIncrementIdentifier, true, Luau.AstUtility.False()));
 
-        List<Luau.Statement> whileStatements = [body];
+        List<Luau.Statement> whileStatements = [];
         if (incrementBy != null)
         {
             if (incrementBy is Luau.ExpressionStatement { Expression: Luau.BinaryOperator binaryOperator } expressionStatement &&
@@ -431,6 +432,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         }
 
         whileStatements.Add(new Luau.If(new Luau.UnaryOperator("not ", new Luau.Parenthesized(condition)), new Luau.Break()));
+        whileStatements.Add(body);
         statements.Add(new Luau.While(Luau.AstUtility.True(), new Luau.Block(whileStatements)));
         return new Luau.ScopedBlock(statements);
     }
