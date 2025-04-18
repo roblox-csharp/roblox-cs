@@ -163,8 +163,9 @@ public class GenerationTest
         Assert.Equal("9", maximum.ValueText);
         Assert.Equal("i", numericFor.Name.ToString());
 
-        var statement = numericFor.Body;
-        Assert.IsType<Continue>(statement);
+        var block = (Block)numericFor.Body;
+        Assert.Single(block.Statements);
+        Assert.IsType<Continue>(block.Statements.First());
     }
 
     [Fact]
