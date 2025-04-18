@@ -66,6 +66,23 @@ public sealed class MainTransformer(SyntaxTree tree, TransformState state, Confi
         return base.VisitConditionalAccessExpression(newNode);
     }
 
+    public override SyntaxNode? VisitForEachStatement(ForEachStatementSyntax node) {
+        return base.VisitForEachStatement(SyntaxFactory.ForEachStatement(node.ForEachKeyword, node.OpenParenToken, node.Type, node.Identifier, node.InKeyword, node.Expression, node.CloseParenToken, SyntaxFactory.Block(SyntaxList.Create([node.Statement]))));
+    }
+
+    public override SyntaxNode? VisitForStatement(ForStatementSyntax node) {
+        return base.VisitForStatement(SyntaxFactory.ForStatement(node.Declaration, node.Initializers, node.Condition, node.Incrementors, SyntaxFactory.Block(SyntaxList.Create([node.Statement]))));
+    }
+
+    public override SyntaxNode? VisitWhileStatement(WhileStatementSyntax node) {
+        return base.VisitWhileStatement(SyntaxFactory.WhileStatement(node.WhileKeyword, node.OpenParenToken, node.Condition, node.CloseParenToken, SyntaxFactory.Block(SyntaxList.Create([node.Statement]))));
+    }
+    public override SyntaxNode? VisitIfStatement(IfStatementSyntax node) {
+        return base.VisitIfStatement(SyntaxFactory.IfStatement(node.Condition, SyntaxFactory.Block(SyntaxList.Create([node.Statement])), node.Else));
+    }
+    public override SyntaxNode? VisitElseClause(ElseClauseSyntax node) {
+        return base.VisitElseClause(SyntaxFactory.ElseClause(node.ElseKeyword, SyntaxFactory.Block(SyntaxList.Create([node.Statement]))));
+    }
     private ExpressionSyntax? ProcessWhenNotNull(ExpressionSyntax expression, ExpressionSyntax? whenNotNull)
     {
         if (whenNotNull == null)
