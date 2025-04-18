@@ -10,6 +10,7 @@ namespace RobloxCS.Macros;
 public enum MacroKind
 {
     NewInstance,
+    GetService,
     ListConstruction,
     DictionaryConstruction,
     IEnumerableType,
@@ -134,6 +135,18 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
     public Node? MemberAccess(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess)
     {
         var expressionType = _semanticModel.GetTypeInfo(memberAccess.Expression).Type;
+        {
+            if (memberAccess is { Name.Identifier.Text: { } serviceName }
+                && expressionType?.Name == "Services"
+                && expressionType.ContainingNamespace.Name == "Roblox")
+            {
+                var getService = new MemberAccess(new IdentifierName("game"), new IdentifierName("GetService"), ':');
+                var expanded = new Call(getService, new ArgumentList([new Argument(new Literal('"' + serviceName + '"'))]));
+                expanded.MarkExpanded(MacroKind.GetService);
+            
+                return expanded;
+            }
+        }
         {
             if (memberAccess is
                 {
