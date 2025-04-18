@@ -1,11 +1,12 @@
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RobloxCS.Luau;
 using RobloxCS.Shared;
 
 namespace RobloxCS.Transformers;
 
-public sealed class MainTransformer(SyntaxTree tree, ConfigData config) : BaseTransformer(tree, config)
+public sealed class MainTransformer(SyntaxTree tree, TransformState state, ConfigData config) : BaseTransformer(tree, state, config)
 {
     // Add `using Roblox` and `using static Roblox.Globals` to top of file
     public override SyntaxNode? VisitCompilationUnit(CompilationUnitSyntax node)
@@ -30,20 +31,20 @@ public sealed class MainTransformer(SyntaxTree tree, ConfigData config) : BaseTr
 
     public override SyntaxNode? VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
     {
-        if (node.Name is QualifiedNameSyntax qualifiedName)
-        {
-            var pieces = StandardUtility.GetNamesFromNode(qualifiedName);
-            var firstName = pieces.First();
-            var newFullName = StandardUtility.GetNameNode(pieces.Skip(1).ToList());
-            var childNamespace = node.WithName(newFullName);
-            
-            node = node
-                .WithName(SyntaxFactory.IdentifierName(firstName))
-                .WithExterns([])
-                .WithUsings([])
-                .WithMembers([childNamespace]);
-        }
+        if (node.Name is not QualifiedNameSyntax qualifiedName)
+            return base.VisitNamespaceDeclaration(node);
         
+        var pieces = StandardUtility.GetNamesFromNode(qualifiedName);
+        var firstName = pieces.First();
+        var newFullName = StandardUtility.GetNameNode(pieces.Skip(1).ToList());
+        var childNamespace = node.WithName(newFullName);
+            
+        node = node
+            .WithName(SyntaxFactory.IdentifierName(firstName))
+            .WithExterns([])
+            .WithUsings([])
+            .WithMembers([childNamespace]);
+
         return base.VisitNamespaceDeclaration(node);
     }
 

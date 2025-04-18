@@ -8,6 +8,7 @@ public class Parameter : Statement
     public TypeRef? Type { get; }
     public bool IsVararg { get; }
 
+    // parameter initializers are not true to luau, but we have not used prerequisite statements anywhere yet. so when we do, this will likely be phased out.
     public Parameter(IdentifierName name, bool isVararg = false, Expression? initializer = null, TypeRef? type = null)
     {
         Name = name;
@@ -17,31 +18,21 @@ public class Parameter : Statement
 
         AddChild(Name);
         if (Initializer != null)
-        {
             AddChild(Initializer);
-        }
         if (Type != null)
-        {
-            Type = FixType(Type);
-            AddChild(Type);
-        }
+            AddChild(FixType(Type));
     }
 
     public override void Render(LuauWriter luau)
     {
         if (IsVararg)
-        {
             luau.Write("...");
-        }
         else
-        {
             Name.Render(luau);
-        }
-        if (Type != null)
-        {
-            luau.Write(": ");
-            Type.Render(luau);
-        }
+
+        if (Type == null) return;
+        luau.Write(": ");
+        Type.Render(luau);
     }
 
     private TypeRef FixType(TypeRef type)

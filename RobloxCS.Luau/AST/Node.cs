@@ -36,7 +36,7 @@ public abstract class Node
         if (ExpandedByMacro != null)
             throw Logger.CompilerError(
                 $"""
-                 Attempted to mark macro-expanded node as expanded.
+                 Attempted to mark already macro-expanded node as expanded.
                  Current macro kind: {ExpandedByMacro}
                  Attempted expanding macro kind: {macroKind}
                  """);

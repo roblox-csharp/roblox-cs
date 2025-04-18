@@ -2,8 +2,11 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RobloxCS.Luau;
+using RobloxCS.Transformers;
 
 namespace RobloxCS;
+
+using TransformMethod = Func<SyntaxTree, TransformState, ConfigData, SyntaxTree>;
 
 public static class TranspilerUtility
 {
@@ -37,17 +40,18 @@ public static class TranspilerUtility
     public static SyntaxTree ParseAndTransformTree(string source, ConfigData? config)
     {
         var tree = ParseTree(source);
-        HashSet<Func<SyntaxTree, ConfigData, SyntaxTree>> transformers = [BuiltInTransformers.Main()];
+        HashSet<TransformMethod> transformers = [BuiltInTransformers.Main()];
         
         return TransformTree(tree, transformers);
     }
     
-    public static SyntaxTree TransformTree(SyntaxTree cleanTree, HashSet<Func<SyntaxTree, ConfigData, SyntaxTree>> transformMethods, ConfigData? config = null)
+    public static SyntaxTree TransformTree(SyntaxTree cleanTree, HashSet<TransformMethod> transformMethods, ConfigData? config = null)
     {
         // config ??= ConfigReader.UnitTestingConfig;
         config ??= new ConfigData();
 
-        return transformMethods.Aggregate(cleanTree, (current, transform) => transform(current, config));
+        var state = new TransformState();
+        return transformMethods.Aggregate(cleanTree, (current, transform) => transform(current, state, config));
     }
     
     public static SyntaxTree ParseTree(string source, string sourceFile = "TestFile.cs")
