@@ -36,7 +36,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
             var value = (Expression)visit(assignment.Right)!;
             var bit32Call = AstUtility.Bit32Call(bit32MethodName, target, value);
             bit32Call.MarkExpanded(MacroKind.BitOperation);
-            
+
             return new Assignment(target, AstUtility.Bit32Call(bit32MethodName, target, value));
         }
 
@@ -45,7 +45,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
         {
             var symbolMetadata = SymbolMetadataManager.Get(eventSymbol);
             symbolMetadata.EventConnectionName ??= AstUtility.CreateSimpleName<IdentifierName>(assignment, "conn_" + eventSymbol.Name, registerIdentifier: true);
-            
+
             var connectionName = symbolMetadata.EventConnectionName;
             switch (mappedOperator)
             {
@@ -85,13 +85,13 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
             var right = (Expression)visit(binaryExpression.Right)!;
             var bit32Call = AstUtility.Bit32Call(bit32MethodName, left, right);
             bit32Call.MarkExpanded(MacroKind.BitOperation);
-            
+
             return bit32Call;
         }
 
         return null;
     }
-    
+
     /// <summary>
     /// Takes a C# generic name and expands the name into a macro'd type
     /// </summary>
@@ -104,24 +104,24 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
             {
                 // lord i am sorry for my sins
                 // returning IdentifierName because when visiting GenericNameSyntax (C#) it expects that a Name (luau) is returned
-                
+
                 case "List":
                 case "IEnumerable":
                 {
                     var elementTypeName = visit(genericName.TypeArgumentList.Arguments.First())!;
                     var expanded = new IdentifierName($"{{ {StandardUtility.GetMappedType(elementTypeName.ToString()!)} }}");
                     expanded.MarkExpanded(MacroKind.IEnumerableType);
-                    
+
                     return expanded;
                 }
-                
+
                 case "Dictionary":
                 {
                     var keyTypeName = visit(genericName.TypeArgumentList.Arguments.First())!;
                     var valueTypeName = visit(genericName.TypeArgumentList.Arguments.Last())!;
                     var expanded = new IdentifierName($"{{ [{StandardUtility.GetMappedType(keyTypeName.ToString()!)}]: {StandardUtility.GetMappedType(valueTypeName.ToString()!)} }}");
                     expanded.MarkExpanded(MacroKind.DictionaryType);
-                    
+
                     return expanded;
                 }
             }
@@ -129,7 +129,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
 
         return null;
     }
-    
+
     /// <summary>Takes a C# member access and expands the macro into a Luau expression</summary>
     /// <returns>The expanded expression of the macro, or null if no macro was applied</returns>
     public Node? MemberAccess(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess)
@@ -143,7 +143,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
                 var getService = new MemberAccess(new IdentifierName("game"), new IdentifierName("GetService"), ':');
                 var expanded = new Call(getService, new ArgumentList([new Argument(new Literal('"' + serviceName + '"'))]));
                 expanded.MarkExpanded(MacroKind.GetService);
-            
+
                 return expanded;
             }
         }
@@ -158,14 +158,14 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
             {
                 var className = genericName.TypeArgumentList.Arguments.First().ToString();
                 var instanceConstructor = new MemberAccess(new IdentifierName("Instance"), new IdentifierName("new"));
-            
+
                 List<Argument> arguments = [new(new Literal($"\"{className}\""))];
                 var invocationArguments = (ArgumentList)visit(invocation.ArgumentList)!;
                 arguments.AddRange(invocationArguments.Arguments);
-            
+
                 var expanded = new Call(instanceConstructor, new ArgumentList(arguments));
                 expanded.MarkExpanded(MacroKind.NewInstance);
-            
+
                 return expanded;
             }
         }
@@ -179,14 +179,14 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
                         return expanded;
                     }
                 }
-                
+
                 switch (expressionType?.Name)
                 {
                     case "Dictionary":
                     {
                         if (DictionaryMethod(visit, memberAccess, invocation, out var expanded))
                             return expanded;
-                        
+
                         break;
                     }
 
@@ -194,7 +194,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
                     {
                         if (ListMethod(visit, memberAccess, invocation, out var expanded, transformState))
                             return expanded;
-                        
+
                         break;
                     }
                 }
@@ -211,7 +211,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
         var symbol = baseObjectCreation is ObjectCreationExpressionSyntax objectCreation
             ? _semanticModel.GetSymbolInfo(objectCreation.Type).Symbol
             : _semanticModel.GetSymbolInfo(baseObjectCreation).Symbol?.ContainingSymbol;
-        
+
         if (symbol is not INamedTypeSymbol { TypeParameters.Length: > 0 } namedTypeSymbol)
             return null;
 
@@ -221,10 +221,10 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
                 var expressions = baseObjectCreation.Initializer?.Expressions.Select(expression => (Expression)visit(expression)!).ToList();
                 var table = new TableInitializer(expressions ?? []);
                 table.MarkExpanded(MacroKind.ListConstruction);
-                    
+
                 return table;
             }
-                
+
             case "Dictionary": {
                 var values = new List<Expression>();
                 var keys = new List<Expression>();
@@ -243,7 +243,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
                                 keys.Add(key);
                                 break;
                             }
-                                    
+
                             case InitializerExpressionSyntax initializerExpression:
                             {
                                 var key = (Expression)visit(initializerExpression.Expressions[0])!;
@@ -266,7 +266,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
 
         return null;
     }
-    
+
     /// <summary>Macros <see cref="Object"/> methods</summary>
     private static bool ObjectMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess, out Expression? expanded)
     {
@@ -281,11 +281,11 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
             case "GetType":
                 throw Logger.UnsupportedError(memberAccess.Name, "Object.GetType()", useIs: true, useYet: false);
         }
-        
+
         expanded?.MarkExpanded(MacroKind.ObjectMethod);
         return expanded != null;
     }
-    
+
     /// <summary>Macros <see cref="List"/> methods</summary>
     private static bool ListMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
         InvocationExpressionSyntax invocation, out Node? expanded, TransformState transformState)
@@ -293,18 +293,18 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
         expanded = null;
         var listExpression = (Expression)visit(memberAccess.Expression)!;
         Expression self;
-        
+
         if (listExpression is not IdentifierName name) {
             self = AstUtility.CreateSimpleName(memberAccess.Expression, "_exp", registerIdentifier: true);
             transformState.Prereq(new Variable((IdentifierName)self, true, listExpression));
         } else
             self = name;
-        
+
         switch (memberAccess.Name.Identifier.Text) {
             case "Add": {
                 var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
                 arguments.Arguments.Insert(0, new Argument(self));
-                                
+
                 expanded = new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("insert")), arguments);
                 break;
             }
@@ -560,7 +560,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
             case "Remove": {
                     var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
 
-                    expanded = new Call(new MemberAccess(new IdentifierName("table"), new IdentifierName("remove")), new ArgumentList([new(self), 
+                    expanded = new Call(new MemberAccess(new IdentifierName("table"), new IdentifierName("remove")), new ArgumentList([new(self),
                         new(new Call(new MemberAccess(new IdentifierName("table"), new IdentifierName("find")), new([
                             new(self), arguments.Arguments.First()
                             ])))]));
@@ -583,7 +583,7 @@ public class Macro(SemanticModel semanticModel, TransformState transformState)
                 var self = (Expression)visit(memberAccess.Expression)!;
                 var key = arguments.Arguments.First().Expression;
                 var value = arguments.Arguments.Last().Expression;
-                                
+
                 expanded = new Assignment(new ElementAccess(self, key), value);
                 break;
             }

@@ -625,6 +625,42 @@ public class GenerationTest
         Assert.Equal(luauValueText, literal.ValueText);
     }
 
+    [Theory]
+    [InlineData("""
+        void setValue(out int m) {
+            m = 3;
+        }
+        setValue(out var a);
+        """)]
+    [InlineData("""
+        void setValue(out int m) {
+            m = 3;
+        }
+
+        int a;
+        setValue(out a);
+        """)]
+    [InlineData("""
+        void setValue(ref int m) {
+            m = 3;
+        }
+        int a = 4;
+        setValue(ref a);
+        """)]
+    public void Generates_RefKind(string csSource) {
+        var ast = Generate(csSource);
+        Assert.NotEmpty(ast.Statements);
+
+        var statements = ast.Statements.Skip(1);
+        var refFunc = (Function)statements.First();
+        Assert.IsType<Function>(refFunc);
+        Console.WriteLine(((ExpressionStatement)refFunc.Body!.Statements.First()).Expression);
+        Assert.IsType<Call>(((ExpressionStatement)refFunc.Body!.Statements.First()).Expression);
+        ExpressionStatement call = statements.Last() is ExpressionStatement ? (statements.Last() as ExpressionStatement) : (ExpressionStatement)(statements.Last() as Block).Statements.Last();
+        Assert.IsType<Call>(call.Expression);
+        Assert.IsType<AnonymousFunction>(((Call)call.Expression).ArgumentList.Arguments.First().Expression);
+    }
+
     private static AST Generate(string source)
     {
         var tree = TranspilerUtility.ParseAndTransformTree(source, null);
