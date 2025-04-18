@@ -1,5 +1,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using RobloxCS.Luau;
+using RobloxCS.Transformers;
 
 namespace RobloxCS.Tests.TransformerTests;
 
@@ -35,7 +37,7 @@ public class MainTransformerTest
     {
         var cleanTree = SyntaxFactory.ParseSyntaxTree(source);
         var transform = BuiltInTransformers.Main();
-        var transformedTree = transform(cleanTree, new ConfigData());
+        var transformedTree = transform(cleanTree, new TransformState(), new ConfigData());
         return transformedTree.GetCompilationUnitRoot();
     }
 }

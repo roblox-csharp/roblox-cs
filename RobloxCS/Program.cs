@@ -1,14 +1,17 @@
-using Microsoft.CodeAnalysis.CSharp;
-using RobloxCS.Luau;
-
 namespace RobloxCS;
 
 public static class Program
 {
     public static void Main(string[] args)
     {
-        var source = File.ReadAllText(args[0]).Trim();
-
+        var path = args.ElementAtOrDefault(0);
+        if (path == null)
+        {
+            Console.WriteLine("No path was provided!");
+            Environment.Exit(1);
+        }
+        
+        var source = File.ReadAllText(path).Trim();
         Console.WriteLine(Transpiler.Transpile(source));
     }
 }

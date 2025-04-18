@@ -31,12 +31,12 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         {
             var statement = Visit<Luau.Statement?>(member);
             if (statement == null)
-                throw Logger.CompilerError($"Unhandled syntax node within {member.Kind()}:\n{member}");
+                throw Logger.CompilerError($"Unhandled syntax node within {member.Kind()}", node);
 
-            if (transformState.preReqStatementStack.Count > 0) {
+            if (transformState.PrereqStatements.Count > 0) {
 
-                statements.AddRange(transformState.preReqStatementStack);
-                transformState.preReqStatementStack.Clear();
+                statements.AddRange(transformState.PrereqStatements);
+                transformState.PrereqStatements.Clear();
             }
 
             statements.Add(statement);
@@ -57,7 +57,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
             statements.Add(Luau.AstUtility.SignalImport());
             statements.Add(new Luau.NoOp()); // for the newline
         }
-        
+
 
         var hoistedNodes = node.Members.Where(checkGlobalKind);
         var regularNodes = node.Members.Where(member => !checkGlobalKind(member));
@@ -142,7 +142,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         var className = Luau.AstUtility.CreateSimpleName(node.Parent!);
         var fullName = new Luau.QualifiedName(className, name, IsStatic(node) ? '.' : ':');
         var parameterList = Visit<Luau.ParameterList>(node.ParameterList);
-  
+
 
         var returnType = Luau.AstUtility.CreateTypeRef(Visit<Luau.Name>(node.ReturnType).ToString());
         var body = node.ExpressionBody != null ?
@@ -152,7 +152,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         var attributeLists = node.AttributeLists.Select(Visit<Luau.AttributeList>).ToList();
         return new Luau.Function(fullName, false, parameterList, returnType, body, attributeLists);
     }
-    
+
     public override Luau.Block VisitArrowExpressionClause(ArrowExpressionClauseSyntax node) =>
         new Luau.Block([new Luau.Return(Visit<Luau.Expression>(node.Expression))]);
 
@@ -281,7 +281,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
 
         if (node.Parent is CompilationUnitSyntax)
             statements.Add(new Luau.NoOp()); // for the newline
-        
+
         return new Luau.Block(statements);
     }
 
@@ -319,7 +319,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
 
         if (node.Parent is CompilationUnitSyntax)
             statements.Add(new Luau.NoOp()); // for the newline
-        
+
         return new Luau.Block(statements);
     }
     public override Luau.Block VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
@@ -336,7 +336,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
 
         if (node.Parent is CompilationUnitSyntax)
             statements.Add(new Luau.NoOp()); // for the newline
-        
+
         return new Luau.Block(statements);
     }
 
@@ -344,7 +344,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
     {
         var condition = Visit<Luau.Expression>(node.Condition);
         var body = Visit<Luau.Statement>(node.Statement);
-        
+
         return new Luau.Repeat(new Luau.UnaryOperator("not ", condition), body);
     }
 
@@ -352,27 +352,27 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
     {
         var condition = Visit<Luau.Expression>(node.Condition);
         var body = Visit<Luau.Statement>(node.Statement);
-        
+
         return new Luau.While(condition, body);
     }
 
-    public override Luau.ExpressionalIf VisitConditionalExpression(ConditionalExpressionSyntax node)
+    public override Luau.IfExpression VisitConditionalExpression(ConditionalExpressionSyntax node)
     {
         var condition = Visit<Luau.Expression>(node.Condition);
         var body = Visit<Luau.Expression>(node.WhenTrue);
         var elseBranch = Visit<Luau.Expression>(node.WhenFalse);
-        
-        return new Luau.ExpressionalIf(condition, body, elseBranch);
+
+        return new Luau.IfExpression(condition, body, elseBranch);
     }
 
-    public override Luau.ExpressionalIf VisitConditionalAccessExpression(ConditionalAccessExpressionSyntax node)
+    public override Luau.IfExpression VisitConditionalAccessExpression(ConditionalAccessExpressionSyntax node)
     {
         var comparand = Visit<Luau.Expression>(node.Expression);
         var nil = Luau.AstUtility.Nil();
         var condition = new Luau.BinaryOperator(comparand, "==", nil);
         var elseBranch = Visit<Luau.Expression>(node.WhenNotNull);
-        
-        return new Luau.ExpressionalIf(condition, nil, elseBranch);
+
+        return new Luau.IfExpression(condition, nil, elseBranch);
     }
 
     public override Luau.If VisitIfStatement(IfStatementSyntax node)
@@ -380,8 +380,14 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         var condition = Visit<Luau.Expression>(node.Condition);
         var body = Visit<Luau.Statement>(node.Statement);
         var elseBranch = Visit<Luau.Statement?>(node.Else?.Statement);
-        
+
         return new Luau.If(condition, body, elseBranch);
+    }
+
+    public override Luau.Expression VisitIsPatternExpression(IsPatternExpressionSyntax node)
+    {
+        var expression = Visit<Luau.Expression>(node.Expression);
+        return HandlePattern(node.Pattern, expression, node.Expression);
     }
 
     public override Luau.Statement VisitForStatement(ForStatementSyntax node)
@@ -434,10 +440,17 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
 
     public override Luau.For VisitForEachStatement(ForEachStatementSyntax node)
     {
+        var iterableSymbol = _semanticModel.GetTypeInfo(node.Expression).Type;
+        var isList = StandardUtility.DoesTypeInheritFrom(iterableSymbol, "Array")
+                     || StandardUtility.DoesTypeInheritFrom(iterableSymbol, "List");
+
         List<Luau.IdentifierName> names = [Luau.AstUtility.CreateSimpleName<Luau.IdentifierName>(node)];
-        var iterator = Visit<Luau.Expression>(node.Expression);
+        if (isList)
+            names = names.Prepend(Luau.AstUtility.DiscardName).ToList();
+
+        var iterable = Visit<Luau.Expression>(node.Expression);
         var body = Visit<Luau.Statement>(node.Statement);
-        return new Luau.For(names, iterator, body);
+        return new Luau.For(names, iterable, body);
     }
 
     public override Luau.For VisitForEachVariableStatement(ForEachVariableStatementSyntax node)
@@ -467,7 +480,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
             {
                 if (variableNode is Luau.VariableList variableList)
                     return variableList.Variables;
-                
+
                 return [(Luau.Variable)variableNode];
             })
             .ToList();
@@ -501,7 +514,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         var classSymbol = baseSymbol?.ContainingSymbol ?? baseSymbol;
         if (classSymbol == null)
             throw Logger.CodegenError(node, "Unable to resolve class symbol for implicit object creation");
-        
+
         var name = Luau.AstUtility.TypeNameFromSymbol(classSymbol);
         var nonGenericName = Luau.AstUtility.GetNonGenericName(name);
         var argumentList = Visit<Luau.ArgumentList>(node.ArgumentList);
@@ -644,7 +657,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         var expanded = _macro.Assignment(Visit, node);
         if (expanded != null)
             return expanded;
-        
+
         var mappedOperator = StandardUtility.GetMappedOperator(node.OperatorToken.Text);
         var name = Visit<Luau.AssignmentTarget>(node.Left);
         var value = Visit<Luau.Expression>(node.Right);
@@ -753,11 +766,11 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         var statements = node.Statements.Select((statement) => {
             var visitedStatement = Visit(statement);
 
-            if (transformState.preReqStatementStack.Count > 0) {
+            if (transformState.PrereqStatements.Count > 0) {
                 var preReqStatements = new List<Luau.Statement>([(Luau.Statement)visitedStatement!]);
-                preReqStatements.InsertRange(0, transformState.preReqStatementStack);
+                preReqStatements.InsertRange(0, transformState.PrereqStatements);
                 var block = new Luau.Block(preReqStatements);
-                transformState.preReqStatementStack.Clear();
+                transformState.PrereqStatements.Clear();
                 return block;
             } else
                 return visitedStatement;
@@ -830,8 +843,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
                 continue;
             }
 
-            var binaryOp = HandlePattern(section.Pattern, comparand);
-
+            var binaryOp = HandlePattern(section.Pattern, comparand, node.GoverningExpression);
             statements.Add(new Luau.If(binaryOp, new Luau.Block([
                 new Luau.ExpressionStatement(new Luau.Assignment(expression, Visit<Luau.Expression>(section.Expression))),
                 new Luau.Break()
@@ -845,7 +857,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
             statements.Add(new Luau.ExpressionStatement(new Luau.Assignment(expression, Visit<Luau.Expression>(discardPattern.Expression))));
         prereqStatements.Add(new Luau.Repeat(Luau.AstUtility.True(), new Luau.Block(statements)));
 
-        transformState.prereqList(prereqStatements);
+        transformState.PrereqList(prereqStatements);
 
         return expression;
     }
@@ -883,7 +895,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
                 switch (label) {
                     case CasePatternSwitchLabelSyntax patternLabel:
                     {
-                        var binaryOp = HandlePattern(patternLabel.Pattern, comparand);
+                        var binaryOp = HandlePattern(patternLabel.Pattern, comparand, node.Expression);
                         if (hasFallThrough)
                             binaryOp = new Luau.BinaryOperator(fallthroughIdentifier, "or", binaryOp);
 
@@ -947,7 +959,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
             new Luau.Assignment(
                 new Luau.MemberAccess(
                     new Luau.IdentifierName(classDeclaration.Identifier.Text),
-                    new Luau.IdentifierName(variable.Identifier.Text) 
+                    new Luau.IdentifierName(variable.Identifier.Text)
                 ),
                 new Luau.Call(
                     new Luau.QualifiedName(new Luau.IdentifierName("Signal"), new Luau.IdentifierName("new")),
@@ -959,25 +971,53 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         return new Luau.Block(statements);
     }
 
-    private Luau.Expression HandlePattern(PatternSyntax node, Luau.Expression comparand)
+    private Luau.Expression HandlePattern(PatternSyntax node, Luau.Expression comparand, ExpressionSyntax originalComparand)
     {
         return node switch
         {
             RelationalPatternSyntax relationalPattern => HandleRelationalPattern(relationalPattern, comparand),
-            BinaryPatternSyntax binaryPattern => HandleBinaryPattern(binaryPattern, comparand),
-            UnaryPatternSyntax unaryPattern => HandleUnaryPattern(unaryPattern, comparand),
-            ParenthesizedPatternSyntax parenthesizedPattern => HandleParenthesizedPattern(parenthesizedPattern, comparand),
+            BinaryPatternSyntax binaryPattern => HandleBinaryPattern(binaryPattern, comparand, originalComparand),
+            UnaryPatternSyntax unaryPattern => HandleUnaryPattern(unaryPattern, comparand, originalComparand),
+            ParenthesizedPatternSyntax parenthesizedPattern => HandleParenthesizedPattern(parenthesizedPattern, comparand, originalComparand),
             ConstantPatternSyntax constantPattern => HandleConstantPattern(constantPattern, comparand),
             TypePatternSyntax typePattern => HandleTypePattern(typePattern, comparand),
-            _ => throw Logger.CompilerError($"Unhandled pattern type: {node.GetType().Name}")
+            DeclarationPatternSyntax declarationPattern => HandleDeclarationPattern(declarationPattern, comparand, originalComparand),
+            _ => throw Logger.CompilerError($"Unhandled pattern type: {node.GetType().Name}", node)
         };
+    }
+
+    private Luau.Call HandleDeclarationPattern(DeclarationPatternSyntax node, Luau.Expression originalValue, ExpressionSyntax csharpOriginalValue)
+    {
+        var typeName = Visit<Luau.Name>(node.Type);
+        var oldTypeName = typeName;
+        var typeSymbol = _semanticModel.GetTypeInfo(node.Type).Type;
+        if (typeSymbol is { ContainingNamespace.Name: "System" or "Roblox" } && typeName is Luau.IdentifierName identifierName)
+            typeName = new Luau.IdentifierName('"' + StandardUtility.GetMappedType(identifierName.Text) + '"');
+
+        Luau.IdentifierName newName = node.Designation switch
+        {
+            SingleVariableDesignationSyntax singleDesignation =>
+                (Luau.IdentifierName)Luau.AstUtility.CreateSimpleName(singleDesignation, singleDesignation.Identifier.Text, registerIdentifier: true)
+        };
+
+        transformState.Prereq(new Luau.Variable(newName, true, new Luau.TypeCast(originalValue, new Luau.TypeRef(oldTypeName.ToString()))));
+        var instanceSymbol = _semanticModel.Compilation.GetTypeByMetadataName("Roblox.Instance");
+        var originalValueSymbol = _semanticModel.GetTypeInfo(csharpOriginalValue).Type;
+
+        var instanceIsACall = new Luau.Call(new Luau.MemberAccess(originalValue, new Luau.IdentifierName("IsA"), ':'), new Luau.ArgumentList([new Luau.Argument(typeName)]));
+        return originalValueSymbol != null
+               && instanceSymbol != null
+               && StandardUtility.DoesTypeInheritFrom(originalValueSymbol, instanceSymbol)
+               && typeName.ToString() != "\"Instance\""
+            ? instanceIsACall
+            : Luau.AstUtility.CSCall("is", originalValue, typeName); // TODO: some sort of runtime type check
     }
 
     private Luau.Call HandleTypePattern(TypePatternSyntax node, Luau.Expression comparand)
     {
         var name = Visit<Luau.Name>(node.Type);
-        var typeInfo = _semanticModel.GetTypeInfo(node.Type);
-        if (typeInfo.Type is { ContainingNamespace: { Name: "System" } } && name is Luau.IdentifierName identifierName)
+        var typeInfo = _semanticModel.GetTypeInfo(node.Type); // TODO: some sort of runtime type check
+        if (typeInfo.Type is { ContainingNamespace.Name: "System" } && name is Luau.IdentifierName identifierName)
             name = new Luau.IdentifierName('"' + StandardUtility.GetMappedType(identifierName.Text) + '"');
 
         return Luau.AstUtility.CSCall("is", comparand, name);
@@ -989,19 +1029,19 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         return new Luau.BinaryOperator(comparand, "==", operand);
     }
 
-    private Luau.Parenthesized HandleParenthesizedPattern(ParenthesizedPatternSyntax node, Luau.Expression comparand) =>
-        new Luau.Parenthesized(HandlePattern(node.Pattern, comparand));
+    private Luau.Parenthesized HandleParenthesizedPattern(ParenthesizedPatternSyntax node, Luau.Expression comparand, ExpressionSyntax originalComparand) =>
+        new Luau.Parenthesized(HandlePattern(node.Pattern, comparand, originalComparand));
 
-    private Luau.UnaryOperator HandleUnaryPattern(UnaryPatternSyntax node, Luau.Expression comparand)
+    private Luau.UnaryOperator HandleUnaryPattern(UnaryPatternSyntax node, Luau.Expression comparand, ExpressionSyntax originalComparand)
     {
-        var operand = HandlePattern(node.Pattern, comparand);
+        var operand = HandlePattern(node.Pattern, comparand, originalComparand);
         return new Luau.UnaryOperator("not ", operand);
     }
 
-    private Luau.BinaryOperator HandleBinaryPattern(BinaryPatternSyntax node, Luau.Expression comparand)
+    private Luau.BinaryOperator HandleBinaryPattern(BinaryPatternSyntax node, Luau.Expression comparand, ExpressionSyntax originalComparand)
     {
-        var left = HandlePattern(node.Left, comparand);
-        var right = HandlePattern(node.Right, comparand);
+        var left = HandlePattern(node.Left, comparand, originalComparand);
+        var right = HandlePattern(node.Right, comparand, originalComparand);
         return new Luau.BinaryOperator(left, node.OperatorToken.Text, right);
     }
 
@@ -1047,7 +1087,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
             ? Luau.AstUtility.TypeNameFromSymbol(typeSymbol)
             : null;
 
-        var returnType = new Luau.TypeRef(returnTypeName?.ToString() ?? "nil");
+        var returnType = new Luau.TypeRef(returnTypeName?.ToString() ?? "()");
         var parameterList = new Luau.ParameterList([Visit<Luau.Parameter>(node.Parameter)]);
         var body = node.ExpressionBody != null
             ? new Luau.Block([new Luau.Return(Visit<Luau.Expression>(node.ExpressionBody))])
@@ -1088,16 +1128,20 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
     public override Luau.Parameter VisitParameter(ParameterSyntax node)
     {
         var name = Luau.AstUtility.CreateSimpleName<Luau.IdentifierName>(node, registerIdentifier: true);
-        Luau.TypeRef returnType = null;
-        if (node.Type != null) 
-            returnType = Luau.AstUtility.CreateTypeRef(Visit<Luau.Name>(node.Type).ToString());
+        Luau.TypeRef? type = null;
+        if (node.Type != null)
+            type = Luau.AstUtility.CreateTypeRef(Visit<Luau.Name>(node.Type).ToString());
+
         var initializer = Visit<Luau.Expression?>(node.Default);
         var isParams = HasSyntax(node.Modifiers, SyntaxKind.ParamsKeyword);
 
-        if (returnType != null && node.Modifiers.Any(SyntaxKind.RefKeyword) || node.Modifiers.Any(SyntaxKind.OutKeyword))
-            returnType = new Luau.TypeRef($"({returnType!.Path}?) -> {returnType.Path}", true);
+        if (type != null && node.Modifiers.Any(SyntaxKind.RefKeyword) || node.Modifiers.Any(SyntaxKind.OutKeyword))
+            type = new Luau.TypeRef($"({type!.Path}?) -> {type.Path}", true);
 
-        return new Luau.Parameter(name, isParams, initializer, returnType);
+        if (initializer != null && type != null)
+            type = new Luau.OptionalType(type);
+
+        return new Luau.Parameter(name, isParams, initializer, type);
     }
 
     public override Luau.Node? VisitAttribute(AttributeSyntax node)
@@ -1131,6 +1175,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
 
     public override Luau.Statement VisitLocalDeclarationStatement(LocalDeclarationStatementSyntax node) =>
         Visit<Luau.Statement>(node.Declaration);
+
 
     public override Luau.VariableList VisitVariableDeclaration(VariableDeclarationSyntax node)
     {

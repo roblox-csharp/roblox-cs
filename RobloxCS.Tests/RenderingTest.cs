@@ -164,7 +164,7 @@ public class RenderingTest
         var condition = new IdentifierName("runicIsCool");
         var body = new Literal("\"im tha best\"");
         var elseBranch = new Literal("\"im washed\"");
-        var ifExpression = new ExpressionalIf(condition, body, elseBranch, true);
+        var ifExpression = new IfExpression(condition, body, elseBranch, true);
         var output = Render(ifExpression);
         Assert.Equal("if runicIsCool then \"im tha best\" else \"im washed\"", output);
     }
@@ -511,7 +511,7 @@ public class RenderingTest
     {
         var identifier = new IdentifierName("myFunction");
         var parameterIdentifier = new IdentifierName("x");
-        var parameterType = new TypeRef("number");
+        var parameterType = new OptionalType(new TypeRef("number"));
         var parameterDefault = new Literal("69");
         var body = new Block([]);
         var parameter = new Parameter(parameterIdentifier, false, parameterDefault, parameterType);
