@@ -497,6 +497,13 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         return Luau.AstUtility.CreateTypeInfo(type);
     }
 
+    public override Luau.TypeCast VisitCastExpression(CastExpressionSyntax node)
+    {
+        var expression = Visit<Luau.Expression>(node.Expression);
+        var typeName = Visit<Luau.Name>(node.Type);
+        return new Luau.TypeCast(expression, Luau.AstUtility.CreateTypeRef(typeName.ToString())!);
+    }
+
     public override Luau.Expression VisitExpressionElement(ExpressionElementSyntax node) =>
         Visit<Luau.Expression>(node.Expression);
 
