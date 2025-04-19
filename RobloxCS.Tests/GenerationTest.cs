@@ -67,7 +67,7 @@ public class GenerationTest
         
         var variableList = (VariableList)statement;
         var variable = variableList.Variables.First();
-        Assert.StartsWith("list", variable.Name.ToString()); // temp
+        Assert.Equal("list", variable.Name.ToString());
         Assert.IsType<TableInitializer>(variable.Initializer);
         
         var table = (TableInitializer)variable.Initializer;
@@ -284,11 +284,8 @@ public class GenerationTest
         Assert.IsType<Block>(nestedStatement);
         
         var doubleNestedBlock = (Block)nestedStatement;
-        Assert.Equal(4, doubleNestedBlock.Statements.Count); // 3
+        Assert.Equal(3, doubleNestedBlock.Statements.Count);
         
-        var doubleNestedStatement = doubleNestedBlock.Statements.Skip(1).First();
-        Assert.IsType<ScopedBlock>(doubleNestedStatement);
-            
         var memberAssignment = doubleNestedBlock.Statements.SkipLast(1).Last();
         Assert.IsType<ExpressionStatement>(memberAssignment);
         
@@ -324,7 +321,7 @@ public class GenerationTest
         
         var block = (Block)globalStatements.First();
         var statements = block.Statements;
-        Assert.Equal(5, statements.Count); // 4
+        Assert.Equal(4, statements.Count);
         
         var globalAssignment = statements.SkipLast(2).Last();
         Assert.IsType<ExpressionStatement>(globalAssignment);
@@ -477,7 +474,7 @@ public class GenerationTest
         Assert.IsType<Function>(statement);
         
         var function = (Function)statement;
-        Assert.StartsWith("getInt", function.Name.ToString()); // change to Equal() when duplicate identifier handling is fixed
+        Assert.Equal("getInt", function.Name.ToString());
         Assert.NotNull(function.ReturnType);
         Assert.Equal("number", function.ReturnType.ToString());
         Assert.Empty(function.ParameterList.Parameters);
@@ -539,7 +536,7 @@ public class GenerationTest
         Assert.Single(function.ParameterList.Parameters);
         
         var parameter = function.ParameterList.Parameters.First();
-        Assert.StartsWith("y", parameter.Name.ToString());
+        Assert.Equal("y", parameter.Name.ToString());
         Assert.IsType<OptionalType>(parameter.Type);
         Assert.Equal("number?", parameter.Type.ToString());
     }
@@ -587,7 +584,7 @@ public class GenerationTest
     
     [Theory]
     [InlineData("object abc123;", "abc123")]
-    [InlineData("object @bruh;", "bruh")]
+    [InlineData("object @bruh;", "_bruh")]
     [InlineData("object yang;", "yang")]
     public void Generates_Identifiers(string csharpSource, string expectedLuauIdentifier)
     {
@@ -597,7 +594,6 @@ public class GenerationTest
         var statement = ast.Statements.Skip(1).First();
         Assert.IsType<VariableList>(statement);
         
-        // shit ass C# thinks they're declarations
         var variableList = (VariableList)statement;
         var identifier = variableList.Variables.First().Name;
         Assert.Equal(expectedLuauIdentifier, identifier.Text);

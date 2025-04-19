@@ -370,14 +370,12 @@ public static class AstUtility
             : simpleName.ToString());
     }
 
-    public static Name CreateName(SyntaxNode node, bool registerIdentifier = false, bool bypassReserved = false)
-    {
-        return CreateName(node, string.Join("", StandardUtility.GetNamesFromNode(node)), registerIdentifier, bypassReserved);
-    }
+    public static Name CreateName(SyntaxNode node, bool bypassReserved = false) =>
+        CreateName(node, string.Join("", StandardUtility.GetNamesFromNode(node)), bypassReserved);
 
-    public static Name CreateName(SyntaxNode node, string text, bool registerIdentifier = false, bool bypassReserved = false)
+    public static Name CreateName(SyntaxNode node, string text, bool bypassReserved = false)
     {
-        Name name = CreateSimpleName(node, text, registerIdentifier, bypassReserved);
+        Name name = CreateSimpleName(node, text, bypassReserved);
         var pieces = text.Split('.');
         if (pieces.Length <= 0)
             return name;
@@ -387,56 +385,34 @@ public static class AstUtility
             .Aggregate(name, (current, piece) => new QualifiedName(current, CreateSimpleName(node, piece)));
     }
         
-    public static TNameNode CreateSimpleName<TNameNode>(SyntaxNode node, bool registerIdentifier = false, bool bypassReserved = false) 
+    public static TNameNode CreateSimpleName<TNameNode>(SyntaxNode node, bool bypassReserved = false) 
         where TNameNode : SimpleName
     {
-        return (TNameNode)CreateSimpleName(node, registerIdentifier, bypassReserved);
+        return (TNameNode)CreateSimpleName(node, bypassReserved);
     }
 
-    public static TNameNode CreateSimpleName<TNameNode>(SyntaxNode node, string name, bool registerIdentifier = false, bool bypassReserved = false) 
+    public static TNameNode CreateSimpleName<TNameNode>(SyntaxNode node, string name, bool bypassReserved = false) 
         where TNameNode : SimpleName
     {
-        return (TNameNode)CreateSimpleName(node, name, registerIdentifier, bypassReserved);
+        return (TNameNode)CreateSimpleName(node, name, bypassReserved);
     }
         
-    public static SimpleName CreateSimpleName(SyntaxNode node, bool registerIdentifier = false,bool bypassReserved = false)
+    public static SimpleName CreateSimpleName(SyntaxNode node, bool bypassReserved = false)
     {
-        return CreateSimpleName(node, string.Join("", StandardUtility.GetNamesFromNode(node)), registerIdentifier, bypassReserved);
+        return CreateSimpleName(node, string.Join("", StandardUtility.GetNamesFromNode(node)), bypassReserved);
     }
 
-    public static SimpleName CreateSimpleName(SyntaxNode node, string name, bool registerIdentifier = false, bool bypassReserved = false)
+    public static SimpleName CreateSimpleName(SyntaxNode node, string name, bool bypassReserved = false)
     {
         if (RESERVED_IDENTIFIERS.Contains(name) && !bypassReserved)
             throw Logger.UnsupportedError(node, $"Using '{name}' as an identifier", useIs: true, useYet: false);
 
-        var text = registerIdentifier ? FixIdentifierNameText(node, name, registerIdentifier) : name;
+        var text = name.Replace('@', '_');
         return name.Contains('<') && name.Contains('>')
             ? new GenericName(text.Split('<').First(), StandardUtility.ExtractTypeArguments(text))
             : new IdentifierName(text);
     }
-
-    // TODO: per-scope duplicate handling
-    public static string FixIdentifierNameText(SyntaxNode node, string name, bool registerIdentifier = false)
-    {
-        _identifierDeclarations.TryAdd(node.SyntaxTree.FilePath, []);
-
-        var identifiersInFile = _identifierDeclarations[node.SyntaxTree.FilePath];
-        identifiersInFile.TryAdd(name, 0);
-
-        var useCount = identifiersInFile[name];
-        if (registerIdentifier)
-            identifiersInFile[name]++;
-            
-        if (useCount <= 0)
-            return name;
-            
-        if (!name.EndsWith('_'))
-            name += '_';
-            
-        name += useCount;
-        return name.Replace("@", "");
-    }
-
+    
     public static TypeRef? CreateTypeRef(string? typePath)
     {
         switch (typePath)

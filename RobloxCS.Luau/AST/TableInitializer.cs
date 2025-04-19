@@ -2,6 +2,8 @@
 
 public class TableInitializer : Expression
 {
+    public static readonly TableInitializer Empty = new();
+    
     public List<Expression> Values { get; }
     public List<Expression> Keys { get; }
     public List<KeyValuePair<Expression, Expression>> KeyValuePairs { get; }
