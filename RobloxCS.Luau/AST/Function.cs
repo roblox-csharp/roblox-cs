@@ -8,7 +8,7 @@ public class Function : Statement
     public Block? Body { get; }
     public TypeRef? ReturnType { get; }
     public List<AttributeList> AttributeLists { get; }
-    public List<IdentifierName> TypeParameters { get; }
+    public List<IdentifierName>? TypeParameters { get; }
 
     public Function(
         Name name,
@@ -25,7 +25,7 @@ public class Function : Statement
         Body = body;
         ReturnType = returnType;
         AttributeLists = attributeLists ?? [];
-        TypeParameters = typeParameters ?? [];
+        TypeParameters = typeParameters;
         
         AddChild(Name);
         AddChild(ParameterList);
