@@ -25,7 +25,8 @@ public class IfExpression : Expression
         luau.Write("if ");
         Condition.Render(luau);
         luau.Write(" then" + (IsCompact ? " " : '\n'));
-        luau.PushIndent();
+        if (!IsCompact)
+            luau.PushIndent();
 
         Node body = IsCompact ? Body : new ExpressionStatement(Body);
         body.Render(luau);
@@ -51,7 +52,7 @@ public class IfExpression : Expression
         if (elseBranch is Statement)
             luau.Remove(1);
         
-        if (isElseIf) return;
+        if (isElseIf || IsCompact) return;
         luau.PopIndent();
     }
 }

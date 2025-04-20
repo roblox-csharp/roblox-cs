@@ -6,7 +6,8 @@ using RobloxCS.Shared;
 
 namespace RobloxCS.Transformers;
 
-public sealed class MainTransformer(SyntaxTree tree, TransformState state, ConfigData config) : BaseTransformer(tree, state, config)
+public sealed class MainTransformer(SyntaxTree tree, TransformState state, ConfigData config)
+    : BaseTransformer(tree, state, config)
 {
     // Add `using Roblox` and `using static Roblox.Globals` to top of file
     public override SyntaxNode? VisitCompilationUnit(CompilationUnitSyntax node)
@@ -71,7 +72,6 @@ public sealed class MainTransformer(SyntaxTree tree, TransformState state, Confi
 
     public override SyntaxNode? VisitForStatement(ForStatementSyntax node) =>
         base.VisitForStatement(SyntaxFactory.ForStatement(node.Declaration, node.Initializers, node.Condition, node.Incrementors, Blockify(node.Statement)));
-    
 
     public override SyntaxNode? VisitWhileStatement(WhileStatementSyntax node) =>
         base.VisitWhileStatement(SyntaxFactory.WhileStatement(node.WhileKeyword, node.OpenParenToken, node.Condition, node.CloseParenToken, Blockify(node.Statement)));
@@ -91,10 +91,9 @@ public sealed class MainTransformer(SyntaxTree tree, TransformState state, Confi
         
     private ExpressionSyntax? ProcessWhenNotNull(ExpressionSyntax expression, ExpressionSyntax? whenNotNull)
     {
-        // TODO: temp variables to avoid recalculation
         if (whenNotNull == null)
             return null;
-
+        
         return whenNotNull switch
         {
             MemberAccessExpressionSyntax memberAccess => SyntaxFactory.MemberAccessExpression(

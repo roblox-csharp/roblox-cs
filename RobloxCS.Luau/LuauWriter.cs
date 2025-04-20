@@ -83,13 +83,9 @@ public class LuauWriter : BaseWriter
 
         PopIndent();
         if (createNewline)
-        {
             WriteLine("end");
-        }
         else
-        {
             Write("end");
-        }
     }
 
     public void WriteAssignment(Expression name, Expression initializer)
