@@ -10,10 +10,6 @@ namespace RobloxCS.Luau;
 public static class AstUtility
 {
     public static readonly IdentifierName DiscardName = new("_");
-    
-    // TODO: make per-scope
-    /// <summary>file path -> dictionary(identifier name, amount of times identifier is used)</summary>
-    private static readonly Dictionary<string, Dictionary<string, uint>> _identifierDeclarations = [];
 
     /// <summary>Adds one to the expression</summary>
     public static Expression AddOne(Expression expression)
@@ -206,12 +202,24 @@ public static class AstUtility
     /// <code>CS.getGlobal(name)</code>
     public static Call GetGlobal(Name name) =>
         CSCall("getGlobal", String(name.ToString()));
+    
+    /// <summary>
+    /// Creates a call to a table library method
+    /// </summary>
+    public static Call TableCall(string methodName, params Expression[] arguments) =>
+        new(
+            new MemberAccess(
+                new IdentifierName("table"),
+                new IdentifierName(methodName)
+            ),
+            CreateArgumentList(arguments.ToList())
+        );
 
     /// <summary>
     /// Creates a call to a CS library method
     /// </summary>
     public static Call CSCall(string methodName, params Expression[] arguments) =>
-        new Call(
+        new(
             new MemberAccess(
                 new IdentifierName("CS"),
                 new IdentifierName(methodName)

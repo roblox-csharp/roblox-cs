@@ -41,7 +41,9 @@ public static class FileUtility
 
         foreach (var dllPath in coreDlls.Select(coreDll => Path.Combine(Path.GetDirectoryName(coreLib)!, coreDll)))
             references.Add(MetadataReference.CreateFromFile(dllPath));
-        
+
+        references.Add(MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location));
+        references.Add(MetadataReference.CreateFromFile(typeof(List<>).Assembly.Location));
         return references;
     }
     

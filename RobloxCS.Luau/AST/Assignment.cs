@@ -3,7 +3,7 @@
 public sealed class Assignment : Expression
 {
     public AssignmentTarget Target { get; }
-    public Expression Value { get; private set; }
+    public Expression Value { get; }
 
     public Assignment(AssignmentTarget target, Expression value)
     {

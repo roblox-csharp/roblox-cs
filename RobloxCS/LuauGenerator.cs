@@ -1,6 +1,5 @@
 ﻿using System.Text;
 using System.Text.RegularExpressions;
-using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -8,6 +7,20 @@ using RobloxCS.Macros;
 using RobloxCS.Shared;
 
 namespace RobloxCS;
+
+internal enum LinqQueryClauseInfoKind : byte
+{
+    Select,
+    Where,
+    OrderBy,
+    GroupBy
+}
+
+internal class LinqQueryClauseInfo(LinqQueryClauseInfoKind kind, Luau.IdentifierName name)
+{
+    public LinqQueryClauseInfoKind Kind { get; } = kind;
+    public Luau.IdentifierName Name { get; } = name;
+}
 
 public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, Luau.TransformState transformState) : BaseGenerator(tree, compiler)
 {
@@ -77,6 +90,131 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
 
     public override Luau.OptionalType VisitNullableType(NullableTypeSyntax node) =>
         new(Luau.AstUtility.CreateTypeRef(Visit<Luau.Name>(node.ElementType).ToString())!);
+    
+    public override Luau.IdentifierName VisitQueryExpression(QueryExpressionSyntax node)
+    {
+        var resultIdentifier = _occupiedIdentifiersStack.AddIdentifier("_result");
+        List<Luau.Statement> statements = [];
+        statements.AddRange(transformState.CapturePrereqs(() => Visit(node.Body)));
+        statements.AddRange(transformState.CapturePrereqs(() => Visit(node.FromClause)));
+        transformState.PrereqList(statements);
+
+        return resultIdentifier;
+    }
+    
+    public override Luau.NoOp VisitQueryBody(QueryBodySyntax node) => new Luau.NoOp(false);
+    
+    public override Luau.NoOp VisitFromClause(FromClauseSyntax node)
+    {
+        var query = (QueryExpressionSyntax)node.Parent!;
+        var resultIdentifier = new Luau.IdentifierName(_occupiedIdentifiersStack.GetDuplicateText("_result"));
+        var iterable = Visit<Luau.Expression>(node.Expression);
+
+        HashSet<LinqQueryClauseInfo> clauseInfos = [];
+        void addClauseInfo(SyntaxNode queryClauseSyntax)
+        {
+            var clauseKind = GetLinqQueryClauseKind(queryClauseSyntax.Kind());
+            var identifierName = _occupiedIdentifiersStack.Capture(() => _occupiedIdentifiersStack.AddIdentifier('_' + clauseKind.ToString().ToLower())).First();
+            clauseInfos.Add(new LinqQueryClauseInfo(clauseKind, identifierName));
+            transformState.PrereqList(transformState.CapturePrereqs(() => Visit(queryClauseSyntax)));
+        }
+        
+        foreach (var clause in query.Body.Clauses)
+            addClauseInfo(clause);
+        if (query.Body.Continuation != null)
+            addClauseInfo(query.Body.Continuation);
+        
+        addClauseInfo(query.Body.SelectOrGroup);
+
+        _occupiedIdentifiersStack.Push();
+        var resultValueIdentifier = _occupiedIdentifiersStack.AddIdentifier("_resultValue");
+        var variableName = _occupiedIdentifiersStack.AddIdentifier(node.Identifier);
+        List<Luau.Statement> forStatementBody = [
+            new Luau.Variable(resultValueIdentifier, true, variableName)
+        ];
+
+        var argumentList = new Luau.ArgumentList([new Luau.Argument(variableName)]);
+        foreach (var clauseInfo in clauseInfos)
+        {
+            if (clauseInfo.Kind == LinqQueryClauseInfoKind.OrderBy) continue;
+
+            var call = new Luau.Call(clauseInfo.Name, argumentList);
+            switch (clauseInfo.Kind)
+            {
+                case LinqQueryClauseInfoKind.Select:
+                    forStatementBody.Add(new Luau.ExpressionStatement(new Luau.Assignment(variableName, call)));
+                    break;
+                case LinqQueryClauseInfoKind.Where:
+                    forStatementBody.Add(new Luau.If(new Luau.UnaryOperator("not ", call), new Luau.Continue()));
+                    break;
+                
+                case LinqQueryClauseInfoKind.GroupBy:
+                case LinqQueryClauseInfoKind.OrderBy:
+                default: break;
+            }
+        }
+
+        forStatementBody.Add(new Luau.ExpressionStatement(Luau.AstUtility.TableCall("insert", resultIdentifier, resultValueIdentifier)));
+        List<Luau.Statement> prereqStatements =
+        [
+            new Luau.Variable(resultIdentifier, true, Luau.TableInitializer.Empty),
+            new Luau.For([Luau.AstUtility.DiscardName, variableName], iterable, new Luau.Block(forStatementBody))
+        ];
+
+        foreach (var clauseInfo in clauseInfos.Where(i => i.Kind == LinqQueryClauseInfoKind.OrderBy))
+        {
+            prereqStatements.Add(new Luau.SingleLineComment("\u25bc orderby ascending \u25bc"));
+            
+            prereqStatements.Add(new Luau.SingleLineComment("\u25b2 orderby ascending \u25b2"));
+
+        }
+        transformState.PrereqList(prereqStatements);
+        _occupiedIdentifiersStack.Pop();
+        
+        return new Luau.NoOp(false);
+    }
+
+    public override Luau.NoOp VisitGroupClause(GroupClauseSyntax node)
+    {
+        return new Luau.NoOp(false);
+    }
+    
+    public override Luau.NoOp VisitWhereClause(WhereClauseSyntax node)
+    {
+        var query = (QueryExpressionSyntax)node.Parent?.Parent!;
+        var name = new Luau.IdentifierName(_occupiedIdentifiersStack.GetDuplicateText("_where"));
+        var parameters = new Luau.ParameterList([
+            new Luau.Parameter(
+                new Luau.IdentifierName(_occupiedIdentifiersStack.GetDuplicateText(query.FromClause.Identifier.Text)))
+        ]);
+
+        var condition = Visit<Luau.Expression>(node.Condition);
+        var body = new Luau.Block([new Luau.Return(condition)]);
+        transformState.Prereq(new Luau.Function(name, true, parameters, new Luau.TypeRef("boolean"), body));
+        
+        return new Luau.NoOp(false);
+    }
+    
+    public override Luau.NoOp VisitSelectClause(SelectClauseSyntax node)
+    {
+        var query = (QueryExpressionSyntax)node.Parent?.Parent!;
+        var name = new Luau.IdentifierName(_occupiedIdentifiersStack.GetDuplicateText("_select"));
+        var parameters = new Luau.ParameterList([
+            new Luau.Parameter(
+                new Luau.IdentifierName(_occupiedIdentifiersStack.GetDuplicateText(query.FromClause.Identifier.Text)))
+        ]);
+
+        var expression = Visit<Luau.Expression>(node.Expression);
+        var body = new Luau.Block([new Luau.Return(expression)]);
+        transformState.Prereq(new Luau.Function(name, true, parameters, null, body));
+        
+        return new Luau.NoOp(false);
+    }
+    
+    public override Luau.Node? VisitOrderByClause(OrderByClauseSyntax node)
+    {
+        return new Luau.NoOp(false);
+    }
 
     public override Luau.Statement VisitPropertyDeclaration(PropertyDeclarationSyntax node)
     {
@@ -1000,94 +1138,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
 
         return new Luau.Block(statements);
     }
-
-    private Luau.Expression HandlePattern(PatternSyntax node, Luau.Expression comparand, ExpressionSyntax originalComparand)
-    {
-        return node switch
-        {
-            RelationalPatternSyntax relationalPattern => HandleRelationalPattern(relationalPattern, comparand),
-            BinaryPatternSyntax binaryPattern => HandleBinaryPattern(binaryPattern, comparand, originalComparand),
-            UnaryPatternSyntax unaryPattern => HandleUnaryPattern(unaryPattern, comparand, originalComparand),
-            ParenthesizedPatternSyntax parenthesizedPattern => HandleParenthesizedPattern(parenthesizedPattern, comparand, originalComparand),
-            ConstantPatternSyntax constantPattern => HandleConstantPattern(constantPattern, comparand),
-            TypePatternSyntax typePattern => HandleTypePattern(typePattern, comparand),
-            DeclarationPatternSyntax declarationPattern => HandleDeclarationPattern(declarationPattern, comparand, originalComparand),
-            _ => throw Logger.CompilerError($"Unhandled pattern type: {node.GetType().Name}", node)
-        };
-    }
-
-    private Luau.Call HandleDeclarationPattern(DeclarationPatternSyntax node, Luau.Expression originalValue, ExpressionSyntax csharpOriginalValue)
-    {
-        var typeName = Visit<Luau.Name>(node.Type);
-        var oldTypeName = typeName;
-        var typeSymbol = _semanticModel.GetTypeInfo(node.Type).Type;
-        if (typeSymbol is { ContainingNamespace.Name: "System" or "Roblox" } && typeName is Luau.IdentifierName identifierName)
-            typeName = new Luau.IdentifierName('"' + StandardUtility.GetMappedType(identifierName.Text) + '"');
-
-        var newName = node.Designation switch
-        {
-            SingleVariableDesignationSyntax singleDesignation =>
-                _occupiedIdentifiersStack.AddIdentifier(singleDesignation.Identifier)
-        };
-
-        transformState.Prereq(new Luau.Variable(newName, true, new Luau.TypeCast(originalValue, new Luau.TypeRef(oldTypeName.ToString()))));
-        var instanceSymbol = _semanticModel.Compilation.GetTypeByMetadataName("Roblox.Instance");
-        var originalValueSymbol = _semanticModel.GetTypeInfo(csharpOriginalValue).Type;
-        var instanceIsACall = new Luau.Call(new Luau.MemberAccess(originalValue, new Luau.IdentifierName("IsA"), ':'), new Luau.ArgumentList([new Luau.Argument(typeName)]));
-        
-        return originalValueSymbol != null
-               && instanceSymbol != null
-               && StandardUtility.DoesTypeInheritFrom(originalValueSymbol, instanceSymbol)
-               && typeName.ToString() != "\"Instance\""
-            ? instanceIsACall
-            : Luau.AstUtility.CSCall("is", originalValue, typeName); // TODO: some sort of runtime type check
-    }
-
-    private Luau.Call HandleTypePattern(TypePatternSyntax node, Luau.Expression comparand)
-    {
-        var name = Visit<Luau.Name>(node.Type);
-        var typeInfo = _semanticModel.GetTypeInfo(node.Type); // TODO: some sort of runtime type check
-        if (typeInfo.Type is { ContainingNamespace.Name: "System" } && name is Luau.IdentifierName identifierName)
-            name = new Luau.IdentifierName('"' + StandardUtility.GetMappedType(identifierName.Text) + '"');
-
-        return Luau.AstUtility.CSCall("is", comparand, name);
-    }
-
-    private Luau.BinaryOperator HandleConstantPattern(ConstantPatternSyntax node, Luau.Expression comparand)
-    {
-        var operand = Visit<Luau.Expression>(node.Expression);
-        return new Luau.BinaryOperator(comparand, "==", operand);
-    }
-
-    private Luau.Parenthesized HandleParenthesizedPattern(ParenthesizedPatternSyntax node, Luau.Expression comparand, ExpressionSyntax originalComparand) =>
-        new Luau.Parenthesized(HandlePattern(node.Pattern, comparand, originalComparand));
-
-    private Luau.UnaryOperator HandleUnaryPattern(UnaryPatternSyntax node, Luau.Expression comparand, ExpressionSyntax originalComparand)
-    {
-        var operand = HandlePattern(node.Pattern, comparand, originalComparand);
-        return new Luau.UnaryOperator("not ", operand);
-    }
-
-    private Luau.BinaryOperator HandleBinaryPattern(BinaryPatternSyntax node, Luau.Expression comparand, ExpressionSyntax originalComparand)
-    {
-        var left = HandlePattern(node.Left, comparand, originalComparand);
-        var right = HandlePattern(node.Right, comparand, originalComparand);
-        return new Luau.BinaryOperator(left, node.OperatorToken.Text, right);
-    }
-
-    private Luau.BinaryOperator HandleRelationalPattern(RelationalPatternSyntax node, Luau.Expression comparand)
-    {
-        var op = StandardUtility.GetMappedOperator(node.OperatorToken.Text);
-        var operand = Visit<Luau.Expression>(node.Expression);
-        return new Luau.BinaryOperator(comparand, op, operand);
-    }
-
-    private Luau.BinaryOperator HandleCaseSwitchLabel(CaseSwitchLabelSyntax caseLabel, Luau.Expression comparand)
-    {
-        var caseValue = Visit<Luau.Expression>(caseLabel.Value);
-        return new Luau.BinaryOperator(comparand, "==", caseValue);
-    }
-
+    
     public override Luau.Parenthesized VisitParenthesizedExpression(ParenthesizedExpressionSyntax node)
     {
         var expression = Visit<Luau.Expression>(node.Expression);
@@ -1240,8 +1291,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         );
     }
 
-    public override Luau.Node? VisitEqualsValueClause(EqualsValueClauseSyntax node) =>
-        Visit(node.Value);
+    public override Luau.Node? VisitEqualsValueClause(EqualsValueClauseSyntax node) => Visit(node.Value);
 
     public override Luau.Node VisitExpressionStatement(ExpressionStatementSyntax node)
     {
@@ -1315,5 +1365,103 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         }
 
         return new Luau.Literal(valueText);
+    }
+    
+    private Luau.Expression HandlePattern(PatternSyntax node, Luau.Expression comparand, ExpressionSyntax originalComparand)
+    {
+        return node switch
+        {
+            RelationalPatternSyntax relationalPattern => HandleRelationalPattern(relationalPattern, comparand),
+            BinaryPatternSyntax binaryPattern => HandleBinaryPattern(binaryPattern, comparand, originalComparand),
+            UnaryPatternSyntax unaryPattern => HandleUnaryPattern(unaryPattern, comparand, originalComparand),
+            ParenthesizedPatternSyntax parenthesizedPattern => HandleParenthesizedPattern(parenthesizedPattern, comparand, originalComparand),
+            ConstantPatternSyntax constantPattern => HandleConstantPattern(constantPattern, comparand),
+            TypePatternSyntax typePattern => HandleTypePattern(typePattern, comparand),
+            DeclarationPatternSyntax declarationPattern => HandleDeclarationPattern(declarationPattern, comparand, originalComparand),
+            _ => throw Logger.CompilerError($"Unhandled pattern type: {node.GetType().Name}", node)
+        };
+    }
+
+    private Luau.Call HandleDeclarationPattern(DeclarationPatternSyntax node, Luau.Expression originalValue, ExpressionSyntax csharpOriginalValue)
+    {
+        var typeName = Visit<Luau.Name>(node.Type);
+        var oldTypeName = typeName;
+        var typeSymbol = _semanticModel.GetTypeInfo(node.Type).Type;
+        if (typeSymbol is { ContainingNamespace.Name: "System" or "Roblox" } && typeName is Luau.IdentifierName identifierName)
+            typeName = new Luau.IdentifierName('"' + StandardUtility.GetMappedType(identifierName.Text) + '"');
+
+        var newName = node.Designation switch
+        {
+            SingleVariableDesignationSyntax singleDesignation =>
+                _occupiedIdentifiersStack.AddIdentifier(singleDesignation.Identifier)
+        };
+
+        transformState.Prereq(new Luau.Variable(newName, true, new Luau.TypeCast(originalValue, new Luau.TypeRef(oldTypeName.ToString()))));
+        var instanceSymbol = _semanticModel.Compilation.GetTypeByMetadataName("Roblox.Instance");
+        var originalValueSymbol = _semanticModel.GetTypeInfo(csharpOriginalValue).Type;
+        var instanceIsACall = new Luau.Call(new Luau.MemberAccess(originalValue, new Luau.IdentifierName("IsA"), ':'), new Luau.ArgumentList([new Luau.Argument(typeName)]));
+        
+        return originalValueSymbol != null
+               && instanceSymbol != null
+               && StandardUtility.DoesTypeInheritFrom(originalValueSymbol, instanceSymbol)
+               && typeName.ToString() != "\"Instance\""
+            ? instanceIsACall
+            : Luau.AstUtility.CSCall("is", originalValue, typeName); // TODO: some sort of runtime type check
+    }
+
+    private Luau.Call HandleTypePattern(TypePatternSyntax node, Luau.Expression comparand)
+    {
+        var name = Visit<Luau.Name>(node.Type);
+        var typeInfo = _semanticModel.GetTypeInfo(node.Type); // TODO: some sort of runtime type check
+        if (typeInfo.Type is { ContainingNamespace.Name: "System" } && name is Luau.IdentifierName identifierName)
+            name = new Luau.IdentifierName('"' + StandardUtility.GetMappedType(identifierName.Text) + '"');
+
+        return Luau.AstUtility.CSCall("is", comparand, name);
+    }
+
+    private Luau.BinaryOperator HandleConstantPattern(ConstantPatternSyntax node, Luau.Expression comparand)
+    {
+        var operand = Visit<Luau.Expression>(node.Expression);
+        return new Luau.BinaryOperator(comparand, "==", operand);
+    }
+
+    private Luau.Parenthesized HandleParenthesizedPattern(ParenthesizedPatternSyntax node, Luau.Expression comparand, ExpressionSyntax originalComparand) =>
+        new Luau.Parenthesized(HandlePattern(node.Pattern, comparand, originalComparand));
+
+    private Luau.UnaryOperator HandleUnaryPattern(UnaryPatternSyntax node, Luau.Expression comparand, ExpressionSyntax originalComparand)
+    {
+        var operand = HandlePattern(node.Pattern, comparand, originalComparand);
+        return new Luau.UnaryOperator("not ", operand);
+    }
+
+    private Luau.BinaryOperator HandleBinaryPattern(BinaryPatternSyntax node, Luau.Expression comparand, ExpressionSyntax originalComparand)
+    {
+        var left = HandlePattern(node.Left, comparand, originalComparand);
+        var right = HandlePattern(node.Right, comparand, originalComparand);
+        return new Luau.BinaryOperator(left, node.OperatorToken.Text, right);
+    }
+
+    private Luau.BinaryOperator HandleRelationalPattern(RelationalPatternSyntax node, Luau.Expression comparand)
+    {
+        var op = StandardUtility.GetMappedOperator(node.OperatorToken.Text);
+        var operand = Visit<Luau.Expression>(node.Expression);
+        return new Luau.BinaryOperator(comparand, op, operand);
+    }
+
+    private Luau.BinaryOperator HandleCaseSwitchLabel(CaseSwitchLabelSyntax caseLabel, Luau.Expression comparand)
+    {
+        var caseValue = Visit<Luau.Expression>(caseLabel.Value);
+        return new Luau.BinaryOperator(comparand, "==", caseValue);
+    }
+    
+    private static LinqQueryClauseInfoKind GetLinqQueryClauseKind(SyntaxKind syntaxKind)
+    {
+        return syntaxKind switch
+        {
+            SyntaxKind.SelectClause => LinqQueryClauseInfoKind.Select,
+            SyntaxKind.WhereClause => LinqQueryClauseInfoKind.Where,
+            SyntaxKind.OrderByClause => LinqQueryClauseInfoKind.OrderBy,
+            SyntaxKind.GroupClause => LinqQueryClauseInfoKind.GroupBy
+        };
     }
 }

@@ -21,9 +21,10 @@ public class OccupiedIdentifiersStack : Stack<List<IdentifierName>>
 
     public string GetDuplicateText(string text)
     {
-        var occurences = HasIdentifier(text) ? "_" + CountOccurrences(text) : "";
+        var occurrences = CountOccurrences(text) - 1;
+        var newText = occurrences > 0 ? "_" + occurrences : "";
         var halves = text.Split('<'); // generics, poopoo.
-        var duplicateText = halves.First() + occurences + (halves.Length > 1 ? "<" + halves.Last() : "");
+        var duplicateText = halves.First() + newText + (halves.Length > 1 ? "<" + halves.Last() : "");
         return duplicateText.Replace('@', '_');
     }
     
