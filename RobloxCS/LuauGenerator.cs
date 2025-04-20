@@ -1205,7 +1205,7 @@ public sealed class LuauGenerator(
         var returnTypeName = typeSymbol != null
             ? Luau.AstUtility.TypeNameFromSymbol(typeSymbol)
             : null;
-
+        
         var returnType = new Luau.TypeRef(returnTypeName?.ToString() ?? "()");
         var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
         Luau.Block? body;
@@ -1265,7 +1265,7 @@ public sealed class LuauGenerator(
     {
         var name = occupiedIdentifiersStack.AddIdentifier(node.Identifier);
         var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
-        var typeParameters = node.TypeParameterList?.Parameters.Select(p => new Luau.IdentifierName(p.Identifier.Text)).ToList() ?? [];
+        var typeParameters = node.TypeParameterList?.Parameters.Select(p => new Luau.IdentifierName(p.Identifier.Text)).ToList();
         var returnType = Luau.AstUtility.CreateTypeRef(node.ReturnType);
         var body = node.ExpressionBody != null
             ? Visit<Luau.Block>(node.ExpressionBody)

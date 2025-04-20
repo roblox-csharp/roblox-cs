@@ -35,6 +35,8 @@ public class Function : Statement
             AddChild(Body);
         
         AddChildren(AttributeLists);
+        if (typeParameters != null)
+            AddChildren(typeParameters);
     }
 
     public override void Render(LuauWriter luau) =>
