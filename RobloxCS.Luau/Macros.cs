@@ -20,9 +20,9 @@ public enum MacroKind
     BitOperation
 }
 
-public class MacroManager(SemanticModel semanticModel, TransformState transformState)
+public class MacroManager(SemanticModel semanticModel, TransformState transformState, OccupiedIdentifiersStack occupiedIdentifiersStack)
 {
-    private SemanticModel _semanticModel { get; } = semanticModel;
+    private readonly OccupiedIdentifiersStack _occupiedIdentifiersStack = occupiedIdentifiersStack;
 
     public Node? Assignment(Func<SyntaxNode, Node?> visit, AssignmentExpressionSyntax assignment)
     {
@@ -38,7 +38,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             return new Assignment(target, AstUtility.Bit32Call(bit32MethodName, target, value));
         }
 
-        var leftSymbol = _semanticModel.GetSymbolInfo(assignment.Left).Symbol;
+        var leftSymbol = semanticModel.GetSymbolInfo(assignment.Left).Symbol;
         if (leftSymbol is IEventSymbol eventSymbol)
         {
             var symbolMetadata = SymbolMetadataManager.Get(eventSymbol);
@@ -96,7 +96,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
     /// </summary>
     public Name? GenericName(Func<SyntaxNode, Node?> visit, GenericNameSyntax genericName)
     {
-        var typeInfo = _semanticModel.GetTypeInfo(genericName);
+        var typeInfo = semanticModel.GetTypeInfo(genericName);
         if (StandardUtility.IsFromSystemNamespace(typeInfo.Type))
             switch (genericName.Identifier.Text)
             {
@@ -133,7 +133,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
     /// <returns>The expanded expression of the macro, or null if no macro was applied</returns>
     public Node? MemberAccess(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess)
     {
-        var expressionType = _semanticModel.GetTypeInfo(memberAccess.Expression).Type;
+        var expressionType = semanticModel.GetTypeInfo(memberAccess.Expression).Type;
         {
             if (memberAccess is { Name.Identifier.Text: { } serviceName }
                 && expressionType?.Name == "Services"
@@ -190,7 +190,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
 
                     case "List":
                     {
-                        if (ListMethod(visit, memberAccess, invocation, out var expanded, transformState))
+                        if (ListMethod(visit, memberAccess, invocation, out var expanded))
                             return expanded;
 
                         break;
@@ -209,8 +209,8 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
     {
         // generic objects
         var symbol = baseObjectCreation is ObjectCreationExpressionSyntax objectCreation
-            ? _semanticModel.GetSymbolInfo(objectCreation.Type).Symbol
-            : _semanticModel.GetSymbolInfo(baseObjectCreation).Symbol?.ContainingSymbol;
+            ? semanticModel.GetSymbolInfo(objectCreation.Type).Symbol
+            : semanticModel.GetSymbolInfo(baseObjectCreation).Symbol?.ContainingSymbol;
 
         if (symbol is not INamedTypeSymbol { TypeParameters.Length: > 0 } namedTypeSymbol)
             return null;
@@ -289,8 +289,8 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
     }
 
     /// <summary>Macros <see cref="List" /> methods</summary>
-    private static bool ListMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
-        InvocationExpressionSyntax invocation, out Node? expanded, TransformState transformState)
+    private bool ListMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
+        InvocationExpressionSyntax invocation, out Node? expanded)
     {
         expanded = null;
         var listExpression = (Expression)visit(memberAccess.Expression)!;
@@ -298,15 +298,13 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
 
         if (listExpression is not IdentifierName name)
         {
-            self = AstUtility.CreateSimpleName(memberAccess.Expression, "_exp", true);
+            self = _occupiedIdentifiersStack.AddIdentifier("_exp");
             transformState.Prereq(new Variable((IdentifierName)self, true, listExpression));
         }
         else
-        {
             self = name;
-        }
 
-        var filterFuncIdentifier = new IdentifierName("_filterFunc");
+        var filterFuncIdentifier = _occupiedIdentifiersStack.AddIdentifier("_filterFunc");
         switch (memberAccess.Name.Identifier.Text)
         {
             case "Add":
@@ -314,14 +312,12 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
                 arguments.Arguments.Insert(0, new Argument(self));
 
-                expanded = new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("insert")),
-                    arguments);
+                expanded = AstUtility.TableCall("insert", arguments);
                 break;
             }
             case "AsReadOnly":
             {
-                expanded = new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("freeze")),
-                    new ArgumentList([new Argument(self)]));
+                expanded = AstUtility.TableCall("freeze", new ArgumentList([new Argument(self)]));
                 break;
             }
             case "Contains":
@@ -330,31 +326,33 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 arguments.Arguments.Insert(0, new Argument(self));
 
                 expanded = new BinaryOperator(
-                    new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("find")), arguments),
+                    AstUtility.TableCall("find", arguments),
                     "~=", AstUtility.Nil());
                 break;
             }
             case "Clear":
             {
-                expanded = new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("clear")),
-                    new ArgumentList([new Argument(self)]));
+                expanded = AstUtility.TableCall("clear", new ArgumentList([new Argument(self)]));
                 break;
             }
             case "Exists":
             {
                 var FilterFunc = (ArgumentList)visit(invocation.ArgumentList)!;
-                var expression = new IdentifierName("_newValue");
-                var key = new IdentifierName("_");
-                var value = new IdentifierName("_v");
+                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
 
                 transformState.Prereq(new Block([
                     new Variable(filterFuncIdentifier, true, FilterFunc.Arguments.First()),
                     new Variable(expression, true, AstUtility.False()),
                     new For([key, value], self, new Block([
-                        new If(new Call(filterFuncIdentifier, new ArgumentList([new Argument(value)])), new Block([
-                            new ExpressionStatement(new Assignment(expression, AstUtility.True())),
-                            new Break()
-                        ]))
+                        new If(new Call(
+                            filterFuncIdentifier,
+                            new ArgumentList([new Argument(value)])),
+                            new Block([
+                                new ExpressionStatement(new Assignment(expression, AstUtility.True())),
+                                new Break()
+                            ]))
                     ]))
                 ]));
                 expanded = expression;
@@ -363,9 +361,9 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "Find":
             {
                 var filterFunc = (ArgumentList)visit(invocation.ArgumentList)!;
-                var expression = new IdentifierName("_newValue");
-                var key = new IdentifierName("_");
-                var value = new IdentifierName("_v");
+                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
 
                 transformState.Prereq(new Block([
                     new Variable(expression, true, AstUtility.Nil()),
@@ -383,17 +381,20 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "FindLast":
             {
                 var filterFunc = (ArgumentList)visit(invocation.ArgumentList)!;
-                var expression = new IdentifierName("_newValue");
-                var key = new IdentifierName("_");
-                var value = new IdentifierName("_v");
+                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
 
                 transformState.Prereq(new Block([
                     new Variable(filterFuncIdentifier, true, filterFunc.Arguments.First()),
                     new Variable(expression, true),
                     new For([key, value], self, new Block([
-                        new If(new Call(filterFuncIdentifier, new ArgumentList([new Argument(value)])), new Block([
-                            new ExpressionStatement(new Assignment(expression, value))
-                        ]))
+                        new If(new Call(
+                            filterFuncIdentifier,
+                            new ArgumentList([new Argument(value)])),
+                            new Block([
+                                new ExpressionStatement(new Assignment(expression, value))
+                            ]))
                     ]))
                 ]));
 
@@ -403,19 +404,20 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "FindAll":
             {
                 var filterFunc = (ArgumentList)visit(invocation.ArgumentList)!;
-                var expression = new IdentifierName("_newValue");
-                var key = new IdentifierName("_");
-                var value = new IdentifierName("_v");
+                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
 
                 transformState.Prereq(new Block([
                     new Variable(filterFuncIdentifier, true, filterFunc.Arguments.First()),
                     new Variable(expression, true, new TableInitializer()),
                     new For([key, value], self, new Block([
-                        new If(new Call(filterFuncIdentifier, new ArgumentList([new Argument(value)])), new Block([
-                            new ExpressionStatement(new Call(
-                                new MemberAccess(new IdentifierName("table"), new IdentifierName("insert")),
-                                new ArgumentList([new Argument(expression), new Argument(value)])))
-                        ]))
+                        new If(new Call(
+                            filterFuncIdentifier,
+                            new ArgumentList([new Argument(value)])),
+                            new Block([
+                                new ExpressionStatement(AstUtility.TableCall("insert", new ArgumentList([new Argument(expression), new Argument(value)])))
+                            ]))
                     ]))
                 ]));
                 expanded = expression;
@@ -424,14 +426,13 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "AddRange":
             {
                 var table = (ArgumentList)visit(invocation.ArgumentList)!;
-                var key = new IdentifierName("_");
-                var value = new IdentifierName("_v");
+                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
 
                 expanded = new Block([
                     new For([key, value], table.Arguments.First(), new Block([
-                        new ExpressionStatement(new Call(
-                            new MemberAccess(new IdentifierName("table"), new IdentifierName("insert")),
-                            new ArgumentList([new Argument(self), new Argument(value)])))
+                        new ExpressionStatement(AstUtility.TableCall("insert", new ArgumentList([new Argument(self), new Argument(value)])))
                     ]))
                 ]);
                 break;
@@ -440,7 +441,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             {
                 var args = (ArgumentList)visit(invocation.ArgumentList)!;
                 var funcBody = (AnonymousFunction)args.Arguments.First().Expression!;
-                var key = new IdentifierName("_");
+                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
 
                 expanded =
                     new For([key, funcBody.ParameterList.Parameters.First().Name], self, funcBody.Body!);
@@ -449,23 +450,23 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "ConvertAll":
             {
                 var convertFunc = (ArgumentList)visit(invocation.ArgumentList)!;
-                var expression = new IdentifierName("_newValue");
-                var key = new IdentifierName("_");
-                var value = new IdentifierName("_v");
+                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
+                var convertFuncIdentifier = _occupiedIdentifiersStack.AddIdentifier("_convertFunc");
 
                 transformState.Prereq(new Block([
-                    new Variable(new IdentifierName("_ConvertFunc"), true, convertFunc.Arguments.First()),
+                    new Variable(convertFuncIdentifier, true, convertFunc.Arguments.First()),
                     new Variable(expression, true,
                         new Call(new MemberAccess(new IdentifierName("table"), new IdentifierName("create")),
                             new ArgumentList([new Argument(new UnaryOperator("#", self))]))),
                     new For([key, value], self, new Block([
-                        new ExpressionStatement(new Call(
-                            new MemberAccess(new IdentifierName("table"), new IdentifierName("insert")),
-                            new ArgumentList([
-                                new Argument(expression),
-                                new Argument(new Call(new IdentifierName("_ConvertFunc"),
-                                    new ArgumentList([new Argument(value)])))
-                            ])))
+                        new ExpressionStatement(AstUtility.TableCall("insert", new ArgumentList([
+                            new Argument(expression),
+                            new Argument(new Call(
+                                convertFuncIdentifier,
+                                new ArgumentList([new Argument(value)])))
+                        ])))
                     ]))
                 ]));
                 expanded = expression;
@@ -474,9 +475,9 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "FindIndex":
             {
                 var filterFunc = (ArgumentList)visit(invocation.ArgumentList)!;
-                var expression = new IdentifierName("_newValue");
-                var key = new IdentifierName("_k");
-                var value = new IdentifierName("_v");
+                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
 
                 if (invocation.ArgumentList.Arguments.Count == 1)
                 {
@@ -497,15 +498,16 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                         ? new BinaryOperator(filterFunc.Arguments.First(), "+", filterFunc.Arguments.ElementAt(1))
                         : new UnaryOperator("#", self);
 
+                    var indexIdentifier = _occupiedIdentifiersStack.AddIdentifier("_i");
                     transformState.Prereq(new Block([
                         new Variable(filterFuncIdentifier, true,
                             invocation.ArgumentList.Arguments.Count == 2
                                 ? filterFunc.Arguments.ElementAt(1)
                                 : filterFunc.Arguments.ElementAt(2)),
                         
-                        new NumericFor(new IdentifierName("_i"), filterFunc.Arguments.First().Expression, max, null,
+                        new NumericFor(indexIdentifier, filterFunc.Arguments.First().Expression, max, null,
                             new Block([
-                                new Variable(value, true, new ElementAccess(self, new IdentifierName("_i"))),
+                                new Variable(value, true, new ElementAccess(self, indexIdentifier)),
                                 new If(new Call(filterFuncIdentifier, new ArgumentList([new Argument(value)])),
                                     new Block([
                                         new ExpressionStatement(new Assignment(expression, key)),
@@ -521,9 +523,9 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "FindIndexLast":
             {
                 var filterFunc = (ArgumentList)visit(invocation.ArgumentList)!;
-                var expression = new IdentifierName("_newValue");
-                var key = new IdentifierName("_k");
-                var value = new IdentifierName("_v");
+                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
 
                 if (invocation.ArgumentList.Arguments.Count == 1)
                 {
@@ -531,9 +533,12 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                         new Variable(filterFuncIdentifier, true, filterFunc.Arguments.First()),
                         new Variable(expression, true),
                         new For([key, value], self, new Block([
-                            new If(new Call(filterFuncIdentifier, new ArgumentList([new Argument(value)])), new Block([
-                                new ExpressionStatement(new Assignment(expression, key))
-                            ]))
+                            new If(new Call(
+                                filterFuncIdentifier,
+                                new ArgumentList([new Argument(value)])),
+                                new Block([
+                                    new ExpressionStatement(new Assignment(expression, key))
+                                ]))
                         ]))
                     ]));
                 }
@@ -543,15 +548,18 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                         ? new BinaryOperator(filterFunc.Arguments.First(), "+", filterFunc.Arguments.ElementAt(1))
                         : new UnaryOperator("#", self);
 
+                    var indexIdentifier = _occupiedIdentifiersStack.AddIdentifier("_i");
                     transformState.Prereq(new Block([
                         new Variable(filterFuncIdentifier, true,
                             invocation.ArgumentList.Arguments.Count == 2
                                 ? filterFunc.Arguments.ElementAt(1)
                                 : filterFunc.Arguments.ElementAt(2)),
-                        new NumericFor(new IdentifierName("_i"), filterFunc.Arguments.First().Expression, max, null,
+                        new NumericFor(indexIdentifier, filterFunc.Arguments.First().Expression, max, null,
                             new Block([
-                                new Variable(value, true, new ElementAccess(self, new IdentifierName("_i"))),
-                                new If(new Call(filterFuncIdentifier, new ArgumentList([new Argument(value)])),
+                                new Variable(value, true, new ElementAccess(self, indexIdentifier)),
+                                new If(new Call(
+                                    filterFuncIdentifier, 
+                                    new ArgumentList([new Argument(value)])),
                                     new Block([
                                         new ExpressionStatement(new Assignment(expression, key))
                                     ]))
@@ -565,9 +573,9 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "IndexOf":
             {
                 var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
-                var expression = new IdentifierName("_newValue");
-                var key = new IdentifierName("_k");
-                var value = new IdentifierName("_v");
+                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
                 var shouldCreateVariable =
                     invocation.ArgumentList.Arguments.First().Expression is not LiteralExpressionSyntax;
 
@@ -597,9 +605,9 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "IndexOfLast":
             {
                 var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
-                var expression = new IdentifierName("_newValue");
-                var key = new IdentifierName("_k");
-                var value = new IdentifierName("_v");
+                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
                 var shouldCreateVariable =
                     invocation.ArgumentList.Arguments.First().Expression is not LiteralExpressionSyntax;
 
@@ -629,18 +637,17 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             {
                 var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
 
-                expanded = new Call(new MemberAccess(new IdentifierName("table"), new IdentifierName("insert")),
-                    new ArgumentList([new Argument(self), arguments.Arguments.First(), arguments.Arguments.Last()]));
+                expanded = AstUtility.TableCall("insert", new ArgumentList([new Argument(self), arguments.Arguments.First(), arguments.Arguments.Last()]));
                 break;
             }
             case "Remove":
             {
                 var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
 
-                expanded = new Call(new MemberAccess(new IdentifierName("table"), new IdentifierName("remove")),
+                expanded = AstUtility.TableCall("remove",
                     new ArgumentList([
                         new Argument(self),
-                        new Argument(new Call(new MemberAccess(new IdentifierName("table"), new IdentifierName("find")),
+                        new Argument(AstUtility.TableCall("find",
                             new ArgumentList([
                                 new Argument(self), arguments.Arguments.First()
                             ])))
