@@ -173,7 +173,14 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             {
                 {
                     if (StandardUtility.DoesTypeInheritFrom(expressionType, "Object")
-                        && ObjectMethod(visit, memberAccess, out var expanded))
+                        && ObjectMethod(visit, memberAccess, invocation, out var expanded))
+                    {
+                        return expanded;
+                    }
+                }
+                {
+                    if (StandardUtility.DoesTypeInheritFrom(expressionType, "Instance")
+                        && InstanceMethod(visit, memberAccess, invocation, out var expanded))
                     {
                         return expanded;
                     }
@@ -296,10 +303,37 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
 
         return null;
     }
+    
+    /// <summary>Macros <see cref="Instance" /> methods</summary>
+    private static bool InstanceMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
+        InvocationExpressionSyntax invocation, out Expression? expanded)
+    {
+        expanded = null;
+        switch (memberAccess.Name.Identifier.Text)
+        {
+            case "FindFirstAncestorWhichIsA":
+            case "FindFirstAncestorOfClass":
+            case "FindFirstChildWhichIsA":
+            case "FindFirstChildOfClass":
+            case "IsA":
+            {
+                if (memberAccess.Name is not GenericNameSyntax genericName) break;
+                var self = (Expression)visit(memberAccess.Expression)!;
+                expanded = new Call(
+                    new MemberAccess(self, new IdentifierName(memberAccess.Name.Identifier.Text), ':'),
+                    new ArgumentList([new Argument(new Literal($"\"{genericName.TypeArgumentList.Arguments.First().ToString()}\""))])
+                );
+                break;
+            }
+        }
+
+        expanded?.MarkExpanded(MacroKind.ObjectMethod);
+        return expanded != null;
+    }
 
     /// <summary>Macros <see cref="Object" /> methods</summary>
     private static bool ObjectMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
-        out Expression? expanded)
+        InvocationExpressionSyntax invocation, out Expression? expanded)
     {
         expanded = null;
         switch (memberAccess.Name.Identifier.Text)
