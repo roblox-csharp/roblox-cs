@@ -338,8 +338,11 @@ public sealed class LuauGenerator(
         return new Luau.Function(fullName, false, parameterList, returnType, body, attributeLists);
     }
 
-    public override Luau.Block VisitArrowExpressionClause(ArrowExpressionClauseSyntax node) =>
-        new([new Luau.Return(Visit<Luau.Expression>(node.Expression))]);
+    public override Luau.Block VisitArrowExpressionClause(ArrowExpressionClauseSyntax node)
+    {
+        var (expression, prereqStatements) = transformState.Capture(() => Visit<Luau.Expression>(node.Expression));
+        return new Luau.Block([..prereqStatements, new Luau.Return(expression)]);
+    }
 
     public override Luau.IdentifierName VisitThisExpression(ThisExpressionSyntax node) =>
         new("self");
@@ -1198,9 +1201,16 @@ public sealed class LuauGenerator(
 
         var returnType = new Luau.TypeRef(returnTypeName?.ToString() ?? "()");
         var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
-        var body = node.ExpressionBody != null ?
-            new Luau.Block([new Luau.Return(Visit<Luau.Expression>(node.ExpressionBody))])
-            : Visit<Luau.Block?>(node.Block);
+        Luau.Block? body;
+        if (node.ExpressionBody != null)
+        {
+            var (expression, prereqStatements) =
+                transformState.Capture(() => Visit<Luau.Expression>(node.ExpressionBody));
+            
+            body = new Luau.Block([..prereqStatements, new Luau.Return(expression)]);
+        }
+        else
+            body = Visit<Luau.Block?>(node.Block);
 
         return new Luau.AnonymousFunction(parameterList, returnType, body);
     }
@@ -1214,10 +1224,17 @@ public sealed class LuauGenerator(
 
         var returnType = new Luau.TypeRef(returnTypeName?.ToString() ?? "()");
         var parameterList = new Luau.ParameterList([Visit<Luau.Parameter>(node.Parameter)]);
-        var body = node.ExpressionBody != null
-            ? new Luau.Block([new Luau.Return(Visit<Luau.Expression>(node.ExpressionBody))])
-            : Visit<Luau.Block?>(node.Block);
-
+        Luau.Block? body;
+        if (node.ExpressionBody != null)
+        {
+            var (expression, prereqStatements) =
+                transformState.Capture(() => Visit<Luau.Expression>(node.ExpressionBody));
+            
+            body = new Luau.Block([..prereqStatements, new Luau.Return(expression)]);
+        }
+        else
+            body = Visit<Luau.Block?>(node.Block);
+        
         return new Luau.AnonymousFunction(parameterList, returnType, body);
     }
 
@@ -1242,8 +1259,8 @@ public sealed class LuauGenerator(
         var name = occupiedIdentifiersStack.AddIdentifier(node.Identifier);
         var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
         var returnType = Luau.AstUtility.CreateTypeRef(node.ReturnType);
-        var body = node.ExpressionBody != null ?
-            Visit<Luau.Block>(node.ExpressionBody)
+        var body = node.ExpressionBody != null
+            ? Visit<Luau.Block>(node.ExpressionBody)
             : Visit<Luau.Block?>(node.Body);
 
         var attributeLists = node.AttributeLists.Select(Visit<Luau.AttributeList>).ToList();
@@ -1259,7 +1276,6 @@ public sealed class LuauGenerator(
 
         var initializer = Visit<Luau.Expression?>(node.Default);
         var isParams = HasSyntax(node.Modifiers, SyntaxKind.ParamsKeyword);
-
         if (type != null && node.Modifiers.Any(SyntaxKind.RefKeyword) || node.Modifiers.Any(SyntaxKind.OutKeyword))
             type = new Luau.FunctionType([new Luau.ParameterType(null, new Luau.OptionalType(type!))], type!);
 
