@@ -93,7 +93,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
     }
 
     /// <summary>
-    ///     Takes a C# generic name and expands the name into a macro'd type
+    /// Takes a C# generic name and expands the name into a macro'd type
     /// </summary>
     public Name? GenericName(Func<SyntaxNode, Node?> visit, GenericNameSyntax genericName)
     {

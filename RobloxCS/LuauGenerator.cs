@@ -95,6 +95,10 @@ public sealed class LuauGenerator(
         }
         
         node = loopMembersToHoist(node);
+        _compiler = _compiler.ReplaceSyntaxTree(lastSyntaxTree, node.SyntaxTree);
+        _semanticModel = _compiler.GetSemanticModel(node.SyntaxTree);
+        _macro = new MacroManager(_semanticModel, transformState, occupiedIdentifiersStack);
+        
         if (node.DescendantNodes().Any(descendant =>
                 descendant.IsKind(SyntaxKind.EventDeclaration) || descendant.IsKind(SyntaxKind.EventFieldDeclaration)))
         {
@@ -1465,17 +1469,20 @@ public sealed class LuauGenerator(
             case BlockSyntax block:
             {
                 var statements = block.Statements;
+                if (statements.Count <= 1) return false;
+                
                 var targetIndex = statements.IndexOf((StatementSyntax)updatedTarget);
                 var newStatements = statements.Insert(targetIndex, (StatementSyntax)newNode);
                 var newBlock = block.WithStatements(newStatements);
                 newRoot = modifiedRoot.ReplaceNode(block, newBlock);
-                
                 return true;
             }
 
             case ClassDeclarationSyntax declaration:
             {
                 var members = declaration.Members;
+                if (members.Count <= 1) return false;
+                
                 var targetIndex = members.IndexOf((MemberDeclarationSyntax)updatedTarget);
                 var newMembers = members.Insert(targetIndex, (MemberDeclarationSyntax)newNode);
                 var newClass = declaration.WithMembers(newMembers);
@@ -1486,24 +1493,39 @@ public sealed class LuauGenerator(
 
             case NamespaceDeclarationSyntax declaration:
             {
-                var members = declaration.Members;
-                var targetIndex = members.IndexOf((MemberDeclarationSyntax)updatedTarget);
-                var newMembers = members.Insert(targetIndex, (MemberDeclarationSyntax)newNode);
-                var newDeclaration = declaration.WithMembers(newMembers);
-                newRoot = modifiedRoot.ReplaceNode(declaration, newDeclaration);
+                if (declaration.Members.Count <= 1) return false;
+                var targetIndex = updatedTarget is MemberDeclarationSyntax t
+                    ? declaration.Members.IndexOf(t)
+                    : declaration.Usings.IndexOf((UsingDirectiveSyntax)updatedTarget);
                 
+                var newDeclaration = updatedNodeToHoist is MemberDeclarationSyntax n
+                    ? declaration.WithMembers(declaration.Members
+                        .Remove(n)
+                        .Insert(targetIndex, (MemberDeclarationSyntax)newNode))
+                    : declaration.WithUsings(declaration.Usings
+                        .Remove((UsingDirectiveSyntax)updatedNodeToHoist)
+                        .Insert(targetIndex, (UsingDirectiveSyntax)newNode));
+                
+                newRoot = modifiedRoot.ReplaceNode(declaration, newDeclaration);
                 return true;
             }
 
             case CompilationUnitSyntax compilationUnit:
             {
-                var members = compilationUnit.Members;
-                var targetIndex = members.IndexOf((MemberDeclarationSyntax)updatedTarget);
-                var newMembers = members
-                    .Remove((MemberDeclarationSyntax)updatedNodeToHoist)
-                    .Insert(targetIndex, (MemberDeclarationSyntax)newNode);
+                if (compilationUnit.Members.Count <= 1) return false;
+                var targetIndex = updatedTarget is MemberDeclarationSyntax t
+                    ? compilationUnit.Members.IndexOf(t)
+                    : compilationUnit.Usings.IndexOf((UsingDirectiveSyntax)updatedTarget);
                 
-                newRoot = compilationUnit.WithMembers(newMembers);
+                // GARBAGE
+                newRoot = updatedNodeToHoist is MemberDeclarationSyntax n
+                    ? compilationUnit.WithMembers(compilationUnit.Members
+                        .Remove(n)
+                        .Insert(targetIndex, (MemberDeclarationSyntax)newNode))
+                    : compilationUnit.WithUsings(compilationUnit.Usings
+                        .Remove((UsingDirectiveSyntax)updatedNodeToHoist)
+                        .Insert(targetIndex, (UsingDirectiveSyntax)newNode));
+                
                 return true;
             }
 
@@ -1552,7 +1574,8 @@ public sealed class LuauGenerator(
             .Distinct()
             .ToList();
 
-        var dependencies = calledMethods.Concat(referencedSymbols)
+        var dependencies = calledMethods
+            .Concat(referencedSymbols)
             .Where(dep => dep?.SpanStart < node.SpanStart)
             .OrderBy(d => d?.SpanStart)
             .ToList();
