@@ -13,7 +13,8 @@ internal enum LinqQueryClauseInfoKind : byte
     Select,
     Where,
     OrderBy,
-    GroupBy
+    Group,
+    Continuation
 }
 
 internal class LinqQueryClauseInfo(LinqQueryClauseInfoKind kind, Luau.IdentifierName name)
@@ -102,13 +103,20 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         return resultIdentifier;
     }
     
-    public override Luau.NoOp VisitQueryBody(QueryBodySyntax node) => new Luau.NoOp(false);
+    public override Luau.NoOp VisitQueryBody(QueryBodySyntax node) => new(false);
     
     public override Luau.NoOp VisitFromClause(FromClauseSyntax node)
     {
-        var query = (QueryExpressionSyntax)node.Parent!;
+        var query = FindFirstAncestor<QueryExpressionSyntax>(node);
+        return query == null
+            ? new Luau.NoOp(false)
+            : HandleQuery(node.Expression, node.Identifier, query.Body);
+    }
+
+    private Luau.NoOp HandleQuery(ExpressionSyntax expression, SyntaxToken identifier, QueryBodySyntax body)
+    {
         var resultIdentifier = new Luau.IdentifierName(_occupiedIdentifiersStack.GetDuplicateText("_result"));
-        var iterable = Visit<Luau.Expression>(node.Expression);
+        var iterable = Visit<Luau.Expression>(expression);
 
         HashSet<LinqQueryClauseInfo> clauseInfos = [];
         void addClauseInfo(SyntaxNode queryClauseSyntax)
@@ -119,16 +127,14 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
             transformState.PrereqList(transformState.CapturePrereqs(() => Visit(queryClauseSyntax)));
         }
         
-        foreach (var clause in query.Body.Clauses)
+        foreach (var clause in body.Clauses)
             addClauseInfo(clause);
-        if (query.Body.Continuation != null)
-            addClauseInfo(query.Body.Continuation);
         
-        addClauseInfo(query.Body.SelectOrGroup);
+        addClauseInfo(body.SelectOrGroup);
 
         _occupiedIdentifiersStack.Push();
         var resultValueIdentifier = _occupiedIdentifiersStack.AddIdentifier("_resultValue");
-        var variableName = _occupiedIdentifiersStack.AddIdentifier(node.Identifier);
+        var variableName = _occupiedIdentifiersStack.AddIdentifier(identifier);
         List<Luau.Statement> forStatementBody = [
             new Luau.Variable(resultValueIdentifier, true, variableName)
         ];
@@ -148,7 +154,8 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
                     forStatementBody.Add(new Luau.If(new Luau.UnaryOperator("not ", call), new Luau.Continue()));
                     break;
                 
-                case LinqQueryClauseInfoKind.GroupBy:
+                case LinqQueryClauseInfoKind.Continuation:
+                case LinqQueryClauseInfoKind.Group:
                 case LinqQueryClauseInfoKind.OrderBy:
                 default: break;
             }
@@ -160,16 +167,12 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
             new Luau.Variable(resultIdentifier, true, Luau.TableInitializer.Empty),
             new Luau.For([Luau.AstUtility.DiscardName, variableName], iterable, new Luau.Block(forStatementBody))
         ];
-
-        foreach (var clauseInfo in clauseInfos.Where(i => i.Kind == LinqQueryClauseInfoKind.OrderBy))
-        {
-            prereqStatements.Add(new Luau.SingleLineComment("\u25bc orderby ascending \u25bc"));
-            
-            prereqStatements.Add(new Luau.SingleLineComment("\u25b2 orderby ascending \u25b2"));
-
-        }
-        transformState.PrereqList(prereqStatements);
+        
         _occupiedIdentifiersStack.Pop();
+        transformState.PrereqList(prereqStatements);
+        
+        if (body.Continuation != null)
+            transformState.PrereqList(transformState.CapturePrereqs(() => Visit(body.Continuation)));
         
         return new Luau.NoOp(false);
     }
@@ -181,7 +184,10 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
     
     public override Luau.NoOp VisitWhereClause(WhereClauseSyntax node)
     {
-        var query = (QueryExpressionSyntax)node.Parent?.Parent!;
+        var query = FindFirstAncestor<QueryExpressionSyntax>(node);
+        if (query == null)
+            return new Luau.NoOp(false);
+        
         var name = new Luau.IdentifierName(_occupiedIdentifiersStack.GetDuplicateText("_where"));
         var parameters = new Luau.ParameterList([
             new Luau.Parameter(
@@ -197,7 +203,10 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
     
     public override Luau.NoOp VisitSelectClause(SelectClauseSyntax node)
     {
-        var query = (QueryExpressionSyntax)node.Parent?.Parent!;
+        var query = FindFirstAncestor<QueryExpressionSyntax>(node);
+        if (query == null)
+            return new Luau.NoOp(false);
+        
         var name = new Luau.IdentifierName(_occupiedIdentifiersStack.GetDuplicateText("_select"));
         var parameters = new Luau.ParameterList([
             new Luau.Parameter(
@@ -211,9 +220,17 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         return new Luau.NoOp(false);
     }
     
-    public override Luau.Node? VisitOrderByClause(OrderByClauseSyntax node)
+    public override Luau.NoOp VisitOrderByClause(OrderByClauseSyntax node)
     {
         return new Luau.NoOp(false);
+    }
+
+    public override Luau.NoOp VisitQueryContinuation(QueryContinuationSyntax node)
+    {
+        var query = FindFirstAncestor<QueryExpressionSyntax>(node);
+        return query == null
+            ? new Luau.NoOp(false)
+            : HandleQuery(query.FromClause.Expression, node.Identifier, node.Body);
     }
 
     public override Luau.Statement VisitPropertyDeclaration(PropertyDeclarationSyntax node)
@@ -1461,7 +1478,8 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
             SyntaxKind.SelectClause => LinqQueryClauseInfoKind.Select,
             SyntaxKind.WhereClause => LinqQueryClauseInfoKind.Where,
             SyntaxKind.OrderByClause => LinqQueryClauseInfoKind.OrderBy,
-            SyntaxKind.GroupClause => LinqQueryClauseInfoKind.GroupBy
+            SyntaxKind.GroupClause => LinqQueryClauseInfoKind.Continuation,
+            SyntaxKind.QueryContinuation => LinqQueryClauseInfoKind.Continuation,
         };
     }
 }
