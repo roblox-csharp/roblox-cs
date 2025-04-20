@@ -1620,7 +1620,7 @@ public sealed class LuauGenerator(
             UnaryPatternSyntax unaryPattern => HandleUnaryPattern(unaryPattern, comparand, originalComparand),
             ParenthesizedPatternSyntax parenthesizedPattern => HandleParenthesizedPattern(parenthesizedPattern, comparand, originalComparand),
             ConstantPatternSyntax constantPattern => HandleConstantPattern(constantPattern, comparand),
-            TypePatternSyntax typePattern => HandleTypePattern(typePattern, comparand),
+            TypePatternSyntax typePattern => HandleTypePattern(typePattern, comparand, originalComparand),
             DeclarationPatternSyntax declarationPattern => HandleDeclarationPattern(declarationPattern, comparand, originalComparand),
             _ => throw Logger.CompilerError($"Unhandled pattern type: {node.GetType().Name}", node)
         };
@@ -1641,26 +1641,31 @@ public sealed class LuauGenerator(
         };
 
         transformState.Prereq(new Luau.Variable(newName, true, new Luau.TypeCast(originalValue, new Luau.TypeRef(oldTypeName.ToString()))));
-        var instanceSymbol = _semanticModel.Compilation.GetTypeByMetadataName("Roblox.Instance");
-        var originalValueSymbol = _semanticModel.GetTypeInfo(csharpOriginalValue).Type;
-        var instanceIsACall = new Luau.Call(new Luau.MemberAccess(originalValue, new Luau.IdentifierName("IsA"), ':'), new Luau.ArgumentList([new Luau.Argument(typeName)]));
-
-        return originalValueSymbol != null
-               && instanceSymbol != null
-               && StandardUtility.DoesTypeInheritFrom(originalValueSymbol, instanceSymbol)
-               && typeName.ToString() != "\"Instance\""
-            ? instanceIsACall
-            : Luau.AstUtility.CSCall("is", originalValue, typeName); // TODO: some sort of runtime type check
+        return PatternIsType(originalValue, csharpOriginalValue, typeName);
     }
 
-    private Luau.Call HandleTypePattern(TypePatternSyntax node, Luau.Expression comparand)
+    private Luau.Call HandleTypePattern(TypePatternSyntax node, Luau.Expression comparand, ExpressionSyntax originalComparand)
     {
         var name = Visit<Luau.Name>(node.Type);
-        var typeInfo = _semanticModel.GetTypeInfo(node.Type); // TODO: some sort of runtime type check
-        if (typeInfo.Type is { ContainingNamespace.Name: "System" } && name is Luau.IdentifierName identifierName)
+        var typeSymbol = _semanticModel.GetTypeInfo(node.Type).Type; // TODO: some sort of runtime type check
+        if (typeSymbol is { ContainingNamespace.Name: "System" or "Roblox" } && name is Luau.IdentifierName identifierName)
             name = new Luau.IdentifierName('"' + StandardUtility.GetMappedType(identifierName.Text) + '"');
-
-        return Luau.AstUtility.CSCall("is", comparand, name);
+        
+        return PatternIsType(comparand, originalComparand, name);
+    }
+    
+    private Luau.Call PatternIsType(Luau.Expression originalValue, ExpressionSyntax csharpOriginalValue, Luau.Name typeName)
+    {
+        var instanceSymbol = _semanticModel.Compilation.GetTypeByMetadataName("Roblox.Instance");
+        var originalValueSymbol = _semanticModel.GetTypeInfo(csharpOriginalValue).Type;
+        var isInstanceValue = originalValueSymbol != null
+                              && instanceSymbol != null
+                              && StandardUtility.DoesTypeInheritFrom(originalValueSymbol, instanceSymbol)
+                              && typeName.ToString() != "\"Instance\"";
+        
+        return isInstanceValue
+            ? new Luau.Call(new Luau.MemberAccess(originalValue, new Luau.IdentifierName("IsA"), ':'), new Luau.ArgumentList([new Luau.Argument(typeName)]))
+            : Luau.AstUtility.Is(originalValue, typeName); // TODO: some sort of runtime type check
     }
 
     private Luau.BinaryOperator HandleConstantPattern(ConstantPatternSyntax node, Luau.Expression comparand)
@@ -1670,7 +1675,7 @@ public sealed class LuauGenerator(
     }
 
     private Luau.Parenthesized HandleParenthesizedPattern(ParenthesizedPatternSyntax node, Luau.Expression comparand, ExpressionSyntax originalComparand) =>
-        new Luau.Parenthesized(HandlePattern(node.Pattern, comparand, originalComparand));
+        new(HandlePattern(node.Pattern, comparand, originalComparand));
 
     private Luau.UnaryOperator HandleUnaryPattern(UnaryPatternSyntax node, Luau.Expression comparand, ExpressionSyntax originalComparand)
     {

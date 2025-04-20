@@ -194,12 +194,16 @@ public static class AstUtility
     }
 
     /// <code>CS.defineGlobal(name, value)</code>
-    public static Call DefineGlobal(Name name, Expression value) =>
-        CSCall("defineGlobal", String(name.ToString()), value);
+    public static Call DefineGlobal(Name name, Expression type) =>
+        CSCall("defineGlobal", String(name.ToString()), type);
 
     /// <code>CS.getGlobal(name)</code>
     public static Call GetGlobal(Name name) =>
         CSCall("getGlobal", String(name.ToString()));
+    
+    /// <code>CS.is(value, type)</code>
+    public static Call Is(Expression value, Expression type) =>
+        CSCall("is", value, type);
     
     /// <summary>
     /// Creates a call to a table library method
