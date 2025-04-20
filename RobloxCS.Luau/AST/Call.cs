@@ -7,6 +7,10 @@
 
         public Call(Expression callee, ArgumentList argumentList)
         {
+            // monkey patch for https://github.com/roblox-csharp/roblox-cs/issues/44
+            if (callee is Name name)
+                callee = AstUtility.GetNonGenericName(name);
+            
             Callee = callee;
             ArgumentList = argumentList;
             AddChildren([Callee, ArgumentList]);

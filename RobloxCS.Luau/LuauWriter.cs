@@ -30,7 +30,16 @@ public class LuauWriter : BaseWriter
         WriteLine($"require({requirePath})");
     }
 
-    public void WriteFunction(Name? name, bool isLocal, ParameterList parameterList, TypeRef? returnType = null, Block? body = null, List<AttributeList>? attributeLists = null, bool inlineAttributes = false, bool createNewline = true)
+    public void WriteFunction(
+        Name? name,
+        bool isLocal,
+        ParameterList parameterList,
+        TypeRef? returnType = null,
+        Block? body = null,
+        List<AttributeList>? attributeLists = null,
+        List<IdentifierName>? typeParameters = null,
+        bool inlineAttributes = false,
+        bool createNewline = true)
     {
         foreach (var attributeList in attributeLists ?? [])
         {
@@ -46,6 +55,13 @@ public class LuauWriter : BaseWriter
             Write(' ');
             name.Render(this);
         }
+        if (typeParameters != null)
+        {
+            Write('<');
+            WriteNodes(typeParameters);
+            Write('>');
+        }
+        
         parameterList.Render(this);
         WriteTypeAnnotation(returnType);
         WriteLine();

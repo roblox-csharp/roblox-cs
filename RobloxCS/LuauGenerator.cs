@@ -693,7 +693,7 @@ public sealed class LuauGenerator(
         return new Luau.TableInitializer(elements);
     }
 
-    public override Luau.Node? VisitImplicitObjectCreationExpression(ImplicitObjectCreationExpressionSyntax node)
+    public override Luau.Expression VisitImplicitObjectCreationExpression(ImplicitObjectCreationExpressionSyntax node)
     {
         // TODO: handle non-null node.Initializer (prob won't be supported)
         var baseSymbol = _semanticModel.GetSymbolInfo(node).Symbol;
@@ -900,10 +900,7 @@ public sealed class LuauGenerator(
     public override Luau.Node VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
     {
         var expression = Visit<Luau.Expression>(node.Expression);
-        var name = Visit<Luau.SimpleName>(node.Name);
-        if (name is Luau.GenericName genericName)
-            name = new Luau.IdentifierName(genericName.Text.Split('<').First());
-
+        var name = Luau.AstUtility.GetNonGenericName(Visit<Luau.SimpleName>(node.Name));
         var memberAccess = new Luau.MemberAccess(expression, name);
         var luauNode = Luau.AstUtility.DiscardVariableIfExpressionStatement(node, memberAccess, node.Parent);
         if (node.Parent is AssignmentExpressionSyntax assignment && assignment.Left == node)
@@ -1268,13 +1265,14 @@ public sealed class LuauGenerator(
     {
         var name = occupiedIdentifiersStack.AddIdentifier(node.Identifier);
         var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
+        var typeParameters = node.TypeParameterList?.Parameters.Select(p => new Luau.IdentifierName(p.Identifier.Text)).ToList() ?? [];
         var returnType = Luau.AstUtility.CreateTypeRef(node.ReturnType);
         var body = node.ExpressionBody != null
             ? Visit<Luau.Block>(node.ExpressionBody)
             : Visit<Luau.Block?>(node.Body);
 
         var attributeLists = node.AttributeLists.Select(Visit<Luau.AttributeList>).ToList();
-        return new Luau.Function(name, true, parameterList, returnType, body, attributeLists);
+        return new Luau.Function(name, true, parameterList, returnType, body, attributeLists, typeParameters);
     }
 
     public override Luau.Parameter VisitParameter(ParameterSyntax node)

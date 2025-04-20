@@ -8,6 +8,7 @@ public class Function : Statement
     public Block? Body { get; }
     public TypeRef? ReturnType { get; }
     public List<AttributeList> AttributeLists { get; }
+    public List<IdentifierName> TypeParameters { get; }
 
     public Function(
         Name name,
@@ -15,7 +16,8 @@ public class Function : Statement
         ParameterList parameterList,
         TypeRef? returnType = null,
         Block? body = null,
-        List<AttributeList>? attributeLists = null)
+        List<AttributeList>? attributeLists = null,
+        List<IdentifierName>? typeParameters = null)
     {
         Name = name;
         IsLocal = isLocal;
@@ -23,6 +25,7 @@ public class Function : Statement
         Body = body;
         ReturnType = returnType;
         AttributeLists = attributeLists ?? [];
+        TypeParameters = typeParameters ?? [];
         
         AddChild(Name);
         AddChild(ParameterList);
@@ -35,5 +38,5 @@ public class Function : Statement
     }
 
     public override void Render(LuauWriter luau) =>
-        luau.WriteFunction(Name, IsLocal, ParameterList, ReturnType, Body, AttributeLists);
+        luau.WriteFunction(Name, IsLocal, ParameterList, ReturnType, Body, AttributeLists, TypeParameters);
 }
