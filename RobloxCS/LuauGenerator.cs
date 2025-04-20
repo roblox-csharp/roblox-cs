@@ -764,7 +764,7 @@ public sealed class LuauGenerator(
 
             return new Luau.Argument(new Luau.AnonymousFunction(new Luau.ParameterList(new([new Luau.Parameter(new Luau.IdentifierName("..."))])), body: new Luau.Block([
                 new Luau.Variable(new Luau.IdentifierName("_val"), true, new Luau.IdentifierName("...")),
-                new Luau.If(new Luau.BinaryOperator(new Luau.Call(new Luau.IdentifierName("select"), new ([new (new Luau.Literal("#")), new (new Luau.IdentifierName("..."))])), "~=", new Luau.Literal("0")), new Luau.ExpressionStatement(new Luau.Assignment(variable?.Name ?? Visit<Luau.IdentifierName>(arg.Expression), new Luau.IdentifierName("_val")))),
+                new Luau.If(new Luau.BinaryOperator(new Luau.Call(new Luau.IdentifierName("select"), new ([new (new Luau.Literal("\"#\"")), new (new Luau.IdentifierName("..."))])), "~=", new Luau.Literal("0")), new Luau.ExpressionStatement(new Luau.Assignment(variable?.Name ?? Visit<Luau.IdentifierName>(arg.Expression), new Luau.IdentifierName("_val")))),
                 new Luau.Return(variable?.Name ?? Visit<Luau.IdentifierName>(arg.Expression))
             ])));
         }).ToList();
@@ -854,18 +854,31 @@ public sealed class LuauGenerator(
         var name = Visit<Luau.AssignmentTarget>(node.Left);
         var value = Visit<Luau.Expression>(node.Right);
         var method = GetParameterList(node);
+        Luau.Node returningName = name;
+
+        Luau.Expression returning = new Luau.BinaryOperator(name, mappedOperator, value);
+
+        if (node.IsKind(SyntaxKind.SimpleAssignmentExpression))
+            returning = new Luau.Assignment(name, value);
 
         if (method != null) {
             var refKinds = GetRefKindParameters(method);
-
-            if (refKinds.Contains(name.ToString()))
-                return new Luau.Call(name, new([new(value)]));
+            if (refKinds.Contains(name.ToString())) {
+                returning = new Luau.Call(name, new([new(value)]));
+                returningName = new Luau.Call(name, new([]));
+            }
+            if (refKinds.Contains(value.ToString())) {
+                returning = new Luau.Assignment(name, new Luau.Call(value, new([])));
+            }
         }
 
-        if (node.IsKind(SyntaxKind.SimpleAssignmentExpression))
-            return new Luau.Assignment(name, value);
+        var isAlone = node.Parent is ExpressionStatementSyntax;
+        if (!isAlone)
+            transformState.Prereq(
+                new Luau.ExpressionStatement(returning)
+            );
 
-        return new Luau.BinaryOperator(name, mappedOperator, value);
+        return isAlone ? returning : returningName;
     }
 
     public override Luau.TableInitializer VisitAnonymousObjectCreationExpression(AnonymousObjectCreationExpressionSyntax node)
@@ -954,7 +967,7 @@ public sealed class LuauGenerator(
 
     public override Luau.Break VisitBreakStatement(BreakStatementSyntax node) => new();
     public override Luau.Continue VisitContinueStatement(ContinueStatementSyntax node) => new();
-    public override Luau.Return VisitReturnStatement(ReturnStatementSyntax node) => new(Visit<Luau.Expression?>(node.Expression));
+    public override Luau.Return VisitReturnStatement(ReturnStatementSyntax node) =>new(Visit<Luau.Expression?>(node.Expression));
 
     public override Luau.Block VisitBlock(BlockSyntax node)
     {
