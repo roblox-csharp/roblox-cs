@@ -17,6 +17,7 @@ public enum MacroKind
     IEnumerableMethod,
     ListMethod,
     DictionaryMethod,
+    ListProperty,
     BitOperation
 }
 
@@ -108,8 +109,8 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                     var elementTypeName = visit(genericName.TypeArgumentList.Arguments.First())!;
                     var expanded =
                         new IdentifierName($"{{ {StandardUtility.GetMappedType(elementTypeName.ToString()!)} }}");
+                    
                     expanded.MarkExpanded(MacroKind.IEnumerableType);
-
                     return expanded;
                 }
 
@@ -173,9 +174,11 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             if (memberAccess is { Parent: InvocationExpressionSyntax invocation })
             {
                 {
-                    if (StandardUtility.DoesTypeInheritFrom(expressionType, "Object") &&
-                        ObjectMethod(visit, memberAccess, out var expanded))
+                    if (StandardUtility.DoesTypeInheritFrom(expressionType, "Object")
+                        && ObjectMethod(visit, memberAccess, out var expanded))
+                    {
                         return expanded;
+                    }
                 }
 
                 switch (expressionType?.Name)
@@ -197,9 +200,38 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                     }
                 }
             }
+            else
+            {
+                switch (expressionType?.Name)
+                {
+                    case "List":
+                    {
+                        if (ListProperty(visit, memberAccess, out var expanded))
+                            return expanded;
+
+                        break;
+                    }
+                }
+            }
         }
 
         return null;
+    }
+
+    private bool ListProperty(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess, out Node? expanded)
+    {
+        expanded = null;
+        var self = (Expression)visit(memberAccess.Expression)!;
+        
+        switch (memberAccess.Name.Identifier.Text)
+        {
+            case "Count":
+                expanded = new UnaryOperator("#", self);
+                break;
+        }
+
+        expanded?.MarkExpanded(MacroKind.ListProperty);
+        return expanded != null;
     }
 
     /// <summary>Takes a C# object creation and expands the macro into a Luau expression</summary>
@@ -458,7 +490,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 transformState.Prereq(new Block([
                     new Variable(convertFuncIdentifier, true, convertFunc.Arguments.First()),
                     new Variable(expression, true,
-                        new Call(new MemberAccess(new IdentifierName("table"), new IdentifierName("create")),
+                        AstUtility.TableCall("create",
                             new ArgumentList([new Argument(new UnaryOperator("#", self))]))),
                     new For([key, value], self, new Block([
                         new ExpressionStatement(AstUtility.TableCall("insert", new ArgumentList([
