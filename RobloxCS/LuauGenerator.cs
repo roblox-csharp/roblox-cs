@@ -1,8 +1,10 @@
-﻿using System.Text;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using Microsoft.CodeAnalysis.Text;
 using RobloxCS.Macros;
 using RobloxCS.Shared;
 
@@ -23,9 +25,13 @@ internal class LinqQueryClauseInfo(LinqQueryClauseInfoKind kind, Luau.Identifier
     public Luau.IdentifierName Name { get; } = name;
 }
 
-public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, Luau.TransformState transformState, OccupiedIdentifiersStack occupiedIdentifiersStack) : BaseGenerator(tree, compiler)
+public sealed class LuauGenerator(
+    SyntaxTree tree,
+    CSharpCompilation compiler,
+    Luau.TransformState transformState,
+    OccupiedIdentifiersStack occupiedIdentifiersStack)
+    : BaseGenerator(tree, compiler)
 {
-    private readonly MacroManager _macro = new(compiler.GetSemanticModel(tree), transformState, occupiedIdentifiersStack);
     private readonly HashSet<SyntaxKind> _hoistedSyntaxes =
     [
         SyntaxKind.NamespaceDeclaration,
@@ -34,7 +40,10 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         SyntaxKind.EnumDeclaration,
         SyntaxKind.LocalFunctionStatement
     ];
-    
+
+    private MacroManager _macro = null!; // hack
+    private CSharpCompilation _compiler = compiler;
+
     public Luau.AST GetLuauAST() => Visit<Luau.AST>(_tree.GetRoot());
 
     public override Luau.AST VisitCompilationUnit(CompilationUnitSyntax node)
@@ -42,7 +51,38 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         occupiedIdentifiersStack.Push();
         List<Luau.Statement> result = [new Luau.SingleLineComment(Shared.Constants.HeaderComment + "\n\n")];
 
-        void visitStatement(MemberDeclarationSyntax member)
+        var lastSyntaxTree = node.SyntaxTree;
+        var i = 0;
+        HashSet<SyntaxNode> alreadyHoisted = [];
+
+        CompilationUnitSyntax loopMembersToHoist(CompilationUnitSyntax root)
+        {
+            while (true)
+            {
+                var members = root.Members
+                    .Where(m => _hoistedSyntaxes.Contains(m is GlobalStatementSyntax g ? g.Statement.Kind() : m.Kind()))
+                    .ToList();
+                var nonHoisted = members.Where(m => !alreadyHoisted.Any(m.IsEquivalentTo))
+                    .ToList();
+
+                var difference = members.Count - nonHoisted.Count;
+                var member = nonHoisted.ElementAtOrDefault(i - difference);
+                if (member == null) return root;
+                i++;
+
+                if (TryHoistNode(root, member, out var newRoot))
+                {
+                    alreadyHoisted.Add(member);
+                    root = (CompilationUnitSyntax)newRoot;
+                    _compiler = _compiler.ReplaceSyntaxTree(lastSyntaxTree, root.SyntaxTree);
+                    _semanticModel = _compiler.GetSemanticModel(root.SyntaxTree);
+                    _macro = new MacroManager(_semanticModel, transformState, occupiedIdentifiersStack);
+                    lastSyntaxTree = root.SyntaxTree;
+                }
+            }
+        }
+
+        void visitMember(MemberDeclarationSyntax member)
         {
             var (statement, prereqStatements) = transformState.Capture(() => Visit<Luau.Statement?>(member));
             if (statement == null)
@@ -50,19 +90,11 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
 
             if (prereqStatements.Count > 0)
                 result.AddRange(prereqStatements);
-
+            
             result.Add(statement);
         }
-
-        bool checkGlobalKind(MemberDeclarationSyntax memberDeclarationSyntax)
-        {
-            return _hoistedSyntaxes.Contains(
-                memberDeclarationSyntax is GlobalStatementSyntax globalStatement
-                    ? globalStatement.Statement.Kind()
-                    : memberDeclarationSyntax.Kind()
-            );
-        }
-
+        
+        node = loopMembersToHoist(node);
         if (node.DescendantNodes().Any(descendant =>
                 descendant.IsKind(SyntaxKind.EventDeclaration) || descendant.IsKind(SyntaxKind.EventFieldDeclaration)))
         {
@@ -70,12 +102,8 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
             result.Add(new Luau.NoOp()); // for the newline
         }
         
-        var hoistedNodes = node.Members.Where(checkGlobalKind);
-        var regularNodes = node.Members.Where(member => !checkGlobalKind(member));
-        foreach (var member in hoistedNodes)
-            visitStatement(member);
-        foreach (var member in regularNodes)
-            visitStatement(member);
+        foreach (var member in node.Members)
+            visitMember(member);
 
         occupiedIdentifiersStack.Pop();
         return new Luau.AST(result);
@@ -307,20 +335,17 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
     }
 
     public override Luau.Block VisitArrowExpressionClause(ArrowExpressionClauseSyntax node) =>
-        new Luau.Block([new Luau.Return(Visit<Luau.Expression>(node.Expression))]);
+        new([new Luau.Return(Visit<Luau.Expression>(node.Expression))]);
 
     public override Luau.IdentifierName VisitThisExpression(ThisExpressionSyntax node) =>
-        new Luau.IdentifierName("self");
+        new("self");
 
     // TODO: support initializers
     public override Luau.Call VisitArrayCreationExpression(ArrayCreationExpressionSyntax node) {
         var sizeExpression = node.Type.RankSpecifiers[0].Sizes[0];
         var translatedSize = Visit<Luau.Expression>(sizeExpression);
 
-        return new Luau.Call(
-            new Luau.MemberAccess(new Luau.IdentifierName("table"), new Luau.IdentifierName("create")),
-            new Luau.ArgumentList([new Luau.Argument(translatedSize)])
-        );
+        return Luau.AstUtility.TableCall("create", new Luau.ArgumentList([new Luau.Argument(translatedSize)]));
     }
 
     public override Luau.TableInitializer VisitImplicitArrayCreationExpression(ImplicitArrayCreationExpressionSyntax node) {
@@ -1380,6 +1405,163 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
         }
 
         return new Luau.Literal(valueText);
+    }
+    
+    // extremely skidded
+    private bool TryHoistNode(SyntaxNode root, SyntaxNode nodeToHoist, [NotNullWhen(true)] out SyntaxNode? newRoot)
+    {
+        newRoot = null;
+        var originalNodeToHoist = nodeToHoist;
+        if (nodeToHoist is GlobalStatementSyntax globalStatement)
+            nodeToHoist = globalStatement.Statement;
+        
+        var shouldHoist = _hoistedSyntaxes.Contains(nodeToHoist.Kind());
+        if (!shouldHoist)
+            return false;
+        
+        var hoistTarget = GetHoistInsertionTarget(nodeToHoist);
+        if (hoistTarget == null)
+            return false; // nothing to do
+
+        var originalParent = originalNodeToHoist.Parent;
+        if (originalParent == null)
+            return false;
+
+        var modifiedRoot = root
+            .TrackNodes(originalNodeToHoist, originalParent, hoistTarget)
+            .RemoveNode(originalNodeToHoist, SyntaxRemoveOptions.KeepNoTrivia)!;
+        
+        var updatedNodeToHoist = modifiedRoot.GetCurrentNode(originalNodeToHoist);
+        if (updatedNodeToHoist == null)
+        {
+            newRoot = modifiedRoot;
+            return true;
+        }
+        
+        var updatedParent = modifiedRoot.GetCurrentNode(originalParent);
+        if (updatedParent == null)
+        {
+            newRoot = modifiedRoot;
+            return true;
+        }
+        
+        var updatedTarget = modifiedRoot.GetCurrentNode(hoistTarget);
+        if (updatedTarget == null)
+        {
+            newRoot = modifiedRoot;
+            return true;
+        }
+
+        var container = updatedTarget.Parent;
+        if (container == null)
+        {
+            newRoot = modifiedRoot;
+            return true;
+        }
+        
+        var newNode = updatedNodeToHoist.WithoutTrivia().NormalizeWhitespace();
+        switch (container) // insert logic depends on the type of container
+        {
+            case BlockSyntax block:
+            {
+                var statements = block.Statements;
+                var targetIndex = statements.IndexOf((StatementSyntax)updatedTarget);
+                var newStatements = statements.Insert(targetIndex, (StatementSyntax)newNode);
+                var newBlock = block.WithStatements(newStatements);
+                newRoot = modifiedRoot.ReplaceNode(block, newBlock);
+                
+                return true;
+            }
+
+            case ClassDeclarationSyntax declaration:
+            {
+                var members = declaration.Members;
+                var targetIndex = members.IndexOf((MemberDeclarationSyntax)updatedTarget);
+                var newMembers = members.Insert(targetIndex, (MemberDeclarationSyntax)newNode);
+                var newClass = declaration.WithMembers(newMembers);
+                newRoot = modifiedRoot.ReplaceNode(declaration, newClass);
+                
+                return true;
+            }
+
+            case NamespaceDeclarationSyntax declaration:
+            {
+                var members = declaration.Members;
+                var targetIndex = members.IndexOf((MemberDeclarationSyntax)updatedTarget);
+                var newMembers = members.Insert(targetIndex, (MemberDeclarationSyntax)newNode);
+                var newDeclaration = declaration.WithMembers(newMembers);
+                newRoot = modifiedRoot.ReplaceNode(declaration, newDeclaration);
+                
+                return true;
+            }
+
+            case CompilationUnitSyntax compilationUnit:
+            {
+                var members = compilationUnit.Members;
+                var targetIndex = members.IndexOf((MemberDeclarationSyntax)updatedTarget);
+                var newMembers = members
+                    .Remove((MemberDeclarationSyntax)updatedNodeToHoist)
+                    .Insert(targetIndex, (MemberDeclarationSyntax)newNode);
+                
+                newRoot = compilationUnit.WithMembers(newMembers);
+                return true;
+            }
+
+            default:
+                newRoot = modifiedRoot;
+                return true;
+        }
+    }
+
+    private SyntaxNode? GetHoistInsertionTarget(SyntaxNode node)
+    {
+        var location = FindHoistTarget(node);
+        if (location == null) return null;
+
+        var scope = node.FirstAncestorOrSelf<SyntaxNode>(n =>
+            n is BlockSyntax or ClassDeclarationSyntax or NamespaceDeclarationSyntax or CompilationUnitSyntax);
+
+        return scope?
+            .ChildNodes()
+            .FirstOrDefault(n => n.SpanStart >= location.SourceSpan.Start);
+    }
+    
+    private Location? FindHoistTarget(SyntaxNode node)
+    {
+        var scope = node.FirstAncestorOrSelf<SyntaxNode>(n =>
+            n is BlockSyntax or ClassDeclarationSyntax or NamespaceDeclarationSyntax or CompilationUnitSyntax);
+        if (scope == null) return null;
+
+        var calledMethods = node
+            .DescendantNodes()
+            .OfType<InvocationExpressionSyntax>()
+            .Select(inv =>
+            {
+                var symbol = _semanticModel.GetSymbolInfo(inv).Symbol;
+                return symbol?.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
+            })
+            .Where(syntax => syntax != null && scope.Span.Contains(syntax.Span))
+            .Distinct()
+            .ToList();
+
+        var referencedSymbols = node
+            .DescendantNodes()
+            .OfType<IdentifierNameSyntax>()
+            .Select(id => _semanticModel.GetSymbolInfo(id).Symbol?.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax())
+            .Where(s => s != null && scope.Span.Contains(s.Span))
+            .Distinct()
+            .ToList();
+
+        var dependencies = calledMethods.Concat(referencedSymbols)
+            .Where(dep => dep?.SpanStart < node.SpanStart)
+            .OrderBy(d => d?.SpanStart)
+            .ToList();
+
+        if (dependencies.Count == 0)
+            return Location.Create(node.SyntaxTree, new TextSpan(scope.SpanStart, 0));
+
+        var lastDependency = dependencies.MaxBy(d => d?.Span.End)!;
+        return Location.Create(node.SyntaxTree, new TextSpan(lastDependency.Span.End + 1, 0));
     }
     
     private Luau.Expression HandlePattern(PatternSyntax node, Luau.Expression comparand, ExpressionSyntax originalComparand)

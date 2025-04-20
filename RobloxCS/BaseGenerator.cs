@@ -9,8 +9,8 @@ namespace RobloxCS;
 /// <summary>Basically just defines utility methods for LuauGenerator</summary>
 public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharpSyntaxVisitor<Node>
 {
-    protected SyntaxTree _tree { get; } = tree;
-    protected SemanticModel _semanticModel { get; } = compiler.GetSemanticModel(tree);
+    protected readonly SyntaxTree _tree = tree;
+    protected SemanticModel _semanticModel = compiler.GetSemanticModel(tree);
 
     private readonly HashSet<SyntaxKind> multiLineCommentSyntaxes = [
         SyntaxKind.MultiLineCommentTrivia,
