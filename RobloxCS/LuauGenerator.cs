@@ -124,18 +124,17 @@ public sealed class LuauGenerator(
 
     public override Luau.IdentifierName VisitQueryExpression(QueryExpressionSyntax node)
     {
-        var resultIdentifier = occupiedIdentifiersStack.AddIdentifier("_result");
         List<Luau.Statement> statements = [];
         statements.AddRange(transformState.CapturePrereqs(() => Visit(node.Body)));
         statements.AddRange(transformState.CapturePrereqs(() => Visit(node.FromClause)));
         transformState.PrereqList(statements);
 
-        return resultIdentifier;
+        return new Luau.IdentifierName(occupiedIdentifiersStack.GetDuplicateText("_result"));
     }
 
     public override Luau.NoOp VisitQueryBody(QueryBodySyntax node) => new(false);
 
-    public override Luau.NoOp VisitFromClause(FromClauseSyntax node)
+    public override Luau.Node VisitFromClause(FromClauseSyntax node)
     {
         var query = FindFirstAncestor<QueryExpressionSyntax>(node);
         return query == null
@@ -143,10 +142,11 @@ public sealed class LuauGenerator(
             : HandleQuery(node.Expression, node.Identifier, query.Body);
     }
 
-    private Luau.NoOp HandleQuery(ExpressionSyntax expression, SyntaxToken identifier, QueryBodySyntax body)
+    private Luau.Node HandleQuery(ExpressionSyntax? expression, SyntaxToken identifier, QueryBodySyntax body)
     {
+        var lastResultIdentifier = occupiedIdentifiersStack.AddIdentifier("_result");
         var resultIdentifier = new Luau.IdentifierName(occupiedIdentifiersStack.GetDuplicateText("_result"));
-        var iterable = Visit<Luau.Expression>(expression);
+        var iterable = expression == null ? lastResultIdentifier : Visit<Luau.Expression>(expression);
 
         HashSet<LinqQueryClauseInfo> clauseInfos = [];
         void addClauseInfo(SyntaxNode queryClauseSyntax)
@@ -169,7 +169,7 @@ public sealed class LuauGenerator(
             new Luau.Variable(resultValueIdentifier, true, variableName)
         ];
 
-        var argumentList = new Luau.ArgumentList([new Luau.Argument(variableName)]);
+        var argumentList = new Luau.ArgumentList([new Luau.Argument(resultValueIdentifier)]);
         foreach (var clauseInfo in clauseInfos)
         {
             if (clauseInfo.Kind == LinqQueryClauseInfoKind.OrderBy) continue;
@@ -178,7 +178,7 @@ public sealed class LuauGenerator(
             switch (clauseInfo.Kind)
             {
                 case LinqQueryClauseInfoKind.Select:
-                    forStatementBody.Add(new Luau.Assignment(variableName, call));
+                    forStatementBody.Add(new Luau.Assignment(resultValueIdentifier, call));
                     break;
                 case LinqQueryClauseInfoKind.Where:
                     forStatementBody.Add(new Luau.If(new Luau.UnaryOperator("not ", call), new Luau.Continue()));
@@ -202,7 +202,10 @@ public sealed class LuauGenerator(
         transformState.PrereqList(prereqStatements);
 
         if (body.Continuation != null)
+        {
             transformState.PrereqList(transformState.CapturePrereqs(() => Visit(body.Continuation)));
+            return resultIdentifier;
+        }
 
         return new Luau.NoOp(false);
     }
@@ -219,9 +222,12 @@ public sealed class LuauGenerator(
             return new Luau.NoOp(false);
 
         var name = new Luau.IdentifierName(occupiedIdentifiersStack.GetDuplicateText("_where"));
+        var paramText = FindFirstAncestor<QueryContinuationSyntax>(node) is { } continuation
+            ? continuation.Identifier.Text
+            : query.FromClause.Identifier.Text;
         var parameters = new Luau.ParameterList([
             new Luau.Parameter(
-                new Luau.IdentifierName(occupiedIdentifiersStack.GetDuplicateText(query.FromClause.Identifier.Text)))
+                new Luau.IdentifierName(occupiedIdentifiersStack.GetDuplicateText(paramText)))
         ]);
 
         var condition = Visit<Luau.Expression>(node.Condition);
@@ -238,9 +244,12 @@ public sealed class LuauGenerator(
             return new Luau.NoOp(false);
 
         var name = new Luau.IdentifierName(occupiedIdentifiersStack.GetDuplicateText("_select"));
+        var paramText = FindFirstAncestor<QueryContinuationSyntax>(node) is { } continuation
+            ? continuation.Identifier.Text
+            : query.FromClause.Identifier.Text;
         var parameters = new Luau.ParameterList([
             new Luau.Parameter(
-                new Luau.IdentifierName(occupiedIdentifiersStack.GetDuplicateText(query.FromClause.Identifier.Text)))
+                new Luau.IdentifierName(occupiedIdentifiersStack.GetDuplicateText(paramText)))
         ]);
 
         var expression = Visit<Luau.Expression>(node.Expression);
@@ -255,12 +264,12 @@ public sealed class LuauGenerator(
         return new Luau.NoOp(false);
     }
 
-    public override Luau.NoOp VisitQueryContinuation(QueryContinuationSyntax node)
+    public override Luau.Node VisitQueryContinuation(QueryContinuationSyntax node)
     {
         var query = FindFirstAncestor<QueryExpressionSyntax>(node);
         return query == null
             ? new Luau.NoOp(false)
-            : HandleQuery(query.FromClause.Expression, node.Identifier, node.Body);
+            : HandleQuery(null, node.Identifier, node.Body);
     }
 
     public override Luau.Statement VisitPropertyDeclaration(PropertyDeclarationSyntax node)
