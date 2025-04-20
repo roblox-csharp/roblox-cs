@@ -81,6 +81,7 @@ public class LuauWriter : BaseWriter
         name.Render(this);
         Write(" = ");
         initializer.Render(this);
+        WriteLine();
     }
 
     public void WriteVariable(Name name, bool isLocal, Expression? initializer = null, TypeRef? type = null)

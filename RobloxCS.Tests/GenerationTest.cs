@@ -287,12 +287,9 @@ public class GenerationTest
         Assert.Equal(3, doubleNestedBlock.Statements.Count);
         
         var memberAssignment = doubleNestedBlock.Statements.SkipLast(1).Last();
-        Assert.IsType<ExpressionStatement>(memberAssignment);
+        Assert.IsType<Assignment>(memberAssignment);
         
-        var expressionStatement = (ExpressionStatement)memberAssignment;
-        Assert.IsType<Assignment>(expressionStatement.Expression);
-        
-        var assignment = (Assignment)expressionStatement.Expression;
+        var assignment = (Assignment)memberAssignment;
         Assert.IsType<MemberAccess>(assignment.Target);
         Assert.IsType<IdentifierName>(assignment.Value);
 
@@ -385,8 +382,7 @@ public class GenerationTest
         var enumBlock = (Block)scopedBlock.Statements.First();
         Assert.Equal(3, enumBlock.Statements.Count);
         Assert.IsType<Variable>(enumBlock.Statements[0]);
-        Assert.IsType<ExpressionStatement>(enumBlock.Statements[1]);
-        Assert.IsType<Assignment>(((ExpressionStatement)enumBlock.Statements[1]).Expression);
+        Assert.IsType<Assignment>(enumBlock.Statements[1]);
         Assert.IsType<TypeAlias>(enumBlock.Statements[2]);
         
         var expressionStatement = (ExpressionStatement)thirdStatement;

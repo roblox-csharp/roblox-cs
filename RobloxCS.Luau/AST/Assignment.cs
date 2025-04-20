@@ -1,6 +1,6 @@
 ﻿namespace RobloxCS.Luau;
 
-public sealed class Assignment : Expression
+public sealed class Assignment : Statement
 {
     public AssignmentTarget Target { get; }
     public Expression Value { get; }

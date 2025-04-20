@@ -23,8 +23,6 @@ public enum MacroKind
 
 public class MacroManager(SemanticModel semanticModel, TransformState transformState, OccupiedIdentifiersStack occupiedIdentifiersStack)
 {
-    private readonly OccupiedIdentifiersStack _occupiedIdentifiersStack = occupiedIdentifiersStack;
-
     public Node? Assignment(Func<SyntaxNode, Node?> visit, AssignmentExpressionSyntax assignment)
     {
         var mappedOperator = StandardUtility.GetMappedOperator(assignment.OperatorToken.Text);
@@ -330,13 +328,13 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
 
         if (listExpression is not IdentifierName name)
         {
-            self = _occupiedIdentifiersStack.AddIdentifier("_exp");
+            self = occupiedIdentifiersStack.AddIdentifier("_exp");
             transformState.Prereq(new Variable((IdentifierName)self, true, listExpression));
         }
         else
             self = name;
 
-        var filterFuncIdentifier = _occupiedIdentifiersStack.AddIdentifier("_filterFunc");
+        var filterFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_filterFunc");
         switch (memberAccess.Name.Identifier.Text)
         {
             case "Add":
@@ -370,9 +368,9 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "Exists":
             {
                 var FilterFunc = (ArgumentList)visit(invocation.ArgumentList)!;
-                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
+                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = occupiedIdentifiersStack.AddIdentifier("_v");
 
                 transformState.Prereq(new Block([
                     new Variable(filterFuncIdentifier, true, FilterFunc.Arguments.First()),
@@ -382,7 +380,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                             filterFuncIdentifier,
                             new ArgumentList([new Argument(value)])),
                             new Block([
-                                new ExpressionStatement(new Assignment(expression, AstUtility.True())),
+                                new Assignment(expression, AstUtility.True()),
                                 new Break()
                             ]))
                     ]))
@@ -393,16 +391,16 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "Find":
             {
                 var filterFunc = (ArgumentList)visit(invocation.ArgumentList)!;
-                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
+                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = occupiedIdentifiersStack.AddIdentifier("_v");
 
                 transformState.Prereq(new Block([
                     new Variable(expression, true, AstUtility.Nil()),
                     new Variable(filterFuncIdentifier, true, filterFunc.Arguments.First()),
                     new For([key, value], self, new Block([
                         new If(new Call(filterFuncIdentifier, new ArgumentList([new Argument(value)])), new Block([
-                            new ExpressionStatement(new Assignment(expression, value)),
+                            new Assignment(expression, value),
                             new Break()
                         ]))
                     ]))
@@ -413,9 +411,9 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "FindLast":
             {
                 var filterFunc = (ArgumentList)visit(invocation.ArgumentList)!;
-                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
+                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = occupiedIdentifiersStack.AddIdentifier("_v");
 
                 transformState.Prereq(new Block([
                     new Variable(filterFuncIdentifier, true, filterFunc.Arguments.First()),
@@ -425,7 +423,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                             filterFuncIdentifier,
                             new ArgumentList([new Argument(value)])),
                             new Block([
-                                new ExpressionStatement(new Assignment(expression, value))
+                                new Assignment(expression, value)
                             ]))
                     ]))
                 ]));
@@ -436,9 +434,9 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "FindAll":
             {
                 var filterFunc = (ArgumentList)visit(invocation.ArgumentList)!;
-                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
+                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = occupiedIdentifiersStack.AddIdentifier("_v");
 
                 transformState.Prereq(new Block([
                     new Variable(filterFuncIdentifier, true, filterFunc.Arguments.First()),
@@ -458,9 +456,9 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "AddRange":
             {
                 var table = (ArgumentList)visit(invocation.ArgumentList)!;
-                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
+                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = occupiedIdentifiersStack.AddIdentifier("_v");
 
                 expanded = new Block([
                     new For([key, value], table.Arguments.First(), new Block([
@@ -473,7 +471,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             {
                 var args = (ArgumentList)visit(invocation.ArgumentList)!;
                 var funcBody = (AnonymousFunction)args.Arguments.First().Expression!;
-                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
+                var key = occupiedIdentifiersStack.AddIdentifier("_k");
 
                 expanded =
                     new For([key, funcBody.ParameterList.Parameters.First().Name], self, funcBody.Body!);
@@ -482,10 +480,10 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "ConvertAll":
             {
                 var convertFunc = (ArgumentList)visit(invocation.ArgumentList)!;
-                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
-                var convertFuncIdentifier = _occupiedIdentifiersStack.AddIdentifier("_convertFunc");
+                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = occupiedIdentifiersStack.AddIdentifier("_v");
+                var convertFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_convertFunc");
 
                 transformState.Prereq(new Block([
                     new Variable(convertFuncIdentifier, true, convertFunc.Arguments.First()),
@@ -507,9 +505,9 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "FindIndex":
             {
                 var filterFunc = (ArgumentList)visit(invocation.ArgumentList)!;
-                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
+                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = occupiedIdentifiersStack.AddIdentifier("_v");
 
                 if (invocation.ArgumentList.Arguments.Count == 1)
                 {
@@ -517,10 +515,13 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                         new Variable(filterFuncIdentifier, true, filterFunc.Arguments.First()),
                         new Variable(expression, true),
                         new For([key, value], self, new Block([
-                            new If(new Call(filterFuncIdentifier, new ArgumentList([new Argument(value)])), new Block([
-                                new ExpressionStatement(new Assignment(expression, key)),
-                                new Break()
-                            ]))
+                            new If(new Call(
+                                filterFuncIdentifier,
+                                new ArgumentList([new Argument(value)])),
+                                new Block([
+                                    new Assignment(expression, key),
+                                    new Break()
+                                ]))
                         ]))
                     ]));
                 }
@@ -530,7 +531,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                         ? new BinaryOperator(filterFunc.Arguments.First(), "+", filterFunc.Arguments.ElementAt(1))
                         : new UnaryOperator("#", self);
 
-                    var indexIdentifier = _occupiedIdentifiersStack.AddIdentifier("_i");
+                    var indexIdentifier = occupiedIdentifiersStack.AddIdentifier("_i");
                     transformState.Prereq(new Block([
                         new Variable(filterFuncIdentifier, true,
                             invocation.ArgumentList.Arguments.Count == 2
@@ -540,9 +541,11 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                         new NumericFor(indexIdentifier, filterFunc.Arguments.First().Expression, max, null,
                             new Block([
                                 new Variable(value, true, new ElementAccess(self, indexIdentifier)),
-                                new If(new Call(filterFuncIdentifier, new ArgumentList([new Argument(value)])),
+                                new If(new Call(
+                                    filterFuncIdentifier, 
+                                    new ArgumentList([new Argument(value)])),
                                     new Block([
-                                        new ExpressionStatement(new Assignment(expression, key)),
+                                        new Assignment(expression, key),
                                         new Break()
                                     ]))
                             ]))
@@ -555,9 +558,9 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "FindIndexLast":
             {
                 var filterFunc = (ArgumentList)visit(invocation.ArgumentList)!;
-                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
+                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = occupiedIdentifiersStack.AddIdentifier("_v");
 
                 if (invocation.ArgumentList.Arguments.Count == 1)
                 {
@@ -569,7 +572,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                                 filterFuncIdentifier,
                                 new ArgumentList([new Argument(value)])),
                                 new Block([
-                                    new ExpressionStatement(new Assignment(expression, key))
+                                    new Assignment(expression, key)
                                 ]))
                         ]))
                     ]));
@@ -580,7 +583,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                         ? new BinaryOperator(filterFunc.Arguments.First(), "+", filterFunc.Arguments.ElementAt(1))
                         : new UnaryOperator("#", self);
 
-                    var indexIdentifier = _occupiedIdentifiersStack.AddIdentifier("_i");
+                    var indexIdentifier = occupiedIdentifiersStack.AddIdentifier("_i");
                     transformState.Prereq(new Block([
                         new Variable(filterFuncIdentifier, true,
                             invocation.ArgumentList.Arguments.Count == 2
@@ -593,7 +596,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                                     filterFuncIdentifier, 
                                     new ArgumentList([new Argument(value)])),
                                     new Block([
-                                        new ExpressionStatement(new Assignment(expression, key))
+                                        new Assignment(expression, key)
                                     ]))
                             ]))
                     ]));
@@ -605,9 +608,9 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "IndexOf":
             {
                 var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
-                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
+                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = occupiedIdentifiersStack.AddIdentifier("_v");
                 var shouldCreateVariable =
                     invocation.ArgumentList.Arguments.First().Expression is not LiteralExpressionSyntax;
 
@@ -620,7 +623,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                                 shouldCreateVariable
                                     ? new IdentifierName("_val")
                                     : arguments.Arguments.First().Expression, "==", value), new Block([
-                                new ExpressionStatement(new Assignment(expression, key)),
+                                new Assignment(expression, key),
                                 new Break()
                             ]))
                     ]))
@@ -637,9 +640,9 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "IndexOfLast":
             {
                 var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
-                var expression = _occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var key = _occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = _occupiedIdentifiersStack.AddIdentifier("_v");
+                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var key = occupiedIdentifiersStack.AddIdentifier("_k");
+                var value = occupiedIdentifiersStack.AddIdentifier("_v");
                 var shouldCreateVariable =
                     invocation.ArgumentList.Arguments.First().Expression is not LiteralExpressionSyntax;
 
@@ -652,7 +655,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                                 shouldCreateVariable
                                     ? new IdentifierName("_val")
                                     : arguments.Arguments.First().Expression, "==", value), new Block([
-                                new ExpressionStatement(new Assignment(expression, key))
+                                new Assignment(expression, key)
                             ]))
                     ]))
                 ];
@@ -693,7 +696,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
     }
 
     /// <summary>Macros <see cref="Dictionary" /> methods</summary>
-    private static bool DictionaryMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
+    private bool DictionaryMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
         InvocationExpressionSyntax invocation, out Expression? expanded)
     {
         expanded = null;
@@ -706,7 +709,9 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 var key = arguments.Arguments.First().Expression;
                 var value = arguments.Arguments.Last().Expression;
 
-                expanded = new Assignment(new ElementAccess(self, key), value);
+                var originalIdentifier = occupiedIdentifiersStack.AddIdentifier("_original");
+                transformState.Prereq(new Assignment(new ElementAccess(self, key), value));
+                expanded = originalIdentifier;
                 break;
             }
             case "ContainsKey":

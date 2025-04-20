@@ -414,7 +414,7 @@ public class RenderingTest
         var value = new Literal("420");
         var assignment = new Assignment(target, value);
         var output = Render(assignment);
-        Assert.Equal("a[69] = 420", output);
+        Assert.Equal("a[69] = 420\n", output);
     }
     
     [Fact]

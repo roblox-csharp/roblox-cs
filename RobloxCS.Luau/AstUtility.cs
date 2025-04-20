@@ -182,14 +182,12 @@ public static class AstUtility
         
         var fullParentName = GetFullParentName(node);
         if (fullParentName != null)
-            return new ExpressionStatement(
-                new Assignment(
-                    new MemberAccess(
-                        fullParentName,
-                        name
-                    ),
+            return new Assignment(
+                new MemberAccess(
+                    fullParentName,
                     name
-                )
+                ),
+                name
             );
 
         return new NoOp();
@@ -307,7 +305,7 @@ public static class AstUtility
     public static If DefaultValueInitializer(Name name, Expression initializer) =>
         new(
             new BinaryOperator(name, "==", Nil()),
-            new ExpressionStatement(new Assignment(name, initializer))
+            new Assignment(name, initializer)
         );
 
     /// <summary>
@@ -393,30 +391,30 @@ public static class AstUtility
             .Aggregate(name, (current, piece) => new QualifiedName(current, CreateSimpleName(node, piece)));
     }
         
-    public static TNameNode CreateSimpleName<TNameNode>(SyntaxNode node, bool bypassReserved = false) 
+    public static TNameNode CreateSimpleName<TNameNode>(SyntaxNode node, bool bypassReserved = false, bool noGenerics = false) 
         where TNameNode : SimpleName
     {
-        return (TNameNode)CreateSimpleName(node, bypassReserved);
+        return (TNameNode)CreateSimpleName(node, bypassReserved, noGenerics);
     }
 
-    public static TNameNode CreateSimpleName<TNameNode>(SyntaxNode node, string name, bool bypassReserved = false) 
+    public static TNameNode CreateSimpleName<TNameNode>(SyntaxNode node, string name, bool bypassReserved = false, bool noGenerics = false) 
         where TNameNode : SimpleName
     {
-        return (TNameNode)CreateSimpleName(node, name, bypassReserved);
+        return (TNameNode)CreateSimpleName(node, name, bypassReserved, noGenerics);
     }
         
-    public static SimpleName CreateSimpleName(SyntaxNode node, bool bypassReserved = false)
+    public static SimpleName CreateSimpleName(SyntaxNode node, bool bypassReserved = false, bool noGenerics = false)
     {
-        return CreateSimpleName(node, string.Join("", StandardUtility.GetNamesFromNode(node)), bypassReserved);
+        return CreateSimpleName(node, string.Join("", StandardUtility.GetNamesFromNode(node)), bypassReserved, noGenerics);
     }
 
-    public static SimpleName CreateSimpleName(SyntaxNode node, string name, bool bypassReserved = false)
+    public static SimpleName CreateSimpleName(SyntaxNode node, string name, bool bypassReserved = false, bool noGenerics = false)
     {
         if (RESERVED_IDENTIFIERS.Contains(name) && !bypassReserved)
             throw Logger.UnsupportedError(node, $"Using '{name}' as an identifier", useIs: true, useYet: false);
 
         var text = name.Replace('@', '_');
-        return name.Contains('<') && name.Contains('>')
+        return name.Contains('<') && name.Contains('>') && !noGenerics
             ? new GenericName(text.Split('<').First(), StandardUtility.ExtractTypeArguments(text))
             : new IdentifierName(text);
     }

@@ -52,14 +52,12 @@ public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharp
                 if (declarator.Initializer == null) continue;
 
                 var initializer = Visit<Expression>(declarator.Initializer);
-                body.Statements.Add(new ExpressionStatement(
-                    new Assignment(
-                        new MemberAccess(
-                            new IdentifierName("self"),
-                            AstUtility.CreateSimpleName(declarator)
-                        ),
-                        initializer
-                    )
+                body.Statements.Add(new Assignment(
+                    new MemberAccess(
+                        new IdentifierName("self"),
+                        AstUtility.CreateSimpleName(declarator)
+                    ),
+                    initializer
                 ));
             }
         }
@@ -69,14 +67,12 @@ public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharp
             if (property.Initializer == null) continue;
 
             var initializer = Visit<Expression>(property.Initializer);
-            body.Statements.Add(new ExpressionStatement(
-                new Assignment(
-                    new MemberAccess(
-                        new IdentifierName("self"),
-                        AstUtility.CreateSimpleName(property)
-                    ),
-                    initializer
-                )
+            body.Statements.Add(new Assignment(
+                new MemberAccess(
+                    new IdentifierName("self"),
+                    AstUtility.CreateSimpleName(property)
+                ),
+                initializer
             ));
         }
 
