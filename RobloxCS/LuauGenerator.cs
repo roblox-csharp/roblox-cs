@@ -652,7 +652,7 @@ public sealed class LuauGenerator(SyntaxTree tree, CSharpCompilation compiler, L
             throw Logger.CodegenError(node, "Unable to resolve type symbol of the type provided to typeof()");
 
         var type = StandardUtility.GetRuntimeType(_semanticModel, node, typeSymbol);
-        return Luau.AstUtility.CreateTypeInfo(type);
+        return new Luau.Parenthesized(Luau.AstUtility.CreateTypeInfo(type));
     }
 
     public override Luau.TypeCast VisitCastExpression(CastExpressionSyntax node)

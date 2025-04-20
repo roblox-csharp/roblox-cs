@@ -30,7 +30,7 @@ public static class AstUtility
     /// <summary>
     /// Creates type info table for runtime type objects
     /// </summary>
-    public static Parenthesized CreateTypeInfo(Type type)
+    public static TableInitializer CreateTypeInfo(Type type)
     {
         List<Expression> keys = [
             new IdentifierName("Name"),
@@ -154,7 +154,7 @@ public static class AstUtility
             new Literal($"\"{type.GUID}\"")
         ];
 
-        return new Parenthesized(new TableInitializer(values, keys));
+        return new TableInitializer(values, keys, true);
     }
 
     /// <summary>
@@ -163,13 +163,13 @@ public static class AstUtility
     private static TableInitializer CreateConstructorInfo(ConstructorInfo type)
     {
         List<Expression> keys = [
-            new Literal("Name"),
+            new IdentifierName("Name"),
         ];
         List<Expression> values = [
             new Literal(type.Name),
         ];
             
-        return new TableInitializer(values, keys);
+        return new TableInitializer(values, keys, true);
     }
 
     /// <summary>
