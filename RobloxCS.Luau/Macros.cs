@@ -1,4 +1,5 @@
 using Microsoft.CodeAnalysis;
+using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RobloxCS.Luau;
 using RobloxCS.Shared;
@@ -18,7 +19,8 @@ public enum MacroKind
     ListMethod,
     DictionaryMethod,
     ListProperty,
-    BitOperation
+    BitOperation,
+    EventInvoke
 }
 
 public class MacroManager(SemanticModel semanticModel, TransformState transformState, OccupiedIdentifiersStack occupiedIdentifiersStack)
@@ -37,7 +39,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             return new Assignment(target, AstUtility.Bit32Call(bit32MethodName, target, value));
         }
 
-        var leftSymbol = semanticModel.GetSymbolInfo(assignment.Left).Symbol;
+        var leftSymbol = ModelExtensions.GetSymbolInfo(semanticModel, assignment.Left).Symbol;
         if (leftSymbol is IEventSymbol eventSymbol)
         {
             var symbolMetadata = SymbolMetadataManager.Get(eventSymbol);
@@ -95,7 +97,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
     /// </summary>
     public Name? GenericName(Func<SyntaxNode, Node?> visit, GenericNameSyntax genericName)
     {
-        var typeInfo = semanticModel.GetTypeInfo(genericName);
+        var typeInfo = ModelExtensions.GetTypeInfo(semanticModel, genericName);
         if (StandardUtility.IsFromSystemNamespace(typeInfo.Type))
             switch (genericName.Identifier.Text)
             {
@@ -132,7 +134,8 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
     /// <returns>The expanded expression of the macro, or null if no macro was applied</returns>
     public Node? MemberAccess(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess)
     {
-        var expressionType = semanticModel.GetTypeInfo(memberAccess.Expression).Type;
+        var expressionType = ModelExtensions.GetTypeInfo(semanticModel, memberAccess.Expression).Type;
+        var expressionSymbol = ModelExtensions.GetSymbolInfo(semanticModel, memberAccess.Expression).Symbol;
         {
             if (memberAccess is { Name.Identifier.Text: { } serviceName }
                 && expressionType?.Name == "Services"
@@ -143,6 +146,21 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                     new ArgumentList([new Argument(new Literal('"' + serviceName + '"'))]));
                 expanded.MarkExpanded(MacroKind.GetService);
 
+                return expanded;
+            }
+        }
+        {
+            if (expressionSymbol is IEventSymbol eventSymbol
+                && memberAccess is
+                  {
+                      Parent: InvocationExpressionSyntax invocation,
+                      Name: IdentifierNameSyntax { Identifier.Text: "Invoke" } name
+                  })
+            {
+                var expression = (Expression)visit(memberAccess.Expression)!;
+                var expanded = new MemberAccess(expression, new IdentifierName("Fire"), ':');
+                expanded.MarkExpanded(MacroKind.EventInvoke);
+                
                 return expanded;
             }
         }
@@ -246,8 +264,8 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
     {
         // generic objects
         var symbol = baseObjectCreation is ObjectCreationExpressionSyntax objectCreation
-            ? semanticModel.GetSymbolInfo(objectCreation.Type).Symbol
-            : semanticModel.GetSymbolInfo(baseObjectCreation).Symbol?.ContainingSymbol;
+            ? ModelExtensions.GetSymbolInfo(semanticModel, objectCreation.Type).Symbol
+            : ModelExtensions.GetSymbolInfo(semanticModel, baseObjectCreation).Symbol?.ContainingSymbol;
 
         if (symbol is not INamedTypeSymbol { TypeParameters.Length: > 0 } namedTypeSymbol)
             return null;

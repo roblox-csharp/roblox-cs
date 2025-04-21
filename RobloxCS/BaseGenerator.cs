@@ -108,7 +108,7 @@ public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharp
     protected T? FindFirstAncestor<T>(SyntaxNode node) where T : SyntaxNode =>
         GetAncestors<T>(node).FirstOrDefault();
 
-    private List<T> GetAncestors<T>(SyntaxNode node) where T : SyntaxNode =>
+    private static List<T> GetAncestors<T>(SyntaxNode node) where T : SyntaxNode =>
         node.Ancestors().OfType<T>().ToList();
 
     private bool IsParentClassStatic(SyntaxNode node) =>

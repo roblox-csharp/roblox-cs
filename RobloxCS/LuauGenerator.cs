@@ -929,8 +929,8 @@ public sealed class LuauGenerator(
         var name = Luau.AstUtility.GetNonGenericName(Visit<Luau.SimpleName>(node.Name));
         var memberAccess = new Luau.MemberAccess(expression, name);
         var luauNode = Luau.AstUtility.DiscardVariableIfExpressionStatement(node, memberAccess, node.Parent);
-        if (node.Parent is AssignmentExpressionSyntax assignment && assignment.Left == node)
-            luauNode = Luau.AstUtility.QualifiedNameFromMemberAccess(memberAccess);
+        // if (node.Parent is AssignmentExpressionSyntax assignment && assignment.Left == node)
+        //     luauNode = Luau.AstUtility.QualifiedNameFromMemberAccess(memberAccess);
 
         var expandedExpression = _macro.MemberAccess(Visit, node);
         if (expandedExpression != null)
@@ -971,15 +971,7 @@ public sealed class LuauGenerator(
                 return new Luau.Call(name, new([]));
         }
 
-        var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node);
-        var isClassMember = classDeclaration != null
-                            && classDeclaration.Members.Any(member => member is not ConstructorDeclarationSyntax && TryGetName(member) == GetName(node))
-                            && node.Parent is not MemberAccessExpressionSyntax { Expression: ThisExpressionSyntax };
-
-        // this is so cooked
-        return isClassMember ?
-            new Luau.QualifiedName(new Luau.IdentifierName("self"), name)
-            : name;
+        return name;
     }
 
     public override Luau.Expression VisitGenericName(GenericNameSyntax node)
