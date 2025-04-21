@@ -25,7 +25,7 @@ public sealed class MainTransformer(SyntaxTree tree, TransformState state, Confi
         
         return base.VisitCompilationUnit(node.WithUsings(usings));
     }
-    
+
     // Turn file-scoped namespaces into regular namespaces (to reduce code duplication)
     public override SyntaxNode? VisitFileScopedNamespaceDeclaration(FileScopedNamespaceDeclarationSyntax node) =>
         VisitNamespaceDeclaration(SyntaxFactory.NamespaceDeclaration(node.AttributeLists, node.Modifiers, node.Name, node.Externs, node.Usings, node.Members));

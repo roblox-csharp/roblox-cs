@@ -73,7 +73,7 @@ public class LuauWriter : BaseWriter
             if (parameter.IsVararg)
             {
                 var type = parameter.Type != null ? AstUtility.CreateTypeRef(parameter.Type.Path + "[]") : null;
-                var value = new TableInitializer([AstUtility.Vararg()]);
+                var value = new TableInitializer([AstUtility.Vararg]);
                 body.Statements.Insert(0, new Variable(parameter.Name, true, value, type));
             }
             else if (parameter.Initializer != null)

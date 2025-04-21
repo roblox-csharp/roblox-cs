@@ -455,7 +455,7 @@ public static class AstUtility
         
     public static Literal String(string text) => new($"\"{text}\"");
 
-    public static Literal Vararg() => new("...");
+    public static IdentifierName Vararg { get; } = new("...");
 
     public static Literal False() => new("false");
 
@@ -463,5 +463,5 @@ public static class AstUtility
 
     public static Literal Nil() => new("nil");
 
-    public static TypeRef AnyType() => new("any");
+    public static TypeRef AnyType { get; } = new("any");
 }

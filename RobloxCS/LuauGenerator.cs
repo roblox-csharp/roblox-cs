@@ -332,11 +332,10 @@ public sealed class LuauGenerator(
         var className = Luau.AstUtility.CreateSimpleName(node.Parent!);
         var fullName = new Luau.QualifiedName(className, name, IsStatic(node) ? '.' : ':');
         var parameterList = Visit<Luau.ParameterList>(node.ParameterList);
-
-
+        
         var returnType = Luau.AstUtility.CreateTypeRef(Visit<Luau.Name>(node.ReturnType).ToString());
-        var body = node.ExpressionBody != null ?
-            Visit<Luau.Block>(node.ExpressionBody)
+        var body = node.ExpressionBody != null
+            ? Visit<Luau.Block>(node.ExpressionBody)
             : Visit<Luau.Block?>(node.Body);
 
         var attributeLists = node.AttributeLists.Select(Visit<Luau.AttributeList>).ToList();
@@ -370,7 +369,7 @@ public sealed class LuauGenerator(
     {
         var name = occupiedIdentifiersStack.AddIdentifier(node.Identifier);
         var nonGenericName = Luau.AstUtility.GetNonGenericName(name);
-        var members = node.Members.Select(Visit<Luau.Statement>).ToList();
+        var members = node.Members.Select(Visit<Luau.Statement>).Where(m => m is not Luau.NoOp).ToList();
         var explicitConstructor = node.Members.FirstOrDefault(member => member.IsKind(SyntaxKind.ConstructorDeclaration)) as ConstructorDeclarationSyntax;
         var constructor = explicitConstructor == null
             ? GenerateConstructor(node, new Luau.ParameterList([]))
@@ -431,7 +430,7 @@ public sealed class LuauGenerator(
                                             nonGenericName
                                         ])
                                     ),
-                                    Luau.AstUtility.AnyType()
+                                    Luau.AstUtility.AnyType
                                 )
                             ),
                             typeRef
@@ -457,7 +456,7 @@ public sealed class LuauGenerator(
         classMemberStatements.AddRange(members);
 
         List<Luau.Statement> statements = [
-            new Luau.Variable(nonGenericName, true, null),
+            new Luau.Variable(nonGenericName, true ),
             new Luau.ScopedBlock(classMemberStatements),
             Luau.AstUtility.DefineGlobalOrMember(node, nonGenericName),
             new Luau.TypeAlias(name, new Luau.TypeOfCall(nonGenericName))
@@ -781,14 +780,14 @@ public sealed class LuauGenerator(
                 statements.Add(variable);
             }
 
-            return new Luau.Argument(new Luau.AnonymousFunction(new Luau.ParameterList(new([new Luau.Parameter(new Luau.IdentifierName("..."))])), body: new Luau.Block([
-                new Luau.Variable(new Luau.IdentifierName("_val"), true, new Luau.IdentifierName("...")),
+            return new Luau.Argument(new Luau.AnonymousFunction(new Luau.ParameterList(new([new Luau.Parameter(Luau.AstUtility.Vararg)])), body: new Luau.Block([
+                new Luau.Variable(new Luau.IdentifierName("_val"), true, Luau.AstUtility.Vararg),
                 new Luau.If(
                     new Luau.BinaryOperator(new Luau.Call(
                         new Luau.IdentifierName("select"),
-                        new ([
+                        new([
                             new (new Luau.Literal("\"#\"")),
-                            new (new Luau.IdentifierName("..."))
+                            new(Luau.AstUtility.Vararg)
                         ])
                     ), "~=", new Luau.Literal("0")),
                     new Luau.Assignment(variable?.Name ?? Visit<Luau.IdentifierName>(arg.Expression), new Luau.IdentifierName("_val"))
@@ -1194,7 +1193,7 @@ public sealed class LuauGenerator(
     }
 
     public override Luau.Block VisitEventFieldDeclaration(EventFieldDeclarationSyntax node) {
-        var classDeclaration = (ClassDeclarationSyntax)node.Parent!; // this should be temporary.
+        var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node)!;
         var statements = node.Declaration.Variables.Select(variable =>
             new Luau.Assignment(
                 new Luau.MemberAccess(
@@ -1272,9 +1271,16 @@ public sealed class LuauGenerator(
 
         var returnType = new Luau.TypeRef(returnTypeName?.ToString() ?? "()");
         var parameterList = Visit<Luau.ParameterList?>(node.ParameterList) ?? new Luau.ParameterList([]);
-        var body = node.ExpressionBody != null ?
-            new Luau.Block([new Luau.ExpressionStatement(Visit<Luau.Expression>(node.ExpressionBody))])
-            : Visit<Luau.Block?>(node.Block);
+        Luau.Block? body;
+        if (node.ExpressionBody != null)
+        {
+            var (expression, prereqStatements) =
+                transformState.Capture(() => Visit<Luau.Expression>(node.ExpressionBody));
+
+            body = new Luau.Block([..prereqStatements, new Luau.Return(expression)]);
+        }
+        else
+            body = Visit<Luau.Block?>(node.Body);
 
         return new Luau.AnonymousFunction(parameterList, returnType, body);
     }
@@ -1517,6 +1523,7 @@ public sealed class LuauGenerator(
                 var newStatements = statements.Insert(targetIndex, (StatementSyntax)newNode);
                 var newBlock = block.WithStatements(newStatements);
                 newRoot = modifiedRoot.ReplaceNode(block, newBlock);
+                
                 return true;
             }
 
@@ -1524,6 +1531,8 @@ public sealed class LuauGenerator(
             {
                 var members = declaration.Members;
                 if (members.Count <= 1) return false;
+                // stupid hack this code sucks so bad
+                if (newNode is ClassDeclarationSyntax c && declaration.Identifier.Text == c.Identifier.Text) return false;
 
                 var targetIndex = members.IndexOf((MemberDeclarationSyntax)updatedTarget);
                 var newMembers = members.Insert(targetIndex, (MemberDeclarationSyntax)newNode);
