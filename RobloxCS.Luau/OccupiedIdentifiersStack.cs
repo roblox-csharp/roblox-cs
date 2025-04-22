@@ -5,39 +5,31 @@ namespace RobloxCS;
 
 public class OccupiedIdentifiersStack : Stack<List<IdentifierName>>
 {
-    public List<IdentifierName> Push()
+    public void Push()
     {
         List<IdentifierName> newList = [];
         Push(newList);
-        return newList;
-    }
-    
-    public List<IdentifierName> Capture(Action callback)
-    {
-        Push();
-        callback();
-        return Pop();
     }
 
     public string GetDuplicateText(string text)
     {
+        text = text.Replace("@", "");
+        
         var occurrences = CountOccurrences(text) - 1;
         var newText = occurrences > 0 ? "_" + occurrences : "";
         var halves = text.Split('<'); // generics, poopoo.
         var duplicateText = halves.First() + newText + (halves.Length > 1 ? "<" + halves.Last() : "");
-        return duplicateText.Replace('@', '_');
+        return duplicateText;
     }
     
-    public IdentifierName AddIdentifier(string text) =>
-        AddIdentifier(new IdentifierName(GetDuplicateText(text)));
+    public int CountOccurrences(string text) => Peek().Count(identifier => identifier.Text == text);
 
     public IdentifierName AddIdentifier(SyntaxToken token) => AddIdentifier(token.Text);
-    private IdentifierName AddIdentifier(IdentifierName identifierName)
+    public IdentifierName AddIdentifier(string text)
     {
-        Peek().Add(identifierName);
-        return identifierName;
+        AddIdentifier(new IdentifierName(text.Replace("@", "")));
+        return new IdentifierName(GetDuplicateText(text));
     }
-    
-    private bool HasIdentifier(string text) => CountOccurrences(text) > 0;
-    private int CountOccurrences(string text) => Peek().Count(identifier => identifier.Text == text);
+
+    private void AddIdentifier(IdentifierName identifierName) => Peek().Add(identifierName);
 }

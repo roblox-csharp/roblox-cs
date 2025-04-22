@@ -311,7 +311,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 transformState.Prereq(new Variable(distinctIdentifier, true, TableInitializer.Empty));
                 transformState.Prereq(new Variable(seenIdentifier, true, TableInitializer.Empty));
                 transformState.Prereq(new For(
-                    [new IdentifierName("_"), valueIdentifier],
+                    [AstUtility.DiscardName, valueIdentifier],
                     self,
                     new Block([
                         new If(
@@ -332,7 +332,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 
                 transformState.Prereq(new Variable(resultIdentifier, true, AstUtility.TableCall("clone", self)));
                 transformState.Prereq(new For(
-                    [new IdentifierName("_"), valueIdentifier],
+                    [AstUtility.DiscardName, valueIdentifier],
                     other,
                     new Block([
                         new ExpressionStatement(AstUtility.TableCall("insert", resultIdentifier, valueIdentifier)),
@@ -350,11 +350,11 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 
                 transformState.Prereq(new Variable(resultIdentifier, true, TableInitializer.Empty));
                 transformState.Prereq(new For(
-                    [new IdentifierName("_"), firstIdentifier],
+                    [AstUtility.DiscardName, firstIdentifier],
                     self,
                     new Block([
                         new For(
-                            [new IdentifierName("_"), secondIdentifier],
+                            [AstUtility.DiscardName, secondIdentifier],
                             other,
                             new Block([
                                 new If(

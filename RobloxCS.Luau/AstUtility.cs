@@ -417,7 +417,7 @@ public static class AstUtility
         if (RESERVED_IDENTIFIERS.Contains(name) && !bypassReserved)
             throw Logger.UnsupportedError(node, $"Using '{name}' as an identifier", useIs: true, useYet: false);
 
-        var text = name.Replace('@', '_');
+        var text = name.Replace("@", "");
         return name.Contains('<') && name.Contains('>') && !noGenerics
             ? new GenericName(text.Split('<').First(), StandardUtility.ExtractTypeArguments(text))
             : new IdentifierName(text);

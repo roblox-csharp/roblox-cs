@@ -144,15 +144,15 @@ public sealed class LuauGenerator(
 
     private Luau.Node HandleQuery(ExpressionSyntax? expression, SyntaxToken identifier, QueryBodySyntax body)
     {
-        var lastResultIdentifier = occupiedIdentifiersStack.AddIdentifier("_result");
-        var resultIdentifier = new Luau.IdentifierName(occupiedIdentifiersStack.GetDuplicateText("_result"));
+        var lastResultIdentifier = new Luau.IdentifierName(occupiedIdentifiersStack.GetDuplicateText("_result"));
+        var resultIdentifier = occupiedIdentifiersStack.AddIdentifier("_result");
         var iterable = expression == null ? lastResultIdentifier : Visit<Luau.Expression>(expression);
 
         HashSet<LinqQueryClauseInfo> clauseInfos = [];
         void addClauseInfo(SyntaxNode queryClauseSyntax)
         {
             var clauseKind = GetLinqQueryClauseKind(queryClauseSyntax.Kind());
-            var identifierName = occupiedIdentifiersStack.Capture(() => occupiedIdentifiersStack.AddIdentifier('_' + clauseKind.ToString().ToLower())).First();
+            var identifierName = occupiedIdentifiersStack.AddIdentifier('_' + clauseKind.ToString().ToLower());
             clauseInfos.Add(new LinqQueryClauseInfo(clauseKind, identifierName));
             transformState.PrereqList(transformState.CapturePrereqs(() => Visit(queryClauseSyntax)));
         }
@@ -201,13 +201,11 @@ public sealed class LuauGenerator(
         occupiedIdentifiersStack.Pop();
         transformState.PrereqList(prereqStatements);
 
-        if (body.Continuation != null)
-        {
-            transformState.PrereqList(transformState.CapturePrereqs(() => Visit(body.Continuation)));
-            return resultIdentifier;
-        }
-
-        return new Luau.NoOp(false);
+        if (body.Continuation == null)
+            return new Luau.NoOp(false);
+        
+        transformState.PrereqList(transformState.CapturePrereqs(() => Visit(body.Continuation)));
+        return resultIdentifier;
     }
 
     public override Luau.NoOp VisitGroupClause(GroupClauseSyntax node)
@@ -225,14 +223,16 @@ public sealed class LuauGenerator(
         var paramText = FindFirstAncestor<QueryContinuationSyntax>(node) is { } continuation
             ? continuation.Identifier.Text
             : query.FromClause.Identifier.Text;
+
+        occupiedIdentifiersStack.Push();
         var parameters = new Luau.ParameterList([
-            new Luau.Parameter(
-                new Luau.IdentifierName(occupiedIdentifiersStack.GetDuplicateText(paramText)))
+            new Luau.Parameter(occupiedIdentifiersStack.AddIdentifier(paramText))
         ]);
 
         var condition = Visit<Luau.Expression>(node.Condition);
         var body = new Luau.Block([new Luau.Return(condition)]);
         transformState.Prereq(new Luau.Function(name, true, parameters, new Luau.TypeRef("boolean"), body));
+        occupiedIdentifiersStack.Pop();
 
         return new Luau.NoOp(false);
     }
@@ -247,15 +247,17 @@ public sealed class LuauGenerator(
         var paramText = FindFirstAncestor<QueryContinuationSyntax>(node) is { } continuation
             ? continuation.Identifier.Text
             : query.FromClause.Identifier.Text;
+        
+        occupiedIdentifiersStack.Push();
         var parameters = new Luau.ParameterList([
-            new Luau.Parameter(
-                new Luau.IdentifierName(occupiedIdentifiersStack.GetDuplicateText(paramText)))
+            new Luau.Parameter(occupiedIdentifiersStack.AddIdentifier(paramText))
         ]);
 
         var expression = Visit<Luau.Expression>(node.Expression);
         var body = new Luau.Block([new Luau.Return(expression)]);
         transformState.Prereq(new Luau.Function(name, true, parameters, null, body));
-
+        occupiedIdentifiersStack.Pop();
+        
         return new Luau.NoOp(false);
     }
 
@@ -631,7 +633,7 @@ public sealed class LuauGenerator(
             if (incrementBy is Luau.ExpressionStatement { Expression: Luau.BinaryOperator binaryOperator } expressionStatement &&
                 !binaryOperator.Operator.Contains('='))
             {
-                incrementBy = new Luau.Variable(new Luau.IdentifierName("_"), true, expressionStatement.Expression);
+                incrementBy = new Luau.Variable(Luau.AstUtility.DiscardName, true, expressionStatement.Expression);
             }
             whileStatements.Add(new Luau.If(
                 shouldIncrementIdentifier,
@@ -681,7 +683,7 @@ public sealed class LuauGenerator(
         new(occupiedIdentifiersStack.AddIdentifier(node.Identifier), true);
 
     public override Luau.Variable VisitDiscardDesignation(DiscardDesignationSyntax node) =>
-        new(new Luau.IdentifierName("_"), true);
+        new(Luau.AstUtility.DiscardName, true);
     
     public override Luau.VariableList VisitParenthesizedVariableDesignation(ParenthesizedVariableDesignationSyntax node)
     {
