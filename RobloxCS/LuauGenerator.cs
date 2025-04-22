@@ -146,12 +146,12 @@ public sealed class LuauGenerator(
     {
         var lastResultIdentifier = new Luau.IdentifierName(occupiedIdentifiersStack.GetDuplicateText("_result"));
         var resultIdentifier = occupiedIdentifiersStack.AddIdentifier("_result");
-        var iterable = expression == null ? lastResultIdentifier : Visit<Luau.Expression>(expression);
+        var originalIterable = expression == null ? lastResultIdentifier : Visit<Luau.Expression>(expression);
 
         HashSet<LinqQueryClauseInfo> clauseInfos = [];
         void addClauseInfo(SyntaxNode queryClauseSyntax)
         {
-            var clauseKind = GetLinqQueryClauseKind(queryClauseSyntax.Kind());
+            var clauseKind = GetLinqQueryClauseKind(queryClauseSyntax);
             var identifierName = occupiedIdentifiersStack.AddIdentifier('_' + clauseKind.ToString().ToLower());
             clauseInfos.Add(new LinqQueryClauseInfo(clauseKind, identifierName));
             transformState.PrereqList(transformState.CapturePrereqs(() => Visit(queryClauseSyntax)));
@@ -161,46 +161,48 @@ public sealed class LuauGenerator(
             addClauseInfo(clause);
 
         addClauseInfo(body.SelectOrGroup);
-
-        occupiedIdentifiersStack.Push();
-        var resultValueIdentifier = occupiedIdentifiersStack.AddIdentifier("_resultValue");
-        var variableName = occupiedIdentifiersStack.AddIdentifier(identifier);
-        List<Luau.Statement> forStatementBody = [
-            new Luau.Variable(resultValueIdentifier, true, variableName)
+        List<Luau.Statement> prereqStatements =
+        [
+            new Luau.Variable(resultIdentifier, true, Luau.AstUtility.TableCall("clone", originalIterable))
         ];
 
-        var argumentList = new Luau.ArgumentList([new Luau.Argument(resultValueIdentifier)]);
         foreach (var clauseInfo in clauseInfos)
         {
-            if (clauseInfo.Kind == LinqQueryClauseInfoKind.OrderBy) continue;
+            occupiedIdentifiersStack.Push();
+            var variableName = occupiedIdentifiersStack.AddIdentifier(identifier);
+            var indexName = occupiedIdentifiersStack.AddIdentifier("i");
+            List<Luau.Statement> forStatementBody = [];
+            Luau.Statement? nonForStatementPrereq = null;
 
-            var call = new Luau.Call(clauseInfo.Name, argumentList);
+            var call = new Luau.Call(clauseInfo.Name, Luau.AstUtility.CreateArgumentList([variableName]));
             switch (clauseInfo.Kind)
             {
                 case LinqQueryClauseInfoKind.Select:
-                    forStatementBody.Add(new Luau.Assignment(resultValueIdentifier, call));
+                    forStatementBody.Add(new Luau.Assignment(new Luau.ElementAccess(resultIdentifier, indexName), call));
                     break;
                 case LinqQueryClauseInfoKind.Where:
-                    forStatementBody.Add(new Luau.If(new Luau.UnaryOperator("not ", call), new Luau.Block([new Luau.Continue()])));
+                    forStatementBody.Add(new Luau.If(
+                        call,
+                        new Luau.Block([new Luau.Continue()])));
+                    forStatementBody.Add(new Luau.ExpressionStatement(
+                        Luau.AstUtility.TableCall("remove", resultIdentifier, indexName)));
+                    break;
+                case LinqQueryClauseInfoKind.OrderBy:
+                    var comparatorName = new Luau.IdentifierName(occupiedIdentifiersStack.GetDuplicateText(clauseInfo.Name.Text + "Comparator"));
+                    nonForStatementPrereq = new Luau.ExpressionStatement(Luau.AstUtility.TableCall("sort", resultIdentifier, comparatorName));
                     break;
 
                 case LinqQueryClauseInfoKind.Continuation:
                 case LinqQueryClauseInfoKind.Group:
-                case LinqQueryClauseInfoKind.OrderBy:
-                default: break;
+                default:
+                    break;
             }
+            
+            prereqStatements.Add(nonForStatementPrereq ?? new Luau.For([indexName, variableName], resultIdentifier, new Luau.Block(forStatementBody)));
+            occupiedIdentifiersStack.Pop();
         }
-
-        forStatementBody.Add(new Luau.ExpressionStatement(Luau.AstUtility.TableCall("insert", resultIdentifier, resultValueIdentifier)));
-        List<Luau.Statement> prereqStatements =
-        [
-            new Luau.Variable(resultIdentifier, true, Luau.TableInitializer.Empty),
-            new Luau.For([Luau.AstUtility.DiscardName, variableName], iterable, new Luau.Block(forStatementBody))
-        ];
-
-        occupiedIdentifiersStack.Pop();
+        
         transformState.PrereqList(prereqStatements);
-
         if (body.Continuation == null)
             return new Luau.NoOp(false);
         
@@ -263,6 +265,63 @@ public sealed class LuauGenerator(
 
     public override Luau.NoOp VisitOrderByClause(OrderByClauseSyntax node)
     {
+        var query = FindFirstAncestor<QueryExpressionSyntax>(node);
+        if (query == null)
+            return new Luau.NoOp(false);
+
+        var name = new Luau.IdentifierName(occupiedIdentifiersStack.GetDuplicateText("_orderby"));
+        var paramText = FindFirstAncestor<QueryContinuationSyntax>(node) is { } continuation
+            ? continuation.Identifier.Text
+            : query.FromClause.Identifier.Text;
+     
+        occupiedIdentifiersStack.Push();
+        var parameters = new Luau.ParameterList([
+            new Luau.Parameter(occupiedIdentifiersStack.AddIdentifier(node, paramText))
+        ]);
+
+        var expressions = node.Orderings.Select(ordering => Visit<Luau.Expression>(ordering.Expression)).ToList();
+        var body = new Luau.Block([new Luau.Return(new Luau.TableInitializer(expressions))]);
+        occupiedIdentifiersStack.Pop();
+        
+        occupiedIdentifiersStack.Push();
+        var a = occupiedIdentifiersStack.AddIdentifier("a");
+        var b = occupiedIdentifiersStack.AddIdentifier("b");
+        var orderedA = occupiedIdentifiersStack.AddIdentifier("_orderedA");
+        var orderedB = occupiedIdentifiersStack.AddIdentifier("_orderedB");
+        occupiedIdentifiersStack.Pop();
+
+        var i = 1;
+        var orderClauses = node.Orderings.Select(ordering =>
+        {
+            var comparator = ordering.IsKind(SyntaxKind.DescendingOrdering) ? ">" : "<";
+            var orderingA = new Luau.ElementAccess(orderedA, new Luau.Literal(i.ToString()));
+            var orderingB = new Luau.ElementAccess(orderedB, new Luau.Literal(i.ToString()));
+            i++;
+                    
+            return new Luau.If(
+                new Luau.BinaryOperator(orderingA, "~=", orderingB),
+                new Luau.Block([
+                    new Luau.Return(new Luau.BinaryOperator(orderingA, comparator, orderingB))
+                ]));
+        });
+        
+        var comparatorName = occupiedIdentifiersStack.AddIdentifier(name.Text + "Comparator");
+        transformState.Prereq(new Luau.Function(name, true, parameters, null, body));
+        transformState.Prereq(new Luau.Function(
+            comparatorName,
+            true,
+            new Luau.ParameterList([
+                new Luau.Parameter(a),
+                new Luau.Parameter(b)
+            ]),
+            new Luau.TypeRef("boolean"),
+            new Luau.Block([
+                new Luau.Variable(orderedA, true, new Luau.Call(name, Luau.AstUtility.CreateArgumentList([a]))),
+                new Luau.Variable(orderedB, true, new Luau.Call(name, Luau.AstUtility.CreateArgumentList([b]))),
+                ..orderClauses,
+                new Luau.Return(Luau.AstUtility.False)
+            ])));
+        
         return new Luau.NoOp(false);
     }
 
@@ -350,10 +409,9 @@ public sealed class LuauGenerator(
 
     // TODO: support initializers
     public override Luau.Call VisitArrayCreationExpression(ArrayCreationExpressionSyntax node) {
-        var sizeExpression = node.Type.RankSpecifiers[0].Sizes[0];
-        var translatedSize = Visit<Luau.Expression>(sizeExpression);
+        var sizeExpression = Visit<Luau.Expression>(node.Type.RankSpecifiers[0].Sizes[0]);
 
-        return Luau.AstUtility.TableCall("create", new Luau.ArgumentList([new Luau.Argument(translatedSize)]));
+        return Luau.AstUtility.TableCall("create", Luau.AstUtility.CreateArgumentList([sizeExpression]));
     }
 
     public override Luau.TableInitializer VisitImplicitArrayCreationExpression(ImplicitArrayCreationExpressionSyntax node) {
@@ -562,7 +620,7 @@ public sealed class LuauGenerator(
         var isWhenNotNullBranch = node.Ancestors().Any(a => a.IsKind(SyntaxKind.ConditionalAccessExpression));
         var comparandTempName = isWhenNotNullBranch
             ? new Luau.IdentifierName(occupiedIdentifiersStack.GetDuplicateText(comparandTempNameText))
-            : PushToVariable(node.WhenNotNull, comparandTempNameText, comparand);
+            : PushToVariable(comparandTempNameText, comparand);
         
         var condition = new Luau.BinaryOperator(comparandTempName, "~=", Luau.AstUtility.Nil);
         List<Luau.Statement> ifBody = [new Luau.Assignment(comparandTempName, whenNotNull), ..prereqs];
@@ -571,9 +629,9 @@ public sealed class LuauGenerator(
         return isWhenNotNullBranch ? comparand : comparandTempName;
     }
 
-    private Luau.IdentifierName PushToVariable(SyntaxNode node, string name, Luau.Expression initializer)
+    private Luau.IdentifierName PushToVariable(string name, Luau.Expression initializer)
     {
-        var identifier = occupiedIdentifiersStack.AddIdentifier(node, name);
+        var identifier = occupiedIdentifiersStack.AddIdentifier(name);
         transformState.Prereq(new Luau.Variable(identifier, true, initializer));
         
         return identifier;
@@ -1775,9 +1833,9 @@ public sealed class LuauGenerator(
         return false;
     }
     
-    private static LinqQueryClauseInfoKind GetLinqQueryClauseKind(SyntaxKind syntaxKind)
+    private static LinqQueryClauseInfoKind GetLinqQueryClauseKind(SyntaxNode clause)
     {
-        return syntaxKind switch
+        return clause.Kind() switch
         {
             SyntaxKind.SelectClause => LinqQueryClauseInfoKind.Select,
             SyntaxKind.WhereClause => LinqQueryClauseInfoKind.Where,

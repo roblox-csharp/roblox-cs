@@ -2,7 +2,7 @@
 
 public class Argument : Expression
 {
-    public Expression Expression { get; set; }
+    public Expression Expression { get; }
 
     public Argument(Expression expression)
     {
