@@ -15,7 +15,7 @@ public enum MacroKind
     IEnumerableType,
     DictionaryType,
     ObjectMethod,
-    IEnumerableMethod,
+    EnumerableMethod,
     ListMethod,
     DictionaryMethod,
     ListProperty,
@@ -208,14 +208,19 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 {
                     case "Dictionary":
                     {
+                        if (EnumerableMethod(visit, memberAccess, invocation, out var enumerableExpanded))
+                            return enumerableExpanded;
                         if (DictionaryMethod(visit, memberAccess, invocation, out var expanded))
                             return expanded;
 
                         break;
                     }
-
+                    case "Enumerable":
+                    case "IEnumerable":
                     case "List":
                     {
+                        if (EnumerableMethod(visit, memberAccess, invocation, out var enumerableExpanded))
+                            return enumerableExpanded;
                         if (ListMethod(visit, memberAccess, invocation, out var expanded))
                             return expanded;
 
@@ -240,8 +245,32 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
 
         return null;
     }
+    
+    private static bool EnumerableMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
+        InvocationExpressionSyntax invocation, out Expression? expanded)
+    {
+        expanded = null;
+        var self = (Expression)visit(memberAccess.Expression)!;
+        
+        switch (memberAccess.Name.Identifier.Text)
+        {
+            case "First":
+            {
+                expanded = new ElementAccess(self, new Literal("1"));
+                break;
+            }
+            case "Last":
+            {
+                expanded = new ElementAccess(self, new UnaryOperator("#", self));
+                break;
+            }
+        }
+        
+        expanded?.MarkExpanded(MacroKind.EnumerableMethod);
+        return expanded != null;
+    }
 
-    private bool ListProperty(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess, out Node? expanded)
+    private static bool ListProperty(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess, out Node? expanded)
     {
         expanded = null;
         var self = (Expression)visit(memberAccess.Expression)!;
@@ -272,6 +301,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
 
         switch (namedTypeSymbol.Name)
         {
+            case "IEnumerable":
             case "List":
             {
                 var expressions = baseObjectCreation.Initializer?.Expressions
@@ -281,7 +311,6 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
 
                 return table;
             }
-
             case "Dictionary":
             {
                 var values = new List<Expression>();

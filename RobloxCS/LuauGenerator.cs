@@ -804,7 +804,7 @@ public sealed class LuauGenerator(
         List<MacroKind> returnCalleeMacroKinds =
         [
             MacroKind.NewInstance,
-            MacroKind.IEnumerableMethod,
+            MacroKind.EnumerableMethod,
             MacroKind.ListMethod,
             MacroKind.DictionaryMethod,
             MacroKind.ObjectMethod
