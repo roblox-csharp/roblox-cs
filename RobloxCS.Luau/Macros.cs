@@ -20,8 +20,7 @@ public enum MacroKind
     DictionaryMethod,
     ListProperty,
     BitOperation,
-    EventInvoke,
-    EnumeratorMethod
+    EventInvoke
 }
 
 public class MacroManager(SemanticModel semanticModel, TransformState transformState, OccupiedIdentifiersStack occupiedIdentifiersStack)
@@ -251,6 +250,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
         InvocationExpressionSyntax invocation, out Expression? expanded)
     {
         expanded = null;
+        var arguments = invocation.ArgumentList.Arguments;
         var self = (Expression)visit(memberAccess.Expression)!;
         var one = new Literal("1");
         var zero = new Literal("0");
@@ -275,8 +275,30 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "ElementAt":
             case "ElementAtOrDefault":
             {
-                var index = (Expression)visit(invocation.ArgumentList.Arguments.First().Expression)!;
+                var index = (Expression)visit(arguments.First().Expression)!;
                 expanded = new ElementAccess(self, AstUtility.AddOne(index));
+                break;
+            }
+            case "Append":
+            {
+                var appendedIdentifier = occupiedIdentifiersStack.AddIdentifier("_appended");
+                var element = (Expression)visit(arguments.First().Expression)!;
+                
+                transformState.Prereq(new Variable(appendedIdentifier, true, AstUtility.TableCall("clone", self)));
+                transformState.Prereq(new ExpressionStatement(AstUtility.TableCall("insert", appendedIdentifier, element)));
+                expanded = appendedIdentifier;
+                
+                break;
+            }
+            case "Prepend":
+            {
+                var prependedIdentifier = occupiedIdentifiersStack.AddIdentifier("_prepended");
+                var element = (Expression)visit(arguments.First().Expression)!;
+                
+                transformState.Prereq(new Variable(prependedIdentifier, true, AstUtility.TableCall("clone", self)));
+                transformState.Prereq(new ExpressionStatement(AstUtility.TableCall("insert", prependedIdentifier, one, element)));
+                expanded = prependedIdentifier;
+                
                 break;
             }
             case "Distinct":
@@ -285,7 +307,6 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 var seenIdentifier = occupiedIdentifiersStack.AddIdentifier("_seen");
                 var valueIdentifier = occupiedIdentifiersStack.AddIdentifier("v");
                 var seenValue = new ElementAccess(seenIdentifier, valueIdentifier);
-                IEnumerable<int> n;
                 
                 transformState.Prereq(new Variable(distinctIdentifier, true, TableInitializer.Empty));
                 transformState.Prereq(new Variable(seenIdentifier, true, TableInitializer.Empty));
@@ -307,7 +328,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             {
                 var resultIdentifier = occupiedIdentifiersStack.AddIdentifier("_result");
                 var valueIdentifier = occupiedIdentifiersStack.AddIdentifier("v");
-                var other = (Expression)visit(invocation.ArgumentList.Arguments.First().Expression)!;
+                var other = (Expression)visit(arguments.First().Expression)!;
                 
                 transformState.Prereq(new Variable(resultIdentifier, true, AstUtility.TableCall("clone", self)));
                 transformState.Prereq(new For(
@@ -325,7 +346,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 var resultIdentifier = occupiedIdentifiersStack.AddIdentifier("_result");
                 var firstIdentifier = occupiedIdentifiersStack.AddIdentifier("a");
                 var secondIdentifier = occupiedIdentifiersStack.AddIdentifier("b");
-                var other = (Expression)visit(invocation.ArgumentList.Arguments.First().Expression)!;
+                var other = (Expression)visit(arguments.First().Expression)!;
                 
                 transformState.Prereq(new Variable(resultIdentifier, true, TableInitializer.Empty));
                 transformState.Prereq(new For(
