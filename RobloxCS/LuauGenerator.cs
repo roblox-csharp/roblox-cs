@@ -948,9 +948,14 @@ public sealed class LuauGenerator(
     public override Luau.Node VisitElementAccessExpression(ElementAccessExpressionSyntax node)
     {
         var expression = Visit<Luau.Expression>(node.Expression);
-        var index = Visit<Luau.Expression>(node.ArgumentList.Arguments.First().Expression);
-        var indexPlusOne = Luau.AstUtility.AddOne(index);
-        var elementAccess = new Luau.ElementAccess(expression, indexPlusOne);
+        var indexExpression = node.ArgumentList.Arguments.First().Expression;
+        var typeSymbol = _semanticModel.GetTypeInfo(indexExpression).Type;
+        var index = Visit<Luau.Expression>(indexExpression);
+        index = typeSymbol != null && Shared.Constants.INTEGER_TYPES.Contains(typeSymbol.Name)
+            ? Luau.AstUtility.AddOne(index)
+            : index;
+        
+        var elementAccess = new Luau.ElementAccess(expression, index);
         return Luau.AstUtility.DiscardVariableIfExpressionStatement(node, elementAccess, node.Parent);
     }
 
