@@ -954,6 +954,7 @@ public sealed class LuauGenerator(
 
     public override Luau.Node VisitIdentifierName(IdentifierNameSyntax node)
     {
+        var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node);
         var method = FindFirstAncestor<MethodDeclarationSyntax>(node);
         var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
         node = node.WithIdentifier(
@@ -967,15 +968,16 @@ public sealed class LuauGenerator(
                 return new Luau.Call(name, new([]));
         }
 
-        if (symbol is not (IFieldSymbol or IPropertySymbol or IMethodSymbol { MethodKind: MethodKind.Ordinary })
+        if (classDeclaration == null
+            || symbol is not (IFieldSymbol or IPropertySymbol or IMethodSymbol { MethodKind: MethodKind.Ordinary })
             || symbol.IsStatic
             || IsAlreadyQualified(node))
         {
             return name;
         }
-        
+
         var self = new Luau.IdentifierName("self");
-        return new Luau.MemberAccess(self, name);
+        return new Luau.QualifiedName(self, name);
     }
 
     public override Luau.Expression VisitGenericName(GenericNameSyntax node)
