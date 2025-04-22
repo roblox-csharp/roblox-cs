@@ -519,9 +519,9 @@ public static class AstUtility
 
     public static IdentifierName Vararg { get; } = new("...");
 
-    public static Literal False() => new("false");
+    public static Literal False { get; } = new("false");
 
-    public static Literal True() => new("true");
+    public static Literal True { get; } = new("true");
 
     public static Literal Nil { get; } = new("nil");
 

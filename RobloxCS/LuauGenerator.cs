@@ -595,7 +595,7 @@ public sealed class LuauGenerator(
     public override Luau.Statement VisitForStatement(ForStatementSyntax node)
     {
         var (initializer, initializerPrereqs) = transformState.Capture(() => Visit<Luau.VariableList?>(node.Declaration)?.Variables.FirstOrDefault());
-        var condition = Visit<Luau.Expression?>(node.Condition) ?? Luau.AstUtility.True();
+        var condition = Visit<Luau.Expression?>(node.Condition) ?? Luau.AstUtility.True;
         var isNumericLoop = initializer is { Initializer: Luau.Literal literal } && int.TryParse(literal.ValueText, out _);
         var incrementByExpression = Visit<Luau.Expression?>(node.Incrementors.FirstOrDefault());
         var body = Visit<Luau.Statement>(node.Statement);
@@ -623,7 +623,7 @@ public sealed class LuauGenerator(
 
         var shouldIncrementIdentifier = occupiedIdentifiersStack.AddIdentifier("_shouldIncrement");
         if (incrementBy != null)
-            statements.Add(new Luau.Variable(shouldIncrementIdentifier, true, Luau.AstUtility.False()));
+            statements.Add(new Luau.Variable(shouldIncrementIdentifier, true, Luau.AstUtility.False));
 
         List<Luau.Statement> whileStatements = [];
         if (incrementBy != null)
@@ -637,13 +637,13 @@ public sealed class LuauGenerator(
                 shouldIncrementIdentifier,
                 new Luau.Block([incrementBy]),
                     new Luau.Block([
-                    new Luau.Assignment(shouldIncrementIdentifier, Luau.AstUtility.True())
+                    new Luau.Assignment(shouldIncrementIdentifier, Luau.AstUtility.True)
                 ])));
         }
 
         whileStatements.Add(new Luau.If(new Luau.UnaryOperator("not ", new Luau.Parenthesized(condition)), new Luau.Block([new Luau.Break()])));
         whileStatements.Add(body);
-        statements.Add(new Luau.While(Luau.AstUtility.True(), new Luau.Block(whileStatements)));
+        statements.Add(new Luau.While(Luau.AstUtility.True, new Luau.Block(whileStatements)));
         return new Luau.ScopedBlock(statements);
     }
 
@@ -1122,7 +1122,7 @@ public sealed class LuauGenerator(
         if (discardPattern != null)
             statements.Add(new Luau.Assignment(newValueIdentifier, Visit<Luau.Expression>(discardPattern.Expression)));
 
-        prereqStatements.Add(new Luau.Repeat(Luau.AstUtility.True(), new Luau.Block(statements)));
+        prereqStatements.Add(new Luau.Repeat(Luau.AstUtility.True, new Luau.Block(statements)));
         transformState.PrereqList(prereqStatements);
 
         return newValueIdentifier;
@@ -1155,7 +1155,7 @@ public sealed class LuauGenerator(
                 var hasFallThrough = fallThrough && label != section.Labels.Last();
                 if (hasFallThrough) {
                     nodeHasFallThrough = true;
-                    body.Insert(0, new Luau.Assignment(fallthroughIdentifier!, Luau.AstUtility.True()));
+                    body.Insert(0, new Luau.Assignment(fallthroughIdentifier!, Luau.AstUtility.True));
                 }
 
                 switch (label) {
@@ -1185,13 +1185,13 @@ public sealed class LuauGenerator(
         }
 
         if (nodeHasFallThrough)
-            ifStatements.Insert(0, new Luau.Variable(fallthroughIdentifier!, true, Luau.AstUtility.False()));
+            ifStatements.Insert(0, new Luau.Variable(fallthroughIdentifier!, true, Luau.AstUtility.False));
 
         if (defaultStatements != null)
             ifStatements.Add(new Luau.ScopedBlock(defaultStatements));
 
         List<Luau.Statement> blockStatements = [
-            new Luau.Repeat(Luau.AstUtility.True(), new Luau.Block(ifStatements))
+            new Luau.Repeat(Luau.AstUtility.True, new Luau.Block(ifStatements))
         ];
 
         if (createTempVariable)

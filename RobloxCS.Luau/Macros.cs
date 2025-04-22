@@ -279,6 +279,30 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 expanded = new ElementAccess(self, AstUtility.AddOne(index));
                 break;
             }
+            case "Distinct":
+            {
+                var distinctIdentifier = occupiedIdentifiersStack.AddIdentifier("_distinct");
+                var seenIdentifier = occupiedIdentifiersStack.AddIdentifier("_seen");
+                var valueIdentifier = occupiedIdentifiersStack.AddIdentifier("v");
+                var seenValue = new ElementAccess(seenIdentifier, valueIdentifier);
+                IEnumerable<int> n;
+                
+                transformState.Prereq(new Variable(distinctIdentifier, true, TableInitializer.Empty));
+                transformState.Prereq(new Variable(seenIdentifier, true, TableInitializer.Empty));
+                transformState.Prereq(new For(
+                    [new IdentifierName("_"), valueIdentifier],
+                    self,
+                    new Block([
+                        new If(
+                            seenValue,
+                            new Block([new Continue()])),
+                        new Assignment(seenValue, AstUtility.True),
+                        new ExpressionStatement(AstUtility.TableCall("insert", distinctIdentifier, valueIdentifier)),
+                    ])));
+                expanded = distinctIdentifier;
+                
+                break;
+            }
             case "Concat":
             {
                 var resultIdentifier = occupiedIdentifiersStack.AddIdentifier("_result");
@@ -578,13 +602,13 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
 
                 transformState.Prereq(new Block([
                     new Variable(filterFuncIdentifier, true, FilterFunc.Arguments.First()),
-                    new Variable(expression, true, AstUtility.False()),
+                    new Variable(expression, true, AstUtility.False),
                     new For([key, value], self, new Block([
                         new If(new Call(
                             filterFuncIdentifier,
                             new ArgumentList([new Argument(value)])),
                             new Block([
-                                new Assignment(expression, AstUtility.True()),
+                                new Assignment(expression, AstUtility.True),
                                 new Break()
                             ]))
                     ]))
