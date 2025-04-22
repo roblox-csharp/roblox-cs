@@ -20,7 +20,8 @@ public enum MacroKind
     DictionaryMethod,
     ListProperty,
     BitOperation,
-    EventInvoke
+    EventInvoke,
+    EnumeratorMethod
 }
 
 public class MacroManager(SemanticModel semanticModel, TransformState transformState, OccupiedIdentifiersStack occupiedIdentifiersStack)
@@ -206,6 +207,13 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
 
                 switch (expressionType?.Name)
                 {
+                    case "Enumerator":
+                    {
+                        if (EnumeratorMethod(visit, memberAccess, invocation, out var expanded))
+                            return expanded;
+                        
+                        break;
+                    }
                     case "Dictionary":
                     {
                         if (EnumerableMethod(visit, memberAccess, invocation, out var enumerableExpanded))
@@ -246,18 +254,34 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
         return null;
     }
     
+    private bool EnumeratorMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
+        InvocationExpressionSyntax invocation, out Expression? expanded)
+    {
+        expanded = null;
+        var self = (Expression)visit(memberAccess.Expression)!;
+        
+        switch (memberAccess.Name.Identifier.Text)
+        {
+            
+        }
+        
+        expanded?.MarkExpanded(MacroKind.EnumeratorMethod);
+        return expanded != null;
+    }
+    
     private bool EnumerableMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
         InvocationExpressionSyntax invocation, out Expression? expanded)
     {
         expanded = null;
         var self = (Expression)visit(memberAccess.Expression)!;
+        var one = new Literal("1");
+        var zero = new Literal("0");
 
-        IEnumerable<int> nums = [1, 2, 3];
         switch (memberAccess.Name.Identifier.Text)
         {
             case "First":
             {
-                expanded = new ElementAccess(self, new Literal("1"));
+                expanded = new ElementAccess(self, one);
                 break;
             }
             case "Last":
@@ -267,17 +291,57 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             }
             case "GetEnumerator":
             {
-                var i = occupiedIdentifiersStack.AddIdentifier(memberAccess.Expression is NameSyntax name ? name + "I" : "enumeratorI");
-
-                transformState.Prereq(new Variable(i, true, new Literal("0")));
-                expanded = new AnonymousFunction(
-                    new ParameterList([]),
-                    null,
-                    new Block([
-                        new ExpressionStatement(new BinaryOperator(i, "+=", new Literal("1"))),
-                        new Return(new ElementAccess(self, i))
-                    ])
-                );
+                var selfIdentifier = new IdentifierName("self");
+                var indexIdentifier = new IdentifierName("_index");
+                var currentIdentifier = new IdentifierName("Current");
+                var gotValueIdentifier = new IdentifierName("gotValue");
+                var indexField = new MemberAccess(selfIdentifier, indexIdentifier);
+                var currentField = new MemberAccess(selfIdentifier, currentIdentifier);
+                
+                expanded = new TableInitializer(
+                    [
+                        AstUtility.Nil,
+                        zero,
+                        new AnonymousFunction(
+                            new ParameterList([new Parameter(selfIdentifier)]),
+                            new TypeRef("boolean"),
+                            new Block([
+                                new ExpressionStatement(new BinaryOperator(
+                                    indexField,
+                                    "+=",
+                                    one)),
+                                new Variable(
+                                    gotValueIdentifier,
+                                    true,
+                                    new BinaryOperator(
+                                        indexField,
+                                        "<=",
+                                        new UnaryOperator("#", self))),
+                                new Assignment(currentField, new IfExpression(
+                                    gotValueIdentifier,
+                                    new ElementAccess(self, indexField),
+                                    AstUtility.Nil,
+                                    true)),
+                                new Return(gotValueIdentifier)
+                            ])),
+                        new AnonymousFunction(
+                            new ParameterList([new Parameter(selfIdentifier)]),
+                            new TypeRef("()"),
+                            new Block([
+                                new Assignment(indexField, zero),
+                                new Assignment(currentField, AstUtility.Nil),
+                            ])),
+                        new AnonymousFunction(
+                            new ParameterList([]),
+                            new TypeRef("()")) // no-op
+                    ],
+                    [
+                        currentIdentifier,
+                        indexIdentifier,
+                        new IdentifierName("MoveNext"),
+                        new IdentifierName("Reset"),
+                        new IdentifierName("Dispose") // for API completeness
+                    ]);
                 
                 break;
             }
@@ -285,7 +349,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
         
         expanded?.MarkExpanded(MacroKind.EnumerableMethod);
         return expanded != null;
-    }
+    } 
 
     private static bool ListProperty(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess, out Node? expanded)
     {
@@ -455,7 +519,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
 
                 expanded = new BinaryOperator(
                     AstUtility.TableCall("find", arguments),
-                    "~=", AstUtility.Nil());
+                    "~=", AstUtility.Nil);
                 break;
             }
             case "Clear":
@@ -494,7 +558,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
 
                 transformState.Prereq(new Block([
-                    new Variable(expression, true, AstUtility.Nil()),
+                    new Variable(expression, true, AstUtility.Nil),
                     new Variable(filterFuncIdentifier, true, filterFunc.Arguments.First()),
                     new For([key, value], self, new Block([
                         new If(new Call(filterFuncIdentifier, new ArgumentList([new Argument(value)])), new Block([
@@ -818,15 +882,15 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 var self = (Expression)visit(memberAccess.Expression)!;
                 var key = arguments.Arguments.First().Expression;
 
-                expanded = new BinaryOperator(new ElementAccess(self, key), "~=", AstUtility.Nil());
+                expanded = new BinaryOperator(new ElementAccess(self, key), "~=", AstUtility.Nil);
                 break;
             }
             case "Clear":
             {
                 var self = (Expression)visit(memberAccess.Expression)!;
-
                 expanded = new Call(new QualifiedName(new IdentifierName("table"), new IdentifierName("clear")),
                     new ArgumentList([new Argument(self)]));
+                
                 break;
             }
         }
@@ -834,4 +898,9 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
         expanded?.MarkExpanded(MacroKind.DictionaryMethod);
         return expanded != null;
     }
+    
+    private IdentifierName AddIdentifierWithSelfName(ExpressionSyntax self, string identifier) =>
+        occupiedIdentifiersStack.AddIdentifier(self is NameSyntax name
+            ? name + identifier
+            : identifier);
 }

@@ -11,7 +11,7 @@ public class TableInitializer : Expression
 
     public TableInitializer(List<Expression>? values = null,
         List<Expression>? keys = null,
-        bool treatIdentifiersAsKeyNames = false)
+        bool treatIdentifiersAsKeyNames = true)
     {
         TreatIdentifiersAsKeyNames = treatIdentifiersAsKeyNames;
         Values = values ?? [];
@@ -64,10 +64,7 @@ public class TableInitializer : Expression
             if (value == Values.Last()) continue;
                 
             luau.Write(',');
-            if (hasAnyKeys && value is not AnonymousFunction)
-                luau.WriteLine();
-            else
-                luau.Write(' ');
+            luau.Write(hasAnyKeys ? '\n' : ' ');
         }
             
         if (hasAnyKeys)

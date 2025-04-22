@@ -284,7 +284,7 @@ public sealed class LuauGenerator(
                 Luau.AstUtility.CreateSimpleName(classDeclaration, noGenerics: true),
                 Luau.AstUtility.CreateSimpleName(node, noGenerics: true)
             ),
-            initializer ?? Luau.AstUtility.Nil()
+            initializer
         );
     }
 
@@ -495,7 +495,7 @@ public sealed class LuauGenerator(
             new Luau.Variable(
                 Luau.AstUtility.GetNonGenericName(name),
                 true,
-                new Luau.TableInitializer(enumValues, enumKeys, true)
+                new Luau.TableInitializer(enumValues, enumKeys)
             ),
             Luau.AstUtility.DefineGlobalOrMember(node, name),
             new Luau.TypeAlias(name, finalType)
@@ -554,7 +554,6 @@ public sealed class LuauGenerator(
     public override Luau.Expression VisitConditionalAccessExpression(ConditionalAccessExpressionSyntax node)
     {
         var comparand = Visit<Luau.Expression>(node.Expression);
-        var nil = Luau.AstUtility.Nil();
         var (whenNotNull, prereqs) = transformState.Capture(() => Visit<Luau.Expression>(node.WhenNotNull));
         var name = node.WhenNotNull.DescendantNodes().LastOrDefault(d => d is NameSyntax);
         var comparandTempNameText = name != null ? "_" + name : "_exp";
@@ -563,7 +562,7 @@ public sealed class LuauGenerator(
             ? occupiedIdentifiersStack.AddIdentifier(comparandTempNameText)
             : PushToVariable(comparandTempNameText, comparand);
         
-        var condition = new Luau.BinaryOperator(comparandTempName, "~=", nil);
+        var condition = new Luau.BinaryOperator(comparandTempName, "~=", Luau.AstUtility.Nil);
         List<Luau.Statement> ifBody = [new Luau.Assignment(comparandTempName, whenNotNull), ..prereqs];
         transformState.Prereq(new Luau.If(condition, new Luau.Block(ifBody)));
 

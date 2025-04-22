@@ -75,7 +75,7 @@ public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharp
 
         // add an explicit return (for native codegen) if there isn't one
         if (!body.Statements.Any(statement => statement is Return))
-            body.Statements.Add(new Return(AstUtility.Nil()));
+            body.Statements.Add(new Return(AstUtility.Nil));
 
         return new Function(
             new QualifiedName(nonGenericName, className, ':'),
@@ -89,7 +89,7 @@ public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharp
 
     protected Expression GetFieldInitializer(TypeSyntax type, EqualsValueClauseSyntax? initializer)
     {
-        var defaultValue = AstUtility.Nil();
+        var defaultValue = AstUtility.Nil;
         var explicitInitializer = Visit<Expression?>(initializer);
         if (initializer != null)
             return explicitInitializer ?? defaultValue;

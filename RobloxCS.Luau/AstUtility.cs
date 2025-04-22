@@ -95,11 +95,11 @@ public static class AstUtility
             
         List<Expression> values = [
             new Literal($"\"{type.Name}\""),
-            type.FullName != null ? new Literal($"\"{type.FullName}\"") : Nil(),
-            type.Namespace != null ? new Literal($"\"{type.Namespace}\"") : Nil(),
-            type.AssemblyQualifiedName != null ? new Literal($"\"{type.AssemblyQualifiedName}\"") : Nil(),
-            type.TypeInitializer != null ? CreateConstructorInfo(type.TypeInitializer) : Nil(),
-            type.ReflectedType != null ? CreateTypeInfo(type.ReflectedType) : Nil(),
+            type.FullName != null ? new Literal($"\"{type.FullName}\"") : Nil,
+            type.Namespace != null ? new Literal($"\"{type.Namespace}\"") : Nil,
+            type.AssemblyQualifiedName != null ? new Literal($"\"{type.AssemblyQualifiedName}\"") : Nil,
+            type.TypeInitializer != null ? CreateConstructorInfo(type.TypeInitializer) : Nil,
+            type.ReflectedType != null ? CreateTypeInfo(type.ReflectedType) : Nil,
             new Literal(type.IsAbstract.ToString().ToLower()),
             new Literal(type.IsAnsiClass.ToString().ToLower()),
             new Literal(type.IsArray.ToString().ToLower()),
@@ -146,15 +146,15 @@ public static class AstUtility
             new Literal(type.IsValueType.ToString().ToLower()),
             new Literal(type.IsVariableBoundArray.ToString().ToLower()),
             new Literal(type.IsVisible.ToString().ToLower()),
-            type != type.UnderlyingSystemType ? CreateTypeInfo(type.UnderlyingSystemType) : Nil(),
-            type.BaseType != null ? CreateTypeInfo(type.BaseType) : Nil(),
-            type.DeclaringType != null ? CreateTypeInfo(type.DeclaringType) : Nil(),
+            type != type.UnderlyingSystemType ? CreateTypeInfo(type.UnderlyingSystemType) : Nil,
+            type.BaseType != null ? CreateTypeInfo(type.BaseType) : Nil,
+            type.DeclaringType != null ? CreateTypeInfo(type.DeclaringType) : Nil,
             new Literal(type.ContainsGenericParameters.ToString().ToLower()),
             new TableInitializer(type.GenericTypeArguments.Select(CreateTypeInfo).OfType<Expression>().ToList()),
             new Literal($"\"{type.GUID}\"")
         ];
 
-        return new TableInitializer(values, keys, true);
+        return new TableInitializer(values, keys);
     }
 
     /// <summary>
@@ -169,7 +169,7 @@ public static class AstUtility
             new Literal(type.Name),
         ];
             
-        return new TableInitializer(values, keys, true);
+        return new TableInitializer(values, keys);
     }
 
     /// <summary>
@@ -308,7 +308,7 @@ public static class AstUtility
     /// </code>
     public static If DefaultValueInitializer(Name name, Expression initializer) =>
         new(
-            new BinaryOperator(name, "==", Nil()),
+            new BinaryOperator(name, "==", Nil),
             new Assignment(name, initializer)
         );
 
@@ -523,7 +523,7 @@ public static class AstUtility
 
     public static Literal True() => new("true");
 
-    public static Literal Nil() => new("nil");
+    public static Literal Nil { get; } = new("nil");
 
     public static TypeRef AnyType { get; } = new("any");
 }

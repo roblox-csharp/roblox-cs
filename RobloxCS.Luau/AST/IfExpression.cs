@@ -24,19 +24,21 @@ public class IfExpression : Expression
     {
         luau.Write("if ");
         Condition.Render(luau);
-        luau.Write(" then" + (IsCompact ? " " : '\n'));
+        luau.Write(" then");
+        luau.Write(IsCompact ? ' ' : '\n');
         if (!IsCompact)
             luau.PushIndent();
 
-        Node body = IsCompact ? Body : new ExpressionStatement(Body);
+        Node body = IsCompact ? Body : new ExpressionStatement(Body); // for the newline
         body.Render(luau);
 
         var isElseIf = ElseBranch is IfExpression;
         if (ElseBranch == null) return;
-            
-        luau.PopIndent();
+        
         if (IsCompact)
             luau.Write(' ');
+        else
+            luau.PopIndent();
             
         luau.Write("else");
         if (IsCompact && !isElseIf)
