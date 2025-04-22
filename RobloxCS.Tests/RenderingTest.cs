@@ -178,8 +178,8 @@ public class RenderingTest
         var body = new Block([new ExpressionStatement(AstUtility.PrintCall(new Literal("\"im tha best\"")))]);
         var elseBody = new Block([new ExpressionStatement(AstUtility.PrintCall(new Literal("\"uhhhh\"")))]);
         var elseifBody = new Block([new ExpressionStatement(AstUtility.PrintCall(new Literal("\"im washed\"")))]);
-        var elseifBranch = new If(condition2, elseifBody, elseBody);
-        var ifStatement = new If(condition1, body, elseifBranch);
+        var elseIfBranch = new Block([new If(condition2, elseifBody, elseBody)]);
+        var ifStatement = new If(condition1, body, elseIfBranch);
         var output = Render(ifStatement);
         const string expectedOutput = """
                                       if balls == 69 then

@@ -4,9 +4,9 @@ public class If : Statement
 {
     public Expression Condition { get; }
     public Block Body { get; }
-    public Statement? ElseBranch { get; }
+    public Block? ElseBranch { get; }
 
-    public If(Expression condition, Block body, Statement? elseBranch = null)
+    public If(Expression condition, Block body, Block? elseBranch = null)
     {
         Condition = condition;
         Body = body;

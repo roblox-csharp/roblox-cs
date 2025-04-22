@@ -257,14 +257,109 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
 
         switch (memberAccess.Name.Identifier.Text)
         {
+            // TODO: error if index is out of bounds
             case "First":
             {
                 expanded = new ElementAccess(self, one);
                 break;
             }
+            case "FirstOrDefault":
+            {
+                if (arguments.Count == 0)
+                {
+                    expanded = new ElementAccess(self, one);
+                    break;
+                }
+                
+                var foundIdentifier = occupiedIdentifiersStack.AddIdentifier("_found");
+                var defaultIdentifier = occupiedIdentifiersStack.AddIdentifier("_default");
+                var predicate = (Expression)visit(arguments.First().Expression)!;
+                transformState.Prereq(new Variable(foundIdentifier, true));
+                transformState.Prereq(new Variable(defaultIdentifier, true, predicate));
+
+                occupiedIdentifiersStack.Push();
+                var valueIdentifier = occupiedIdentifiersStack.AddIdentifier("v");
+                transformState.Prereq(
+                    new If(
+                        new BinaryOperator(
+                            new Call(new IdentifierName("typeof"), AstUtility.CreateArgumentList([defaultIdentifier])),
+                            "==",
+                            new Literal("\"function\"")),
+                        new Block([
+                            new For(
+                                [AstUtility.DiscardName, valueIdentifier],
+                                self,
+                                new Block([
+                                    new Block([
+                                        new If(
+                                            new UnaryOperator("not ", new Call(defaultIdentifier, AstUtility.CreateArgumentList([valueIdentifier]))),
+                                            new Block([new Continue()]))
+                                    ]),
+                                    new Assignment(foundIdentifier, valueIdentifier),
+                                    new Break()
+                                ]))
+                        ]),
+                        new Block([
+                            new Assignment(foundIdentifier, new BinaryOperator(
+                                new ElementAccess(self, one),
+                                "or",
+                                defaultIdentifier))
+                        ])));
+                occupiedIdentifiersStack.Pop();
+                expanded = foundIdentifier;
+                
+                break;
+            }
+            // TODO: error if index is out of bounds
             case "Last":
             {
                 expanded = new ElementAccess(self, new UnaryOperator("#", self));
+                break;
+            }
+            case "LastOrDefault":
+            {
+                if (arguments.Count == 0)
+                {
+                    expanded = new ElementAccess(self, new UnaryOperator("#", self));
+                    break;
+                }
+                
+                var foundIdentifier = occupiedIdentifiersStack.AddIdentifier("_found");
+                var defaultIdentifier = occupiedIdentifiersStack.AddIdentifier("_default");
+                var predicate = (Expression)visit(arguments.First().Expression)!;
+                transformState.Prereq(new Variable(foundIdentifier, true));
+                transformState.Prereq(new Variable(defaultIdentifier, true, predicate));
+
+                occupiedIdentifiersStack.Push();
+                var valueIdentifier = occupiedIdentifiersStack.AddIdentifier("v");
+                transformState.Prereq(
+                    new If(
+                        new BinaryOperator(
+                            new Call(new IdentifierName("typeof"), AstUtility.CreateArgumentList([defaultIdentifier])),
+                            "==",
+                            new Literal("\"function\"")),
+                        new Block([
+                            new For(
+                                [AstUtility.DiscardName, valueIdentifier],
+                                self,
+                                new Block([
+                                    new Block([
+                                        new If(
+                                            new UnaryOperator("not ", new Call(defaultIdentifier, AstUtility.CreateArgumentList([valueIdentifier]))),
+                                            new Block([new Continue()]))
+                                    ]),
+                                    new Assignment(foundIdentifier, valueIdentifier)
+                                ]))
+                        ]),
+                        new Block([
+                            new Assignment(foundIdentifier, new BinaryOperator(
+                                new ElementAccess(self, new UnaryOperator("#", self)),
+                                "or",
+                                defaultIdentifier))
+                        ])));
+                occupiedIdentifiersStack.Pop();
+                expanded = foundIdentifier;
+                
                 break;
             }
             case "Count":
@@ -272,7 +367,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 expanded = new UnaryOperator("#", self);
                 break;
             }
-            case "ElementAt":
+            case "ElementAt": // TODO: error if index is out of bounds
             case "ElementAtOrDefault":
             {
                 var index = (Expression)visit(arguments.First().Expression)!;

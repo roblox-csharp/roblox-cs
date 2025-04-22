@@ -731,7 +731,7 @@ public sealed class LuauGenerator(
     {
         var condition = Visit<Luau.Expression>(node.Condition);
         var body = Visit<Luau.Block>(node.Statement);
-        var elseBranch = Visit<Luau.Statement?>(node.Else?.Statement);
+        var elseBranch = Visit<Luau.Block?>(node.Else?.Statement);
 
         return new Luau.If(condition, body, elseBranch);
     }
