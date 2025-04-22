@@ -175,9 +175,9 @@ public class RenderingTest
         var identifier = new IdentifierName("balls");
         var condition1 = new BinaryOperator(identifier, "==", new Literal("69"));
         var condition2 = new BinaryOperator(identifier, "==", new Literal("420"));
-        var body = new ExpressionStatement(AstUtility.PrintCall(new Literal("\"im tha best\"")));
-        var elseBody = new ExpressionStatement(AstUtility.PrintCall(new Literal("\"uhhhh\"")));
-        var elseifBody = new ExpressionStatement(AstUtility.PrintCall(new Literal("\"im washed\"")));
+        var body = new Block([new ExpressionStatement(AstUtility.PrintCall(new Literal("\"im tha best\"")))]);
+        var elseBody = new Block([new ExpressionStatement(AstUtility.PrintCall(new Literal("\"uhhhh\"")))]);
+        var elseifBody = new Block([new ExpressionStatement(AstUtility.PrintCall(new Literal("\"im washed\"")))]);
         var elseifBranch = new If(condition2, elseifBody, elseBody);
         var ifStatement = new If(condition1, body, elseifBranch);
         var output = Render(ifStatement);

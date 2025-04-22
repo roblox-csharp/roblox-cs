@@ -181,7 +181,7 @@ public sealed class LuauGenerator(
                     forStatementBody.Add(new Luau.Assignment(resultValueIdentifier, call));
                     break;
                 case LinqQueryClauseInfoKind.Where:
-                    forStatementBody.Add(new Luau.If(new Luau.UnaryOperator("not ", call), new Luau.Continue()));
+                    forStatementBody.Add(new Luau.If(new Luau.UnaryOperator("not ", call), new Luau.Block([new Luau.Continue()])));
                     break;
 
                 case LinqQueryClauseInfoKind.Continuation:
@@ -580,7 +580,7 @@ public sealed class LuauGenerator(
     public override Luau.If VisitIfStatement(IfStatementSyntax node)
     {
         var condition = Visit<Luau.Expression>(node.Condition);
-        var body = Visit<Luau.Statement>(node.Statement);
+        var body = Visit<Luau.Block>(node.Statement);
         var elseBranch = Visit<Luau.Statement?>(node.Else?.Statement);
 
         return new Luau.If(condition, body, elseBranch);
@@ -633,10 +633,15 @@ public sealed class LuauGenerator(
             {
                 incrementBy = new Luau.Variable(new Luau.IdentifierName("_"), true, expressionStatement.Expression);
             }
-            whileStatements.Add(new Luau.If(shouldIncrementIdentifier, incrementBy, new Luau.Assignment(shouldIncrementIdentifier, Luau.AstUtility.True())));
+            whileStatements.Add(new Luau.If(
+                shouldIncrementIdentifier,
+                new Luau.Block([incrementBy]),
+                    new Luau.Block([
+                    new Luau.Assignment(shouldIncrementIdentifier, Luau.AstUtility.True())
+                ])));
         }
 
-        whileStatements.Add(new Luau.If(new Luau.UnaryOperator("not ", new Luau.Parenthesized(condition)), new Luau.Break()));
+        whileStatements.Add(new Luau.If(new Luau.UnaryOperator("not ", new Luau.Parenthesized(condition)), new Luau.Block([new Luau.Break()])));
         whileStatements.Add(body);
         statements.Add(new Luau.While(Luau.AstUtility.True(), new Luau.Block(whileStatements)));
         return new Luau.ScopedBlock(statements);
@@ -793,7 +798,9 @@ public sealed class LuauGenerator(
                             new(Luau.AstUtility.Vararg)
                         ])
                     ), "~=", new Luau.Literal("0")),
-                    new Luau.Assignment(variable?.Name ?? Visit<Luau.IdentifierName>(arg.Expression), new Luau.IdentifierName("_val"))
+                    new Luau.Block([
+                        new Luau.Assignment(variable?.Name ?? Visit<Luau.IdentifierName>(arg.Expression), new Luau.IdentifierName("_val"))
+                    ])
                 ),
                 new Luau.Return(variable?.Name ?? Visit<Luau.IdentifierName>(arg.Expression))
             ])));

@@ -3,10 +3,10 @@
 public class If : Statement
 {
     public Expression Condition { get; }
-    public Statement Body { get; }
+    public Block Body { get; }
     public Statement? ElseBranch { get; }
 
-    public If(Expression condition, Statement body, Statement? elseBranch = null)
+    public If(Expression condition, Block body, Statement? elseBranch = null)
     {
         Condition = condition;
         Body = body;
@@ -21,9 +21,22 @@ public class If : Statement
     {
         luau.Write("if ");
         Condition.Render(luau);
-        luau.WriteLine(" then");
-        luau.PushIndent();
-        Body.Render(luau);
+        luau.Write(" then");
+
+        var compact = ElseBranch == null
+                      && Body.Statements.Count == 1
+                      && Body.Statements.First() is Return { Expression: null or Literal { ValueText: "nil" } } or Break or Continue;
+
+        luau.Write(compact ? ' ' : '\n');
+        if (!compact)
+            luau.PushIndent();
+
+        (compact ? Body.Statements.First() : Body).Render(luau);
+        if (compact)
+        {
+            luau.Remove(1);
+            luau.Write(' ');
+        }
 
         var isElseIf = ElseBranch is If;
         if (ElseBranch != null)
@@ -36,7 +49,9 @@ public class If : Statement
             ElseBranch.Render(luau);
         }
 
-        luau.PopIndent();
+        if (!compact)
+            luau.PopIndent();
+        
         if (isElseIf) return;
         luau.WriteLine("end");
     }

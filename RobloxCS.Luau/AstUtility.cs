@@ -309,7 +309,7 @@ public static class AstUtility
     public static If DefaultValueInitializer(Name name, Expression initializer) =>
         new(
             new BinaryOperator(name, "==", Nil),
-            new Assignment(name, initializer)
+            new Block([new Assignment(name, initializer)])
         );
 
     /// <summary>

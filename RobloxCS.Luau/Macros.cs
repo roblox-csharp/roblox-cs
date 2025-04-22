@@ -275,8 +275,6 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "ElementAt":
             case "ElementAtOrDefault":
             {
-                IEnumerable<int> n;
-                // n.ElementAt()
                 var index = (Expression)visit(invocation.ArgumentList.Arguments.First().Expression)!;
                 expanded = new ElementAccess(self, AstUtility.AddOne(index));
                 break;
@@ -294,6 +292,33 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                     new Block([
                         new ExpressionStatement(AstUtility.TableCall("insert", resultIdentifier, valueIdentifier)),
                     ])));
+                expanded = resultIdentifier;
+                
+                break;
+            }
+            case "Intersect":
+            {
+                var resultIdentifier = occupiedIdentifiersStack.AddIdentifier("_result");
+                var firstIdentifier = occupiedIdentifiersStack.AddIdentifier("a");
+                var secondIdentifier = occupiedIdentifiersStack.AddIdentifier("b");
+                var other = (Expression)visit(invocation.ArgumentList.Arguments.First().Expression)!;
+                
+                transformState.Prereq(new Variable(resultIdentifier, true, TableInitializer.Empty));
+                transformState.Prereq(new For(
+                    [new IdentifierName("_"), firstIdentifier],
+                    self,
+                    new Block([
+                        new For(
+                            [new IdentifierName("_"), secondIdentifier],
+                            other,
+                            new Block([
+                                new If(
+                                    new BinaryOperator(firstIdentifier, "~=", secondIdentifier),
+                                    new Block([new Continue()])),
+                                new ExpressionStatement(AstUtility.TableCall("insert", resultIdentifier, firstIdentifier))
+                            ]))
+                    ])));
+                
                 expanded = resultIdentifier;
                 
                 break;

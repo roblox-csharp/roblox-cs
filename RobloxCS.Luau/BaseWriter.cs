@@ -22,7 +22,8 @@ public class BaseWriter
         }
 
         WriteIndent();
-        _output.AppendLine(text);
+        _output.Append(text);
+        _output.Append('\n');
     }
     
     public void Write(char text) => Write(text.ToString());
