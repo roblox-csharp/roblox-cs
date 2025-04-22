@@ -411,11 +411,21 @@ public static class AstUtility
     {
         return CreateSimpleName(node, string.Join("", StandardUtility.GetNamesFromNode(node)), bypassReserved, noGenerics);
     }
-
+    
+    public static bool CheckReservedName(SyntaxNode node, string name) => CheckReservedName(node.GetFirstToken(), name);
+    public static bool CheckReservedName(SyntaxToken token, string name)
+    {
+        var reserved = RESERVED_IDENTIFIERS.Contains(name);
+        if (reserved)
+            throw Logger.UnsupportedError(token, $"Using '{name}' as an identifier", useIs: true, useYet: false);
+        
+        return reserved;
+    }
+    
     public static SimpleName CreateSimpleName(SyntaxNode node, string name, bool bypassReserved = false, bool noGenerics = false)
     {
-        if (RESERVED_IDENTIFIERS.Contains(name) && !bypassReserved)
-            throw Logger.UnsupportedError(node, $"Using '{name}' as an identifier", useIs: true, useYet: false);
+        if (!bypassReserved && CheckReservedName(node, name))
+            return null!;
 
         var text = name.Replace("@", "");
         return name.Contains('<') && name.Contains('>') && !noGenerics

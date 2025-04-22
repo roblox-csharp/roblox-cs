@@ -53,9 +53,12 @@ public static class Logger
         Warn($"{message}\n\t- {FormatLocation(lineSpan)}");
     }
 
-    public static CleanExitException UnsupportedError(SyntaxNode node, string subject, bool useIs = false, bool useYet = true)
+    public static CleanExitException UnsupportedError(SyntaxNode node, string subject, bool useIs = false, bool useYet = true) =>
+        UnsupportedError(node.GetFirstToken(), subject, useIs, useYet);
+    
+    public static CleanExitException UnsupportedError(SyntaxToken token, string subject, bool useIs = false, bool useYet = true)
     {
-        return CodegenError(node, $"{subject} {(useIs ? "is" : "are")} not {(useYet ? "yet " : "")}supported, sorry!");
+        return CodegenError(token, $"{subject} {(useIs ? "is" : "are")} not {(useYet ? "yet " : "")}supported, sorry!");
     }
 
     public static CleanExitException CodegenError(SyntaxNode node, string message)

@@ -24,12 +24,24 @@ public class OccupiedIdentifiersStack : Stack<List<IdentifierName>>
     
     public int CountOccurrences(string text) => Peek().Count(identifier => identifier.Text == text);
 
-    public IdentifierName AddIdentifier(SyntaxToken token) => AddIdentifier(token.Text);
+    public IdentifierName AddIdentifier(SyntaxNode node, string text) => AddIdentifier(node.GetFirstToken(), text);
+    public IdentifierName AddIdentifier(SyntaxToken token) => AddIdentifier(token, token.Text);
+    public IdentifierName AddIdentifier(SyntaxToken token, string text)
+    {
+        var verbatim = text.Replace("@", "");
+        if (AstUtility.CheckReservedName(token, verbatim))
+            return null!;
+        
+        return AddIdentifier(verbatim);
+    }
+    
+    /// <summary><b>Note:</b> Skips reserved Luau name checks</summary>
     public IdentifierName AddIdentifier(string text)
     {
         AddIdentifier(new IdentifierName(text.Replace("@", "")));
         return new IdentifierName(GetDuplicateText(text));
     }
+
 
     private void AddIdentifier(IdentifierName identifierName) => Peek().Add(identifierName);
 }

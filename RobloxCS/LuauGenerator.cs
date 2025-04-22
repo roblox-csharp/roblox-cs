@@ -226,7 +226,7 @@ public sealed class LuauGenerator(
 
         occupiedIdentifiersStack.Push();
         var parameters = new Luau.ParameterList([
-            new Luau.Parameter(occupiedIdentifiersStack.AddIdentifier(paramText))
+            new Luau.Parameter(occupiedIdentifiersStack.AddIdentifier(node, paramText))
         ]);
 
         var condition = Visit<Luau.Expression>(node.Condition);
@@ -250,7 +250,7 @@ public sealed class LuauGenerator(
         
         occupiedIdentifiersStack.Push();
         var parameters = new Luau.ParameterList([
-            new Luau.Parameter(occupiedIdentifiersStack.AddIdentifier(paramText))
+            new Luau.Parameter(occupiedIdentifiersStack.AddIdentifier(node, paramText))
         ]);
 
         var expression = Visit<Luau.Expression>(node.Expression);
@@ -510,7 +510,7 @@ public sealed class LuauGenerator(
     }
     public override Luau.Block VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
     {
-        var name = occupiedIdentifiersStack.AddIdentifier(node.Name.ToString().Split('.').Last());
+        var name = occupiedIdentifiersStack.AddIdentifier(node.Name, node.Name.ToString().Split('.').Last());
         var members = new Luau.Block(node.Members.Select(Visit<Luau.Statement>).ToList());
         List<Luau.Statement> statements =
         [
@@ -561,8 +561,8 @@ public sealed class LuauGenerator(
         var comparandTempNameText = name != null ? "_" + name : "_exp";
         var isWhenNotNullBranch = node.Ancestors().Any(a => a.IsKind(SyntaxKind.ConditionalAccessExpression));
         var comparandTempName = isWhenNotNullBranch
-            ? occupiedIdentifiersStack.AddIdentifier(comparandTempNameText)
-            : PushToVariable(comparandTempNameText, comparand);
+            ? new Luau.IdentifierName(occupiedIdentifiersStack.GetDuplicateText(comparandTempNameText))
+            : PushToVariable(node.WhenNotNull, comparandTempNameText, comparand);
         
         var condition = new Luau.BinaryOperator(comparandTempName, "~=", Luau.AstUtility.Nil);
         List<Luau.Statement> ifBody = [new Luau.Assignment(comparandTempName, whenNotNull), ..prereqs];
@@ -571,9 +571,9 @@ public sealed class LuauGenerator(
         return isWhenNotNullBranch ? comparand : comparandTempName;
     }
 
-    private Luau.IdentifierName PushToVariable(string name, Luau.Expression initializer)
+    private Luau.IdentifierName PushToVariable(SyntaxNode node, string name, Luau.Expression initializer)
     {
-        var identifier = occupiedIdentifiersStack.AddIdentifier(name);
+        var identifier = occupiedIdentifiersStack.AddIdentifier(node, name);
         transformState.Prereq(new Luau.Variable(identifier, true, initializer));
         
         return identifier;
@@ -622,14 +622,12 @@ public sealed class LuauGenerator(
         var statements = initializerPrereqs;
         if (initializer != null)
             statements.Add(initializer);
-
-        var shouldIncrementIdentifier = occupiedIdentifiersStack.AddIdentifier("_shouldIncrement");
-        if (incrementBy != null)
-            statements.Add(new Luau.Variable(shouldIncrementIdentifier, true, Luau.AstUtility.False));
-
+        
         List<Luau.Statement> whileStatements = [];
         if (incrementBy != null)
         {
+            var shouldIncrementIdentifier = occupiedIdentifiersStack.AddIdentifier("_shouldIncrement");
+            statements.Add(new Luau.Variable(shouldIncrementIdentifier, true, Luau.AstUtility.False));
             if (incrementBy is Luau.ExpressionStatement { Expression: Luau.BinaryOperator binaryOperator } expressionStatement &&
                 !binaryOperator.Operator.Contains('='))
             {
