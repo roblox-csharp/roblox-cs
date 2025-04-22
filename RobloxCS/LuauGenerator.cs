@@ -274,36 +274,31 @@ public sealed class LuauGenerator(
 
     public override Luau.Statement VisitPropertyDeclaration(PropertyDeclarationSyntax node)
     {
-        if (!IsStatic(node) || node.Parent is not ClassDeclarationSyntax || node.Initializer == null)
-            return new Luau.NoOp();
+        var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node);
+        if (!IsStatic(node) || classDeclaration == null)
+            return new Luau.NoOp(false);
 
-        var classDeclaration = (ClassDeclarationSyntax)node.Parent!;
-        var initializer = Visit<Luau.Expression>(node.Initializer);
+        var initializer = GetFieldInitializer(node.Type, node.Initializer);
         return new Luau.Assignment(
             new Luau.MemberAccess(
                 Luau.AstUtility.CreateSimpleName(classDeclaration, noGenerics: true),
                 Luau.AstUtility.CreateSimpleName(node, noGenerics: true)
             ),
-            initializer
+            initializer ?? Luau.AstUtility.Nil()
         );
     }
 
     public override Luau.Statement VisitFieldDeclaration(FieldDeclarationSyntax node)
     {
-        if (!IsStatic(node) || node.Parent is not ClassDeclarationSyntax)
-            return new Luau.NoOp();
+        var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node);
+        if (!IsStatic(node) || classDeclaration == null)
+            return new Luau.NoOp(false);
 
-        var classDeclaration = (ClassDeclarationSyntax)node.Parent!;
-        var staticFields = classDeclaration.Members
-            .OfType<FieldDeclarationSyntax>()
-            .Where(field => HasSyntax(field.Modifiers, SyntaxKind.StaticKeyword));
-
+        // static fields
         List<Luau.Statement> statements = [];
         foreach (var declarator in node.Declaration.Variables)
         {
-            if (declarator.Initializer == null) continue;
-
-            var initializer = Visit<Luau.Expression>(declarator.Initializer);
+            var initializer = GetFieldInitializer(node.Declaration.Type, declarator.Initializer);
             statements.Add(new Luau.Assignment(
                 new Luau.MemberAccess(
                     Luau.AstUtility.CreateSimpleName(classDeclaration),
@@ -318,7 +313,7 @@ public sealed class LuauGenerator(
 
     public override Luau.Function VisitConstructorDeclaration(ConstructorDeclarationSyntax node)
     {
-        var classDeclaration = (ClassDeclarationSyntax)node.Parent!;
+        var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node)!;
         var parameterList = Visit<Luau.ParameterList>(node.ParameterList);
         var body = Visit<Luau.Block?>(node.Body);
         var attributeLists = node.AttributeLists.Select(Visit<Luau.AttributeList>).ToList();

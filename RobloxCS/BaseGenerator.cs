@@ -49,31 +49,28 @@ public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharp
         {
             foreach (var declarator in field.Declaration.Variables)
             {
-                if (declarator.Initializer == null) continue;
-
-                var initializer = Visit<Expression>(declarator.Initializer);
-                body.Statements.Add(new Assignment(
+                var initializer = GetFieldInitializer(field.Declaration.Type, declarator.Initializer);
+                // stupid hack
+                body.Statements = body.Statements.Prepend(new Assignment(
                     new MemberAccess(
                         new IdentifierName("self"),
                         AstUtility.CreateSimpleName(declarator)
                     ),
                     initializer
-                ));
+                )).ToList();
             }
         }
 
         foreach (var property in nonStaticProperties)
         {
-            if (property.Initializer == null) continue;
-
-            var initializer = Visit<Expression>(property.Initializer);
-            body.Statements.Add(new Assignment(
+            var initializer = GetFieldInitializer(property.Type, property.Initializer);
+            body.Statements = body.Statements.Prepend(new Assignment(
                 new MemberAccess(
                     new IdentifierName("self"),
                     AstUtility.CreateSimpleName(property)
                 ),
                 initializer
-            ));
+            )).ToList();
         }
 
         // add an explicit return (for native codegen) if there isn't one
@@ -88,6 +85,22 @@ public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharp
             body,
             attributeLists
         );
+    }
+
+    protected Expression GetFieldInitializer(TypeSyntax type, EqualsValueClauseSyntax? initializer)
+    {
+        var defaultValue = AstUtility.Nil();
+        var explicitInitializer = Visit<Expression?>(initializer);
+        if (initializer != null)
+            return explicitInitializer ?? defaultValue;
+        
+        var typeSymbol = _semanticModel.GetTypeInfo(type).Type;
+        if (typeSymbol == null)
+            return explicitInitializer ?? defaultValue;
+            
+        defaultValue = new Literal(StandardUtility.GetDefaultValueForType(typeSymbol.Name));
+
+        return explicitInitializer ?? defaultValue;
     }
 
     protected string GetName(SyntaxNode node) =>
