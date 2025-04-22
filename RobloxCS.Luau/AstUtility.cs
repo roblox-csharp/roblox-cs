@@ -32,7 +32,8 @@ public static class AstUtility
     /// </summary>
     public static TableInitializer CreateTypeInfo(Type type)
     {
-        List<Expression> keys = [
+        List<Expression> keys =
+        [
             new IdentifierName("Name"),
             new IdentifierName("FullName"),
             new IdentifierName("Namespace"),
@@ -91,14 +92,15 @@ public static class AstUtility
             new IdentifierName("ContainsGenericParameters"),
             new IdentifierName("GenericTypeArguments"),
             new IdentifierName("GUID"),
+            new IdentifierName("GetProperties")
         ];
-            
-        List<Expression> values = [
-            new Literal($"\"{type.Name}\""),
-            type.FullName != null ? new Literal($"\"{type.FullName}\"") : Nil,
-            type.Namespace != null ? new Literal($"\"{type.Namespace}\"") : Nil,
-            type.AssemblyQualifiedName != null ? new Literal($"\"{type.AssemblyQualifiedName}\"") : Nil,
-            type.TypeInitializer != null ? CreateConstructorInfo(type.TypeInitializer) : Nil,
+        List<Expression> values =
+        [
+            new Literal('"' + type.Name + '"'),
+            type.FullName != null ? new Literal('"' + type.FullName + '"') : Nil,
+            type.Namespace != null ? new Literal('"' + type.Namespace + '"') : Nil,
+            type.AssemblyQualifiedName != null ? new Literal('"' + type.AssemblyQualifiedName + '"') : Nil,
+            type.TypeInitializer != null ? CreateMemberInfo(type.TypeInitializer) : Nil,
             type.ReflectedType != null ? CreateTypeInfo(type.ReflectedType) : Nil,
             new Literal(type.IsAbstract.ToString().ToLower()),
             new Literal(type.IsAnsiClass.ToString().ToLower()),
@@ -151,7 +153,13 @@ public static class AstUtility
             type.DeclaringType != null ? CreateTypeInfo(type.DeclaringType) : Nil,
             new Literal(type.ContainsGenericParameters.ToString().ToLower()),
             new TableInitializer(type.GenericTypeArguments.Select(CreateTypeInfo).OfType<Expression>().ToList()),
-            new Literal($"\"{type.GUID}\"")
+            new Literal($"\"{type.GUID}\""),
+            new AnonymousFunction(
+                new ParameterList([new Parameter(new IdentifierName("self"))]),
+                null,
+                new Block([
+                    new Return(CreatePropertiesInfo(type.GetProperties()))
+                ]))
         ];
 
         if (keys.Count != values.Count)
@@ -160,19 +168,185 @@ public static class AstUtility
         return new TableInitializer(values, keys);
     }
 
-    /// <summary>
-    /// Creates constructor info table for runtime type objects (via .GetType() and typeof())
-    /// </summary>
-    private static TableInitializer CreateConstructorInfo(ConstructorInfo type)
+    /// <summary>Creates array of property infos for runtime type objects</summary>
+    private static TableInitializer CreatePropertiesInfo(PropertyInfo[] properties)
     {
-        List<Expression> keys = [
-            new IdentifierName("Name"),
+        var propertyInfos = properties.Select<PropertyInfo, Expression>(property =>
+        {
+            var memberInfo = CreateMemberInfo(property);
+            List<Expression> keys =
+            [
+                new IdentifierName("CanRead"),
+                new IdentifierName("CanWrite"),
+                new IdentifierName("IsSpecialName"),
+                new IdentifierName("PropertyType"),
+                new IdentifierName("GetMethod"),
+                new IdentifierName("SetMethod")
+            ];
+            List<Expression> values =
+            [
+                new Literal(property.CanRead.ToString().ToLower()),
+                new Literal(property.CanWrite.ToString().ToLower()),
+                new Literal(property.IsSpecialName.ToString().ToLower()),
+                CreateTypeInfo(property.PropertyType),
+                property.GetMethod != null ? CreateMethodInfo(property.GetMethod) : Nil,
+                property.SetMethod != null ? CreateMethodInfo(property.SetMethod) : Nil
+            ];
+            
+            return TableInitializer.Union(memberInfo, new TableInitializer(values, keys));
+        }).ToList();
+
+        return new TableInitializer(propertyInfos);
+    }
+    
+    /// <summary>Creates method info table for runtime type objects</summary>
+    private static TableInitializer CreateMethodInfo(MethodInfo method)
+    {
+        var methodBase = CreateMethodBase(method);
+        List<Expression> keys =
+        [
+            new IdentifierName("ReturnType"),
+            new IdentifierName("ReturnParameter"),
         ];
-        List<Expression> values = [
-            new Literal(type.Name),
+        List<Expression> values =
+        [
+            CreateTypeInfo(method.ReturnType),
+            CreateParameterInfo(method.ReturnParameter),
         ];
             
+        return TableInitializer.Union(methodBase, new TableInitializer(values, keys));
+    }
+
+    private static TableInitializer CreateParameterInfo(ParameterInfo parameter)
+    {
+        List<Expression> keys =
+        [
+            new IdentifierName("Name"),
+            new IdentifierName("IsIn"),
+            new IdentifierName("IsOut"),
+            new IdentifierName("IsOptional"),
+            new IdentifierName("IsLcid"),
+            new IdentifierName("IsRetval"),
+            new IdentifierName("HasDefaultValue"),
+            new IdentifierName("DefaultValue"),
+            new IdentifierName("RawDefaultValue"),
+            new IdentifierName("Position"),
+            new IdentifierName("MetadataToken"),
+            new IdentifierName("ParameterType"),
+            new IdentifierName("Member"),
+        ];
+        List<Expression> values =
+        [
+            parameter.Name != null ? new Literal('"' + parameter.Name + '"') : Nil,
+            new Literal(parameter.IsIn.ToString().ToLower()),
+            new Literal(parameter.IsOut.ToString().ToLower()),
+            new Literal(parameter.IsOptional.ToString().ToLower()),
+            new Literal(parameter.IsLcid.ToString().ToLower()),
+            new Literal(parameter.IsRetval.ToString().ToLower()),
+            new Literal(parameter.HasDefaultValue.ToString().ToLower()),
+            CreateLuauValue(parameter.DefaultValue),
+            CreateLuauValue(parameter.RawDefaultValue),
+            new Literal(parameter.Position.ToString()),
+            new Literal(parameter.MetadataToken.ToString()),
+            CreateTypeInfo(parameter.ParameterType),
+            CreateMemberInfo(parameter.Member),
+        ];
+        
         return new TableInitializer(values, keys);
+    }
+
+    /// <summary>Creates method info table for runtime type objects</summary>
+    private static TableInitializer CreateMethodBase(MethodBase method)
+    {
+        var memberInfo = CreateMemberInfo(method);
+        List<Expression> keys =
+        [
+            new IdentifierName("IsAbstract"),
+            new IdentifierName("IsSpecialName"),
+            new IdentifierName("IsConstructor"),
+            new IdentifierName("IsPublic"),
+            new IdentifierName("IsPrivate"),
+            new IdentifierName("IsStatic"),
+            new IdentifierName("IsAssembly"),
+            new IdentifierName("IsFamily"),
+            new IdentifierName("IsFamilyAndAssembly"),
+            new IdentifierName("IsFamilyOrAssembly"),
+            new IdentifierName("IsFinal"),
+            new IdentifierName("IsVirtual"),
+            new IdentifierName("IsGenericMethod"),
+            new IdentifierName("IsConstructedGenericMethod"),
+            new IdentifierName("IsGenericMethodDefinition"),
+            new IdentifierName("IsHideBySig"),
+            new IdentifierName("IsSecurityCritical"),
+            new IdentifierName("IsSecuritySafeCritical"),
+            new IdentifierName("IsSecurityTransparent"),
+            new IdentifierName("ContainsGenericParameters"),
+            new IdentifierName("CallingConvention"),
+            new IdentifierName("MethodImplementationFlags"),
+        ];
+        List<Expression> values =
+        [
+            new Literal(method.IsAbstract.ToString().ToLower()),
+            new Literal(method.IsSpecialName.ToString().ToLower()),
+            new Literal(method.IsConstructor.ToString().ToLower()),
+            new Literal(method.IsPublic.ToString().ToLower()),
+            new Literal(method.IsPrivate.ToString().ToLower()),
+            new Literal(method.IsStatic.ToString().ToLower()),
+            new Literal(method.IsAssembly.ToString().ToLower()),
+            new Literal(method.IsFamily.ToString().ToLower()),
+            new Literal(method.IsFamilyAndAssembly.ToString().ToLower()),
+            new Literal(method.IsFamilyOrAssembly.ToString().ToLower()),
+            new Literal(method.IsFinal.ToString().ToLower()),
+            new Literal(method.IsVirtual.ToString().ToLower()),
+            new Literal(method.IsGenericMethod.ToString().ToLower()),
+            new Literal(method.IsConstructedGenericMethod.ToString().ToLower()),
+            new Literal(method.IsGenericMethodDefinition.ToString().ToLower()),
+            new Literal(method.IsHideBySig.ToString().ToLower()),
+            new Literal(method.IsSecurityCritical.ToString().ToLower()),
+            new Literal(method.IsSecuritySafeCritical.ToString().ToLower()),
+            new Literal(method.IsSecurityTransparent.ToString().ToLower()),
+            new Literal(method.ContainsGenericParameters.ToString().ToLower()),
+            new Literal(((int)method.CallingConvention).ToString()),
+            new Literal(((int)method.MethodImplementationFlags).ToString()),
+        ];
+            
+        return TableInitializer.Union(memberInfo, new TableInitializer(values, keys));
+    }
+
+    /// <summary>Creates member info table for runtime type objects</summary>
+    private static TableInitializer CreateMemberInfo(MemberInfo member)
+    {
+        List<Expression> keys =
+        [
+            new IdentifierName("Name"),
+            new IdentifierName("MemberType"),
+            new IdentifierName("IsCollectible"),
+            // new IdentifierName("DeclaringType"),
+            // new IdentifierName("ReflectedType"),
+            new IdentifierName("MetadataToken"),
+        ];
+        List<Expression> values =
+        [
+            new Literal('"' + member.Name + '"'),
+            new Literal(((int)member.MemberType).ToString().ToLower()),
+            new Literal(member.IsCollectible.ToString().ToLower()),
+            // member.DeclaringType != null ? CreateTypeInfo(member.DeclaringType) : Nil,
+            // member.ReflectedType != null ? CreateTypeInfo(member.ReflectedType) : Nil,
+            new Literal(member.MetadataToken.ToString()),
+        ];
+        
+        return new TableInitializer(values, keys);
+    }
+
+    public static Expression CreateLuauValue(object? value)
+    {
+        return value switch
+        {
+            null => Nil,
+            bool b => b ? True : False,
+            string or char => new Literal('"' + value.ToString() + '"'),
+            _ => new Literal(value.ToString()!)
+        };
     }
 
     /// <summary>

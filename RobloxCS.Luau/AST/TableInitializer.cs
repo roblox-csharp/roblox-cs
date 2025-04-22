@@ -3,6 +3,13 @@
 public class TableInitializer : Expression
 {
     public static readonly TableInitializer Empty = new();
+
+    public static TableInitializer Union(TableInitializer a, TableInitializer b)
+    {
+        var keys = a.Keys.Union(b.Keys).ToList();
+        var values = a.Values.Union(b.Values).ToList();
+        return new TableInitializer(values, keys);
+    }
     
     public List<Expression> Values { get; }
     public List<Expression> Keys { get; }
