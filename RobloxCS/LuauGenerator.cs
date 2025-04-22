@@ -967,7 +967,7 @@ public sealed class LuauGenerator(
                 return new Luau.Call(name, new([]));
         }
 
-        if (symbol is not (IFieldSymbol or IPropertySymbol or IMethodSymbol)
+        if (symbol is not (IFieldSymbol or IPropertySymbol or IMethodSymbol { MethodKind: MethodKind.Ordinary })
             || symbol.IsStatic
             || IsAlreadyQualified(node))
         {
@@ -975,7 +975,7 @@ public sealed class LuauGenerator(
         }
         
         var self = new Luau.IdentifierName("self");
-        return new Luau.MemberAccess(self, name, symbol is IMethodSymbol ? ':' : '.');
+        return new Luau.MemberAccess(self, name);
     }
 
     public override Luau.Expression VisitGenericName(GenericNameSyntax node)
@@ -1537,7 +1537,7 @@ public sealed class LuauGenerator(
                 var members = declaration.Members;
                 if (members.Count <= 1) return false;
                 // stupid hack this code sucks so bad
-                if (newNode is ClassDeclarationSyntax c && declaration.Identifier.Text == c.Identifier.Text) return false;
+                // if (newNode is ClassDeclarationSyntax c && declaration.Identifier.Text == c.Identifier.Text) return false;
 
                 var targetIndex = members.IndexOf((MemberDeclarationSyntax)updatedTarget);
                 var newMembers = members.Insert(targetIndex, (MemberDeclarationSyntax)newNode);
@@ -1596,18 +1596,28 @@ public sealed class LuauGenerator(
         var location = FindHoistTarget(node);
         if (location == null) return null;
 
-        var scope = node.FirstAncestorOrSelf<SyntaxNode>(n =>
-            n is BlockSyntax or ClassDeclarationSyntax or NamespaceDeclarationSyntax or CompilationUnitSyntax);
-
+        var scope = GetHoistScope(node);
         return scope?
             .ChildNodes()
             .FirstOrDefault(n => n.SpanStart >= location.SourceSpan.Start);
     }
 
+    private static SyntaxNode? GetHoistScope(SyntaxNode node)
+    {
+        return node.FirstAncestorOrSelf<SyntaxNode>(n =>
+        {
+            return node switch
+            {
+                ClassDeclarationSyntax => n is BlockSyntax or CompilationUnitSyntax or NamespaceDeclarationSyntax,
+                NamespaceDeclarationSyntax => n is BlockSyntax or CompilationUnitSyntax or ClassDeclarationSyntax,
+                _ => n is BlockSyntax or CompilationUnitSyntax or NamespaceDeclarationSyntax or ClassDeclarationSyntax
+            };
+        });
+    }
+
     private Location? FindHoistTarget(SyntaxNode node)
     {
-        var scope = node.FirstAncestorOrSelf<SyntaxNode>(n =>
-            n is BlockSyntax or ClassDeclarationSyntax or NamespaceDeclarationSyntax or CompilationUnitSyntax);
+        var scope = GetHoistScope(node);
         if (scope == null) return null;
 
         var calledMethods = node
@@ -1618,7 +1628,7 @@ public sealed class LuauGenerator(
                 var symbol = _semanticModel.GetSymbolInfo(inv).Symbol;
                 return symbol?.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax();
             })
-            .Where(syntax => syntax != null && scope.Span.Contains(syntax.Span))
+            .Where(s => s != null && s != node && scope.Span.Contains(s.Span))
             .Distinct()
             .ToList();
 
@@ -1626,7 +1636,7 @@ public sealed class LuauGenerator(
             .DescendantNodes()
             .OfType<IdentifierNameSyntax>()
             .Select(id => _semanticModel.GetSymbolInfo(id).Symbol?.DeclaringSyntaxReferences.FirstOrDefault()?.GetSyntax())
-            .Where(s => s != null && scope.Span.Contains(s.Span))
+            .Where(s => s != null && s != node && scope.Span.Contains(s.Span))
             .Distinct()
             .ToList();
 
