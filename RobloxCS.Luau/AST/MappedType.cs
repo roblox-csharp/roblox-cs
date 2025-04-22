@@ -6,7 +6,7 @@ public class MappedType : TypeRef
     public TypeRef ValueType { get; }
 
     public MappedType(TypeRef keyType, TypeRef valueType)
-        : base($"{{ [{keyType.Path}]: " + valueType.Path + "; }", true)
+        : base($"{{ [{keyType.Path}]: " + valueType.Path + " }", true)
     {
         KeyType = keyType;
         ValueType = valueType;

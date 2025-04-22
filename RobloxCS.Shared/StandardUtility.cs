@@ -129,6 +129,17 @@ public static class StandardUtility
             
             return $"({string.Join(", ", typeArgs)}) -> {returnType}";
         }
+        if (csharpType.StartsWith("Dictionary<"))
+        {
+            var typeArgs = ExtractTypeArguments(csharpType).ConvertAll(GetMappedType);
+            var keyType = typeArgs.First();
+            var valueType = typeArgs.Last();
+            
+            return $"{{ [{keyType}]: {valueType} }}";
+        }
+
+        if (csharpType.StartsWith("Roblox.Enum"))
+            return GetMappedType(csharpType.Replace("Roblox.Enum", "Enum"));
 
         return csharpType switch
         {
@@ -137,6 +148,7 @@ public static class StandardUtility
             "null" => "nil",
             "char" or "Char" or "String" => "string",
             "Boolean" or "bool" => "boolean",
+            "Roblox.Buffer" or "Buffer" => "buffer",
             _ => INTEGER_TYPES.Contains(csharpType) || DECIMAL_TYPES.Contains(csharpType)
                 ? "number"
                 : csharpType
@@ -182,12 +194,41 @@ public static class StandardUtility
         
     public static List<string> ExtractTypeArguments(string input)
     {
-        var match = Regex.Match(input, @"<([^>]+)>");
+        var match = Regex.Match(input, "<(?<open>(?:[^<>]+|<(?<open>)|>(?<-open>))*)>");
         if (!match.Success)
             return [];
-            
-        var arguments = match.Groups[1].Value.Split(',');
+
+        var argumentsRaw = match.Groups[1].Value;
+        var arguments = SplitGenericArguments(argumentsRaw);
         return arguments.Select(arg => arg.Trim()).ToList();
+    }
+
+    private static List<string> SplitGenericArguments(string input)
+    {
+        var args = new List<string>();
+        var depth = 0;
+        var lastSplit = 0;
+
+        for (var i = 0; i < input.Length; i++)
+        {
+            var c = input[i];
+            switch (c)
+            {
+                case '<':
+                    depth++;
+                    break;
+                case '>':
+                    depth--;
+                    break;
+                case ',' when depth == 0:
+                    args.Add(input.Substring(lastSplit, i - lastSplit));
+                    lastSplit = i + 1;
+                    break;
+            }
+        }
+
+        args.Add(input[lastSplit..]);
+        return args;
     }
     
     public static bool IsGlobal(SyntaxNode node) =>

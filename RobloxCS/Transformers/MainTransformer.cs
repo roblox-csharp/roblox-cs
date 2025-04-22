@@ -25,6 +25,24 @@ public sealed class MainTransformer(SyntaxTree tree, TransformState state, Confi
         
         return base.VisitCompilationUnit(node.WithUsings(usings));
     }
+    
+    public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
+    {
+        if (node.Identifier.Text is not ("Enum" or "Buffer"))
+            return base.VisitIdentifierName(node);
+        
+        var parent = node.Parent;
+        if (parent is QualifiedNameSyntax { Left: IdentifierNameSyntax { Identifier.Text: "Roblox" } })
+            return node;
+
+        // replace with a qualified name: Roblox.Enum or Roblox.Buffer
+        var qualifiedName = SyntaxFactory.QualifiedName(
+            SyntaxFactory.IdentifierName("Roblox"),
+            SyntaxFactory.IdentifierName(node.Identifier));
+
+        return qualifiedName.WithTriviaFrom(node);
+
+    }
 
     // Turn file-scoped namespaces into regular namespaces (to reduce code duplication)
     public override SyntaxNode? VisitFileScopedNamespaceDeclaration(FileScopedNamespaceDeclarationSyntax node) =>

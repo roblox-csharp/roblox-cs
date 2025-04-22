@@ -436,6 +436,18 @@ public static class AstUtility
         if (mappedTypePath.EndsWith('?'))
             return new OptionalType(CreateTypeRef(mappedTypePath.TrimEnd('?'))!);
         
+        var functionMatch = Regex.Match(mappedTypePath, @"^\(\s*(.*?)\s*\)\s*->\s*(.+)$");
+        if (functionMatch.Success)
+        {
+            var argsRaw = functionMatch.Groups[1].Value;
+            var returnTypeRaw = functionMatch.Groups[2].Value.Trim();
+
+            var args = ParseFunctionArgs(argsRaw);
+            var returnType = CreateTypeRef(returnTypeRaw)!;
+
+            return new FunctionType(args, returnType);
+        }
+        
         var mappedTypeMatch = Regex.Match(mappedTypePath, @"\{\s*\[([a-zA-Z0-9]+)\]:\s*(.*)\s*\}");
         if (mappedTypeMatch.Success)
         {
@@ -449,6 +461,56 @@ public static class AstUtility
             return new ArrayType(CreateTypeRef(arrayMatch.Groups[1].Value.Trim())!);
 
         return new TypeRef(mappedTypePath, rawPath: true);
+    }
+    
+    private static List<ParameterType> ParseFunctionArgs(string input)
+    {
+        var args = new List<ParameterType>();
+        if (string.IsNullOrWhiteSpace(input))
+            return args;
+
+        var depth = 0;
+        var lastSplit = 0;
+        for (var i = 0; i < input.Length; i++)
+        {
+            var c = input[i];
+            switch (c)
+            {
+                case '<':
+                case '(':
+                    depth++;
+                    break;
+                case '>':
+                case ')':
+                    depth--;
+                    break;
+                case ',' when depth == 0:
+                    args.Add(ParseSingleArg(input.Substring(lastSplit, i - lastSplit).Trim()));
+                    lastSplit = i + 1;
+                    break;
+            }
+        }
+
+        // Add the final arg
+        args.Add(ParseSingleArg(input.Substring(lastSplit).Trim()));
+
+        return args;
+    }
+
+    private static ParameterType ParseSingleArg(string raw)
+    {
+        var parts = raw.Split(':', 2);
+        if (parts.Length == 2)
+        {
+            var name = parts[0].Trim();
+            var type = CreateTypeRef(parts[1].Trim())!;
+            return new ParameterType(name, type);
+        }
+        else
+        {
+            var type = CreateTypeRef(raw)!;
+            return new ParameterType(null, type);
+        }
     }
 
     public static TypeRef? CreateTypeRef(TypeSyntax? type) => CreateTypeRef(type?.ToString());

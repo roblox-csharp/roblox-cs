@@ -358,6 +358,12 @@ public sealed class LuauGenerator(
         var initializers = node.Initializer.Expressions.Select(Visit<Luau.Expression>);
         return new Luau.TableInitializer(initializers.ToList());
     }
+    
+    public override Luau.TypeAlias VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
+    {
+        var name = new Luau.IdentifierName(node.Identifier.Text);
+        return new Luau.TypeAlias(name, new Luau.InterfaceType([]));
+    }
 
     // long as hell lol
     public override Luau.Block VisitClassDeclaration(ClassDeclarationSyntax node)
@@ -670,11 +676,14 @@ public sealed class LuauGenerator(
     public override Luau.Variable VisitSingleVariableDesignation(SingleVariableDesignationSyntax node) =>
         new(occupiedIdentifiersStack.AddIdentifier(node.Identifier), true);
 
+    public override Luau.Variable VisitDiscardDesignation(DiscardDesignationSyntax node) =>
+        new(new Luau.IdentifierName("_"), true);
+    
     public override Luau.VariableList VisitParenthesizedVariableDesignation(ParenthesizedVariableDesignationSyntax node)
     {
-        var variableNodes = node.Variables.Select(Visit)
-            .Where(variableNode => variableNode != null)
-            .Select(variableNode => variableNode!)
+        var variableNodes = node.Variables
+            .Select(Visit)
+            .OfType<Luau.Node>()
             .SelectMany(variableNode =>
             {
                 if (variableNode is Luau.VariableList variableList)

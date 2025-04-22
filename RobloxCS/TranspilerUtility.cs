@@ -36,16 +36,16 @@ public static class TranspilerUtility
            options: compilationOptions
        );
     }
-    
+
     public static SyntaxTree ParseAndTransformTree(string source, ConfigData? config)
     {
         var tree = ParseTree(source);
         HashSet<TransformMethod> transformers = [BuiltInTransformers.Main()];
         
-        return TransformTree(tree, transformers);
+        return TransformTree(tree, transformers, config);
     }
     
-    public static SyntaxTree TransformTree(SyntaxTree cleanTree, HashSet<TransformMethod> transformMethods, ConfigData? config = null)
+    public static SyntaxTree TransformTree(SyntaxTree cleanTree, HashSet<TransformMethod> transformMethods, ConfigData? config)
     {
         // config ??= ConfigReader.UnitTestingConfig;
         config ??= new ConfigData();
