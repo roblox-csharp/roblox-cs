@@ -162,13 +162,14 @@ public sealed class LuauGenerator(
 
         addClauseInfo(body.SelectOrGroup);
         var onlyGroupBy = clauseInfos.Count == 1 && clauseInfos.First().Kind == LinqQueryClauseInfoKind.GroupBy;
-        var groupingIdentifier = occupiedIdentifiersStack.AddIdentifier("_grouping");
+        var groupingsIdentifier = occupiedIdentifiersStack.AddIdentifier("_groupings");
+        var keyMapIdentifier = occupiedIdentifiersStack.AddIdentifier("_keyMap");
         
         List<Luau.Statement> prereqStatements =
         [
             new Luau.Variable(
                 onlyGroupBy
-                    ? groupingIdentifier
+                    ? groupingsIdentifier
                     : resultIdentifier,
                 true,
                 onlyGroupBy
@@ -184,7 +185,7 @@ public sealed class LuauGenerator(
             var indexName = occupiedIdentifiersStack.AddIdentifier("i");
             List<Luau.Statement> forStatementBody = [];
             Luau.Statement? nonForStatementPrereq = null;
-
+            
             var call = new Luau.Call(clauseInfo.Name, Luau.AstUtility.CreateArgumentList([variableName]));
             switch (clauseInfo.Kind)
             {
@@ -209,20 +210,36 @@ public sealed class LuauGenerator(
                     var byIdentifier = occupiedIdentifiersStack.AddIdentifier("by");
                     var byKey = new Luau.MemberAccess(byIdentifier, new Luau.IdentifierName("key"));
                     var byValue = new Luau.MemberAccess(byIdentifier, new Luau.IdentifierName("value"));
-                    var resultAtKey = new Luau.ElementAccess(groupingIdentifier, byKey);
+                    var keyMapAtKey = new Luau.ElementAccess(keyMapIdentifier, byKey);
+                    
                     forStatementBody.Add(new Luau.Variable(byIdentifier, true, call));
                     forStatementBody.Add(new Luau.If(
-                        new Luau.UnaryOperator("not ", resultAtKey),
+                        new Luau.UnaryOperator("not ", keyMapAtKey),
                         new Luau.Block([
+                            new Luau.ExpressionStatement(
+                                Luau.AstUtility.TableCall(
+                                    "insert",
+                                    groupingsIdentifier,
+                                    new Luau.TableInitializer(
+                                        [byKey],
+                                        [new Luau.IdentifierName("Key")]))),
                             new Luau.Assignment(
-                                resultAtKey,
-                                new Luau.TableInitializer([byKey], [new Luau.IdentifierName("Key")]))
+                                keyMapAtKey,
+                                new Luau.UnaryOperator("#", groupingsIdentifier))
                         ])));
-                    forStatementBody.Add(new Luau.ExpressionStatement(Luau.AstUtility.TableCall("insert", resultAtKey, byValue)));
-                    occupiedIdentifiersStack.Pop();
                     
+                    forStatementBody.Add(new Luau.ExpressionStatement(
+                        Luau.AstUtility.TableCall(
+                            "insert",
+                            new Luau.ElementAccess(
+                            groupingsIdentifier,
+                            keyMapAtKey),
+                            byValue)));
+                    
+                    occupiedIdentifiersStack.Pop();
                     if (!onlyGroupBy)
-                        prereqStatements.Add(new Luau.Variable(groupingIdentifier, true, Luau.TableInitializer.Empty));
+                        prereqStatements.Add(new Luau.Variable(groupingsIdentifier, true, Luau.TableInitializer.Empty));
+                    prereqStatements.Add(new Luau.Variable(keyMapIdentifier, true, Luau.TableInitializer.Empty));
                         
                     break;
                 
@@ -239,8 +256,8 @@ public sealed class LuauGenerator(
             
             if (clauseInfo.Kind == LinqQueryClauseInfoKind.GroupBy)
                 prereqStatements.Add(onlyGroupBy
-                    ? new Luau.Variable(resultIdentifier, true, groupingIdentifier)
-                    : new Luau.Assignment(resultIdentifier, groupingIdentifier));
+                    ? new Luau.Variable(resultIdentifier, true, groupingsIdentifier)
+                    : new Luau.Assignment(resultIdentifier, groupingsIdentifier));
             
             firstClause = false;
         }
@@ -268,7 +285,6 @@ public sealed class LuauGenerator(
         var parameters = new Luau.ParameterList([
             new Luau.Parameter(occupiedIdentifiersStack.AddIdentifier(node, paramText))
         ]);
-
         
         var byKey = Visit<Luau.Expression>(node.ByExpression);
         var byValue = Visit<Luau.Expression>(node.GroupExpression);
@@ -283,7 +299,7 @@ public sealed class LuauGenerator(
             ]);
         
         var body = new Luau.Block([new Luau.Return(groupingInfo)]);
-        transformState.Prereq(new Luau.Function(name, true, parameters, new Luau.TypeRef("boolean"), body));
+        transformState.Prereq(new Luau.Function(name, true, parameters, null, body));
         occupiedIdentifiersStack.Pop();
 
         return new Luau.NoOp(false);
