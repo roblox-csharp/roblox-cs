@@ -15,7 +15,7 @@ internal enum LinqQueryClauseInfoKind : byte
     Select,
     Where,
     OrderBy,
-    Group,
+    GroupBy,
     Continuation
 }
 
@@ -161,11 +161,22 @@ public sealed class LuauGenerator(
             addClauseInfo(clause);
 
         addClauseInfo(body.SelectOrGroup);
+        var onlyGroupBy = clauseInfos.Count == 1 && clauseInfos.First().Kind == LinqQueryClauseInfoKind.GroupBy;
+        var groupingIdentifier = occupiedIdentifiersStack.AddIdentifier("_grouping");
+        
         List<Luau.Statement> prereqStatements =
         [
-            new Luau.Variable(resultIdentifier, true, Luau.AstUtility.TableCall("clone", originalIterable))
+            new Luau.Variable(
+                onlyGroupBy
+                    ? groupingIdentifier
+                    : resultIdentifier,
+                true,
+                onlyGroupBy
+                    ? Luau.TableInitializer.Empty
+                    : Luau.AstUtility.TableCall("clone", originalIterable))
         ];
 
+        var firstClause = true;
         foreach (var clauseInfo in clauseInfos)
         {
             occupiedIdentifiersStack.Push();
@@ -179,6 +190,7 @@ public sealed class LuauGenerator(
             {
                 case LinqQueryClauseInfoKind.Select:
                     forStatementBody.Add(new Luau.Assignment(new Luau.ElementAccess(resultIdentifier, indexName), call));
+                    occupiedIdentifiersStack.Pop();
                     break;
                 case LinqQueryClauseInfoKind.Where:
                     forStatementBody.Add(new Luau.If(
@@ -186,20 +198,51 @@ public sealed class LuauGenerator(
                         new Luau.Block([new Luau.Continue()])));
                     forStatementBody.Add(new Luau.ExpressionStatement(
                         Luau.AstUtility.TableCall("remove", resultIdentifier, indexName)));
+                    occupiedIdentifiersStack.Pop();
                     break;
                 case LinqQueryClauseInfoKind.OrderBy:
+                    occupiedIdentifiersStack.Pop();
                     var comparatorName = new Luau.IdentifierName(occupiedIdentifiersStack.GetDuplicateText(clauseInfo.Name.Text + "Comparator"));
                     nonForStatementPrereq = new Luau.ExpressionStatement(Luau.AstUtility.TableCall("sort", resultIdentifier, comparatorName));
                     break;
-
+                case LinqQueryClauseInfoKind.GroupBy:
+                    var byIdentifier = occupiedIdentifiersStack.AddIdentifier("by");
+                    var byKey = new Luau.MemberAccess(byIdentifier, new Luau.IdentifierName("key"));
+                    var byValue = new Luau.MemberAccess(byIdentifier, new Luau.IdentifierName("value"));
+                    var resultAtKey = new Luau.ElementAccess(groupingIdentifier, byKey);
+                    forStatementBody.Add(new Luau.Variable(byIdentifier, true, call));
+                    forStatementBody.Add(new Luau.If(
+                        new Luau.UnaryOperator("not ", resultAtKey),
+                        new Luau.Block([
+                            new Luau.Assignment(
+                                resultAtKey,
+                                new Luau.TableInitializer([byKey], [new Luau.IdentifierName("Key")]))
+                        ])));
+                    forStatementBody.Add(new Luau.ExpressionStatement(Luau.AstUtility.TableCall("insert", resultAtKey, byValue)));
+                    occupiedIdentifiersStack.Pop();
+                    
+                    if (!onlyGroupBy)
+                        prereqStatements.Add(new Luau.Variable(groupingIdentifier, true, Luau.TableInitializer.Empty));
+                        
+                    break;
+                
                 case LinqQueryClauseInfoKind.Continuation:
-                case LinqQueryClauseInfoKind.Group:
                 default:
+                    occupiedIdentifiersStack.Pop();
                     break;
             }
+
+            prereqStatements.Add(nonForStatementPrereq ?? new Luau.For(
+                [indexName, variableName],
+                firstClause ? originalIterable : resultIdentifier,
+                new Luau.Block(forStatementBody)));
             
-            prereqStatements.Add(nonForStatementPrereq ?? new Luau.For([indexName, variableName], resultIdentifier, new Luau.Block(forStatementBody)));
-            occupiedIdentifiersStack.Pop();
+            if (clauseInfo.Kind == LinqQueryClauseInfoKind.GroupBy)
+                prereqStatements.Add(onlyGroupBy
+                    ? new Luau.Variable(resultIdentifier, true, groupingIdentifier)
+                    : new Luau.Assignment(resultIdentifier, groupingIdentifier));
+            
+            firstClause = false;
         }
         
         transformState.PrereqList(prereqStatements);
@@ -212,6 +255,37 @@ public sealed class LuauGenerator(
 
     public override Luau.NoOp VisitGroupClause(GroupClauseSyntax node)
     {
+        var query = FindFirstAncestor<QueryExpressionSyntax>(node);
+        if (query == null)
+            return new Luau.NoOp(false);
+
+        var name = new Luau.IdentifierName(occupiedIdentifiersStack.GetDuplicateText("_groupby"));
+        var paramText = FindFirstAncestor<QueryContinuationSyntax>(node) is { } continuation
+            ? continuation.Identifier.Text
+            : query.FromClause.Identifier.Text;
+
+        occupiedIdentifiersStack.Push();
+        var parameters = new Luau.ParameterList([
+            new Luau.Parameter(occupiedIdentifiersStack.AddIdentifier(node, paramText))
+        ]);
+
+        
+        var byKey = Visit<Luau.Expression>(node.ByExpression);
+        var byValue = Visit<Luau.Expression>(node.GroupExpression);
+        var groupingInfo = new Luau.TableInitializer(
+            [
+                byKey,
+                byValue
+            ],
+            [
+                new Luau.IdentifierName("key"),
+                new Luau.IdentifierName("value")
+            ]);
+        
+        var body = new Luau.Block([new Luau.Return(groupingInfo)]);
+        transformState.Prereq(new Luau.Function(name, true, parameters, new Luau.TypeRef("boolean"), body));
+        occupiedIdentifiersStack.Pop();
+
         return new Luau.NoOp(false);
     }
 
@@ -1840,7 +1914,7 @@ public sealed class LuauGenerator(
             SyntaxKind.SelectClause => LinqQueryClauseInfoKind.Select,
             SyntaxKind.WhereClause => LinqQueryClauseInfoKind.Where,
             SyntaxKind.OrderByClause => LinqQueryClauseInfoKind.OrderBy,
-            SyntaxKind.GroupClause => LinqQueryClauseInfoKind.Continuation,
+            SyntaxKind.GroupClause => LinqQueryClauseInfoKind.GroupBy,
             SyntaxKind.QueryContinuation => LinqQueryClauseInfoKind.Continuation,
         };
     }

@@ -143,7 +143,7 @@ public static class StandardUtility
 
         return csharpType switch
         {
-            "object" => "any",
+            "Object" or "object" or "dynamic" => "any",
             "void" or "Void" => "()",
             "null" => "nil",
             "char" or "Char" or "String" => "string",
