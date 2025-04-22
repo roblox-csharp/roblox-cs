@@ -332,7 +332,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                                 new Assignment(currentField, AstUtility.Nil),
                             ])),
                         new AnonymousFunction(
-                            new ParameterList([]),
+                            new ParameterList([new Parameter(selfIdentifier)]),
                             new TypeRef("()")) // no-op
                     ],
                     [
