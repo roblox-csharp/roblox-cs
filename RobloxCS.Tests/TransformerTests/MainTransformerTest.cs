@@ -19,13 +19,17 @@ public class MainTransformerTest
     }
     
     [Fact]
-    public void AddsRobloxImports()
+    public void AddsExtraUsings()
     {
         var compilationUnit = Transform("");
-        Assert.Equal(2, compilationUnit.Usings.Count);
+        Assert.Equal(4, compilationUnit.Usings.Count);
 
-        var usingRoblox = compilationUnit.Usings.First();
-        var usingRobloxGlobals = compilationUnit.Usings.Last();
+        var usingSystemCollectionsGeneric = compilationUnit.Usings[0];
+        var usingSystemLinq = compilationUnit.Usings[1];
+        var usingRoblox = compilationUnit.Usings[2];
+        var usingRobloxGlobals = compilationUnit.Usings[3];
+        Assert.Equal("System.Collections.Generic", usingSystemCollectionsGeneric.Name?.ToString());
+        Assert.Equal("System.Linq", usingSystemLinq.Name?.ToString());
         Assert.Equal("Roblox", usingRoblox.Name?.ToString());
 #pragma warning disable xUnit2002
         Assert.NotNull(usingRobloxGlobals.StaticKeyword);
