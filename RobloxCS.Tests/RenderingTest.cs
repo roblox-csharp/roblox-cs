@@ -294,7 +294,7 @@ public class RenderingTest
         var mappedType = new MappedType(new TypeRef("string"), new TypeRef("number"));
         var output = Render(mappedType);
         
-        Assert.Equal("{ [string]: number; }", output);
+        Assert.Equal("{ [string]: number }", output);
     }
     
     [Fact]
