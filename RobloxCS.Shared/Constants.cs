@@ -107,6 +107,7 @@ public static class Constants
     public static readonly HashSet<string> RESERVED_IDENTIFIERS =
     [
         "CS",
+        "next",
         ..LUAU_KEYWORDS
     ];
 

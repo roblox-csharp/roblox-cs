@@ -246,12 +246,13 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
         return null;
     }
     
-    private static bool EnumerableMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
+    private bool EnumerableMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
         InvocationExpressionSyntax invocation, out Expression? expanded)
     {
         expanded = null;
         var self = (Expression)visit(memberAccess.Expression)!;
-        
+
+        IEnumerable<int> nums = [1, 2, 3];
         switch (memberAccess.Name.Identifier.Text)
         {
             case "First":
@@ -262,6 +263,22 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "Last":
             {
                 expanded = new ElementAccess(self, new UnaryOperator("#", self));
+                break;
+            }
+            case "GetEnumerator":
+            {
+                var i = occupiedIdentifiersStack.AddIdentifier(memberAccess.Expression is NameSyntax name ? name + "I" : "enumeratorI");
+
+                transformState.Prereq(new Variable(i, true, new Literal("0")));
+                expanded = new AnonymousFunction(
+                    new ParameterList([]),
+                    null,
+                    new Block([
+                        new ExpressionStatement(new BinaryOperator(i, "+=", new Literal("1"))),
+                        new Return(new ElementAccess(self, i))
+                    ])
+                );
+                
                 break;
             }
         }
