@@ -384,7 +384,6 @@ public class GenerationTest
         
         var table = (TableInitializer)variable.Initializer;
         Assert.Equal(expectedTable.Count, table.KeyValuePairs.Count);
-        Assert.True(table.TreatIdentifiersAsKeyNames);
         
         var index = 0;
         foreach (var (expectedKey, expectedValueText) in expectedTable)

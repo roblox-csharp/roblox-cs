@@ -542,8 +542,7 @@ public sealed class LuauGenerator(
                                 new Luau.TypeRef("string"),
                                 new Luau.Block([new Luau.Return(nameStringLiteral)])
                             )],
-                            [new Luau.IdentifierName("__tostring")],
-                            true
+                            [new Luau.IdentifierName("__tostring")]
                         )
                     ])
                 )

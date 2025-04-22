@@ -7,13 +7,10 @@ public class TableInitializer : Expression
     public List<Expression> Values { get; }
     public List<Expression> Keys { get; }
     public List<KeyValuePair<Expression, Expression>> KeyValuePairs { get; }
-    public bool TreatIdentifiersAsKeyNames { get; }
 
     public TableInitializer(List<Expression>? values = null,
-        List<Expression>? keys = null,
-        bool treatIdentifiersAsKeyNames = true)
+        List<Expression>? keys = null)
     {
-        TreatIdentifiersAsKeyNames = treatIdentifiersAsKeyNames;
         Values = values ?? [];
         Keys = keys ?? [];
 
@@ -31,8 +28,6 @@ public class TableInitializer : Expression
         AddChildren(Keys);
     }
 
-    
-
     public override void Render(LuauWriter luau)
     {
         var hasAnyKeys = Keys.Count > 0;
@@ -44,17 +39,17 @@ public class TableInitializer : Expression
             luau.PushIndent();
         }
             
-        foreach (var value in Values)
+        for (var i = 0; i < Values.Count; i++)
         {
-            var index = Values.IndexOf(value);
-            var key = Keys.ElementAtOrDefault(index);
+            var value = Values[i];
+            var key = Keys.ElementAtOrDefault(i);
             if (key != null)
             {
-                if (!TreatIdentifiersAsKeyNames || key is not IdentifierName)
+                if (key is not IdentifierName)
                     luau.Write('[');
                 
                 key.Render(luau);
-                if (!TreatIdentifiersAsKeyNames || key is not IdentifierName)
+                if (key is not IdentifierName)
                     luau.Write(']');
                 
                 luau.Write(" = ");

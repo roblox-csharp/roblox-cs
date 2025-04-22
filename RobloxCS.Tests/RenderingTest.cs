@@ -218,8 +218,7 @@ public class RenderingTest
     {
         var tableInitializer = new TableInitializer(
             [new Literal("69"), new Literal("420"), AstUtility.String("abc")],
-            [new IdentifierName("foo"), new IdentifierName("bar"), AstUtility.String("baz")],
-            true
+            [new IdentifierName("foo"), new IdentifierName("bar"), AstUtility.String("baz")]
         );
         var output = Render(tableInitializer);
         const string expectedOutput = """

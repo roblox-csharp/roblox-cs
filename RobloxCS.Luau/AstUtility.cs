@@ -154,6 +154,9 @@ public static class AstUtility
             new Literal($"\"{type.GUID}\"")
         ];
 
+        if (keys.Count != values.Count)
+            throw Logger.CompilerError($"Failed to create runtime type info object: Keys and values have unequal sizes.\n\tKeys: {keys.Count}\n\tValues: {values.Count}");
+
         return new TableInitializer(values, keys);
     }
 
