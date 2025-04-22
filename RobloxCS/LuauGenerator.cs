@@ -1309,7 +1309,7 @@ public sealed class LuauGenerator(
                     case CasePatternSwitchLabelSyntax patternLabel:
                     {
                         var binaryOp = HandlePattern(patternLabel.Pattern, comparand, node.Expression);
-                        if (hasFallThrough)
+                        if (nodeHasFallThrough)
                             binaryOp = new Luau.BinaryOperator(fallthroughIdentifier!, "or", binaryOp);
 
                         ifStatements.Add(new Luau.If(binaryOp, new Luau.Block(body)));
@@ -1317,7 +1317,7 @@ public sealed class LuauGenerator(
                     }
                     case CaseSwitchLabelSyntax caseLabel: {
                         var binaryOp = HandleCaseSwitchLabel(caseLabel, comparand);
-                        if (hasFallThrough)
+                        if (nodeHasFallThrough)
                             binaryOp = new Luau.BinaryOperator(fallthroughIdentifier!, "or", binaryOp);
 
                         ifStatements.Add(new Luau.If(binaryOp, new Luau.Block(body)));

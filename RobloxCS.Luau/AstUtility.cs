@@ -345,7 +345,7 @@ public static class AstUtility
             null => Nil,
             bool b => b ? True : False,
             string or char => new Literal('"' + value.ToString() + '"'),
-            _ => new Literal(value.ToString()!)
+            _ => string.IsNullOrEmpty(value.ToString()) ? Nil : new Literal(value.ToString()!)
         };
     }
 
