@@ -13,15 +13,26 @@ public sealed class MainTransformer(SyntaxTree tree, TransformState state, Confi
     public override SyntaxNode? VisitCompilationUnit(CompilationUnitSyntax node)
     {
         var usings = node.Usings;
-        usings = usings.Add(SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("Roblox")));
-        usings = usings.Add(SyntaxFactory.UsingDirective(
-            SyntaxFactory.Token(SyntaxKind.StaticKeyword),
-            null,
-            SyntaxFactory.QualifiedName(
-                SyntaxFactory.IdentifierName("Roblox"),
-                SyntaxFactory.IdentifierName("Globals")
-            )
-        ));
+        usings = usings
+            .Add(SyntaxFactory.UsingDirective(SyntaxFactory.QualifiedName(
+                SyntaxFactory.QualifiedName(
+                    SyntaxFactory.IdentifierName("System"),
+                    SyntaxFactory.IdentifierName("Collections")),
+                SyntaxFactory.IdentifierName("Generic")
+            )))
+            .Add(SyntaxFactory.UsingDirective(SyntaxFactory.QualifiedName(
+                SyntaxFactory.IdentifierName("System"),
+                SyntaxFactory.IdentifierName("Linq")
+            )))
+            .Add(SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("Roblox")))
+            .Add(SyntaxFactory.UsingDirective(
+                SyntaxFactory.Token(SyntaxKind.StaticKeyword),
+                null,
+                SyntaxFactory.QualifiedName(
+                    SyntaxFactory.IdentifierName("Roblox"),
+                    SyntaxFactory.IdentifierName("Globals")
+                )
+            ));
         
         return base.VisitCompilationUnit(node.WithUsings(usings));
     }
