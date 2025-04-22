@@ -148,6 +148,7 @@ public static class StandardUtility
             "null" => "nil",
             "char" or "Char" or "String" => "string",
             "Boolean" or "bool" => "boolean",
+            "System.Index" or "Index" => "number",
             "Roblox.Buffer" or "Buffer" => "buffer",
             _ => INTEGER_TYPES.Contains(csharpType) || DECIMAL_TYPES.Contains(csharpType)
                 ? "number"

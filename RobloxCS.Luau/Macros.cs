@@ -10,7 +10,7 @@ public enum MacroKind
 {
     NewInstance,
     GetService,
-    ListConstruction,
+    EnumerableConstruction,
     DictionaryConstruction,
     IEnumerableType,
     DictionaryType,
@@ -207,13 +207,6 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
 
                 switch (expressionType?.Name)
                 {
-                    case "Enumerator":
-                    {
-                        if (EnumeratorMethod(visit, memberAccess, invocation, out var expanded))
-                            return expanded;
-                        
-                        break;
-                    }
                     case "Dictionary":
                     {
                         if (EnumerableMethod(visit, memberAccess, invocation, out var enumerableExpanded))
@@ -254,21 +247,6 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
         return null;
     }
     
-    private bool EnumeratorMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
-        InvocationExpressionSyntax invocation, out Expression? expanded)
-    {
-        expanded = null;
-        var self = (Expression)visit(memberAccess.Expression)!;
-        
-        switch (memberAccess.Name.Identifier.Text)
-        {
-            
-        }
-        
-        expanded?.MarkExpanded(MacroKind.EnumeratorMethod);
-        return expanded != null;
-    }
-    
     private bool EnumerableMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
         InvocationExpressionSyntax invocation, out Expression? expanded)
     {
@@ -287,6 +265,37 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "Last":
             {
                 expanded = new ElementAccess(self, new UnaryOperator("#", self));
+                break;
+            }
+            case "Count":
+            {
+                expanded = new UnaryOperator("#", self);
+                break;
+            }
+            case "ElementAt":
+            case "ElementAtOrDefault":
+            {
+                IEnumerable<int> n;
+                // n.ElementAt()
+                var index = (Expression)visit(invocation.ArgumentList.Arguments.First().Expression)!;
+                expanded = new ElementAccess(self, AstUtility.AddOne(index));
+                break;
+            }
+            case "Concat":
+            {
+                var resultIdentifier = occupiedIdentifiersStack.AddIdentifier("_result");
+                var valueIdentifier = occupiedIdentifiersStack.AddIdentifier("v");
+                var other = (Expression)visit(invocation.ArgumentList.Arguments.First().Expression)!;
+                
+                transformState.Prereq(new Variable(resultIdentifier, true, AstUtility.TableCall("clone", self)));
+                transformState.Prereq(new For(
+                    [new IdentifierName("_"), valueIdentifier],
+                    other,
+                    new Block([
+                        new ExpressionStatement(AstUtility.TableCall("insert", resultIdentifier, valueIdentifier)),
+                    ])));
+                expanded = resultIdentifier;
+                
                 break;
             }
             case "GetEnumerator":
@@ -345,6 +354,13 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 
                 break;
             }
+            case "ToList":
+            case "ToArray":
+            case "ToDictionary":
+            {
+                expanded = self;
+                break;
+            }
         }
         
         expanded?.MarkExpanded(MacroKind.EnumerableMethod);
@@ -374,8 +390,8 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
     {
         // generic objects
         var symbol = baseObjectCreation is ObjectCreationExpressionSyntax objectCreation
-            ? ModelExtensions.GetSymbolInfo(semanticModel, objectCreation.Type).Symbol
-            : ModelExtensions.GetSymbolInfo(semanticModel, baseObjectCreation).Symbol?.ContainingSymbol;
+            ? semanticModel.GetSymbolInfo(objectCreation.Type).Symbol
+            : semanticModel.GetSymbolInfo(baseObjectCreation).Symbol?.ContainingSymbol;
 
         if (symbol is not INamedTypeSymbol { TypeParameters.Length: > 0 } namedTypeSymbol)
             return null;
@@ -387,8 +403,9 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             {
                 var expressions = baseObjectCreation.Initializer?.Expressions
                     .Select(expression => (Expression)visit(expression)!).ToList();
+                
                 var table = new TableInitializer(expressions ?? []);
-                table.MarkExpanded(MacroKind.ListConstruction);
+                table.MarkExpanded(MacroKind.EnumerableConstruction);
 
                 return table;
             }
