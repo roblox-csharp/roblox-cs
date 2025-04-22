@@ -58,7 +58,7 @@ public sealed class MainTransformer(SyntaxTree tree, TransformState state, Confi
         var pattern = SyntaxFactory.TypePattern(SyntaxFactory.ParseTypeName(((IdentifierNameSyntax)node.Right).Identifier.Text));
         return SyntaxFactory.IsPatternExpression(node.Left, pattern);
     }
-    
+
     // Fix conditional accesses so that they return the AST you expect them to
     public override SyntaxNode? VisitConditionalAccessExpression(ConditionalAccessExpressionSyntax node)
     {

@@ -960,17 +960,27 @@ public sealed class LuauGenerator(
     public override Luau.Node VisitIdentifierName(IdentifierNameSyntax node)
     {
         var method = FindFirstAncestor<MethodDeclarationSyntax>(node);
+        var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
         node = node.WithIdentifier(
             SyntaxFactory.Identifier(occupiedIdentifiersStack.GetDuplicateText(node.Identifier.Text)));
 
         var name = Luau.AstUtility.CreateSimpleName(node);
-        if (method != null && node.Parent is not AssignmentExpressionSyntax) {
+        if (method != null && node.Parent is not AssignmentExpressionSyntax)
+        {
             var refKinds = GetRefKindParameters(method.ParameterList);
             if (refKinds.Contains(node.Identifier.Text))
                 return new Luau.Call(name, new([]));
         }
 
-        return name;
+        if (symbol is not (IFieldSymbol or IPropertySymbol or IMethodSymbol)
+            || symbol.IsStatic
+            || IsAlreadyQualified(node))
+        {
+            return name;
+        }
+        
+        var self = new Luau.IdentifierName("self");
+        return new Luau.MemberAccess(self, name, symbol is IMethodSymbol ? ':' : '.');
     }
 
     public override Luau.Expression VisitGenericName(GenericNameSyntax node)
@@ -1730,6 +1740,14 @@ public sealed class LuauGenerator(
         return new Luau.BinaryOperator(comparand, "==", caseValue);
     }
 
+    private static bool IsAlreadyQualified(IdentifierNameSyntax node)
+    {
+        if (node.Parent is MemberAccessExpressionSyntax memberAccess)
+            return memberAccess.Name == node;
+
+        return false;
+    }
+    
     private static LinqQueryClauseInfoKind GetLinqQueryClauseKind(SyntaxKind syntaxKind)
     {
         return syntaxKind switch
