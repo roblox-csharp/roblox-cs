@@ -642,9 +642,11 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
     }
 
     /// <summary>Macros <see cref="Object" /> methods</summary>
-    private static bool ObjectMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
+    private bool ObjectMethod(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess,
         InvocationExpressionSyntax invocation, out Expression? expanded)
     {
+        var expressionSymbol = semanticModel.GetSymbolInfo(memberAccess.Expression).Symbol;
+        
         expanded = null;
         switch (memberAccess.Name.Identifier.Text)
         {

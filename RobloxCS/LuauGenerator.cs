@@ -516,8 +516,22 @@ public sealed class LuauGenerator(
     }
 
     // long as hell lol
-    public override Luau.Block VisitClassDeclaration(ClassDeclarationSyntax node)
+    public override Luau.Statement VisitClassDeclaration(ClassDeclarationSyntax node)
     {
+        if (node.AttributeLists.Any(list => list.Attributes.Any(attr =>
+            {
+                var symbol = _semanticModel.GetSymbolInfo(attr).Symbol;
+                return symbol is
+                    { ContainingSymbol.Name: "AttributeUsageAttribute", ContainingNamespace.Name: "System" };
+            })))
+        {
+            if (node.Members.Count > 0)
+                throw Logger.CodegenError(node.Members.First(),
+                    "Attribute classes may not have members because only metadata attributes are supported");
+            
+            return new Luau.NoOp(false);
+        }
+        
         var name = occupiedIdentifiersStack.AddIdentifier(node.Identifier);
         var nonGenericName = Luau.AstUtility.GetNonGenericName(name);
         var members = node.Members.Select(Visit<Luau.Statement>).Where(m => m is not Luau.NoOp).ToList();
@@ -1502,7 +1516,7 @@ public sealed class LuauGenerator(
                 return new Luau.BuiltInAttribute(new Luau.IdentifierName("native"));
         }
 
-        Logger.UnsupportedError(node, "User-defined attributes");
+        // Logger.UnsupportedError(node, "User-defined attributes");
         return null;
     }
 

@@ -9,6 +9,32 @@ namespace RobloxCS.Shared;
 
 public static class StandardUtility
 {
+    public class KeyValuePairEqualityComparer<TKey, TValue> : IEqualityComparer<KeyValuePair<TKey, TValue>>
+    {
+        private readonly IEqualityComparer<TKey> _keyComparer;
+        private readonly IEqualityComparer<TValue> _valueComparer;
+
+        public KeyValuePairEqualityComparer(
+            IEqualityComparer<TKey> keyComparer = null!,
+            IEqualityComparer<TValue> valueComparer = null!)
+        {
+            _keyComparer = keyComparer ?? EqualityComparer<TKey>.Default;
+            _valueComparer = valueComparer ?? EqualityComparer<TValue>.Default;
+        }
+
+        public bool Equals(KeyValuePair<TKey, TValue> x, KeyValuePair<TKey, TValue> y)
+        {
+            return _keyComparer.Equals(x.Key, y.Key) && _valueComparer.Equals(x.Value, y.Value);
+        }
+
+        public int GetHashCode(KeyValuePair<TKey, TValue> obj)
+        {
+            var hashKey = _keyComparer.GetHashCode(obj.Key!);
+            var hashValue = _valueComparer.GetHashCode(obj.Value!);
+            return hashKey ^ hashValue;
+        }
+    }
+    
     public static Type GetRuntimeType(SemanticModel semanticModel, SyntaxNode node, ITypeSymbol typeSymbol)
     {
         var fullyQualifiedName = GetFullSymbolName(typeSymbol);

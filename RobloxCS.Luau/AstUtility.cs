@@ -27,21 +27,21 @@ public static class AstUtility
             : new BinaryOperator(expression, "-", new Literal("1"));
     }
 
-    /// <summary>
-    /// Creates type info table for runtime type objects
-    /// </summary>
-    public static TableInitializer CreateTypeInfo(Type type)
+    public static TableInitializer CreateTypeInfo(Type type) => CreateTypeInfo(type, false);
+
+    /// <summary> Creates type info table for runtime type objects</summary>
+    public static TableInitializer CreateTypeInfo(Type type, bool noAttributes)
     {
+        var memberInfo = CreateMemberInfo(type);
         List<Expression> keys =
         [
-            new IdentifierName("Name"),
             new IdentifierName("FullName"),
             new IdentifierName("Namespace"),
             new IdentifierName("AssemblyQualifiedName"),
             new IdentifierName("TypeInitializer"),
             new IdentifierName("ReflectedType"),
             new IdentifierName("IsAbstract"),
-            new IdentifierName("IsAnsiClass"),
+            // new IdentifierName("IsAnsiClass"),
             new IdentifierName("IsArray"),
             new IdentifierName("IsSealed"),
             new IdentifierName("IsInterface"),
@@ -52,58 +52,57 @@ public static class AstUtility
             new IdentifierName("IsConstructedGenericType"),
             new IdentifierName("IsImport"),
             new IdentifierName("IsClass"),
-            new IdentifierName("IsCollectible"),
             new IdentifierName("IsByRef"),
             new IdentifierName("IsByRefLike"),
-            new IdentifierName("IsAutoClass"),
-            new IdentifierName("IsAutoLayout"),
-            new IdentifierName("IsCOMObject"),
+            // new IdentifierName("IsAutoClass"),
+            // new IdentifierName("IsAutoLayout"),
+            // new IdentifierName("IsCOMObject"),
             new IdentifierName("IsContextful"),
             new IdentifierName("IsEnum"),
-            new IdentifierName("IsExplicitLayout"),
-            new IdentifierName("IsPointer"),
-            new IdentifierName("IsFunctionPointer"),
-            new IdentifierName("IsUnmanagedFunctionPointer"),
-            new IdentifierName("IsLayoutSequential"),
-            new IdentifierName("IsMarshalByRef"),
+            // new IdentifierName("IsExplicitLayout"),
+            // new IdentifierName("IsPointer"),
+            // new IdentifierName("IsFunctionPointer"),
+            // new IdentifierName("IsUnmanagedFunctionPointer"),
+            // new IdentifierName("IsLayoutSequential"),
+            // new IdentifierName("IsMarshalByRef"),
             new IdentifierName("IsNested"),
-            new IdentifierName("IsNestedAssembly"),
-            new IdentifierName("IsNestedFamily"),
-            new IdentifierName("IsNestedFamANDAssem"),
-            new IdentifierName("IsNestedFamORAssem"),
+            // new IdentifierName("IsNestedAssembly"),
+            // new IdentifierName("IsNestedFamily"),
+            // new IdentifierName("IsNestedFamANDAssem"),
+            // new IdentifierName("IsNestedFamORAssem"),
             new IdentifierName("IsNestedPrivate"),
             new IdentifierName("IsNestedPublic"),
             new IdentifierName("IsNotPublic"),
             new IdentifierName("IsPublic"),
             new IdentifierName("IsSZArray"),
-            new IdentifierName("IsSecurityCritical"),
-            new IdentifierName("IsSecuritySafeCritical"),
-            new IdentifierName("IsSecurityTransparent"),
+            // new IdentifierName("IsSecurityCritical"),
+            // new IdentifierName("IsSecuritySafeCritical"),
+            // new IdentifierName("IsSecurityTransparent"),
             new IdentifierName("IsSignatureType"),
             new IdentifierName("IsSpecialName"),
             new IdentifierName("IsTypeDefinition"),
-            new IdentifierName("IsUnicodeClass"),
+            // new IdentifierName("IsUnicodeClass"),
             new IdentifierName("IsValueType"),
             new IdentifierName("IsVariableBoundArray"),
-            new IdentifierName("IsVisible"),
-            new IdentifierName("UnderlyingSystemType"),
+            // new IdentifierName("IsVisible"),
+            // new IdentifierName("UnderlyingSystemType"),
             new IdentifierName("BaseType"),
             new IdentifierName("DeclaringType"),
             new IdentifierName("ContainsGenericParameters"),
             new IdentifierName("GenericTypeArguments"),
             new IdentifierName("GUID"),
+            new IdentifierName("CustomAttributes"),
             new IdentifierName("GetProperties")
         ];
         List<Expression> values =
         [
-            new Literal('"' + type.Name + '"'),
             type.FullName != null ? new Literal('"' + type.FullName + '"') : Nil,
             type.Namespace != null ? new Literal('"' + type.Namespace + '"') : Nil,
             type.AssemblyQualifiedName != null ? new Literal('"' + type.AssemblyQualifiedName + '"') : Nil,
-            type.TypeInitializer != null ? CreateMemberInfo(type.TypeInitializer) : Nil,
+            type.TypeInitializer != null ? CreateMethodBase(type.TypeInitializer) : Nil,
             type.ReflectedType != null ? CreateTypeInfo(type.ReflectedType) : Nil,
             new Literal(type.IsAbstract.ToString().ToLower()),
-            new Literal(type.IsAnsiClass.ToString().ToLower()),
+            // new Literal(type.IsAnsiClass.ToString().ToLower()),
             new Literal(type.IsArray.ToString().ToLower()),
             new Literal(type.IsSealed.ToString().ToLower()),
             new Literal(type.IsInterface.ToString().ToLower()),
@@ -114,46 +113,46 @@ public static class AstUtility
             new Literal(type.IsConstructedGenericType.ToString().ToLower()),
             new Literal(type.IsImport.ToString().ToLower()),
             new Literal(type.IsClass.ToString().ToLower()),
-            new Literal(type.IsCollectible.ToString().ToLower()),
             new Literal(type.IsByRef.ToString().ToLower()),
             new Literal(type.IsByRefLike.ToString().ToLower()),
-            new Literal(type.IsAutoClass.ToString().ToLower()),
-            new Literal(type.IsAutoLayout.ToString().ToLower()),
-            new Literal(type.IsCOMObject.ToString().ToLower()),
+            // new Literal(type.IsAutoClass.ToString().ToLower()),
+            // new Literal(type.IsAutoLayout.ToString().ToLower()),
+            // new Literal(type.IsCOMObject.ToString().ToLower()),
             new Literal(type.IsContextful.ToString().ToLower()),
             new Literal(type.IsEnum.ToString().ToLower()),
-            new Literal(type.IsExplicitLayout.ToString().ToLower()),
-            new Literal(type.IsPointer.ToString().ToLower()),
-            new Literal(type.IsFunctionPointer.ToString().ToLower()),
-            new Literal(type.IsUnmanagedFunctionPointer.ToString().ToLower()),
-            new Literal(type.IsLayoutSequential.ToString().ToLower()),
-            new Literal(type.IsMarshalByRef.ToString().ToLower()),
+            // new Literal(type.IsExplicitLayout.ToString().ToLower()),
+            // new Literal(type.IsPointer.ToString().ToLower()),
+            // new Literal(type.IsFunctionPointer.ToString().ToLower()),
+            // new Literal(type.IsUnmanagedFunctionPointer.ToString().ToLower()),
+            // new Literal(type.IsLayoutSequential.ToString().ToLower()),
+            // new Literal(type.IsMarshalByRef.ToString().ToLower()),
             new Literal(type.IsNested.ToString().ToLower()),
-            new Literal(type.IsNestedAssembly.ToString().ToLower()),
-            new Literal(type.IsNestedFamily.ToString().ToLower()),
-            new Literal(type.IsNestedFamANDAssem.ToString().ToLower()),
-            new Literal(type.IsNestedFamORAssem.ToString().ToLower()),
+            // new Literal(type.IsNestedAssembly.ToString().ToLower()),
+            // new Literal(type.IsNestedFamily.ToString().ToLower()),
+            // new Literal(type.IsNestedFamANDAssem.ToString().ToLower()),
+            // new Literal(type.IsNestedFamORAssem.ToString().ToLower()),
             new Literal(type.IsNestedPrivate.ToString().ToLower()),
             new Literal(type.IsNestedPublic.ToString().ToLower()),
             new Literal(type.IsNotPublic.ToString().ToLower()),
             new Literal(type.IsPublic.ToString().ToLower()),
             new Literal(type.IsSZArray.ToString().ToLower()),
-            new Literal(type.IsSecurityCritical.ToString().ToLower()),
-            new Literal(type.IsSecuritySafeCritical.ToString().ToLower()),
-            new Literal(type.IsSecurityTransparent.ToString().ToLower()),
+            // new Literal(type.IsSecurityCritical.ToString().ToLower()),
+            // new Literal(type.IsSecuritySafeCritical.ToString().ToLower()),
+            // new Literal(type.IsSecurityTransparent.ToString().ToLower()),
             new Literal(type.IsSignatureType.ToString().ToLower()),
             new Literal(type.IsSpecialName.ToString().ToLower()),
             new Literal(type.IsTypeDefinition.ToString().ToLower()),
-            new Literal(type.IsUnicodeClass.ToString().ToLower()),
+            // new Literal(type.IsUnicodeClass.ToString().ToLower()),
             new Literal(type.IsValueType.ToString().ToLower()),
             new Literal(type.IsVariableBoundArray.ToString().ToLower()),
-            new Literal(type.IsVisible.ToString().ToLower()),
-            type != type.UnderlyingSystemType ? CreateTypeInfo(type.UnderlyingSystemType) : Nil,
+            // new Literal(type.IsVisible.ToString().ToLower()),
+            // type != type.UnderlyingSystemType ? CreateTypeInfo(type.UnderlyingSystemType) : Nil,
             type.BaseType != null ? CreateTypeInfo(type.BaseType) : Nil,
             type.DeclaringType != null ? CreateTypeInfo(type.DeclaringType) : Nil,
             new Literal(type.ContainsGenericParameters.ToString().ToLower()),
-            new TableInitializer(type.GenericTypeArguments.Select(CreateTypeInfo).OfType<Expression>().ToList()),
+            noAttributes ? TableInitializer.Empty : new TableInitializer(type.GenericTypeArguments.Select(CreateTypeInfo).OfType<Expression>().ToList()),
             new Literal($"\"{type.GUID}\""),
+            new TableInitializer(type.CustomAttributes.Select(CreateCustomAttributeData).ToList<Expression>()),
             new AnonymousFunction(
                 new ParameterList([new Parameter(new IdentifierName("self"))]),
                 null,
@@ -165,7 +164,7 @@ public static class AstUtility
         if (keys.Count != values.Count)
             throw Logger.CompilerError($"Failed to create runtime type info object: Keys and values have unequal sizes.\n\tKeys: {keys.Count}\n\tValues: {values.Count}");
 
-        return new TableInitializer(values, keys);
+        return TableInitializer.Union(memberInfo, new TableInitializer(values, keys));
     }
 
     /// <summary>Creates array of property infos for runtime type objects</summary>
@@ -231,7 +230,6 @@ public static class AstUtility
             new IdentifierName("DefaultValue"),
             new IdentifierName("RawDefaultValue"),
             new IdentifierName("Position"),
-            new IdentifierName("MetadataToken"),
             new IdentifierName("ParameterType"),
             new IdentifierName("Member"),
         ];
@@ -247,7 +245,6 @@ public static class AstUtility
             CreateLuauValue(parameter.DefaultValue),
             CreateLuauValue(parameter.RawDefaultValue),
             new Literal(parameter.Position.ToString()),
-            new Literal(parameter.MetadataToken.ToString()),
             CreateTypeInfo(parameter.ParameterType),
             CreateMemberInfo(parameter.Member),
         ];
@@ -268,21 +265,19 @@ public static class AstUtility
             new IdentifierName("IsPrivate"),
             new IdentifierName("IsStatic"),
             new IdentifierName("IsAssembly"),
-            new IdentifierName("IsFamily"),
-            new IdentifierName("IsFamilyAndAssembly"),
-            new IdentifierName("IsFamilyOrAssembly"),
             new IdentifierName("IsFinal"),
             new IdentifierName("IsVirtual"),
             new IdentifierName("IsGenericMethod"),
             new IdentifierName("IsConstructedGenericMethod"),
             new IdentifierName("IsGenericMethodDefinition"),
             new IdentifierName("IsHideBySig"),
-            new IdentifierName("IsSecurityCritical"),
-            new IdentifierName("IsSecuritySafeCritical"),
-            new IdentifierName("IsSecurityTransparent"),
+            // new IdentifierName("IsSecurityCritical"),
+            // new IdentifierName("IsSecuritySafeCritical"),
+            // new IdentifierName("IsSecurityTransparent"),
             new IdentifierName("ContainsGenericParameters"),
             new IdentifierName("CallingConvention"),
             new IdentifierName("MethodImplementationFlags"),
+            new IdentifierName("Attributes")
         ];
         List<Expression> values =
         [
@@ -293,21 +288,19 @@ public static class AstUtility
             new Literal(method.IsPrivate.ToString().ToLower()),
             new Literal(method.IsStatic.ToString().ToLower()),
             new Literal(method.IsAssembly.ToString().ToLower()),
-            new Literal(method.IsFamily.ToString().ToLower()),
-            new Literal(method.IsFamilyAndAssembly.ToString().ToLower()),
-            new Literal(method.IsFamilyOrAssembly.ToString().ToLower()),
             new Literal(method.IsFinal.ToString().ToLower()),
             new Literal(method.IsVirtual.ToString().ToLower()),
             new Literal(method.IsGenericMethod.ToString().ToLower()),
             new Literal(method.IsConstructedGenericMethod.ToString().ToLower()),
             new Literal(method.IsGenericMethodDefinition.ToString().ToLower()),
             new Literal(method.IsHideBySig.ToString().ToLower()),
-            new Literal(method.IsSecurityCritical.ToString().ToLower()),
-            new Literal(method.IsSecuritySafeCritical.ToString().ToLower()),
-            new Literal(method.IsSecurityTransparent.ToString().ToLower()),
+            // new Literal(method.IsSecurityCritical.ToString().ToLower()),
+            // new Literal(method.IsSecuritySafeCritical.ToString().ToLower()),
+            // new Literal(method.IsSecurityTransparent.ToString().ToLower()),
             new Literal(method.ContainsGenericParameters.ToString().ToLower()),
             new Literal(((int)method.CallingConvention).ToString()),
             new Literal(((int)method.MethodImplementationFlags).ToString()),
+            new Literal(((int)method.Attributes).ToString()),
         ];
             
         return TableInitializer.Union(memberInfo, new TableInitializer(values, keys));
@@ -323,7 +316,6 @@ public static class AstUtility
             new IdentifierName("IsCollectible"),
             // new IdentifierName("DeclaringType"),
             // new IdentifierName("ReflectedType"),
-            new IdentifierName("MetadataToken"),
         ];
         List<Expression> values =
         [
@@ -332,7 +324,20 @@ public static class AstUtility
             new Literal(member.IsCollectible.ToString().ToLower()),
             // member.DeclaringType != null ? CreateTypeInfo(member.DeclaringType) : Nil,
             // member.ReflectedType != null ? CreateTypeInfo(member.ReflectedType) : Nil,
-            new Literal(member.MetadataToken.ToString()),
+        ];
+        
+        return new TableInitializer(values, keys);
+    }
+
+    private static TableInitializer CreateCustomAttributeData(CustomAttributeData data)
+    {
+        List<Expression> keys =
+        [
+            new IdentifierName("AttributeType"),
+        ];
+        List<Expression> values =
+        [
+            CreateMemberInfo(data.AttributeType)
         ];
         
         return new TableInitializer(values, keys);

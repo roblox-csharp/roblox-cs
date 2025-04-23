@@ -1,4 +1,6 @@
-﻿namespace RobloxCS.Luau;
+﻿using RobloxCS.Shared;
+
+namespace RobloxCS.Luau;
 
 public class TableInitializer : Expression
 {
@@ -6,9 +8,9 @@ public class TableInitializer : Expression
 
     public static TableInitializer Union(TableInitializer a, TableInitializer b)
     {
-        var keys = a.Keys.Union(b.Keys).ToList();
-        var values = a.Values.Union(b.Values).ToList();
-        return new TableInitializer(values, keys);
+        var kvpComparer = new StandardUtility.KeyValuePairEqualityComparer<Expression, Expression>();
+        var pairs = a.KeyValuePairs.Union(b.KeyValuePairs, kvpComparer).ToDictionary();
+        return new TableInitializer(pairs.Values.ToList(), pairs.Keys.ToList());
     }
     
     public List<Expression> Values { get; }
