@@ -38,7 +38,7 @@ public class If : Statement
             luau.Write(' ');
         }
 
-        var isElseIf = ElseBranch is If;
+        var isElseIf = ElseBranch is { Statements.Count: 1 } && ElseBranch.Statements.First() is If;
         if (ElseBranch != null)
         {
             luau.PopIndent();
