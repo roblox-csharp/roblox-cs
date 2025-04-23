@@ -1211,12 +1211,17 @@ public sealed class LuauGenerator(
     public override Luau.Node VisitBinaryExpression(BinaryExpressionSyntax node)
     {
         var expanded = _macro.BinaryExpression(Visit, node);
-        if (expanded != null)
+        if (expanded != null)   
             return expanded;
+        
+        var leftType = _semanticModel.GetTypeInfo(node.Left).Type;
+        var rightType = _semanticModel.GetTypeInfo(node.Right).Type;
+        var mappedOperator = StandardUtility.GetMappedOperator(node.OperatorToken.Text);
+        if (leftType is { Name: "String" or "Char" } || rightType is { Name: "String" or "Char" })
+            mappedOperator = "..";
 
         var left = Visit<Luau.Expression>(node.Left);
         var right = Visit<Luau.Expression>(node.Right);
-        var mappedOperator = StandardUtility.GetMappedOperator(node.OperatorToken.Text);
         return new Luau.BinaryOperator(left, mappedOperator, right);
     }
 
