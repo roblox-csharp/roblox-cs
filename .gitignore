@@ -6,7 +6,7 @@ RobloxCS.Tests/**/out
 RobloxCS.Tests/**/include
 RobloxCS.Tests/**/package-lock.json
 *.DotSettings.user
-test.cs
+**/test.cs
 
 obj/
 bin/

@@ -197,8 +197,9 @@ public sealed class LuauGenerator(
                     forStatementBody.Add(new Luau.If(
                         call,
                         new Luau.Block([new Luau.Continue()])));
-                    forStatementBody.Add(new Luau.ExpressionStatement(
-                        Luau.AstUtility.TableCall("remove", resultIdentifier, indexName)));
+                    forStatementBody.Add(new Luau.Assignment(
+                        new Luau.ElementAccess(resultIdentifier, indexName),
+                        Luau.AstUtility.Nil));
                     occupiedIdentifiersStack.Pop();
                     break;
                 case LinqQueryClauseInfoKind.OrderBy:

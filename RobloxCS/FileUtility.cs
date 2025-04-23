@@ -44,6 +44,7 @@ public static class FileUtility
 
         references.Add(MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location));
         references.Add(MetadataReference.CreateFromFile(typeof(List<>).Assembly.Location));
+        // TODO: add references to installed packages
         return references;
     }
     

@@ -6,7 +6,7 @@
     <RootNamespace>RobloxCS</RootNamespace>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
-    <Version>2.0.0-pre5</Version>
+    <Version>2.0.0-pre7</Version>
   </PropertyGroup>
 
   <ItemGroup>
@@ -14,7 +14,8 @@
     <PackageReference Include="RobloxCS.Types" Version="1.2.1" />
     <ProjectReference Include="..\RobloxCS.Luau\RobloxCS.Luau.csproj" />
     <ProjectReference Include="..\RobloxCS.Shared\RobloxCS.Shared.csproj" />
-    <Compile Remove="./RobloxCS/test.cs" />
+    <None Include=".\test.cs" />
+    <Compile Remove=".\test.cs" />
   </ItemGroup>
 
 </Project>
