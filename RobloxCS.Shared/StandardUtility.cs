@@ -271,7 +271,7 @@ public static class StandardUtility
         return SyntaxFactory.QualifiedName(left, right);
     }
 
-    public static List<string> GetNamesFromNode(SyntaxNode? node)
+    public static List<string> GetNamesFromNode(SyntaxNode? node, bool noGenerics = false)
     {
         if (node is BaseExpressionSyntax)
             return [""];
@@ -300,7 +300,7 @@ public static class StandardUtility
         if (identifierProperty != null && identifierValue is SyntaxToken token)
         {
             names.Add(token.ValueText.Trim());
-            return addGenerics(names);
+            return noGenerics ? names : addGenerics(names);
         }
 
         var childNodes = node.ChildNodes().ToList();
@@ -321,6 +321,6 @@ public static class StandardUtility
         if (qualifiedNameNodes.Count <= 1)
             names.AddRange(simpleNameNodes.Select(simpleNameNode => simpleNameNode.ToString().Trim()));
         
-        return addGenerics(names);
+        return noGenerics ? names : addGenerics(names);
     }
 }

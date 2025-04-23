@@ -591,7 +591,7 @@ public static class AstUtility
         
     public static SimpleName CreateSimpleName(SyntaxNode node, bool bypassReserved = false, bool noGenerics = false)
     {
-        return CreateSimpleName(node, string.Join("", StandardUtility.GetNamesFromNode(node)), bypassReserved, noGenerics);
+        return CreateSimpleName(node, string.Join("", StandardUtility.GetNamesFromNode(node, noGenerics)), bypassReserved, noGenerics);
     }
     
     public static bool CheckReservedName(SyntaxNode node, string name) => CheckReservedName(node.GetFirstToken(), name);
@@ -610,7 +610,7 @@ public static class AstUtility
             return null!;
 
         var text = name.Replace("@", "");
-        return name.Contains('<') && name.Contains('>') && !noGenerics
+        return !noGenerics && name.Contains('<') && name.Contains('>')
             ? new GenericName(text.Split('<').First(), StandardUtility.ExtractTypeArguments(text))
             : new IdentifierName(text);
     }

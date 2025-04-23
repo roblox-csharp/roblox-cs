@@ -429,11 +429,12 @@ public sealed class LuauGenerator(
         if (!IsStatic(node) || classDeclaration == null)
             return new Luau.NoOp(false);
 
+        // static props
         var initializer = GetFieldInitializer(node.Type, node.Initializer);
         return new Luau.Assignment(
             new Luau.MemberAccess(
                 Luau.AstUtility.CreateSimpleName(classDeclaration, noGenerics: true),
-                Luau.AstUtility.CreateSimpleName(node, noGenerics: true)
+                Luau.AstUtility.CreateSimpleName(node)
             ),
             initializer
         );
@@ -452,7 +453,7 @@ public sealed class LuauGenerator(
             var initializer = GetFieldInitializer(node.Declaration.Type, declarator.Initializer);
             statements.Add(new Luau.Assignment(
                 new Luau.MemberAccess(
-                    Luau.AstUtility.CreateSimpleName(classDeclaration),
+                    Luau.AstUtility.CreateSimpleName(classDeclaration, noGenerics: true),
                     Luau.AstUtility.CreateSimpleName(declarator)
                 ),
                 initializer
@@ -474,8 +475,9 @@ public sealed class LuauGenerator(
 
     public override Luau.Function VisitMethodDeclaration(MethodDeclarationSyntax node)
     {
+        var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node)!;
         var name = Luau.AstUtility.CreateSimpleName(node);
-        var className = Luau.AstUtility.CreateSimpleName(node.Parent!);
+        var className = Luau.AstUtility.CreateSimpleName(classDeclaration, noGenerics: true);
         var fullName = new Luau.QualifiedName(className, name, IsStatic(node) ? '.' : ':');
         var parameterList = Visit<Luau.ParameterList>(node.ParameterList);
         
@@ -532,10 +534,12 @@ public sealed class LuauGenerator(
             return new Luau.NoOp(false);
         }
         
-        var name = occupiedIdentifiersStack.AddIdentifier(node.Identifier);
+        var name = Luau.AstUtility.CreateSimpleName(node);
         var nonGenericName = Luau.AstUtility.GetNonGenericName(name);
+        occupiedIdentifiersStack.AddIdentifier(nonGenericName.Text);
+        
         var members = node.Members.Select(Visit<Luau.Statement>).Where(m => m is not Luau.NoOp).ToList();
-        var explicitConstructor = node.Members.FirstOrDefault(member => member.IsKind(SyntaxKind.ConstructorDeclaration)) as ConstructorDeclarationSyntax;
+        var explicitConstructor = node.Members.OfType<ConstructorDeclarationSyntax>().FirstOrDefault();
         var constructor = explicitConstructor == null
             ? GenerateConstructor(node, new Luau.ParameterList([]))
             : Visit<Luau.Function>(explicitConstructor);
@@ -610,7 +614,11 @@ public sealed class LuauGenerator(
                             new Luau.IdentifierName("self")
                         )
                     )
-                ])
+                ]),
+                null,
+                name is Luau.GenericName genericName
+                    ? genericName.TypeArguments.Select(a => new Luau.IdentifierName(a)).ToList()
+                    : null
             )
         ];
 
@@ -618,7 +626,6 @@ public sealed class LuauGenerator(
             classMemberStatements.Add(constructor);
 
         classMemberStatements.AddRange(members);
-
         List<Luau.Statement> statements = [
             new Luau.Variable(nonGenericName, true ),
             new Luau.ScopedBlock(classMemberStatements),
@@ -644,7 +651,7 @@ public sealed class LuauGenerator(
             var explicitValue = member.EqualsValue?.Value;
             var value = explicitValue?.ToString() ?? index.ToString();
             // enumTypes.Add(new Luau.TypeRef(value));
-            enumKeys.Add(Luau.AstUtility.CreateSimpleName(member, member.Identifier.Text));
+            enumKeys.Add(new Luau.IdentifierName(member.Identifier.Text));
             enumValues.Add(new Luau.Literal(value));
 
             index = (explicitValue != null ? int.Parse(explicitValue.ToString()) : index) + 1;
@@ -656,7 +663,7 @@ public sealed class LuauGenerator(
         List<Luau.Statement> statements =
         [
             new Luau.Variable(
-                Luau.AstUtility.GetNonGenericName(name),
+                name,
                 true,
                 new Luau.TableInitializer(enumValues, enumKeys)
             ),
@@ -907,12 +914,11 @@ public sealed class LuauGenerator(
 
     public override Luau.Expression VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
     {
-        // TODO: handle non-null node.Initializer (prob won't be supported)
         var name = Visit<Luau.Name>(node.Type);
         var nonGenericName = Luau.AstUtility.GetNonGenericName(name);
         var argumentList = Visit<Luau.ArgumentList>(node.ArgumentList);
 
-        var callee = new Luau.QualifiedName(nonGenericName, new Luau.IdentifierName("new"));
+        var callee = new Luau.MemberAccess(nonGenericName, new Luau.IdentifierName("new"));
         var expandedExpression = _macro.ObjectCreation(Visit, node);
 
         return expandedExpression ?? new Luau.Call(callee, argumentList);
@@ -1096,12 +1102,14 @@ public sealed class LuauGenerator(
     public override Luau.Node VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
     {
         var expression = Visit<Luau.Expression>(node.Expression);
-        var name = Luau.AstUtility.GetNonGenericName(Visit<Luau.SimpleName>(node.Name));
+        var originalName = Visit<Luau.Name>(node.Name);
+        if (originalName is not Luau.SimpleName simpleName)
+            throw Logger.CompilerError($"Member access name is not a simple name, instead it is '{originalName.GetType().Name}'",
+                node.Name);
+        
+        var name = Luau.AstUtility.GetNonGenericName(simpleName);
         var memberAccess = new Luau.MemberAccess(expression, name);
         var luauNode = Luau.AstUtility.DiscardVariableIfExpressionStatement(node, memberAccess, node.Parent);
-        // if (node.Parent is AssignmentExpressionSyntax assignment && assignment.Left == node)
-        //     luauNode = Luau.AstUtility.QualifiedNameFromMemberAccess(memberAccess);
-
         var expandedExpression = _macro.MemberAccess(Visit, node);
         if (expandedExpression != null)
             luauNode = expandedExpression;
@@ -1114,11 +1122,15 @@ public sealed class LuauGenerator(
 
     public override Luau.Node VisitElementAccessExpression(ElementAccessExpressionSyntax node)
     {
-        var expression = Visit<Luau.Expression>(node.Expression);
+        var expressionTypeSymbol = _semanticModel.GetTypeInfo(node.Expression).Type;
         var indexExpression = node.ArgumentList.Arguments.First().Expression;
-        var typeSymbol = _semanticModel.GetTypeInfo(indexExpression).Type;
+        var indexTypeSymbol = _semanticModel.GetTypeInfo(indexExpression).Type;
+        var expression = Visit<Luau.Expression>(node.Expression);
         var index = Visit<Luau.Expression>(indexExpression);
-        index = typeSymbol != null && Shared.Constants.INTEGER_TYPES.Contains(typeSymbol.Name)
+        index = indexTypeSymbol != null
+                && expressionTypeSymbol != null
+                && expressionTypeSymbol.Name != "Dictionary"
+                && Shared.Constants.INTEGER_TYPES.Contains(indexTypeSymbol.Name)
             ? Luau.AstUtility.AddOne(index)
             : index;
         
@@ -1151,14 +1163,17 @@ public sealed class LuauGenerator(
 
         if (classDeclaration == null
             || symbol is not (IFieldSymbol or IPropertySymbol or IMethodSymbol { MethodKind: MethodKind.Ordinary })
-            || symbol.IsStatic
+            || symbol.ContainingType.Name != classDeclaration.Identifier.Text
             || IsAlreadyQualified(node))
         {
             return name;
         }
 
-        var self = new Luau.IdentifierName("self");
-        return new Luau.QualifiedName(self, name);
+        var qualifier = symbol.IsStatic
+            ? Luau.AstUtility.CreateSimpleName(node, classDeclaration.Identifier.Text, noGenerics: true)
+            : new Luau.IdentifierName("self");
+        
+        return new Luau.QualifiedName(qualifier, name, symbol is IMethodSymbol ? ':' : '.');
     }
 
     public override Luau.Expression VisitGenericName(GenericNameSyntax node)
@@ -1928,11 +1943,13 @@ public sealed class LuauGenerator(
         return new Luau.BinaryOperator(comparand, "==", caseValue);
     }
 
-    private static bool IsAlreadyQualified(IdentifierNameSyntax node)
+    private bool IsAlreadyQualified(IdentifierNameSyntax node)
     {
-        if (node.Parent is MemberAccessExpressionSyntax memberAccess)
+        if (FindFirstAncestor<MemberAccessExpressionSyntax>(node) is { } memberAccess)
             return memberAccess.Name == node;
-
+        if (FindFirstAncestor<QualifiedNameSyntax>(node) is { } qualifiedName)
+            return qualifiedName.Right == node;
+        
         return false;
     }
     

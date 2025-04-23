@@ -33,7 +33,7 @@ public sealed class MainTransformer(SyntaxTree tree, TransformState state, Confi
                     SyntaxFactory.IdentifierName("Globals")
                 )
             ));
-        
+
         return base.VisitCompilationUnit(node.WithUsings(usings));
     }
     
@@ -51,8 +51,7 @@ public sealed class MainTransformer(SyntaxTree tree, TransformState state, Confi
             SyntaxFactory.IdentifierName("Roblox"),
             SyntaxFactory.IdentifierName(node.Identifier));
 
-        return qualifiedName.WithTriviaFrom(node);
-
+        return VisitQualifiedName(qualifiedName.WithTriviaFrom(node));
     }
 
     // Turn file-scoped namespaces into regular namespaces (to reduce code duplication)
