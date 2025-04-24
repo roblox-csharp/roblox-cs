@@ -1063,6 +1063,16 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 
                 break;
             }
+            case "RemoveAt":
+            {
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression).ToList();;
+                expanded = AstUtility.TableCall(
+                    "remove",
+                    self,
+                    AstUtility.AddOne(arguments.First()));
+                
+                break;
+            }
         }
 
         expanded?.MarkExpanded(MacroKind.ListMethod);
