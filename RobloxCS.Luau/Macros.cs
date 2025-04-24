@@ -686,7 +686,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
         {
             case "Add":
             {
-                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments;
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
                 expanded = AstUtility.TableCall("insert", [self, ..arguments]);
                 break;
             }
@@ -697,7 +697,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             }
             case "Contains":
             {
-                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments;
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
                 expanded = new BinaryOperator(
                     AstUtility.TableCall("find", [self, ..arguments]),
                     "~=", AstUtility.Nil);
@@ -710,7 +710,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             }
             case "Exists":
             {
-                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments;
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
                 var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
                 var key = occupiedIdentifiersStack.AddIdentifier("_k");
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
@@ -734,7 +734,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             }
             case "Find":
             {
-                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments;
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
                 var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
                 var key = occupiedIdentifiersStack.AddIdentifier("_k");
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
@@ -758,7 +758,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             }
             case "FindLast":
             {
-                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments;
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
                 var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
                 var key = occupiedIdentifiersStack.AddIdentifier("_k");
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
@@ -782,7 +782,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             }
             case "FindAll":
             {
-                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments;
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
                 var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
                 var key = occupiedIdentifiersStack.AddIdentifier("_k");
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
@@ -805,7 +805,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             }
             case "AddRange":
             {
-                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments;
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
                 var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
                 var key = occupiedIdentifiersStack.AddIdentifier("_k");
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
@@ -819,8 +819,8 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             }
             case "ForEach":
             {
-                var args = (ArgumentList)visit(invocation.ArgumentList)!;
-                var funcBody = (AnonymousFunction)args.Arguments.First().Expression!;
+                var args = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
+                var funcBody = (AnonymousFunction)args.First();
                 var key = occupiedIdentifiersStack.AddIdentifier("_k");
 
                 expanded =
@@ -829,7 +829,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             }
             case "ConvertAll":
             {
-                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments;
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
                 var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
                 var key = occupiedIdentifiersStack.AddIdentifier("_k");
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
@@ -854,7 +854,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             }
             case "FindIndex":
             {
-                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments;
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression).ToList();
                 var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
                 var key = occupiedIdentifiersStack.AddIdentifier("_k");
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
@@ -908,7 +908,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             }
             case "FindIndexLast":
             {
-                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments;
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression).ToList();
                 var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
                 var key = occupiedIdentifiersStack.AddIdentifier("_k");
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
@@ -941,7 +941,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                             invocation.ArgumentList.Arguments.Count == 2
                                 ? arguments.ElementAt(1)
                                 : arguments.ElementAt(2)),
-                        new NumericFor(indexIdentifier, arguments.First().Expression, max, null,
+                        new NumericFor(indexIdentifier, arguments.First(), max, null,
                             new Block([
                                 new Variable(value, true, new ElementAccess(self, indexIdentifier)),
                                 new If(new Call(
