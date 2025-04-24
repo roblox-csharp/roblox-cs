@@ -10,7 +10,7 @@ public enum MacroKind
 {
     NewInstance,
     GetService,
-    IEnumerableConstruction,
+    ListConstruction,
     DictionaryConstruction,
     IEnumerableType,
     DictionaryType,
@@ -563,17 +563,18 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
 
         switch (namedTypeSymbol.Name)
         {
-            case "IEnumerable":
             case "List":
             {
-                var expressions = baseObjectCreation.Initializer?.Expressions
-                    .Select(visit)
-                    .OfType<Expression>()
-                    .ToList();
+                Expression table = TableInitializer.Empty;
+                if (baseObjectCreation.Initializer != null)
+                    table = new TableInitializer(baseObjectCreation.Initializer.Expressions
+                        .Select(visit)
+                        .OfType<Expression>()
+                        .ToList());
+                else if (baseObjectCreation.ArgumentList != null)
+                    table = (Expression)visit(baseObjectCreation.ArgumentList.Arguments.First().Expression)!;
                 
-                var table = new TableInitializer(expressions ?? []);
-                table.MarkExpanded(MacroKind.IEnumerableConstruction);
-
+                table.MarkExpanded(MacroKind.ListConstruction);
                 return table;
             }
             case "Dictionary":

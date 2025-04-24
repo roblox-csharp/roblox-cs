@@ -104,7 +104,7 @@ public class GenerationTest
         Assert.IsType<ArrayType>(arrayType.ElementType);
         
         var nestedArrayType = (ArrayType)arrayType.ElementType;
-        Assert.Equal("number", nestedArrayType.Path);
+        Assert.Equal("number", nestedArrayType.ElementType.Path);
     }
     
     [Theory]
@@ -127,7 +127,7 @@ public class GenerationTest
         if (isMacro)
         {
             Assert.NotNull(variable.Initializer.ExpandedByMacro);
-            Assert.Equal(MacroKind.IEnumerableConstruction, variable.Initializer.ExpandedByMacro);
+            Assert.Equal(MacroKind.ListConstruction, variable.Initializer.ExpandedByMacro);
         }
         Assert.IsType<TableInitializer>(variable.Initializer);
         
