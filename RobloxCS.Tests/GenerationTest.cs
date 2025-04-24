@@ -6,6 +6,24 @@ namespace RobloxCS.Tests;
 public class GenerationTest : Base.Generation
 {
     [Fact]
+    public void Hoists_LocalFunctions()
+    {
+        var ast = Generate("var a = 1; abc(); void abc() => print(a);");
+        var statements = ast.Statements.Skip(1).ToList();
+        Assert.Equal(3, statements.Count);
+        
+        var variableStatement = statements[0];
+        var functionStatement = statements[1];
+        var callStatement = statements[2];
+        Assert.IsType<VariableList>(variableStatement);
+        Assert.IsType<Function>(functionStatement);
+        Assert.IsType<ExpressionStatement>(callStatement);
+        
+        var expressionStatement = (ExpressionStatement)callStatement;
+        Assert.IsType<Call>(expressionStatement.Expression);
+    }
+    
+    [Fact]
     public void Generates_ObjectCreation_WithInitializer()
     {
         var ast = Generate("class Abc { public required int A { get; set; } } var abc = new Abc() { A = 69 };");
