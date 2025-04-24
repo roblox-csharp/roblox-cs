@@ -6,6 +6,53 @@ namespace RobloxCS.Tests;
 public class GenerationTest : Base.Generation
 {
     [Fact]
+    public void Generates_ObjectCreation_WithInitializer()
+    {
+        var ast = Generate("class Abc { public required int A { get; set; } } var abc = new Abc() { A = 69 };");
+        Assert.NotEmpty(ast.Statements);
+            
+        var statements = ast.Statements.Skip(2).ToList();
+        Assert.Equal(3, statements.Count);
+        
+        var bindingVariableStatement = statements[0];
+        Assert.IsType<Variable>(bindingVariableStatement);
+        
+        var bindingVariable = (Variable)bindingVariableStatement;
+        Assert.Equal("_binding", bindingVariable.Name.ToString());
+        Assert.IsType<Call>(bindingVariable.Initializer);
+            
+        var constructorCall = (Call)bindingVariable.Initializer;
+        Assert.Empty(constructorCall.ArgumentList.Arguments);
+        Assert.IsType<MemberAccess>(constructorCall.Callee);
+        
+        var constructor = (MemberAccess)constructorCall.Callee;
+        Assert.IsType<IdentifierName>(constructor.Expression);
+        Assert.IsType<IdentifierName>(constructor.Name);
+        Assert.Equal("Abc", constructor.Expression.ToString());
+        Assert.Equal("new", constructor.Name.ToString());
+        
+        var aFieldAssignment = statements[1];
+        Assert.IsType<Assignment>(aFieldAssignment);
+        
+        var assignment = (Assignment)aFieldAssignment;
+        Assert.IsType<QualifiedName>(assignment.Target);
+        Assert.IsType<Literal>(assignment.Value);
+        Assert.Equal("_binding.A", assignment.Target.ToString());
+        
+        var value = (Literal)assignment.Value;
+        Assert.Equal("69", value.ValueText);
+        
+        var finalVariableStatement = statements[2];
+        Assert.IsType<VariableList>(finalVariableStatement);
+        
+        var finalVariableList = (VariableList)finalVariableStatement;
+        var finalVariable = finalVariableList.Variables.First();
+        Assert.Equal("abc", finalVariable.Name.ToString());
+        Assert.IsType<IdentifierName>(finalVariable.Initializer);
+        Assert.Equal("_binding", finalVariable.Initializer.ToString());
+    }
+    
+    [Fact]
     public void Generates_ObjectCreation()
     {
         var ast = Generate("class Abc<T>; var abc = new Abc<int>();");
