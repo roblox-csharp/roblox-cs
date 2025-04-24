@@ -112,7 +112,7 @@ public class GenerationTest
     [InlineData("var list = new List<int>() { 1 };")]
     [InlineData("List<int> list = [1];", false)]
     [InlineData("List<int> list = new([1]);")]
-    public void Macros_ListCreation(string source, bool isMacro = true)
+    public void Generates_ListCreation(string source, bool isMacro = true)
     {
         var ast = Generate(source);
         Assert.NotEmpty(ast.Statements);
@@ -139,6 +139,111 @@ public class GenerationTest
         
         var literal = (Literal)value;
         Assert.Equal("1", literal.ValueText);
+    }
+    
+    [Fact]
+    public void Generates_DictionaryType()
+    {
+        var ast = Generate("Dictionary<string, int> d = [];");
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<VariableList>(statement);
+        
+        var variableList = (VariableList)statement;
+        var variable = variableList.Variables.First();
+        Assert.Equal("d", variable.Name.ToString());
+        Assert.IsType<TableInitializer>(variable.Initializer);
+        Assert.IsType<MappedType>(variable.Type);
+        
+        var mappedType = (MappedType)variable.Type;
+        Assert.Equal("string", mappedType.KeyType.Path);
+        Assert.Equal("number", mappedType.ValueType.Path);
+    }
+    
+    [Fact]
+    public void Generates_NestedDictionaryType()
+    {
+        var ast = Generate("Dictionary<string, Dictionary<string, int>> d = [];");
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<VariableList>(statement);
+        
+        var variableList = (VariableList)statement;
+        var variable = variableList.Variables.First();
+        Assert.Equal("d", variable.Name.ToString());
+        Assert.IsType<TableInitializer>(variable.Initializer);
+        Assert.IsType<MappedType>(variable.Type);
+        
+        var mappedType = (MappedType)variable.Type;
+        Assert.IsType<MappedType>(mappedType.ValueType);
+        Assert.Equal("string", mappedType.KeyType.Path);
+        
+        var nestedMappedType = (MappedType)mappedType.ValueType;
+        Assert.Equal("string", nestedMappedType.KeyType.Path);
+        Assert.Equal("number", nestedMappedType.ValueType.Path);
+    }
+    
+    [Theory]
+    [InlineData("var dict = new Dictionary<string, int>();")]
+    [InlineData("Dictionary<string, int> dict = new();")]
+    [InlineData("Dictionary<string, int> dict = [];", false)]
+    public void Generates_EmptyDictionaryCreation(string source, bool isMacro = true)
+    {
+        var ast = Generate(source);
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<VariableList>(statement);
+        
+        var variableList = (VariableList)statement;
+        var variable = variableList.Variables.First();
+        Assert.Equal("dict", variable.Name.ToString());
+        Assert.NotNull(variable.Initializer);
+        if (isMacro)
+        {
+            Assert.NotNull(variable.Initializer.ExpandedByMacro);
+            Assert.Equal(MacroKind.DictionaryConstruction, variable.Initializer.ExpandedByMacro);
+        }
+        Assert.IsType<TableInitializer>(variable.Initializer);
+        
+        var table = (TableInitializer)variable.Initializer;
+        Assert.Empty(table.KeyValuePairs);
+    }
+    
+    [Theory]
+    [InlineData("var dict = new Dictionary<string, int> { [\"abc\"] = 69 };")]
+    [InlineData("var dict = new Dictionary<string, int> { { \"abc\", 69 } };")]
+    [InlineData("Dictionary<string, int> dict = new() { [\"abc\"] = 69 };")]
+    [InlineData("Dictionary<string, int> dict = new() { { \"abc\", 69 } };")]
+    public void Generates_DictionaryCreation(string source)
+    {
+        var ast = Generate(source);
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<VariableList>(statement);
+        
+        var variableList = (VariableList)statement;
+        var variable = variableList.Variables.First();
+        Assert.Equal("dict", variable.Name.ToString());
+        Assert.NotNull(variable.Initializer);
+        Assert.NotNull(variable.Initializer.ExpandedByMacro);
+        Assert.Equal(MacroKind.DictionaryConstruction, variable.Initializer.ExpandedByMacro);
+        Assert.IsType<TableInitializer>(variable.Initializer);
+        
+        var table = (TableInitializer)variable.Initializer;
+        Assert.Single(table.KeyValuePairs);
+        
+        var pair = table.KeyValuePairs.First();
+        Assert.IsType<Literal>(pair.Key);
+        Assert.IsType<Literal>(pair.Value);
+        
+        var key = (Literal)pair.Key;
+        var value = (Literal)pair.Value;
+        Assert.Equal("\"abc\"", key.ValueText);
+        Assert.Equal("69", value.ValueText);
     }
     
     // TODO: actually implement fully
