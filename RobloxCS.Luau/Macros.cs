@@ -820,11 +820,15 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "ForEach":
             {
                 var args = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
-                var funcBody = (AnonymousFunction)args.First();
-                var key = occupiedIdentifiersStack.AddIdentifier("_k");
-
-                expanded =
-                    new For([key, funcBody.ParameterList.Parameters.First().Name], self, funcBody.Body!);
+                var callbackIdentifier = occupiedIdentifiersStack.AddIdentifier("_callback");
+                var valueName = occupiedIdentifiersStack.AddIdentifier("_v");
+                
+                transformState.Prereq(new Variable(callbackIdentifier, true, args.First()));
+                transformState.Prereq(new For([AstUtility.DiscardName, valueName], self, new Block([
+                    new ExpressionStatement(new Call(callbackIdentifier, AstUtility.CreateArgumentList([valueName])))
+                ])));
+                
+                expanded = new NoOpExpression();
                 break;
             }
             case "ConvertAll":
