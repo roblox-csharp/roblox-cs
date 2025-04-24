@@ -834,7 +834,6 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "AddRange":
             {
                 var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
-                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
                 var key = occupiedIdentifiersStack.AddIdentifier("_k");
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
 
@@ -991,60 +990,50 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             }
             case "IndexOf":
             {
-                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments;
-                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var key = occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = occupiedIdentifiersStack.AddIdentifier("_v");
-                var shouldCreateVariable =
-                    invocation.ArgumentList.Arguments.First().Expression is not LiteralExpressionSyntax;
-
-                List<Statement> block =
-                [
-                    new Variable(expression, true),
-                    new For([key, value], self, new Block([
-                        new If(
-                            new BinaryOperator(
-                                shouldCreateVariable
-                                        ? new IdentifierName("_val")
-                                        : arguments.First(),
-                                "==",
-                                value),
-                            new Block([
-                                new Assignment(expression, key),
-                                new Break()
-                            ]))
-                    ]))
-                ];
-
-                if (shouldCreateVariable)
-                    block.Insert(0, new Variable(new IdentifierName("_val"), true, arguments.First()));
-
-                transformState.Prereq(new Block(block));
-
-                expanded = expression;
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression).ToList();
+                var init = arguments.ElementAtOrDefault(1);
+                if (arguments.Count == 3)
+                    throw Logger.UnsupportedError(invocation.ArgumentList.Arguments.Last(), "IndexOf() count parameter", useYet: false);
+                
+                expanded = AstUtility.SubtractOne(
+                    new Parenthesized(
+                        new BinaryOperator(
+                            AstUtility.TableCall("find", self, arguments.First(), init != null ? AstUtility.AddOne(init) : AstUtility.Nil),
+                            "or",
+                            new Literal("0"))));
+                
                 break;
             }
-            case "IndexOfLast":
+            case "LastIndexOf":
             {
-                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments;
-                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var key = occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = occupiedIdentifiersStack.AddIdentifier("_v");
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression).ToList();
+                var expressionName = occupiedIdentifiersStack.AddIdentifier("_newValue");
+                var indexName = occupiedIdentifiersStack.AddIdentifier("_i");
                 var shouldCreateVariable =
                     invocation.ArgumentList.Arguments.First().Expression is not LiteralExpressionSyntax;
 
+                var init = arguments.ElementAtOrDefault(1);
+                var value = shouldCreateVariable
+                    ? new IdentifierName("_val")
+                    : arguments.First();
+
+                var negativeOne = new UnaryOperator("-", new Literal("1"));
                 List<Statement> block =
                 [
-                    new Variable(expression, true),
-                    new For([key, value], self, new Block([
-                        new If(
-                            new BinaryOperator(
-                                shouldCreateVariable
-                                    ? new IdentifierName("_val")
-                                    : arguments.First(), "==", value), new Block([
-                                new Assignment(expression, key)
-                            ]))
-                    ]))
+                    new Variable(expressionName, true),
+                    new NumericFor(
+                        indexName,
+                        init ?? new UnaryOperator("#", self),
+                        new Literal("1"),
+                        negativeOne,
+                        new Block([
+                            new If(
+                                new BinaryOperator(new ElementAccess(self, indexName), "==", value),
+                                new Block([
+                                    new Return(AstUtility.SubtractOne(indexName))
+                                ])),
+                            new Return(negativeOne)
+                        ]))
                 ];
 
                 if (shouldCreateVariable)
@@ -1052,18 +1041,18 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
 
                 transformState.PrereqList(block);
 
-                expanded = expression;
+                expanded = expressionName;
                 break;
             }
             case "Insert":
             {
-                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments;
-                expanded = AstUtility.TableCall("insert", self, arguments.First(), arguments.Last());
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression).ToList();;
+                expanded = AstUtility.TableCall("insert", self, AstUtility.AddOne(arguments.First()), arguments.Last());
                 break;
             }
             case "Remove":
             {
-                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments;
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression).ToList();;
                 expanded = AstUtility.TableCall(
                     "remove",
                     self,
@@ -1082,14 +1071,15 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
         InvocationExpressionSyntax invocation, out Expression? expanded)
     {
         expanded = null;
+        
+        var self = (Expression)visit(memberAccess.Expression)!;
         switch (memberAccess.Name.Identifier.Text)
         {
             case "Add":
             {
-                var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
-                var self = (Expression)visit(memberAccess.Expression)!;
-                var key = arguments.Arguments.First().Expression;
-                var value = arguments.Arguments.Last().Expression;
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression).ToList();;
+                var key = arguments.First();
+                var value = arguments.Last();
 
                 transformState.Prereq(new Assignment(new ElementAccess(self, key), value));
                 expanded = new NoOpExpression();
@@ -1097,18 +1087,15 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             }
             case "ContainsKey":
             {
-                var arguments = (ArgumentList)visit(invocation.ArgumentList)!;
-                var self = (Expression)visit(memberAccess.Expression)!;
-                var key = arguments.Arguments.First().Expression;
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression).ToList();;
+                var key = arguments.First();
 
                 expanded = new Parenthesized(new BinaryOperator(new ElementAccess(self, key), "~=", AstUtility.Nil));
                 break;
             }
             case "Clear":
             {
-                var self = (Expression)visit(memberAccess.Expression)!;
                 expanded = AstUtility.TableCall("clear", self);
-                
                 break;
             }
         }
