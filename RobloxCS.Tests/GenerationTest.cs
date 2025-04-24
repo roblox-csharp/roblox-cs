@@ -6,6 +6,31 @@ namespace RobloxCS.Tests;
 public class GenerationTest : Base.Generation
 {
     [Fact]
+    public void Generates_ObjectCreation()
+    {
+        var ast = Generate("class Abc<T>; var abc = new Abc<int>();");
+        Assert.NotEmpty(ast.Statements);
+            
+        var statement = ast.Statements.Skip(2).First();
+        Assert.IsType<VariableList>(statement);
+            
+        var variableList = (VariableList)statement;
+        var variable = variableList.Variables.First();
+        Assert.Equal("abc", variable.Name.ToString());
+        Assert.IsType<Call>(variable.Initializer);
+            
+        var constructorCall = (Call)variable.Initializer;
+        Assert.Empty(constructorCall.ArgumentList.Arguments);
+        Assert.IsType<MemberAccess>(constructorCall.Callee);
+        
+        var constructor = (MemberAccess)constructorCall.Callee;
+        Assert.IsType<IdentifierName>(constructor.Expression);
+        Assert.IsType<IdentifierName>(constructor.Name);
+        Assert.Equal("Abc", constructor.Expression.ToString());
+        Assert.Equal("new", constructor.Name.ToString());
+    }
+    
+    [Fact]
     public void Generates_ListType()
     {
         var ast = Generate("List<int> l = [];");
