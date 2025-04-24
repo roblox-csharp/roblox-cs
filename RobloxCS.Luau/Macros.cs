@@ -460,8 +460,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             }
             case "GetEnumerator":
             {
-                var enumeratorClass = AstUtility.CSCall("getGlobal", AstUtility.String("Enumerator"));
-                expanded = new Call(new MemberAccess(enumeratorClass, new IdentifierName("new")), AstUtility.CreateArgumentList([self]));
+                expanded = AstUtility.NewEnumerator(self);
                 break;
             }
             case "ToList":

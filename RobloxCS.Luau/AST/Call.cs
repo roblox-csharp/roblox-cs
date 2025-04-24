@@ -5,14 +5,14 @@
         public Expression Callee { get; }
         public ArgumentList ArgumentList { get; }
 
-        public Call(Expression callee, ArgumentList argumentList)
+        public Call(Expression callee, ArgumentList? argumentList = null)
         {
             // monkey patch for https://github.com/roblox-csharp/roblox-cs/issues/44
             if (callee is Name name)
                 callee = AstUtility.GetNonGenericName(name);
             
             Callee = callee;
-            ArgumentList = argumentList;
+            ArgumentList = argumentList ?? new ArgumentList([]);
             AddChildren([Callee, ArgumentList]);
         }
 

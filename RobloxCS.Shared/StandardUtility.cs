@@ -163,6 +163,11 @@ public static class StandardUtility
             
             return $"{{ [{keyType}]: {valueType} }}";
         }
+        if (csharpType.StartsWith("IEnumerator<"))
+        {
+            var elementType = GetMappedType(ExtractTypeArguments(csharpType).First());
+            return $"CS.IEnumerator<{elementType}>";
+        }
 
         if (csharpType.StartsWith("Roblox.Enum"))
             return GetMappedType(csharpType.Replace("Roblox.Enum", "Enum"));

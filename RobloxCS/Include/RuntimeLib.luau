@@ -59,6 +59,7 @@ end
 export type EnumeratorClass<T> = IClass<(items: { T }) -> IEnumerator<T>>;
 export type IEnumerator<T> = EnumeratorClass<T> & {
 	_index: number;
+	read _isAdvanced: boolean;
 	Current: T;
 	MoveNext: (IEnumerator<T>) -> ();
 }
@@ -75,26 +76,40 @@ do
 	Enumerator.__index = Enumerator
 	Enumerator.__className = className
 
-	function Enumerator.new<T>(items: { T }): IEnumerator<T>
-		return (setmetatable({ _items = items, _index = 0 }, Enumerator) :: any) :: IEnumerator<T>
+	function Enumerator.new<T>(items: { T } | (() -> { () -> T })): IEnumerator<T>
+		local isAdvanced = typeof(items) == "function"
+		return (setmetatable({
+			_items = if isAdvanced then items() else items,
+			_isAdvanced = isAdvanced,
+			_index = 0
+		}, Enumerator) :: any) :: IEnumerator<T>
 	end
-	
+
 	function Enumerator:MoveNext(): boolean
 		self._index += 1
 		local gotValue = self._index <= #self._items
-		self.Current = if gotValue then self._items[self._index] else nil
+		local item = if gotValue then self._items[self._index] else nil
+		self.Current = if self._isAdvanced and typeof(item) == "function" then
+				item(function()
+					self._index = #self._items + 1
+				end)
+			else
+				item
 		return gotValue
 	end
-	
+
 	function Enumerator:Reset(): ()
 		self._index = 0
 		self.Current = nil :: any
 	end
-	
+
 	function Enumerator:Dispose(): ()
+		self._items = nil
+		setmetatable(self, nil)
 	end
 end
 CS.defineGlobal("Enumerator", Enumerator)
+CS.Enumerator = Enumerator
 
 -- Exception class
 type ExceptionClass = Class & {
@@ -127,6 +142,7 @@ do
 	end
 end
 CS.defineGlobal("Exception", Exception)
+CS.Exception = Exception
 
 type CatchBlock = {
 	exceptionClass: string;

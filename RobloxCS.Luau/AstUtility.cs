@@ -391,60 +391,52 @@ public static class AstUtility
     /// Creates a call to a table library method
     /// </summary>
     public static Call TableCall(string methodName, params Expression[] arguments) =>
-        new(
-            new MemberAccess(
+        new(new MemberAccess(
                 new IdentifierName("table"),
-                new IdentifierName(methodName)
-            ),
-            CreateArgumentList(arguments.ToList())
-        );
+                new IdentifierName(methodName)),
+            CreateArgumentList(arguments.ToList()));
 
     /// <summary>
     /// Creates a call to a CS library method
     /// </summary>
     public static Call CSCall(string methodName, params Expression[] arguments) =>
-        new(
-            new MemberAccess(
+        new(new MemberAccess(
                 new IdentifierName("CS"),
-                new IdentifierName(methodName)
-            ),
-            CreateArgumentList(arguments.ToList())
-        );
+                new IdentifierName(methodName)),
+            CreateArgumentList(arguments.ToList()));
+
+    public static Call NewEnumerator(Expression items) =>
+        new(new MemberAccess(
+                new MemberAccess(
+                    new IdentifierName("CS"),
+                    new IdentifierName("Enumerator")),
+                new IdentifierName("new")),
+            CreateArgumentList([items]));
 
     public static Variable SignalImport() =>
-        new(
-            new IdentifierName("Signal"),
+        new(new IdentifierName("Signal"),
             true,
             // temporary until RojoReader
-            RequireCall(new Luau.QualifiedName(
+            RequireCall(new QualifiedName(
                 new IdentifierName("rbxcs_include"),
-                new IdentifierName("GoodSignal")
-            ))
-        );
+                new IdentifierName("GoodSignal"))));
         
     public static Call RequireCall(Expression modulePath) =>
-        new(
-            new IdentifierName("require"),
-            new ArgumentList([new Argument(modulePath)])
-        );
+        new(new IdentifierName("require"),
+            CreateArgumentList([modulePath]));
         
     public static Call PrintCall(params List<Expression> args) =>
-        new(
-            new IdentifierName("print"),
-            new ArgumentList(args.ConvertAll(value => new Argument(value)))
-        );
+        new(new IdentifierName("print"),
+            CreateArgumentList(args));
 
     /// <summary>
     /// Creates a call to a bit32 library method
     /// </summary>
     public static Call Bit32Call(string methodName, params Expression[] arguments) =>
-        new(
-            new MemberAccess(
+        new(new MemberAccess(
                 new IdentifierName("bit32"),
-                new IdentifierName(methodName)
-            ),
-            CreateArgumentList(arguments.ToList())
-        );
+                new IdentifierName(methodName)),
+            CreateArgumentList(arguments.ToList()));
 
     public static ArgumentList CreateArgumentList(List<Expression> arguments) =>
         new(arguments.ConvertAll(expression => new Argument(expression)));
@@ -475,11 +467,9 @@ public static class AstUtility
         var parentName = CreateSimpleName(node.Parent);
         var parentLocation = GetFullParentName(node.Parent);
         return parentLocation == null
-            ? (
-                node.Parent.SyntaxTree == node.SyntaxTree
-                    ? parentName
-                    : CSCall("getGlobal", new Literal($"\"{(parentName is GenericName genericName ? genericName.Text : parentName.ToString())}\""))
-            )
+            ? node.Parent.SyntaxTree == node.SyntaxTree
+                ? parentName
+                : GetGlobal(parentName)
             : new MemberAccess(parentLocation, parentName);
     }
 
