@@ -897,7 +897,6 @@ public sealed class LuauGenerator(
 
     public override Luau.Expression VisitImplicitObjectCreationExpression(ImplicitObjectCreationExpressionSyntax node)
     {
-        // TODO: handle non-null node.Initializer
         var baseSymbol = _semanticModel.GetSymbolInfo(node).Symbol;
         var classSymbol = baseSymbol?.ContainingSymbol ?? baseSymbol;
         if (classSymbol == null)
@@ -910,7 +909,8 @@ public sealed class LuauGenerator(
         var callee = new Luau.QualifiedName(nonGenericName, new Luau.IdentifierName("new"));
         var expandedExpression = _macro.ObjectCreation(Visit, node);
 
-        return expandedExpression ?? new Luau.Call(callee, argumentList);
+        var creationExpression = expandedExpression ?? new Luau.Call(callee, argumentList);
+        return HandleObjectCreationInitializer(node.Initializer, expandedExpression, creationExpression) ?? creationExpression;
     }
 
     public override Luau.Expression VisitObjectCreationExpression(ObjectCreationExpressionSyntax node)
@@ -921,8 +921,34 @@ public sealed class LuauGenerator(
 
         var callee = new Luau.MemberAccess(nonGenericName, new Luau.IdentifierName("new"));
         var expandedExpression = _macro.ObjectCreation(Visit, node);
+        
+        var creationExpression = expandedExpression ?? new Luau.Call(callee, argumentList);
+        return HandleObjectCreationInitializer(node.Initializer, expandedExpression, creationExpression) ?? creationExpression;
+    }
 
-        return expandedExpression ?? new Luau.Call(callee, argumentList);
+    private Luau.IdentifierName? HandleObjectCreationInitializer(
+        InitializerExpressionSyntax? initializer,
+        Luau.Expression? macroExpandedExpression,
+        Luau.Expression creationExpression)
+    {
+        if (initializer == null || macroExpandedExpression != null) return null;
+        
+        var binding = PushToVariable("_binding", creationExpression);
+        foreach (var expression in initializer.Expressions)
+        {
+            switch (expression)
+            {
+                case AssignmentExpressionSyntax assignment:
+                {
+                    var name = Visit<Luau.SimpleName>(assignment.Left);
+                    var value = Visit<Luau.Expression>(assignment.Right);
+                    transformState.Prereq(new Luau.Assignment(new Luau.QualifiedName(binding, name), value));
+                    break;
+                }
+            }
+        }
+
+        return binding;
     }
 
     public override Luau.Node VisitInvocationExpression(InvocationExpressionSyntax node)
