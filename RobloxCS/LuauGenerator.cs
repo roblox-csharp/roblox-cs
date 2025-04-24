@@ -897,7 +897,7 @@ public sealed class LuauGenerator(
 
     public override Luau.Expression VisitImplicitObjectCreationExpression(ImplicitObjectCreationExpressionSyntax node)
     {
-        // TODO: handle non-null node.Initializer (prob won't be supported)
+        // TODO: handle non-null node.Initializer
         var baseSymbol = _semanticModel.GetSymbolInfo(node).Symbol;
         var classSymbol = baseSymbol?.ContainingSymbol ?? baseSymbol;
         if (classSymbol == null)

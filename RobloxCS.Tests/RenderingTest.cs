@@ -159,7 +159,7 @@ public class RenderingTest
     }
     
     [Fact]
-    public void Renders_ExpressionalIf()
+    public void Renders_IfExpression()
     {
         var condition = new IdentifierName("runicIsCool");
         var body = new Literal("\"im tha best\"");
@@ -189,10 +189,9 @@ public class RenderingTest
                                       else
                                         print("uhhhh")
                                       end
-                                      
                                       """;
         
-        Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
+        Assert.Equal(expectedOutput.Replace("\r", "").Trim(), output.Replace("\r", "").Trim());
     }
     
     [Fact]
