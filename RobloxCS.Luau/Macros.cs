@@ -837,11 +837,14 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 var key = occupiedIdentifiersStack.AddIdentifier("_k");
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
 
-                expanded = new Block([
-                    new For([key, value], arguments.First(), new Block([
+                transformState.Prereq(new For(
+                    [key, value],
+                    arguments.First(),
+                    new Block([
                         new ExpressionStatement(AstUtility.TableCall("insert", self, value))
-                    ]))
-                ]);
+                    ])));
+                
+                expanded = new NoOpExpression();
                 break;
             }
             case "ForEach":
@@ -937,7 +940,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 expanded = expression;
                 break;
             }
-            case "FindIndexLast":
+            case "FindLastIndex":
             {
                 var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression).ToList();
                 var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
