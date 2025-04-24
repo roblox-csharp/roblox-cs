@@ -565,32 +565,35 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
         {
             case "List":
             {
-                Expression table = TableInitializer.Empty;
+                Expression finalExpression = new TableInitializer();
                 if (baseObjectCreation.Initializer != null)
-                    table = new TableInitializer(baseObjectCreation.Initializer.Expressions
+                    finalExpression = new TableInitializer(baseObjectCreation.Initializer.Expressions
                         .Select(visit)
                         .OfType<Expression>()
                         .ToList());
-                else if (baseObjectCreation.ArgumentList != null)
+                else if (baseObjectCreation.ArgumentList is { Arguments.Count: > 0 })
                 {
-                    var argumentExpression = baseObjectCreation.ArgumentList.Arguments.First().Expression;
-                    var expressionType = semanticModel.GetTypeInfo(argumentExpression).Type;
+                    var expression = baseObjectCreation.ArgumentList.Arguments.First().Expression;
+                    var expressionType = semanticModel.GetTypeInfo(expression).Type;
                     if (expressionType != null && Constants.INTEGER_TYPES.Contains(expressionType.Name))
-                        throw Logger.UnsupportedError(argumentExpression, "Fixed list capacities", useYet: false);
+                        throw Logger.UnsupportedError(expression, "Fixed list capacities", useYet: false);
                     
-                    table = (Expression)visit(argumentExpression)!;
+                    finalExpression = (Expression)visit(expression)!;
                 }
                 
-                table.MarkExpanded(MacroKind.ListConstruction);
-                return table;
+                finalExpression.MarkExpanded(MacroKind.ListConstruction);
+                return finalExpression;
             }
             case "Dictionary":
             {
-                var values = new List<Expression>();
-                var keys = new List<Expression>();
-
+                Expression finalExpression = new TableInitializer();
                 if (baseObjectCreation.Initializer != null)
+                {
+                    List<Expression> values = [];
+                    List<Expression> keys = [];
+
                     foreach (var expression in baseObjectCreation.Initializer.Expressions)
+                    {
                         switch (expression)
                         {
                             case AssignmentExpressionSyntax assignmentExpression:
@@ -602,7 +605,6 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                                 keys.Add(key);
                                 break;
                             }
-
                             case InitializerExpressionSyntax initializerExpression:
                             {
                                 var key = (Expression)visit(initializerExpression.Expressions[0])!;
@@ -612,12 +614,30 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                                 keys.Add(key);
                                 break;
                             }
+                            
+                            default:
+                                throw Logger.CompilerError($"Unsupported dictionary initializer expression '{expression.Kind()}'", expression);
                         }
+                    }
+                    finalExpression = new TableInitializer(values, keys);
+                }
+                else if (baseObjectCreation.ArgumentList is { Arguments.Count: > 0 })
+                {
+                    var arguments = baseObjectCreation.ArgumentList.Arguments.Select(arg => arg.Expression).ToList();
+                    if (arguments.Any(arg =>
+                        {
+                            var type = semanticModel.GetTypeInfo(arg).Type;
+                            return type is { Name: "EqualityComparer" or "IEqualityComparer" };
+                        }))
+                    {
+                        throw Logger.UnsupportedError(baseObjectCreation.ArgumentList, "Equality comparers");
+                    }
+                    
+                    throw Logger.UnsupportedError(baseObjectCreation.ArgumentList, "Dictionary constructor arguments");
+                }
 
-                var table = new TableInitializer(values, keys);
-                table.MarkExpanded(MacroKind.DictionaryConstruction);
-
-                return table;
+                finalExpression.MarkExpanded(MacroKind.DictionaryConstruction);
+                return finalExpression;
             }
         }
 

@@ -5,11 +5,11 @@ namespace RobloxCS.Luau;
 
 public abstract class Node
 {
-    public Node? Parent { get; private set; } = null;
+    public Node? Parent { get; private set; }
     public List<Node> Children { get; } = [];
     public MacroKind? ExpandedByMacro { get; private set; }
 
-    private List<Node>? _descendants = null;
+    private List<Node>? _descendants;
     public List<Node> Descendants
     {
         get
@@ -39,7 +39,7 @@ public abstract class Node
                  Attempted to mark already macro-expanded node as expanded.
                  Current macro kind: {ExpandedByMacro}
                  Attempted expanding macro kind: {macroKind}
-                 """);
+                 """.Trim());
             
         ExpandedByMacro = macroKind;
     }
