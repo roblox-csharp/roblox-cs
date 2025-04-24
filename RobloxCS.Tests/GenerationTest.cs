@@ -6,6 +6,246 @@ namespace RobloxCS.Tests;
 public class GenerationTest : Base.Generation
 {
     [Fact]
+    public void Generates_ComplexGeneratorFunction()
+    {
+        var ast = Generate("""
+                           IEnumerator<int> GetEnumerator()
+                           {
+                             print("a");
+                             yield return 1;
+                             print("b");
+                             yield break;
+                             print("c");
+                             yield return 3;
+                           }
+                           """);
+        
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<Function>(statement);
+        
+        var function = (Function)statement;
+        Assert.Empty(function.ParameterList.Parameters);
+        Assert.True(function.IsLocal);
+        Assert.NotNull(function.ReturnType);
+        Assert.Equal("CS.IEnumerator<number>", function.ReturnType.Path);
+        Assert.NotNull(function.Body);
+        Assert.Single(function.Body.Statements);
+        
+        var bodyStatement = function.Body.Statements.First();
+        Assert.IsType<Return>(bodyStatement);
+        
+        var returnStatement = (Return)bodyStatement;
+        Assert.IsType<Call>(returnStatement.Expression);
+        
+        var call = (Call)returnStatement.Expression;
+        Assert.Single(call.ArgumentList.Arguments);
+        Assert.IsType<MemberAccess>(call.Callee);
+        
+        var enumeratorConstructor = (MemberAccess)call.Callee;
+        Assert.IsType<MemberAccess>(enumeratorConstructor.Expression);
+        Assert.IsType<IdentifierName>(enumeratorConstructor.Name);
+        Assert.Equal("new", enumeratorConstructor.Name.ToString());
+        
+        var csDotEnumerator = (MemberAccess)enumeratorConstructor.Expression;
+        Assert.IsType<IdentifierName>(csDotEnumerator.Expression);
+        Assert.IsType<IdentifierName>(csDotEnumerator.Name);
+        Assert.Equal("CS", csDotEnumerator.Expression.ToString());
+        Assert.Equal("Enumerator", csDotEnumerator.Name.ToString());
+        
+        var argumentExpression = call.ArgumentList.Arguments.First().Expression;
+        Assert.IsType<AnonymousFunction>(argumentExpression);
+        
+        var initializerFunction = (AnonymousFunction)argumentExpression;
+        Assert.NotNull(initializerFunction.Body);
+        Assert.Single(initializerFunction.Body.Statements);
+        
+        var initializerStatement = initializerFunction.Body.Statements.First();
+        Assert.IsType<Return>(initializerStatement);
+        
+        var initializerReturn = (Return)initializerStatement;
+        Assert.IsType<TableInitializer>(initializerReturn.Expression);
+        
+        var tableInitializer = (TableInitializer)initializerReturn.Expression;
+        Assert.Equal(3, tableInitializer.Values.Count);
+        
+        var firstValue = tableInitializer.Values[0];
+        var secondValue = tableInitializer.Values[1];
+        var thirdValue = tableInitializer.Values[2];
+        Assert.IsType<AnonymousFunction>(firstValue);
+        Assert.IsType<AnonymousFunction>(secondValue);
+        Assert.IsType<AnonymousFunction>(thirdValue);
+        
+        var firstFunction = (AnonymousFunction)firstValue;
+        var secondFunction = (AnonymousFunction)secondValue;
+        var thirdFunction = (AnonymousFunction)thirdValue;
+        Assert.NotNull(firstFunction.Body);
+        Assert.NotNull(secondFunction.Body);
+        Assert.NotNull(thirdFunction.Body);
+        Assert.Equal(2, firstFunction.Body.Statements.Count);
+        Assert.Equal(2, secondFunction.Body.Statements.Count);
+        Assert.Equal(2, thirdFunction.Body.Statements.Count);
+        
+        var firstFirstStatement = firstFunction.Body.Statements.First();
+        var firstLastStatement = firstFunction.Body.Statements.Last();
+        Assert.IsType<ExpressionStatement>(firstFirstStatement);
+        Assert.IsType<Return>(firstLastStatement);
+        
+        var firstExpression = ((ExpressionStatement)firstFirstStatement).Expression;
+        Assert.IsType<Call>(firstExpression);
+        
+        var firstReturn = (Return)firstLastStatement;
+        Assert.IsType<Literal>(firstReturn.Expression);
+        
+        var firstReturnValue = (Literal)firstReturn.Expression;
+        Assert.Equal("1", firstReturnValue.ValueText);
+        
+        var secondFirstStatement = secondFunction.Body.Statements.First();
+        var secondLastStatement = secondFunction.Body.Statements.Last();
+        Assert.IsType<ExpressionStatement>(secondFirstStatement);
+        Assert.IsType<ExpressionStatement>(secondLastStatement);
+        
+        var secondExpression = ((ExpressionStatement)secondFirstStatement).Expression;
+        var breakExpression = ((ExpressionStatement)secondLastStatement).Expression;
+        Assert.IsType<Call>(secondExpression);
+        Assert.IsType<Call>(breakExpression);
+        
+        var breakCall = (Call)breakExpression;
+        Assert.IsType<IdentifierName>(breakCall.Callee);
+        Assert.Equal("_breakIteration", breakCall.Callee.ToString());
+        
+        var thirdFirstStatement = thirdFunction.Body.Statements.First();
+        var thirdLastStatement = thirdFunction.Body.Statements.Last();
+        Assert.IsType<ExpressionStatement>(thirdFirstStatement);
+        Assert.IsType<Return>(thirdLastStatement);
+        
+        var thirdExpression = ((ExpressionStatement)thirdFirstStatement).Expression;
+        Assert.IsType<Call>(thirdExpression);
+        
+        var thirdReturn = (Return)thirdLastStatement;
+        Assert.IsType<Literal>(thirdReturn.Expression);
+        
+        var thirdReturnValue = (Literal)thirdReturn.Expression;
+        Assert.Equal("3", thirdReturnValue.ValueText);
+    }
+    
+    [Fact]
+    public void Generates_SimpleGeneratorFunction_WithBreak()
+    {
+        var ast = Generate("""
+                           IEnumerator<int> GetEnumerator()
+                           {
+                             yield return 1;
+                             yield break;
+                             yield return 3;
+                           }
+                           """);
+        
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<Function>(statement);
+        
+        var function = (Function)statement;
+        Assert.Empty(function.ParameterList.Parameters);
+        Assert.True(function.IsLocal);
+        Assert.NotNull(function.ReturnType);
+        Assert.Equal("CS.IEnumerator<number>", function.ReturnType.Path);
+        Assert.NotNull(function.Body);
+        Assert.Single(function.Body.Statements);
+        
+        var bodyStatement = function.Body.Statements.First();
+        Assert.IsType<Return>(bodyStatement);
+        
+        var returnStatement = (Return)bodyStatement;
+        Assert.IsType<Call>(returnStatement.Expression);
+        
+        var call = (Call)returnStatement.Expression;
+        Assert.Single(call.ArgumentList.Arguments);
+        Assert.IsType<MemberAccess>(call.Callee);
+        
+        var enumeratorConstructor = (MemberAccess)call.Callee;
+        Assert.IsType<MemberAccess>(enumeratorConstructor.Expression);
+        Assert.IsType<IdentifierName>(enumeratorConstructor.Name);
+        Assert.Equal("new", enumeratorConstructor.Name.ToString());
+        
+        var csDotEnumerator = (MemberAccess)enumeratorConstructor.Expression;
+        Assert.IsType<IdentifierName>(csDotEnumerator.Expression);
+        Assert.IsType<IdentifierName>(csDotEnumerator.Name);
+        Assert.Equal("CS", csDotEnumerator.Expression.ToString());
+        Assert.Equal("Enumerator", csDotEnumerator.Name.ToString());
+        
+        var argumentExpression = call.ArgumentList.Arguments.First().Expression;
+        Assert.IsType<TableInitializer>(argumentExpression);
+        
+        var tableInitializer = (TableInitializer)argumentExpression;
+        Assert.Single(tableInitializer.Values);
+        
+        var value = tableInitializer.Values.First();
+        Assert.IsType<Literal>(value);
+        
+        var literal = (Literal)value;
+        Assert.Equal("1", literal.ValueText);
+    }
+    
+    [Fact]
+    public void Generates_SimpleGeneratorFunction()
+    {
+        var ast = Generate("""
+                           IEnumerator<int> GetEnumerator()
+                           {
+                             yield return 1;
+                             yield return 2;
+                             yield return 3;
+                           }
+                           """);
+        
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<Function>(statement);
+        
+        var function = (Function)statement;
+        Assert.Empty(function.ParameterList.Parameters);
+        Assert.True(function.IsLocal);
+        Assert.NotNull(function.ReturnType);
+        Assert.Equal("CS.IEnumerator<number>", function.ReturnType.Path);
+        Assert.NotNull(function.Body);
+        Assert.Single(function.Body.Statements);
+        
+        var bodyStatement = function.Body.Statements.First();
+        Assert.IsType<Return>(bodyStatement);
+        
+        var returnStatement = (Return)bodyStatement;
+        Assert.IsType<Call>(returnStatement.Expression);
+        
+        var call = (Call)returnStatement.Expression;
+        Assert.Single(call.ArgumentList.Arguments);
+        Assert.IsType<MemberAccess>(call.Callee);
+        
+        var enumeratorConstructor = (MemberAccess)call.Callee;
+        Assert.IsType<MemberAccess>(enumeratorConstructor.Expression);
+        Assert.IsType<IdentifierName>(enumeratorConstructor.Name);
+        Assert.Equal("new", enumeratorConstructor.Name.ToString());
+        
+        var csDotEnumerator = (MemberAccess)enumeratorConstructor.Expression;
+        Assert.IsType<IdentifierName>(csDotEnumerator.Expression);
+        Assert.IsType<IdentifierName>(csDotEnumerator.Name);
+        Assert.Equal("CS", csDotEnumerator.Expression.ToString());
+        Assert.Equal("Enumerator", csDotEnumerator.Name.ToString());
+        
+        var argumentExpression = call.ArgumentList.Arguments.First().Expression;
+        Assert.IsType<TableInitializer>(argumentExpression);
+        
+        var tableInitializer = (TableInitializer)argumentExpression;
+        Assert.Equal(3, tableInitializer.Values.Count);
+        
+        var value = tableInitializer.Values.First();
+        Assert.IsType<Literal>(value);
+        
+        var literal = (Literal)value;
+        Assert.Equal("1", literal.ValueText);
+    }
+
+    [Fact]
     public void Hoists_LocalFunctions()
     {
         var ast = Generate("var a = 1; abc(); void abc() => print(a);");

@@ -6,7 +6,7 @@ public abstract class Generation
 {
     protected static AST Generate(string source)
     {
-        var tree = TranspilerUtility.ParseAndTransformTree(source, null);
+        var tree = TranspilerUtility.ParseAndTransformTree(source.Trim(), null);
         var compiler = TranspilerUtility.GetCompiler([tree], null);
         
         return TranspilerUtility.GetLuauAST(tree, compiler);
