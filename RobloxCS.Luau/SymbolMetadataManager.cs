@@ -4,7 +4,7 @@ namespace RobloxCS.Luau;
 
 public class SymbolMetadata
 {
-    public Luau.IdentifierName? EventConnectionName { get; set; }
+    public IdentifierName? EventConnectionName { get; set; }
 }
 
 public static class SymbolMetadataManager

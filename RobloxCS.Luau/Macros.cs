@@ -6,7 +6,7 @@ using RobloxCS.Shared;
 
 namespace RobloxCS.Macros;
 
-public enum MacroKind
+public enum MacroKind : byte
 {
     NewInstance,
     GetService,
@@ -39,37 +39,32 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             return new Assignment(target, AstUtility.Bit32Call(bit32MethodName, target, value));
         }
 
-        var leftSymbol = ModelExtensions.GetSymbolInfo(semanticModel, assignment.Left).Symbol;
-        if (leftSymbol is IEventSymbol eventSymbol)
-        {
-            var symbolMetadata = SymbolMetadataManager.Get(eventSymbol);
-            symbolMetadata.EventConnectionName ??=
-                AstUtility.CreateSimpleName<IdentifierName>(assignment, "conn_" + eventSymbol.Name, true);
+        var leftSymbol = semanticModel.GetSymbolInfo(assignment.Left).Symbol;
+        if (leftSymbol is not IEventSymbol eventSymbol) return null;
+        
+        var symbolMetadata = SymbolMetadataManager.Get(eventSymbol);
+        symbolMetadata.EventConnectionName ??=
+            AstUtility.CreateSimpleName<IdentifierName>(assignment, "conn_" + eventSymbol.Name, true);
 
-            var connectionName = symbolMetadata.EventConnectionName;
-            switch (mappedOperator)
-            {
-                case "+=":
-                {
-                    var left = (Expression)visit(assignment.Left)!;
-                    var right = (Expression)visit(assignment.Right)!;
-                    return new Variable(
-                        connectionName,
-                        true,
-                        new Call(
-                            new MemberAccess(left, new IdentifierName("Connect"), ':'),
-                            new ArgumentList([new Argument(right)])
-                        )
-                    );
-                }
-                case "-=":
-                {
-                    return new Call(
-                        new MemberAccess(connectionName, new IdentifierName("Disconnect"), ':'),
-                        new ArgumentList([])
-                    );
-                }
-            }
+        var connectionName = symbolMetadata.EventConnectionName;
+        switch (mappedOperator)
+        {
+            case "+=":
+                var left = (Expression)visit(assignment.Left)!;
+                var right = (Expression)visit(assignment.Right)!;
+                return new Variable(
+                    connectionName,
+                    true,
+                    new Call(
+                        new MemberAccess(left, new IdentifierName("Connect"), ':'),
+                        new ArgumentList([new Argument(right)])
+                    )
+                );
+            case "-=":
+                return new Call(
+                    new MemberAccess(connectionName, new IdentifierName("Disconnect"), ':'),
+                    new ArgumentList([])
+                );
         }
 
         return null;
@@ -465,58 +460,8 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             }
             case "GetEnumerator":
             {
-                var selfIdentifier = new IdentifierName("self");
-                var indexIdentifier = new IdentifierName("_index");
-                var currentIdentifier = new IdentifierName("Current");
-                var gotValueIdentifier = new IdentifierName("gotValue");
-                var indexField = new MemberAccess(selfIdentifier, indexIdentifier);
-                var currentField = new MemberAccess(selfIdentifier, currentIdentifier);
-                
-                expanded = new TableInitializer(
-                    [
-                        AstUtility.Nil,
-                        zero,
-                        new AnonymousFunction(
-                            new ParameterList([new Parameter(selfIdentifier)]),
-                            new TypeRef("boolean"),
-                            new Block([
-                                new ExpressionStatement(new BinaryOperator(
-                                    indexField,
-                                    "+=",
-                                    one)),
-                                new Variable(
-                                    gotValueIdentifier,
-                                    true,
-                                    new BinaryOperator(
-                                        indexField,
-                                        "<=",
-                                        new UnaryOperator("#", self))),
-                                new Assignment(currentField, new IfExpression(
-                                    gotValueIdentifier,
-                                    new ElementAccess(self, indexField),
-                                    AstUtility.Nil,
-                                    true)),
-                                new Return(gotValueIdentifier)
-                            ])),
-                        new AnonymousFunction(
-                            new ParameterList([new Parameter(selfIdentifier)]),
-                            new TypeRef("()"),
-                            new Block([
-                                new Assignment(indexField, zero),
-                                new Assignment(currentField, AstUtility.Nil),
-                            ])),
-                        new AnonymousFunction(
-                            new ParameterList([new Parameter(selfIdentifier)]),
-                            new TypeRef("()")) // no-op
-                    ],
-                    [
-                        currentIdentifier,
-                        indexIdentifier,
-                        new IdentifierName("MoveNext"),
-                        new IdentifierName("Reset"),
-                        new IdentifierName("Dispose") // for API completeness
-                    ]);
-                
+                var enumeratorClass = AstUtility.CSCall("getGlobal", AstUtility.String("Enumerator"));
+                expanded = new Call(new MemberAccess(enumeratorClass, new IdentifierName("new")), AstUtility.CreateArgumentList([self]));
                 break;
             }
             case "ToList":
