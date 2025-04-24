@@ -34,9 +34,42 @@ public class GenerationTest
     }
     
     [Fact]
+    public void Macros_List_Add()
+    {
+        var ast = Generate("List<int> l = []; l.Add(69);");
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(2).First();
+        Assert.IsType<ExpressionStatement>(statement);
+        
+        var expression = ((ExpressionStatement)statement).Expression;
+        Assert.IsType<Call>(expression);
+        
+        var call = (Call)expression;
+        Assert.NotNull(call.ExpandedByMacro);
+        Assert.Equal(MacroKind.ListMethod, call.ExpandedByMacro);
+        Assert.IsType<MemberAccess>(call.Callee);
+        
+        var selfArgument = call.ArgumentList.Arguments.First().Expression;
+        var elementArgument = call.ArgumentList.Arguments.Last().Expression;
+        Assert.IsType<IdentifierName>(selfArgument);
+        Assert.IsType<Literal>(elementArgument);
+        Assert.Equal("l", selfArgument.ToString());
+        
+        var element = (Literal)elementArgument;
+        Assert.Equal("69", element.ValueText);
+        
+        var memberAccess = (MemberAccess)call.Callee;
+        Assert.IsType<IdentifierName>(memberAccess.Expression);
+        Assert.IsType<IdentifierName>(memberAccess.Name);
+        Assert.Equal("table", memberAccess.Expression.ToString());
+        Assert.Equal("insert", memberAccess.Name.ToString());
+    }
+    
+    [Fact]
     public void Generates_ListType()
     {
-        var ast = Generate("using System.Collections.Generic;\nList<int> l = [];");
+        var ast = Generate("List<int> l = [];");
         Assert.NotEmpty(ast.Statements);
         
         var statement = ast.Statements.Skip(1).First();
@@ -44,7 +77,7 @@ public class GenerationTest
         
         var variableList = (VariableList)statement;
         var variable = variableList.Variables.First();
-        Assert.Equal("l", variable.Name.ToString()); // temp
+        Assert.Equal("l", variable.Name.ToString());
         Assert.IsType<TableInitializer>(variable.Initializer);
         Assert.IsType<ArrayType>(variable.Type);
         
@@ -52,14 +85,36 @@ public class GenerationTest
         Assert.Equal("number", arrayType.ElementType.Path);
     }
     
-    [Theory]
-    [InlineData("var list = new List<int>();")]
-    [InlineData("var list = new List<int>() { };")]
-    [InlineData("List<int> list = [];")]
-    [InlineData("List<int> list = new();")]
-    public void Generates_ListCreation(string source)
+    [Fact]
+    public void Generates_NestedListType()
     {
-        var ast = Generate("using System.Collections.Generic;\n" + source);
+        var ast = Generate("List<List<int>> l = [];");
+        Assert.NotEmpty(ast.Statements);
+        
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<VariableList>(statement);
+        
+        var variableList = (VariableList)statement;
+        var variable = variableList.Variables.First();
+        Assert.Equal("l", variable.Name.ToString());
+        Assert.IsType<TableInitializer>(variable.Initializer);
+        Assert.IsType<ArrayType>(variable.Type);
+        
+        var arrayType = (ArrayType)variable.Type;
+        Assert.IsType<ArrayType>(arrayType.ElementType);
+        
+        var nestedArrayType = (ArrayType)arrayType.ElementType;
+        Assert.Equal("number", nestedArrayType.Path);
+    }
+    
+    [Theory]
+    [InlineData("var list = new List<int>([1]);")]
+    [InlineData("var list = new List<int>() { 1 };")]
+    [InlineData("List<int> list = [1];", false)]
+    [InlineData("List<int> list = new([1]);")]
+    public void Macros_ListCreation(string source, bool isMacro = true)
+    {
+        var ast = Generate(source);
         Assert.NotEmpty(ast.Statements);
         
         var statement = ast.Statements.Skip(1).First();
@@ -68,10 +123,22 @@ public class GenerationTest
         var variableList = (VariableList)statement;
         var variable = variableList.Variables.First();
         Assert.Equal("list", variable.Name.ToString());
+        Assert.NotNull(variable.Initializer);
+        if (isMacro)
+        {
+            Assert.NotNull(variable.Initializer.ExpandedByMacro);
+            Assert.Equal(MacroKind.IEnumerableConstruction, variable.Initializer.ExpandedByMacro);
+        }
         Assert.IsType<TableInitializer>(variable.Initializer);
         
         var table = (TableInitializer)variable.Initializer;
-        Assert.Empty(table.KeyValuePairs);
+        Assert.Single(table.Values);
+
+        var value = table.Values.First();
+        Assert.IsType<Literal>(value);
+        
+        var literal = (Literal)value;
+        Assert.Equal("1", literal.ValueText);
     }
     
     // TODO: actually implement fully
@@ -149,52 +216,86 @@ public class GenerationTest
         Assert.Equal("native", attribute.Name.ToString());
     }
     
-    // TODO: uncomment when complex expressions are macro'd
-    // [Fact]
-    // public void Generates_ExpressionalIncrement()
-    // {
-    //     var ast = Generate("var x = a++;");
-    //     Assert.NotEmpty(ast.Statements);
-    //     
-    //     var statements = ast.Statements.Skip(1).ToList();
-    //     Assert.Equal(3, statements.Count);
-    //     
-    //     var firstStatement = statements[0];
-    //     var secondStatement = statements[1];
-    //     var thirdStatement = statements[2];
-    //     Assert.IsType<Variable>(firstStatement);
-    //     Assert.IsType<ExpressionStatement>(secondStatement);
-    //     Assert.IsType<VariableList>(thirdStatement);
-    //     
-    //     var tempVariable = (Variable)firstStatement;
-    //     Assert.Equal("_original", tempVariable.Name.ToString());
-    //     Assert.IsType<IdentifierName>(tempVariable.Initializer);
-    //     
-    //     var tempInitializer = (IdentifierName)tempVariable.Initializer;
-    //     Assert.Equal("a", tempInitializer.ToString());
-    //     
-    //     var expressionStatement = (ExpressionStatement)secondStatement;
-    //     Assert.IsType<BinaryOperator>(expressionStatement.Expression);
-    //     
-    //     var binaryOperator = (BinaryOperator)expressionStatement.Expression;
-    //     Assert.IsType<IdentifierName>(binaryOperator.Left);
-    //     Assert.IsType<Literal>(binaryOperator.Right);
-    //     
-    //     var left = (IdentifierName)binaryOperator.Left;
-    //     var right = (Literal)binaryOperator.Right;
-    //     Assert.Equal("a", left.ToString());
-    //     Assert.Equal("1", right.ValueText);
-    //     
-    //     var variableList = (VariableList)thirdStatement;
-    //     Assert.Single(variableList.Variables);
-    //     
-    //     var variable = variableList.Variables.First();
-    //     Assert.Equal("x", variable.Name.ToString());
-    //     Assert.IsType<IdentifierName>(variable.Initializer);
-    //     
-    //     var initializer = (IdentifierName)variable.Initializer;
-    //     Assert.Equal("_original", initializer.ToString());
-    // }
+    [Fact]
+    public void Generates_AssignmentExpressionResult()
+    {
+        var ast = Generate("var a = 1; var x = a = 2;");
+        Assert.NotEmpty(ast.Statements);
+        
+        var statements = ast.Statements.Skip(2).ToList();
+        Assert.Equal(2, statements.Count);
+        
+        var firstStatement = statements[0];
+        var secondStatement = statements[1];
+        Assert.IsType<Assignment>(firstStatement);
+        Assert.IsType<VariableList>(secondStatement);
+        
+        var assignment = (Assignment)firstStatement;
+        Assert.IsType<IdentifierName>(assignment.Target);
+        Assert.IsType<Literal>(assignment.Value);
+        
+        var left = (IdentifierName)assignment.Target;
+        var right = (Literal)assignment.Value;
+        Assert.Equal("a", left.ToString());
+        Assert.Equal("2", right.ValueText);
+        
+        var variableList = (VariableList)secondStatement;
+        Assert.Single(variableList.Variables);
+        
+        var variable = variableList.Variables.First();
+        Assert.Equal("x", variable.Name.ToString());
+        Assert.IsType<IdentifierName>(variable.Initializer);
+        
+        var initializer = (IdentifierName)variable.Initializer;
+        Assert.Equal("a", initializer.ToString());
+    }
+    
+    [Fact]
+    public void Generates_IncrementExpressionResult()
+    {
+        var ast = Generate("var x = a++;");
+        Assert.NotEmpty(ast.Statements);
+        
+        var statements = ast.Statements.Skip(1).ToList();
+        Assert.Equal(3, statements.Count);
+        
+        var firstStatement = statements[0];
+        var secondStatement = statements[1];
+        var thirdStatement = statements[2];
+        Assert.IsType<Variable>(firstStatement);
+        Assert.IsType<ExpressionStatement>(secondStatement);
+        Assert.IsType<VariableList>(thirdStatement);
+        
+        var tempVariable = (Variable)firstStatement;
+        Assert.Equal("_original", tempVariable.Name.ToString());
+        Assert.IsType<IdentifierName>(tempVariable.Initializer);
+        
+        var tempInitializer = (IdentifierName)tempVariable.Initializer;
+        Assert.Equal("a", tempInitializer.ToString());
+        
+        var expressionStatement = (ExpressionStatement)secondStatement;
+        Assert.IsType<BinaryOperator>(expressionStatement.Expression);
+        
+        var binaryOperator = (BinaryOperator)expressionStatement.Expression;
+        Assert.Equal("+=", binaryOperator.Operator);
+        Assert.IsType<IdentifierName>(binaryOperator.Left);
+        Assert.IsType<Literal>(binaryOperator.Right);
+        
+        var left = (IdentifierName)binaryOperator.Left;
+        var right = (Literal)binaryOperator.Right;
+        Assert.Equal("a", left.ToString());
+        Assert.Equal("1", right.ValueText);
+        
+        var variableList = (VariableList)thirdStatement;
+        Assert.Single(variableList.Variables);
+        
+        var variable = variableList.Variables.First();
+        Assert.Equal("x", variable.Name.ToString());
+        Assert.IsType<IdentifierName>(variable.Initializer);
+        
+        var initializer = (IdentifierName)variable.Initializer;
+        Assert.Equal("_original", initializer.ToString());
+    }
     
     [Fact]
     public void Generates_Increment()
@@ -209,9 +310,9 @@ public class GenerationTest
         Assert.IsType<BinaryOperator>(expressionStatement.Expression);
         
         var binaryOperator = (BinaryOperator)expressionStatement.Expression;
+        Assert.Equal("+=", binaryOperator.Operator);
         Assert.IsType<IdentifierName>(binaryOperator.Left);
         Assert.IsType<Literal>(binaryOperator.Right);
-        Assert.Equal("+=", binaryOperator.Operator);
         
         var left = (IdentifierName)binaryOperator.Left;
         var right = (Literal)binaryOperator.Right;
@@ -372,7 +473,7 @@ public class GenerationTest
         Assert.Equal(name, variable.Name.ToString());
         Assert.IsType<TableInitializer>(variable.Initializer);
 
-        var expectedTable = new Dictionary<string, string>()
+        var expectedTable = new Dictionary<string, string>
         {
             { "A", "0" },
             { "B", "1" },
@@ -518,6 +619,7 @@ public class GenerationTest
         foreach (var variable in variableList.Variables)
             Assert.Equal((index++).ToString(), (variable.Initializer as Literal)?.ValueText);
     }
+    
     [Theory]
     [InlineData("var a = 1;", null, "1")]
     [InlineData("int b = 2;", "number", "2")]

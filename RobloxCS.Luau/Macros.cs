@@ -10,7 +10,7 @@ public enum MacroKind
 {
     NewInstance,
     GetService,
-    EnumerableConstruction,
+    IEnumerableConstruction,
     DictionaryConstruction,
     IEnumerableType,
     DictionaryType,
@@ -567,10 +567,12 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
             case "List":
             {
                 var expressions = baseObjectCreation.Initializer?.Expressions
-                    .Select(expression => (Expression)visit(expression)!).ToList();
+                    .Select(visit)
+                    .OfType<Expression>()
+                    .ToList();
                 
                 var table = new TableInitializer(expressions ?? []);
-                table.MarkExpanded(MacroKind.EnumerableConstruction);
+                table.MarkExpanded(MacroKind.IEnumerableConstruction);
 
                 return table;
             }
@@ -680,7 +682,6 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
         else
             self = name;
 
-        var filterFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_filterFunc");
         switch (memberAccess.Name.Identifier.Text)
         {
             case "Add":
@@ -713,6 +714,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
                 var key = occupiedIdentifiersStack.AddIdentifier("_k");
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
+                var filterFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_filterFunc");
 
                 transformState.Prereq(new Block([
                     new Variable(filterFuncIdentifier, true, arguments.First()),
@@ -736,6 +738,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
                 var key = occupiedIdentifiersStack.AddIdentifier("_k");
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
+                var filterFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_filterFunc");
 
                 transformState.Prereq(new Block([
                     new Variable(expression, true, AstUtility.Nil),
@@ -759,6 +762,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
                 var key = occupiedIdentifiersStack.AddIdentifier("_k");
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
+                var filterFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_filterFunc");
 
                 transformState.Prereq(new Block([
                     new Variable(filterFuncIdentifier, true, arguments.First()),
@@ -782,6 +786,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
                 var key = occupiedIdentifiersStack.AddIdentifier("_k");
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
+                var filterFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_filterFunc");
 
                 transformState.Prereq(new Block([
                     new Variable(filterFuncIdentifier, true, arguments.First()),
@@ -853,6 +858,7 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
                 var key = occupiedIdentifiersStack.AddIdentifier("_k");
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
+                var filterFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_filterFunc");
 
                 if (invocation.ArgumentList.Arguments.Count == 1)
                 {
@@ -906,7 +912,8 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                 var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
                 var key = occupiedIdentifiersStack.AddIdentifier("_k");
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
-
+                var filterFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_filterFunc");
+                
                 if (invocation.ArgumentList.Arguments.Count == 1)
                 {
                     transformState.Prereq(new Block([
