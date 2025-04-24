@@ -572,7 +572,14 @@ public class MacroManager(SemanticModel semanticModel, TransformState transformS
                         .OfType<Expression>()
                         .ToList());
                 else if (baseObjectCreation.ArgumentList != null)
-                    table = (Expression)visit(baseObjectCreation.ArgumentList.Arguments.First().Expression)!;
+                {
+                    var argumentExpression = baseObjectCreation.ArgumentList.Arguments.First().Expression;
+                    var expressionType = semanticModel.GetTypeInfo(argumentExpression).Type;
+                    if (expressionType != null && Constants.INTEGER_TYPES.Contains(expressionType.Name))
+                        throw Logger.UnsupportedError(argumentExpression, "Fixed list capacities", useYet: false);
+                    
+                    table = (Expression)visit(argumentExpression)!;
+                }
                 
                 table.MarkExpanded(MacroKind.ListConstruction);
                 return table;
