@@ -9,21 +9,7 @@ namespace RobloxCS;
 /// <summary>Basically just defines utility methods for LuauGenerator</summary>
 public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharpSyntaxVisitor<Node>
 {
-    protected readonly SyntaxTree _tree = tree;
-    protected SemanticModel _semanticModel = compiler.GetSemanticModel(tree);
-
-    private readonly HashSet<SyntaxKind> multiLineCommentSyntaxes = [SyntaxKind.MultiLineCommentTrivia, SyntaxKind.MultiLineDocumentationCommentTrivia];
-
-
-
-
-
-
-
-
-
-
-    private readonly SyntaxKind[] commentSyntaxes =
+    private readonly SyntaxKind[] _commentSyntaxes =
     [
         SyntaxKind.SingleLineCommentTrivia,
         SyntaxKind.SingleLineDocumentationCommentTrivia,
@@ -31,24 +17,15 @@ public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharp
         SyntaxKind.MultiLineDocumentationCommentTrivia
     ];
 
-
-
-
-
-
-
-
-
+    private readonly HashSet<SyntaxKind> _multiLineCommentSyntaxes = [SyntaxKind.MultiLineCommentTrivia, SyntaxKind.MultiLineDocumentationCommentTrivia];
+    protected readonly SyntaxTree _tree = tree;
+    protected SemanticModel _semanticModel = compiler.GetSemanticModel(tree);
 
     protected TNode Visit<TNode>(SyntaxNode? node)
-        where TNode : Node?
-    {
-        return (TNode)Visit(node)!;
-    }
+        where TNode : Node? =>
+        (TNode)Visit(node)!;
 
-    /// <summary>
-    /// Generates a Luau class constructor from a C# class declaration
-    /// </summary>
+    /// <summary>Generates a Luau class constructor from a C# class declaration</summary>
     protected Function GenerateConstructor(ClassDeclarationSyntax classDeclaration,
                                            ParameterList parameterList,
                                            Block? body = null,
@@ -74,21 +51,20 @@ public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharp
                 var initializer = GetFieldInitializer(field.Declaration.Type, declarator.Initializer);
 
                 // stupid hack
-                body.Statements = body.Statements.Prepend(new Assignment(new MemberAccess(new IdentifierName("self"),
-                                                                                          AstUtility
-                                                                                              .CreateSimpleName(declarator)),
-                                                                         initializer))
-                                      .ToList();
+                body.Statements.Insert(0,
+                                       new Assignment(new MemberAccess(new IdentifierName("self"),
+                                                                       AstUtility.CreateSimpleName(declarator)),
+                                                      initializer));
             }
         }
 
         foreach (var property in nonStaticProperties)
         {
             var initializer = GetFieldInitializer(property.Type, property.Initializer);
-            body.Statements = body.Statements.Prepend(new Assignment(new MemberAccess(new IdentifierName("self"),
-                                                                                      AstUtility.CreateSimpleName(property)),
-                                                                     initializer))
-                                  .ToList();
+            body.Statements.Insert(0,
+                                   new Assignment(new MemberAccess(new IdentifierName("self"),
+                                                                   AstUtility.CreateSimpleName(property)),
+                                                  initializer));
         }
 
         // add an explicit return (for native codegen) if there isn't one

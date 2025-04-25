@@ -5,6 +5,7 @@ namespace RobloxCS.Luau;
 public class SymbolMetadata
 {
     public IdentifierName? EventConnectionName { get; set; }
+    public Dictionary<string, Dictionary<IMethodSymbol, int>>? MethodOverloads { get; set; }
 }
 
 public static class SymbolMetadataManager

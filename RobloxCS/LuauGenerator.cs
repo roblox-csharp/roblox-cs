@@ -351,7 +351,8 @@ public sealed class LuauGenerator(
     public override Function VisitMethodDeclaration(MethodDeclarationSyntax node)
     {
         var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node)!;
-        var name = AstUtility.CreateSimpleName(node);
+        var symbol = _semanticModel.GetDeclaredSymbol(node)!;
+        var name = DefineMethodName(symbol);
         var className = AstUtility.CreateSimpleName(classDeclaration, noGenerics: true);
         var fullName = new QualifiedName(className, name, IsStatic(node) ? '.' : ':');
         var parameterList = Visit<ParameterList>(node.ParameterList);
@@ -716,7 +717,7 @@ public sealed class LuauGenerator(
         var iterator = Visit<Expression>(node.Expression);
         var body = Visit<Statement>(node.Statement);
         occupiedIdentifiersStack.Pop();
-        
+
         return new For(names, iterator, body);
     }
 
@@ -815,7 +816,8 @@ public sealed class LuauGenerator(
     public override Node VisitInvocationExpression(InvocationExpressionSyntax node)
     {
         var methodSymbolInfo = _semanticModel.GetSymbolInfo(node.Expression);
-        if (methodSymbolInfo.Symbol == null
+        var methodSymbol = methodSymbolInfo.Symbol;
+        if (methodSymbol == null
          && methodSymbolInfo.CandidateSymbols.IsEmpty
          && methodSymbolInfo.CandidateReason == CandidateReason.None
          && node.Expression is IdentifierNameSyntax identifier
@@ -827,7 +829,7 @@ public sealed class LuauGenerator(
             }
 
         var callee = Visit<Expression>(node.Expression);
-        if (methodSymbolInfo.Symbol != null && callee is MemberAccess memberAccess) memberAccess.Operator = methodSymbolInfo.Symbol.IsStatic ? '.' : ':';
+        if (methodSymbol != null && callee is MemberAccess memberAccess) memberAccess.Operator = methodSymbol.IsStatic ? '.' : ':';
 
         List<Statement> statements = [];
         var arguments = node.ArgumentList.Arguments.Select(arg =>
@@ -839,9 +841,7 @@ public sealed class LuauGenerator(
                                 Variable? variable = null;
                                 if (arg.Expression.IsKind(SyntaxKind.DeclarationExpression))
                                 {
-                                    variable = Visit<Variable>((arg.Expression as DeclarationExpressionSyntax)!.Designation as
-                                                               SingleVariableDesignationSyntax);
-
+                                    variable = Visit<Variable>((arg.Expression as DeclarationExpressionSyntax)!.Designation as SingleVariableDesignationSyntax);
                                     statements.Add(variable);
                                 }
 
@@ -1037,7 +1037,13 @@ public sealed class LuauGenerator(
         var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node);
         var method = FindFirstAncestor<MethodDeclarationSyntax>(node);
         var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
-        node = node.WithIdentifier(SyntaxFactory.Identifier(occupiedIdentifiersStack.GetDuplicateText(node.Identifier.Text)));
+        var identifierText = occupiedIdentifiersStack.GetDuplicateText(node.Identifier.Text);
+        if (symbol is IMethodSymbol methodSymbol
+         && SymbolMetadataManager.Get(methodSymbol.ContainingType) is { MethodOverloads: not null }
+         && GetMethodName(methodSymbol) is { } methodName)
+            identifierText = methodName;
+
+        node = node.WithIdentifier(SyntaxFactory.Identifier(identifierText));
 
         var name = AstUtility.CreateSimpleName(node);
         if (method != null && node.Parent is not AssignmentExpressionSyntax)
@@ -1796,6 +1802,43 @@ public sealed class LuauGenerator(
         block.Statements
              .OfType<YieldStatementSyntax>()
              .ToList();
+
+    private IdentifierName DefineMethodName(IMethodSymbol symbol)
+    {
+        var hasOtherOverloads = symbol.ContainingType
+                                      .GetMembers(symbol.Name)
+                                      .OfType<IMethodSymbol>()
+                                      .Any(s => !SymbolEqualityComparer.Default.Equals(s, symbol));
+
+        if (!hasOtherOverloads) return occupiedIdentifiersStack.AddIdentifier(symbol.Name);
+
+        var symbolMetadata = SymbolMetadataManager.Get(symbol.ContainingType);
+        symbolMetadata.MethodOverloads ??= [];
+
+        Dictionary<IMethodSymbol, int> methodOverloads = [];
+        if (!symbolMetadata.MethodOverloads.TryAdd(symbol.Name, methodOverloads)) methodOverloads = symbolMetadata.MethodOverloads[symbol.Name];
+
+        var lastCount = methodOverloads.Values.Order().LastOrDefault(0);
+        var count = lastCount + 1;
+        methodOverloads.Add(symbol, count);
+
+        return occupiedIdentifiersStack.AddIdentifier($"{symbol.Name}_impl{count}");
+    }
+
+    private static string? GetMethodName(IMethodSymbol symbol)
+    {
+        var hasOtherOverloads = symbol.ContainingType
+                                      .GetMembers(symbol.Name)
+                                      .OfType<IMethodSymbol>()
+                                      .Any(s => !SymbolEqualityComparer.Default.Equals(s, symbol));
+
+        var symbolMetadata = SymbolMetadataManager.Get(symbol.ContainingType);
+        if (!hasOtherOverloads || symbolMetadata.MethodOverloads == null) return null;
+
+        var methodOverloads = symbolMetadata.MethodOverloads[symbol.Name];
+        var count = methodOverloads[symbol];
+        return $"{symbol.Name}_impl{count}";
+    }
 
     // extremely skidded
     private bool TryHoistNode(SyntaxNode root, SyntaxNode nodeToHoist, [NotNullWhen(true)] out SyntaxNode? newRoot)
