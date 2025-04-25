@@ -7,6 +7,75 @@ namespace RobloxCS.Tests;
 public class GenerationTest : Generation
 {
     [Fact]
+    public void Generates_TupleDestructuring()
+    {
+        var ast = Generate("var (a, b, c) = (1, 2, 3)");
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<MultipleVariable>(statement);
+
+        var variable = (MultipleVariable)statement;
+        Assert.Single(variable.Initializers);
+        Assert.IsType<Call>(variable.Initializers.First());
+        Assert.Equal(3, variable.Names.Count);
+        
+        var unpackCall = (Call)variable.Initializers.First();
+        Assert.IsType<MemberAccess>(unpackCall.Callee);
+        
+        var memberAccess = (MemberAccess)unpackCall.Callee;
+        Assert.IsType<IdentifierName>(memberAccess.Expression);
+        Assert.IsType<IdentifierName>(memberAccess.Name);
+        Assert.Equal("CS", memberAccess.Expression.ToString());
+        Assert.Equal("unpackTuple", memberAccess.Name.ToString());
+            
+        Assert.Single(unpackCall.ArgumentList.Arguments);
+        Assert.IsType<TableInitializer>(unpackCall.ArgumentList.Arguments.First().Expression);
+        
+        var enumerator = variable.Names.GetEnumerator();
+        enumerator.MoveNext();
+        var firstName = enumerator.Current;
+        enumerator.MoveNext();
+        var secondName = enumerator.Current;
+        enumerator.MoveNext();
+        var thirdName = enumerator.Current;
+        
+        Assert.Equal("a", firstName.ToString());
+        Assert.Equal("b", secondName.ToString());
+        Assert.Equal("c", thirdName.ToString());
+    }
+    
+    [Fact]
+    public void Generates_Tuples()
+    {
+        var ast = Generate("(1, 2, 3)");
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<ExpressionStatement>(statement);
+
+        var expression = ((ExpressionStatement)statement).Expression;
+        Assert.IsType<TableInitializer>(expression);
+
+        var table = (TableInitializer)expression;
+        var firstPair = table.KeyValuePairs[0];
+        var secondPair = table.KeyValuePairs[1];
+        var thirdPair = table.KeyValuePairs[2];
+        Assert.IsType<IdentifierName>(firstPair.Key);
+        Assert.IsType<IdentifierName>(secondPair.Key);
+        Assert.IsType<IdentifierName>(thirdPair.Key);
+        Assert.IsType<Literal>(firstPair.Value);
+        Assert.IsType<Literal>(secondPair.Value);
+        Assert.IsType<Literal>(thirdPair.Value);
+        Assert.Equal("Item1", firstPair.Key.ToString());
+        Assert.Equal("Item2", secondPair.Key.ToString());
+        Assert.Equal("Item3", thirdPair.Key.ToString());
+
+        var firstLiteral = (Literal)firstPair.Value;
+        var secondLiteral = (Literal)secondPair.Value;
+        var thirdLiteral = (Literal)thirdPair.Value;
+        Assert.Equal("1", firstLiteral.ValueText);
+        Assert.Equal("2", secondLiteral.ValueText);
+        Assert.Equal("3", thirdLiteral.ValueText);
+    }
+
+    [Fact]
     public void Generates_ComplexGeneratorFunction()
     {
         var ast = Generate("""
