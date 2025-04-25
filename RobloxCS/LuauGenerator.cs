@@ -42,15 +42,6 @@ public sealed class LuauGenerator(
         SyntaxKind.LocalFunctionStatement
     ];
 
-
-
-
-
-
-
-
-
-
     private CSharpCompilation _compiler = compiler;
 
     private MacroManager _macro = null!; // hack
@@ -697,13 +688,22 @@ public sealed class LuauGenerator(
 
     public override For VisitForEachVariableStatement(ForEachVariableStatementSyntax node)
     {
-        var variableList = Visit<Statement>(node.Variable);
-        if (variableList is Variable variable) variableList = new VariableList([variable]);
+        var iteratorType = _semanticModel.GetTypeInfo(node.Expression).Type;
+        if (iteratorType is INamedTypeSymbol { IsGenericType: true, TypeArguments: { Length: > 0 } typeArguments }
+         && StandardUtility.DoesTypeInheritFrom(iteratorType, "IEnumerable"))
+            iteratorType = typeArguments.First();
 
-        var names = ((VariableList)variableList).Variables.ConvertAll(v => v.Name);
+        var variableNode = Visit<Statement>(node.Variable);
+        var names = variableNode switch
+        {
+            Variable variable => [variable.Name],
+            MultipleVariable multipleVariable when iteratorType is { ContainingNamespace.Name: "Roblox", Name: "LuaTuple" } =>
+                multipleVariable.Names.ToList(),
+            _ => []
+        };
+
         var iterator = Visit<Expression>(node.Expression);
         var body = Visit<Statement>(node.Statement);
-
         return new For(names, iterator, body);
     }
 
@@ -714,20 +714,28 @@ public sealed class LuauGenerator(
 
     public override Variable VisitDiscardDesignation(DiscardDesignationSyntax node) => new(AstUtility.DiscardName, true);
 
-    public override VariableList VisitParenthesizedVariableDesignation(ParenthesizedVariableDesignationSyntax node)
+    public override MultipleVariable VisitParenthesizedVariableDesignation(ParenthesizedVariableDesignationSyntax node)
     {
-        var variableNodes = node.Variables
-                                .Select(Visit)
-                                .OfType<Node>()
-                                .SelectMany(variableNode =>
-                                {
-                                    if (variableNode is VariableList variableList) return variableList.Variables;
+        HashSet<IdentifierName> names = [];
+        List<Expression> initializers = [];
+        var variables = node.Variables
+                            .Select(Visit)
+                            .OfType<Node>()
+                            .SelectMany(variable =>
+                            {
+                                if (variable is VariableList variableList) return variableList.Variables;
 
-                                    return [(Variable)variableNode];
-                                })
-                                .ToList();
+                                return [(Variable)variable];
+                            })
+                            .ToList();
 
-        return new VariableList(variableNodes);
+        foreach (var variable in variables)
+        {
+            names.Add(variable.Name);
+            initializers.Add(variable.Initializer ?? AstUtility.Nil);
+        }
+
+        return new MultipleVariable(names, true, initializers);
     }
 
     public override Parenthesized VisitTypeOfExpression(TypeOfExpressionSyntax node)
@@ -825,41 +833,25 @@ public sealed class LuauGenerator(
                                 }
 
                                 return new
-                                    Argument(new AnonymousFunction(new ParameterList(new List<Parameter>([new Parameter(AstUtility.Vararg)])),
+                                    Argument(new AnonymousFunction(new ParameterList([new Parameter(AstUtility.Vararg)]),
                                                                    body: new Block([
                                                                        new Variable(new IdentifierName("_val"),
                                                                                     true,
                                                                                     AstUtility.Vararg),
-                                                                       new
-                                                                           If(new
-                                                                                  BinaryOperator(new
-                                                                                                     Call(new
-                                                                                                              IdentifierName("select"),
-                                                                                                          new
-                                                                                                              ArgumentList([
-                                                                                                                  new
-                                                                                                                      Argument(new
-                                                                                                                                   Literal("\"#\"")),
-                                                                                                                  new
-                                                                                                                      Argument(AstUtility
-                                                                                                                                   .Vararg)
-                                                                                                              ])),
+                                                                       new If(new BinaryOperator(new Call(new IdentifierName("select"),
+                                                                                                          AstUtility.CreateArgumentList([
+                                                                                                              AstUtility.String("#"),
+                                                                                                              AstUtility.Vararg
+                                                                                                          ])),
                                                                                                  "~=",
-                                                                                                 new
-                                                                                                     Literal("0")),
+                                                                                                 new Literal("0")),
                                                                               new Block([
-                                                                                  new
-                                                                                      Assignment(variable
-                                                                                                     ?.Name
-                                                                                              ?? Visit<
-                                                                                                     IdentifierName>(arg
-                                                                                                                         .Expression),
-                                                                                                 new
-                                                                                                     IdentifierName("_val"))
+                                                                                  new Assignment(variable?.Name
+                                                                                              ?? Visit<IdentifierName>(arg.Expression),
+                                                                                                 new IdentifierName("_val"))
                                                                               ])),
                                                                        new Return(variable?.Name
-                                                                               ?? Visit<IdentifierName>(arg
-                                                                                                            .Expression))
+                                                                               ?? Visit<IdentifierName>(arg.Expression))
                                                                    ])));
                             })
                             .ToList();
@@ -916,12 +908,25 @@ public sealed class LuauGenerator(
     public override Node VisitAssignmentExpression(AssignmentExpressionSyntax node)
     {
         var expanded = _macro.Assignment(Visit, node);
-
         if (expanded != null) return expanded;
+
+        var initializerType = _semanticModel.GetTypeInfo(node.Right).Type;
+        var value = Visit<Expression>(node.Right);
+        if (node.Left is DeclarationExpressionSyntax declarationExpression && initializerType is { ContainingNamespace.Name: "Roblox", Name: "LuaTuple" })
+        {
+            var designation = Visit<BaseVariable>(declarationExpression.Designation);
+            var names = designation switch
+            {
+                Variable variable => [variable.Name],
+                MultipleVariable multipleVariable => multipleVariable.Names,
+                _ => []
+            };
+
+            return new MultipleVariable(names, designation.IsLocal, [value], designation.Type);
+        }
 
         var mappedOperator = StandardUtility.GetMappedOperator(node.OperatorToken.Text);
         var name = Visit<AssignmentTarget>(node.Left);
-        var value = Visit<Expression>(node.Right);
         var method = GetParameterList(node);
         Expression returningName = name;
         Statement returning = new ExpressionStatement(new BinaryOperator(name, mappedOperator, value));
@@ -1397,7 +1402,6 @@ public sealed class LuauGenerator(
         if (node.ReturnOrBreakKeyword.IsKind(SyntaxKind.BreakKeyword)) return new ExpressionStatement(new Call(new IdentifierName("_breakIteration")));
 
         var expression = Visit<Expression>(node.Expression!);
-
         return new Return(expression);
     }
 
@@ -1413,37 +1417,21 @@ public sealed class LuauGenerator(
             type = new FunctionType([new ParameterType(null, new OptionalType(type!))], type!);
 
         if (isParams && type is ArrayType arrayType) type = arrayType.ElementType;
-
         if (initializer != null && type != null) type = new OptionalType(type);
 
         return new Parameter(name, isParams, initializer, type);
     }
 
-    public override Node? VisitAttribute(AttributeSyntax node)
-    {
-        switch (GetName(node))
+    public override Node? VisitAttribute(AttributeSyntax node) =>
+        GetName(node) switch
         {
-            case "Native":
-                return new BuiltInAttribute(new IdentifierName("native"));
-        }
+            "Native" => new BuiltInAttribute(new IdentifierName("native")),
+            _ => null
+        };
 
-        // Logger.UnsupportedError(node, "User-defined attributes");
-        return null;
-    }
+    public override AttributeList VisitAttributeList(AttributeListSyntax node) => new(node.Attributes.Select(Visit<Statement?>).OfType<Statement>().ToList());
 
-    public override AttributeList VisitAttributeList(AttributeListSyntax node) =>
-        new(node.Attributes.Select(Visit<Statement?>).Where(luauNode => luauNode != null)!.ToList<Statement>());
-
-    public override Statement VisitGlobalStatement(GlobalStatementSyntax node)
-    {
-        var luauNode = Visit<Statement>(node.Statement);
-        if (HasSyntax(node.Modifiers, SyntaxKind.PublicKeyword))
-        {
-            // TODO: add to exports
-        }
-
-        return luauNode;
-    }
+    public override Statement VisitGlobalStatement(GlobalStatementSyntax node) => Visit<Statement>(node.Statement);
 
     public override ParameterList VisitParameterList(ParameterListSyntax node)
     {

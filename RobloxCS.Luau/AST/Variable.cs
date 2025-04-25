@@ -1,23 +1,19 @@
 ﻿namespace RobloxCS.Luau;
 
-public sealed class Variable : Statement
+public sealed class Variable : BaseVariable
 {
-    public IdentifierName Name { get; }
-    public bool IsLocal { get; }
-    public Expression? Initializer;
-    public TypeRef? Type { get; }
-
     public Variable(IdentifierName name, bool isLocal, Expression? initializer = null, TypeRef? type = null)
+        : base(isLocal, type)
     {
         Name = name;
-        IsLocal = isLocal;
         Initializer = initializer;
-        Type = type;
 
         AddChild(Name);
         if (Initializer != null) AddChild(Initializer);
-        if (Type != null) AddChild(Type);
     }
 
-    public override void Render(LuauWriter luau) => luau.WriteVariable(Name, IsLocal, Initializer, Type);
+    public IdentifierName Name { get; }
+    public Expression? Initializer { get; }
+
+    public override void Render(LuauWriter luau) => luau.WriteVariable([Name], IsLocal, Initializer != null ? [Initializer] : [], Type);
 }

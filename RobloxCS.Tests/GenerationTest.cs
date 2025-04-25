@@ -1,9 +1,10 @@
 using RobloxCS.Luau;
 using RobloxCS.Macros;
+using RobloxCS.Tests.Base;
 
 namespace RobloxCS.Tests;
 
-public class GenerationTest : Base.Generation
+public class GenerationTest : Generation
 {
     [Fact]
     public void Generates_ComplexGeneratorFunction()
@@ -853,7 +854,7 @@ public class GenerationTest : Base.Generation
             { "C", "5" },
             { "D", "6" },
             { "E", "10" },
-            { "F", "11" },
+            { "F", "11" }
         };
 
         var table = (TableInitializer)variable.Initializer;

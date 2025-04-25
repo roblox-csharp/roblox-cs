@@ -9,14 +9,15 @@ public class LuauWriter : BaseWriter
         return ToString();
     }
 
-    public void WriteNodesCommaSeparated<TNode>(List<TNode> nodes)
+    public void WriteNodesCommaSeparated<TNode>(IEnumerable<TNode> nodes)
         where TNode : Node
     {
+        var nodesList = nodes.ToList();
         var index = 0;
-        foreach (var node in nodes)
+        foreach (var node in nodesList)
         {
             node.Render(this);
-            if (index++ != nodes.Count - 1) Write(", ");
+            if (index++ != nodesList.Count - 1) Write(", ");
         }
     }
 
@@ -26,10 +27,7 @@ public class LuauWriter : BaseWriter
         foreach (var node in nodes) node.Render(this);
     }
 
-    public void WriteRequire(string requirePath)
-    {
-        WriteLine($"require({requirePath})");
-    }
+    public void WriteRequire(string requirePath) => WriteLine($"require({requirePath})");
 
     public void WriteFunction(Name? name,
                               bool isLocal,
@@ -70,15 +68,16 @@ public class LuauWriter : BaseWriter
 
         body ??= new Block([]);
         foreach (var parameter in parameterList.Parameters)
-        {
             if (parameter.IsVararg)
             {
                 var type = parameter.Type != null ? AstUtility.CreateTypeRef(parameter.Type.Path + "[]") : null;
                 var value = new TableInitializer([AstUtility.Vararg]);
                 body.Statements.Insert(0, new Variable(parameter.Name, true, value, type));
             }
-            else if (parameter.Initializer != null) body.Statements.Insert(0, AstUtility.DefaultValueInitializer(parameter.Name, parameter.Initializer));
-        }
+            else if (parameter.Initializer != null)
+            {
+                body.Statements.Insert(0, AstUtility.DefaultValueInitializer(parameter.Name, parameter.Initializer));
+            }
 
         body.Render(this);
 
@@ -97,16 +96,16 @@ public class LuauWriter : BaseWriter
         WriteLine();
     }
 
-    public void WriteVariable(Name name, bool isLocal, Expression? initializer = null, TypeRef? type = null)
+    public void WriteVariable(HashSet<IdentifierName> names, bool isLocal, List<Expression> initializers, TypeRef? type = null)
     {
         if (isLocal) Write("local ");
 
-        name.Render(this);
+        WriteNodesCommaSeparated(names);
         WriteTypeAnnotation(type);
-        if (initializer != null)
+        if (initializers.Count > 0)
         {
             Write(" = ");
-            initializer.Render(this);
+            WriteNodesCommaSeparated(initializers);
         }
 
         WriteLine();
