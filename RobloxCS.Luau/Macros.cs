@@ -47,8 +47,7 @@ public class MacroManager(
         if (leftSymbol is not IEventSymbol eventSymbol) return null;
 
         var symbolMetadata = SymbolMetadataManager.Get(eventSymbol);
-        symbolMetadata.EventConnectionName ??=
-            AstUtility.CreateSimpleName<IdentifierName>(assignment, "conn_" + eventSymbol.Name, true);
+        symbolMetadata.EventConnectionName ??= AstUtility.CreateSimpleName<IdentifierName>(assignment, "conn_" + eventSymbol.Name, true);
 
         var connectionName = symbolMetadata.EventConnectionName;
         switch (mappedOperator)
@@ -112,9 +111,8 @@ public class MacroManager(
                 {
                     var keyTypeName = visit(genericName.TypeArgumentList.Arguments.First())!;
                     var valueTypeName = visit(genericName.TypeArgumentList.Arguments.Last())!;
-                    var expanded =
-                        new
-                            IdentifierName($"{{ [{StandardUtility.GetMappedType(keyTypeName.ToString()!)}]: {StandardUtility.GetMappedType(valueTypeName.ToString()!)} }}");
+                    var expanded = new
+                        IdentifierName($"{{ [{StandardUtility.GetMappedType(keyTypeName.ToString()!)}]: {StandardUtility.GetMappedType(valueTypeName.ToString()!)} }}");
 
                     expanded.MarkExpanded(MacroKind.DictionaryType);
 
@@ -148,11 +146,7 @@ public class MacroManager(
 
         {
             if (expressionSymbol is IEventSymbol eventSymbol
-             && memberAccess is
-                {
-                    Parent: InvocationExpressionSyntax invocation,
-                    Name: IdentifierNameSyntax { Identifier.Text: "Invoke" } name
-                })
+             && memberAccess is { Parent: InvocationExpressionSyntax invocation, Name: IdentifierNameSyntax { Identifier.Text: "Invoke" } name })
             {
                 var expression = (Expression)visit(memberAccess.Expression)!;
                 var expanded = new MemberAccess(expression, new IdentifierName("Fire"), ':');
@@ -208,8 +202,7 @@ public class MacroManager(
                 {
                     case "Dictionary":
                     {
-                        if (EnumerableMethod(visit, memberAccess, invocation, out var enumerableExpanded))
-                            return enumerableExpanded;
+                        if (EnumerableMethod(visit, memberAccess, invocation, out var enumerableExpanded)) return enumerableExpanded;
 
                         if (DictionaryMethod(visit, memberAccess, invocation, out var expanded)) return expanded;
 
@@ -219,8 +212,7 @@ public class MacroManager(
                     case "IEnumerable":
                     case "List":
                     {
-                        if (EnumerableMethod(visit, memberAccess, invocation, out var enumerableExpanded))
-                            return enumerableExpanded;
+                        if (EnumerableMethod(visit, memberAccess, invocation, out var enumerableExpanded)) return enumerableExpanded;
 
                         if (ListMethod(visit, memberAccess, invocation, out var expanded)) return expanded;
 
@@ -643,6 +635,7 @@ public class MacroManager(
             case "IsA":
             {
                 if (memberAccess.Name is not GenericNameSyntax genericName) break;
+
                 var self = (Expression)visit(memberAccess.Expression)!;
                 expanded = new Call(new MemberAccess(self, new IdentifierName(memberAccess.Name.Identifier.Text), ':'),
                                     new ArgumentList([
@@ -749,13 +742,8 @@ public class MacroManager(
                             self,
                             new Block([
                                 new If(new Call(filterFuncIdentifier,
-                                                new ArgumentList([
-                                                    new Argument(value)
-                                                ])),
-                                       new Block([
-                                           new Assignment(expression, AstUtility.True),
-                                           new Break()
-                                       ]))
+                                                new ArgumentList([new Argument(value)])),
+                                       new Block([new Assignment(expression, AstUtility.True), new Break()]))
                             ]))
                 ]));
 
@@ -778,13 +766,8 @@ public class MacroManager(
                             self,
                             new Block([
                                 new If(new Call(filterFuncIdentifier,
-                                                new ArgumentList([
-                                                    new Argument(value)
-                                                ])),
-                                       new Block([
-                                           new Assignment(expression, value),
-                                           new Break()
-                                       ]))
+                                                new ArgumentList([new Argument(value)])),
+                                       new Block([new Assignment(expression, value), new Break()]))
                             ]))
                 ]));
 
@@ -807,9 +790,7 @@ public class MacroManager(
                             self,
                             new Block([
                                 new If(new Call(filterFuncIdentifier,
-                                                new ArgumentList([
-                                                    new Argument(value)
-                                                ])),
+                                                new ArgumentList([new Argument(value)])),
                                        new Block([new Assignment(expression, value)]))
                             ]))
                 ]));
@@ -833,9 +814,7 @@ public class MacroManager(
                             self,
                             new Block([
                                 new If(new Call(filterFuncIdentifier,
-                                                new ArgumentList([
-                                                    new Argument(value)
-                                                ])),
+                                                new ArgumentList([new Argument(value)])),
                                        new Block([
                                            new ExpressionStatement(AstUtility
                                                                        .TableCall("insert",
@@ -934,13 +913,8 @@ public class MacroManager(
                                 self,
                                 new Block([
                                     new If(new Call(filterFuncIdentifier,
-                                                    new ArgumentList([
-                                                        new Argument(value)
-                                                    ])),
-                                           new Block([
-                                               new Assignment(expression, key),
-                                               new Break()
-                                           ]))
+                                                    new ArgumentList([new Argument(value)])),
+                                           new Block([new Assignment(expression, key), new Break()]))
                                 ]))
                     ]));
                 }
@@ -967,13 +941,8 @@ public class MacroManager(
                                                         new ElementAccess(self,
                                                                           indexIdentifier)),
                                            new If(new Call(filterFuncIdentifier,
-                                                           new ArgumentList([
-                                                               new Argument(value)
-                                                           ])),
-                                                  new Block([
-                                                      new Assignment(expression, key),
-                                                      new Break()
-                                                  ]))
+                                                           new ArgumentList([new Argument(value)])),
+                                                  new Block([new Assignment(expression, key), new Break()]))
                                        ]))
                     ]));
                 }
@@ -999,9 +968,7 @@ public class MacroManager(
                                 self,
                                 new Block([
                                     new If(new Call(filterFuncIdentifier,
-                                                    new ArgumentList([
-                                                        new Argument(value)
-                                                    ])),
+                                                    new ArgumentList([new Argument(value)])),
                                            new Block([new Assignment(expression, key)]))
                                 ]))
                     ]));
@@ -1029,12 +996,8 @@ public class MacroManager(
                                                         new ElementAccess(self,
                                                                           indexIdentifier)),
                                            new If(new Call(filterFuncIdentifier,
-                                                           new ArgumentList([
-                                                               new Argument(value)
-                                                           ])),
-                                                  new Block([
-                                                      new Assignment(expression, key)
-                                                  ]))
+                                                           new ArgumentList([new Argument(value)])),
+                                                  new Block([new Assignment(expression, key)]))
                                        ]))
                     ]));
                 }

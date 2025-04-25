@@ -7,9 +7,17 @@ namespace RobloxCS.Tests;
 
 public class LuauTests(ITestOutputHelper testOutputHelper)
 {
-    private readonly string _cwd =
-        Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly()
-                                                                                                        .Location))))!;
+    private readonly string _cwd = Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly()
+                                                                                                                                   .Location))))!;
+
+
+
+
+
+
+
+
+
 
     [Theory]
     [InlineData("RuntimeLibTest")]

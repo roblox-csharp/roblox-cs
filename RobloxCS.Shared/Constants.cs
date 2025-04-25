@@ -11,20 +11,53 @@ public static class Constants
 
     public static readonly HashSet<string> LENGTH_READABLE_TYPES = ["String", "string", "Array"];
 
+
+
+
+
+
+
+
+
+
     public static readonly HashSet<SyntaxKind> MEMBER_PARENT_SYNTAXES =
     [
-        SyntaxKind.NamespaceDeclaration,
-        SyntaxKind.ClassDeclaration,
-        SyntaxKind.InterfaceDeclaration,
-        SyntaxKind.StructDeclaration
+        SyntaxKind.NamespaceDeclaration, SyntaxKind.ClassDeclaration, SyntaxKind.InterfaceDeclaration, SyntaxKind.StructDeclaration
     ];
+
+
+
+
+
+
+
+
+
 
     public static readonly HashSet<string> NO_FULL_QUALIFICATION_TYPES = ["System", "Roblox", "Globals", "PluginClasses"];
 
     public static readonly HashSet<string> IGNORED_BINARY_OPERATORS = ["as"];
 
+
+
+
+
+
+
+
+
+
     public static readonly Dictionary<List<string>, (string, string)> PER_TYPE_BINARY_OPERATOR_MAP =
         new Dictionary<List<string>, (string, string)> { { ["String", "string"], ("+", "..") } };
+
+
+
+
+
+
+
+
+
 
     public static readonly HashSet<string> GLOBAL_LIBRARIES =
     [
@@ -37,6 +70,15 @@ public static class Constants
         "utf8",
         "debug"
     ];
+
+
+
+
+
+
+
+
+
 
     public static readonly HashSet<string> METAMETHODS =
     [
@@ -62,6 +104,15 @@ public static class Constants
         "__metatable",
     ];
 
+
+
+
+
+
+
+
+
+
     public static readonly HashSet<string> LUAU_KEYWORDS =
     [
         "local",
@@ -82,9 +133,27 @@ public static class Constants
         "typeof"
     ];
 
+
+
+
+
+
+
+
+
+
     public static readonly HashSet<string> RESERVED_IDENTIFIERS = ["CS", "next", ..LUAU_KEYWORDS];
 
     public static readonly HashSet<string> DECIMAL_TYPES = ["float", "double", "Single", "Double"];
+
+
+
+
+
+
+
+
+
 
     public static readonly HashSet<string> INTEGER_TYPES =
     [

@@ -19,10 +19,9 @@ public class AstUtilityTest
     [InlineData("export")]
     public void ThrowsWithReservedIdentifier(string identifier)
     {
-        Assert.Throws<CleanExitException>(() =>
-                                              AstUtility.CreateSimpleName(SyntaxFactory.LiteralExpression(SyntaxKind
-                                                                                                              .NullLiteralExpression),
-                                                                          identifier));
+        Assert.Throws<CleanExitException>(() => AstUtility.CreateSimpleName(SyntaxFactory.LiteralExpression(SyntaxKind
+                                                                                                                .NullLiteralExpression),
+                                                                            identifier));
     }
 
     [Fact]

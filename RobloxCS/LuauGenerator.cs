@@ -35,8 +35,21 @@ public sealed class LuauGenerator(
 {
     private readonly HashSet<SyntaxKind> _hoistedSyntaxes =
     [
-        SyntaxKind.NamespaceDeclaration, SyntaxKind.ClassDeclaration, SyntaxKind.InterfaceDeclaration, SyntaxKind.EnumDeclaration, SyntaxKind.LocalFunctionStatement
+        SyntaxKind.NamespaceDeclaration,
+        SyntaxKind.ClassDeclaration,
+        SyntaxKind.InterfaceDeclaration,
+        SyntaxKind.EnumDeclaration,
+        SyntaxKind.LocalFunctionStatement
     ];
+
+
+
+
+
+
+
+
+
 
     private CSharpCompilation _compiler = compiler;
 
@@ -546,7 +559,10 @@ public sealed class LuauGenerator(
     {
         var name = occupiedIdentifiersStack.AddIdentifier(node.Name, node.Name.ToString().Split('.').Last());
         var members = new Block(node.Members.Select(Visit<Statement>).ToList());
-        List<Statement> statements = [new Variable(name, true, TableInitializer.Empty), AstUtility.DefineGlobalOrMember(node, name), new TypeAlias(name, new TypeOfCall(name))];
+        List<Statement> statements =
+        [
+            new Variable(name, true, TableInitializer.Empty), AstUtility.DefineGlobalOrMember(node, name), new TypeAlias(name, new TypeOfCall(name))
+        ];
 
         if (members.Statements.Count > 0) statements.Insert(1, new ScopedBlock(members.Statements));
 
@@ -693,7 +709,8 @@ public sealed class LuauGenerator(
 
     public override Node? VisitDeclarationExpression(DeclarationExpressionSyntax node) => Visit(node.Designation);
 
-    public override Variable VisitSingleVariableDesignation(SingleVariableDesignationSyntax node) => new(occupiedIdentifiersStack.AddIdentifier(node.Identifier), true);
+    public override Variable VisitSingleVariableDesignation(SingleVariableDesignationSyntax node) =>
+        new(occupiedIdentifiersStack.AddIdentifier(node.Identifier), true);
 
     public override Variable VisitDiscardDesignation(DiscardDesignationSyntax node) => new(AstUtility.DiscardName, true);
 
@@ -848,7 +865,10 @@ public sealed class LuauGenerator(
                             .ToList();
 
         var argumentList = new ArgumentList(arguments);
-        List<MacroKind> returnCalleeMacroKinds = [MacroKind.NewInstance, MacroKind.EnumerableMethod, MacroKind.ListMethod, MacroKind.DictionaryMethod, MacroKind.ObjectMethod];
+        List<MacroKind> returnCalleeMacroKinds =
+        [
+            MacroKind.NewInstance, MacroKind.EnumerableMethod, MacroKind.ListMethod, MacroKind.DictionaryMethod, MacroKind.ObjectMethod
+        ];
 
         // dumb ass hack bc null warning suppression doesn't work here for some reason
         if (callee.ExpandedByMacro != null && returnCalleeMacroKinds.Contains((MacroKind)callee.ExpandedByMacro)) return callee;
@@ -1543,7 +1563,9 @@ public sealed class LuauGenerator(
         return new Literal(valueText);
     }
 
-    private IdentifierName? HandleObjectCreationInitializer(InitializerExpressionSyntax? initializer, Expression? macroExpandedExpression, Expression creationExpression)
+    private IdentifierName? HandleObjectCreationInitializer(InitializerExpressionSyntax? initializer,
+                                                            Expression? macroExpandedExpression,
+                                                            Expression creationExpression)
     {
         if (initializer == null || macroExpandedExpression != null) return null;
 

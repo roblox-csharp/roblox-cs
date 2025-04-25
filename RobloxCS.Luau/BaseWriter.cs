@@ -38,8 +38,7 @@ public class BaseWriter
 
     public void Remove(int amount) => _output.Remove(_output.Length - 1, amount);
 
-    private void WriteIndent() =>
-        _output.Append(WasLastCharacter('\n') ? string.Concat(Enumerable.Repeat(" ", IndentSize * _indent)) : "");
+    private void WriteIndent() => _output.Append(WasLastCharacter('\n') ? string.Concat(Enumerable.Repeat(" ", IndentSize * _indent)) : "");
 
     private bool WasLastCharacter(char character)
     {

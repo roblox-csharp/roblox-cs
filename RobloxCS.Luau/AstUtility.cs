@@ -332,9 +332,7 @@ public static class AstUtility
 
         List<Expression> values =
         [
-            new Literal('"' + member.Name + '"'),
-            new Literal(((int)member.MemberType).ToString().ToLower()),
-            new Literal(member.IsCollectible.ToString().ToLower()),
+            new Literal('"' + member.Name + '"'), new Literal(((int)member.MemberType).ToString().ToLower()), new Literal(member.IsCollectible.ToString().ToLower()),
 
             // member.DeclaringType != null ? CreateTypeInfo(member.DeclaringType) : Nil,
             // member.ReflectedType != null ? CreateTypeInfo(member.ReflectedType) : Nil,
@@ -434,8 +432,7 @@ public static class AstUtility
                              new IdentifierName(methodName)),
             CreateArgumentList(arguments.ToList()));
 
-    public static ArgumentList CreateArgumentList(List<Expression> arguments) =>
-        new(arguments.ConvertAll(expression => new Argument(expression)));
+    public static ArgumentList CreateArgumentList(List<Expression> arguments) => new(arguments.ConvertAll(expression => new Argument(expression)));
 
     public static SimpleName TypeNameFromSymbol(ISymbol symbol)
     {

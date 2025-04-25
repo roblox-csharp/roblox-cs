@@ -28,6 +28,7 @@ public class Parameter : Statement
             Name.Render(luau);
 
         if (Type == null) return;
+
         luau.Write(": ");
         Type.Render(luau);
     }

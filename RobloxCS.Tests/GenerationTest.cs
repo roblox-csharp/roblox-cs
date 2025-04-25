@@ -989,8 +989,7 @@ public class GenerationTest : Base.Generation
         Assert.Equal(3, variableList.Variables.Count);
 
         var index = 1;
-        foreach (var variable in variableList.Variables)
-            Assert.Equal((index++).ToString(), (variable.Initializer as Literal)?.ValueText);
+        foreach (var variable in variableList.Variables) Assert.Equal((index++).ToString(), (variable.Initializer as Literal)?.ValueText);
     }
 
     [Theory]

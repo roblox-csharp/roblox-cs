@@ -12,10 +12,16 @@ public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharp
     protected readonly SyntaxTree _tree = tree;
     protected SemanticModel _semanticModel = compiler.GetSemanticModel(tree);
 
-    private readonly HashSet<SyntaxKind> multiLineCommentSyntaxes =
-    [
-        SyntaxKind.MultiLineCommentTrivia, SyntaxKind.MultiLineDocumentationCommentTrivia
-    ];
+    private readonly HashSet<SyntaxKind> multiLineCommentSyntaxes = [SyntaxKind.MultiLineCommentTrivia, SyntaxKind.MultiLineDocumentationCommentTrivia];
+
+
+
+
+
+
+
+
+
 
     private readonly SyntaxKind[] commentSyntaxes =
     [
@@ -24,6 +30,15 @@ public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharp
         SyntaxKind.MultiLineCommentTrivia,
         SyntaxKind.MultiLineDocumentationCommentTrivia
     ];
+
+
+
+
+
+
+
+
+
 
     protected TNode Visit<TNode>(SyntaxNode? node)
         where TNode : Node?
@@ -107,8 +122,7 @@ public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharp
 
     protected string? TryGetName(SyntaxNode? node) => StandardUtility.GetNamesFromNode(node).FirstOrDefault();
 
-    protected bool IsStatic(MemberDeclarationSyntax node) =>
-        IsParentClassStatic(node) || HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
+    protected bool IsStatic(MemberDeclarationSyntax node) => IsParentClassStatic(node) || HasSyntax(node.Modifiers, SyntaxKind.StaticKeyword);
 
     protected bool HasSyntax(SyntaxTokenList tokens, SyntaxKind syntax) => tokens.Any(token => token.IsKind(syntax));
 

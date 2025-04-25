@@ -77,8 +77,7 @@ public class LuauWriter : BaseWriter
                 var value = new TableInitializer([AstUtility.Vararg]);
                 body.Statements.Insert(0, new Variable(parameter.Name, true, value, type));
             }
-            else if (parameter.Initializer != null)
-                body.Statements.Insert(0, AstUtility.DefaultValueInitializer(parameter.Name, parameter.Initializer));
+            else if (parameter.Initializer != null) body.Statements.Insert(0, AstUtility.DefaultValueInitializer(parameter.Name, parameter.Initializer));
         }
 
         body.Render(this);
@@ -123,6 +122,7 @@ public class LuauWriter : BaseWriter
     public void WriteTypeAnnotation(TypeRef? type)
     {
         if (type == null) return;
+
         Write(": ");
         type.Render(this);
     }

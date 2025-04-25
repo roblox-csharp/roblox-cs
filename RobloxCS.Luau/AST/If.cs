@@ -49,6 +49,7 @@ public class If : Statement
         if (!compact) luau.PopIndent();
 
         if (isElseIf) return;
+
         luau.WriteLine("end");
     }
 }

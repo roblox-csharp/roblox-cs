@@ -8,6 +8,7 @@ public class CleanExitException : Exception
         : base(message)
     {
         if (!Logger.Exit) return;
+
         Environment.Exit(1);
     }
 }
@@ -34,11 +35,9 @@ public static class Logger
         return new CleanExitException(message);
     }
 
-    public static CleanExitException CompilerError(string message, SyntaxNode node) =>
-        CodegenError(node, message + _compilerError);
+    public static CleanExitException CompilerError(string message, SyntaxNode node) => CodegenError(node, message + _compilerError);
 
-    public static CleanExitException CompilerError(string message, SyntaxToken token) =>
-        CodegenError(token, message + _compilerError);
+    public static CleanExitException CompilerError(string message, SyntaxToken token) => CodegenError(token, message + _compilerError);
 
     public static CleanExitException CompilerError(string message) => Error(message + _compilerError);
 

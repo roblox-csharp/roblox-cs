@@ -52,6 +52,7 @@ public class IfExpression : Expression
         if (elseBranch is Statement) luau.Remove(1);
 
         if (isElseIf || IsCompact) return;
+
         luau.PopIndent();
     }
 }

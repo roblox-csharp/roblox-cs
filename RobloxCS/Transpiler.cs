@@ -15,6 +15,15 @@ public static class Transpiler
         "CS5001" // more than 2 entry points
     ];
 
+
+
+
+
+
+
+
+
+
     public static string Transpile(string source)
     {
         try

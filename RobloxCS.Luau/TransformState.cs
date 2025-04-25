@@ -44,8 +44,7 @@ public class TransformState
     {
         Expression? expression = null;
         var statements = CapturePrereqs(() => expression = callback());
-        if (statements.Count > 0)
-            Logger.CompilerError("Assertion of no prereqs failed for " + (expression?.ToString() ?? "expression"));
+        if (statements.Count > 0) Logger.CompilerError("Assertion of no prereqs failed for " + (expression?.ToString() ?? "expression"));
 
         return expression!;
     }

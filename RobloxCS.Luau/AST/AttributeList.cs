@@ -20,6 +20,7 @@ public class AttributeList : Statement
                 attribute.Render(luau);
 
                 if (Inline || attribute.Inline) continue;
+
                 luau.WriteLine();
             }
             else

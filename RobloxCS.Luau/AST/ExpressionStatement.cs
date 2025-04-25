@@ -15,6 +15,7 @@ public class ExpressionStatement : Statement
         Expression.Render(luau);
 
         if (Expression is NoOpExpression) return;
+
         luau.WriteLine();
     }
 }

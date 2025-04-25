@@ -225,9 +225,7 @@ public class RenderingTest
     public void Renders_DictionaryTableInitializer()
     {
         var tableInitializer = new TableInitializer([new Literal("69"), new Literal("420"), AstUtility.String("abc")],
-        [
-            new IdentifierName("foo"), new IdentifierName("bar"), AstUtility.String("baz")
-        ]);
+                                                    [new IdentifierName("foo"), new IdentifierName("bar"), AstUtility.String("baz")]);
 
         var output = Render(tableInitializer);
         const string expectedOutput = """
@@ -466,9 +464,7 @@ public class RenderingTest
     [Fact]
     public void Renders_InterpolatedStrings()
     {
-        var stringInterpolation = new InterpolatedString([
-            new Literal("hello, "), new Interpolation(new IdentifierName("name")), new Literal("!"),
-        ]);
+        var stringInterpolation = new InterpolatedString([new Literal("hello, "), new Interpolation(new IdentifierName("name")), new Literal("!"),]);
 
         var output = Render(stringInterpolation);
         Assert.Equal("`hello, {name}!`", output);

@@ -276,8 +276,7 @@ public static class StandardUtility
         return args;
     }
 
-    public static bool IsGlobal(SyntaxNode node) =>
-        node.Parent.IsKind(SyntaxKind.GlobalStatement) || node.Parent.IsKind(SyntaxKind.CompilationUnit);
+    public static bool IsGlobal(SyntaxNode node) => node.Parent.IsKind(SyntaxKind.GlobalStatement) || node.Parent.IsKind(SyntaxKind.CompilationUnit);
 
     public static NameSyntax GetNameNode(List<string> pieces)
     {
@@ -342,8 +341,7 @@ public static class StandardUtility
                 names.AddRange(GetNamesFromNode(qualifiedNameNode.Right).Select(name => name.Trim()));
             }
 
-        if (qualifiedNameNodes.Count <= 1)
-            names.AddRange(simpleNameNodes.Select(simpleNameNode => simpleNameNode.ToString().Trim()));
+        if (qualifiedNameNodes.Count <= 1) names.AddRange(simpleNameNodes.Select(simpleNameNode => simpleNameNode.ToString().Trim()));
 
         return noGenerics ? names : addGenerics(names);
     }

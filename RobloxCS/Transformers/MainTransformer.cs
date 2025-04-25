@@ -118,8 +118,7 @@ public sealed class MainTransformer(SyntaxTree tree, TransformState state, Confi
     public override SyntaxNode? VisitIfStatement(IfStatementSyntax node) =>
         base.VisitIfStatement(SyntaxFactory.IfStatement(node.Condition, Blockify(node.Statement), node.Else));
 
-    public override SyntaxNode? VisitElseClause(ElseClauseSyntax node) =>
-        base.VisitElseClause(SyntaxFactory.ElseClause(node.ElseKeyword, Blockify(node.Statement)));
+    public override SyntaxNode? VisitElseClause(ElseClauseSyntax node) => base.VisitElseClause(SyntaxFactory.ElseClause(node.ElseKeyword, Blockify(node.Statement)));
 
     private static StatementSyntax Blockify(StatementSyntax statement)
     {
