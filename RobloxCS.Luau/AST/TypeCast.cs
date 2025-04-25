@@ -12,6 +12,5 @@ public class TypeCast : Expression
         AddChildren([Expression, Type]);
     }
 
-    public override void Render(LuauWriter luau) =>
-        luau.WriteTypeCast(Expression, Type);
+    public override void Render(LuauWriter luau) => luau.WriteTypeCast(Expression, Type);
 }

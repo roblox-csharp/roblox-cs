@@ -18,7 +18,7 @@ public class AttributeList : Statement
             if (attributeNode is BuiltInAttribute attribute)
             {
                 attribute.Render(luau);
-            
+
                 if (Inline || attribute.Inline) continue;
                 luau.WriteLine();
             }

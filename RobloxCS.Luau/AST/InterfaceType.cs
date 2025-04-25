@@ -20,8 +20,13 @@ public class InterfaceType : TypeRef
         var tabsOutside = new string(' ', indent * BaseWriter.IndentSize);
         var tabsInside = new string(' ', (indent + 1) * BaseWriter.IndentSize);
         var newline = IsCompact ? "" : "\n";
-        return tabsOutside + "{" + newline
-               + string.Join(newline, Fields.Select(field => tabsInside + field.Path))
-               + tabsOutside + newline + "}";
+
+        return tabsOutside
+             + "{"
+             + newline
+             + string.Join(newline, Fields.Select(field => tabsInside + field.Path))
+             + tabsOutside
+             + newline
+             + "}";
     }
 }

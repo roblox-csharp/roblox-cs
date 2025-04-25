@@ -13,8 +13,7 @@ public class If : Statement
         ElseBranch = elseBranch;
 
         AddChildren([Condition, Body]);
-        if (ElseBranch != null)
-            AddChild(ElseBranch);
+        if (ElseBranch != null) AddChild(ElseBranch);
     }
 
     public override void Render(LuauWriter luau)
@@ -24,12 +23,11 @@ public class If : Statement
         luau.Write(" then");
 
         var compact = ElseBranch == null
-                      && Body.Statements.Count == 1
-                      && Body.Statements.First() is Return { Expression: null or Literal { ValueText: "nil" } } or Break or Continue;
+                   && Body.Statements.Count == 1
+                   && Body.Statements.First() is Return { Expression: null or Literal { ValueText: "nil" } } or Break or Continue;
 
         luau.Write(compact ? ' ' : '\n');
-        if (!compact)
-            luau.PushIndent();
+        if (!compact) luau.PushIndent();
 
         (compact ? Body.Statements.First() : Body).Render(luau);
         if (compact)
@@ -43,15 +41,13 @@ public class If : Statement
         {
             luau.PopIndent();
             luau.Write("else" + (isElseIf ? "" : '\n'));
-            if (!isElseIf)
-                luau.PushIndent();
-            
+            if (!isElseIf) luau.PushIndent();
+
             ElseBranch.Render(luau);
         }
 
-        if (!compact)
-            luau.PopIndent();
-        
+        if (!compact) luau.PopIndent();
+
         if (isElseIf) return;
         luau.WriteLine("end");
     }

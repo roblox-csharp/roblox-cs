@@ -1,6 +1,7 @@
 namespace RobloxCS.Luau;
 
-public class IndexCall(TypeRef typeRef, TypeRef key) : TypeRef(typeRef.Path)
+public class IndexCall(TypeRef typeRef, TypeRef key)
+    : TypeRef(typeRef.Path)
 {
     public TypeRef TypeRef { get; } = typeRef;
     public TypeRef Key { get; } = key;

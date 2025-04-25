@@ -10,14 +10,13 @@ public class Function : Statement
     public List<AttributeList> AttributeLists { get; }
     public List<IdentifierName>? TypeParameters { get; }
 
-    public Function(
-        Name name,
-        bool isLocal,
-        ParameterList parameterList,
-        TypeRef? returnType = null,
-        Block? body = null,
-        List<AttributeList>? attributeLists = null,
-        List<IdentifierName>? typeParameters = null)
+    public Function(Name name,
+                    bool isLocal,
+                    ParameterList parameterList,
+                    TypeRef? returnType = null,
+                    Block? body = null,
+                    List<AttributeList>? attributeLists = null,
+                    List<IdentifierName>? typeParameters = null)
     {
         Name = name;
         IsLocal = isLocal;
@@ -26,19 +25,22 @@ public class Function : Statement
         ReturnType = returnType;
         AttributeLists = attributeLists ?? [];
         TypeParameters = typeParameters;
-        
+
         AddChild(Name);
         AddChild(ParameterList);
-        if (ReturnType != null)
-            AddChild(ReturnType);
-        if (Body != null)
-            AddChild(Body);
-        
+        if (ReturnType != null) AddChild(ReturnType);
+        if (Body != null) AddChild(Body);
+
         AddChildren(AttributeLists);
-        if (typeParameters != null)
-            AddChildren(typeParameters);
+        if (typeParameters != null) AddChildren(typeParameters);
     }
 
     public override void Render(LuauWriter luau) =>
-        luau.WriteFunction(Name, IsLocal, ParameterList, ReturnType, Body, AttributeLists, TypeParameters);
+        luau.WriteFunction(Name,
+                           IsLocal,
+                           ParameterList,
+                           ReturnType,
+                           Body,
+                           AttributeLists,
+                           TypeParameters);
 }

@@ -8,8 +8,9 @@ namespace RobloxCS.Tests;
 public class LuauTests(ITestOutputHelper testOutputHelper)
 {
     private readonly string _cwd =
-        Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location))))!;
-            
+        Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Path.GetDirectoryName(Assembly.GetExecutingAssembly()
+                                                                                                        .Location))))!;
+
     [Theory]
     [InlineData("RuntimeLibTest")]
     public void LuauTests_Pass(string scriptName)
@@ -37,7 +38,7 @@ public class LuauTests(ITestOutputHelper testOutputHelper)
             var output = process.StandardOutput.ReadToEnd();
             var error = process.StandardError.ReadToEnd();
             process.WaitForExit();
-            
+
             testOutputHelper.WriteLine($"{scriptName}.luau Errors:");
             testOutputHelper.WriteLine(error);
             Assert.True(string.IsNullOrWhiteSpace(error));

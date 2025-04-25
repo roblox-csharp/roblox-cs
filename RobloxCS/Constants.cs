@@ -4,6 +4,5 @@ namespace RobloxCS
 {
     internal static class Constants
     {
-        
     }
 }

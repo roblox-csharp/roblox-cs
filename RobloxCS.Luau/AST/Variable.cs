@@ -15,12 +15,9 @@ public sealed class Variable : Statement
         Type = type;
 
         AddChild(Name);
-        if (Initializer != null)
-            AddChild(Initializer);
-        if (Type != null)
-            AddChild(Type);
+        if (Initializer != null) AddChild(Initializer);
+        if (Type != null) AddChild(Type);
     }
 
-    public override void Render(LuauWriter luau) =>
-        luau.WriteVariable(Name, IsLocal, Initializer, Type);
+    public override void Render(LuauWriter luau) => luau.WriteVariable(Name, IsLocal, Initializer, Type);
 }

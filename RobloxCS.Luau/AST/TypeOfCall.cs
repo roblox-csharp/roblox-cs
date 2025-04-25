@@ -2,7 +2,8 @@
 
 public sealed class TypeOfCall : TypeRef
 {
-    public TypeOfCall(Expression expression) : base("")
+    public TypeOfCall(Expression expression)
+        : base("")
     {
         Expression = expression;
         AddChild(Expression);

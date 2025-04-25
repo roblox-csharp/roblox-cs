@@ -1,6 +1,7 @@
 ﻿namespace RobloxCS.Luau;
 
-public class ScopedBlock(List<Statement> statements) : Block(statements)
+public class ScopedBlock(List<Statement> statements)
+    : Block(statements)
 {
     public override void Render(LuauWriter luau)
     {

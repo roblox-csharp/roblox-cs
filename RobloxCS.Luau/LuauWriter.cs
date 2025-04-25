@@ -5,24 +5,25 @@ public class LuauWriter : BaseWriter
     public string Render(AST ast)
     {
         ast.Render(this);
+
         return ToString();
     }
 
-    public void WriteNodesCommaSeparated<TNode>(List<TNode> nodes) where TNode : Node
+    public void WriteNodesCommaSeparated<TNode>(List<TNode> nodes)
+        where TNode : Node
     {
         var index = 0;
         foreach (var node in nodes)
         {
             node.Render(this);
-            if (index++ != nodes.Count - 1)
-                Write(", ");
+            if (index++ != nodes.Count - 1) Write(", ");
         }
     }
-        
-    public void WriteNodes<TNode>(List<TNode> nodes) where TNode : Node
+
+    public void WriteNodes<TNode>(List<TNode> nodes)
+        where TNode : Node
     {
-        foreach (var node in nodes)
-            node.Render(this);
+        foreach (var node in nodes) node.Render(this);
     }
 
     public void WriteRequire(string requirePath)
@@ -30,38 +31,38 @@ public class LuauWriter : BaseWriter
         WriteLine($"require({requirePath})");
     }
 
-    public void WriteFunction(
-        Name? name,
-        bool isLocal,
-        ParameterList parameterList,
-        TypeRef? returnType = null,
-        Block? body = null,
-        List<AttributeList>? attributeLists = null,
-        List<IdentifierName>? typeParameters = null,
-        bool inlineAttributes = false,
-        bool createNewline = true)
+    public void WriteFunction(Name? name,
+                              bool isLocal,
+                              ParameterList parameterList,
+                              TypeRef? returnType = null,
+                              Block? body = null,
+                              List<AttributeList>? attributeLists = null,
+                              List<IdentifierName>? typeParameters = null,
+                              bool inlineAttributes = false,
+                              bool createNewline = true)
     {
         foreach (var attributeList in attributeLists ?? [])
         {
             attributeList.Inline = inlineAttributes;
             attributeList.Render(this);
         }
-        if (isLocal)
-            Write("local ");
-            
+
+        if (isLocal) Write("local ");
+
         Write("function");
         if (name != null)
         {
             Write(' ');
             name.Render(this);
         }
+
         if (typeParameters != null)
         {
             Write('<');
             WriteNodes(typeParameters);
             Write('>');
         }
-        
+
         parameterList.Render(this);
         WriteTypeAnnotation(returnType);
         WriteLine();
@@ -79,6 +80,7 @@ public class LuauWriter : BaseWriter
             else if (parameter.Initializer != null)
                 body.Statements.Insert(0, AstUtility.DefaultValueInitializer(parameter.Name, parameter.Initializer));
         }
+
         body.Render(this);
 
         PopIndent();
@@ -98,9 +100,8 @@ public class LuauWriter : BaseWriter
 
     public void WriteVariable(Name name, bool isLocal, Expression? initializer = null, TypeRef? type = null)
     {
-        if (isLocal)
-            Write("local ");
-        
+        if (isLocal) Write("local ");
+
         name.Render(this);
         WriteTypeAnnotation(type);
         if (initializer != null)
@@ -108,6 +109,7 @@ public class LuauWriter : BaseWriter
             Write(" = ");
             initializer.Render(this);
         }
+
         WriteLine();
     }
 

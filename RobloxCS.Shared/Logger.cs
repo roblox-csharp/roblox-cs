@@ -4,7 +4,8 @@ namespace RobloxCS.Shared;
 
 public class CleanExitException : Exception
 {
-    public CleanExitException(string message) : base(message)
+    public CleanExitException(string message)
+        : base(message)
     {
         if (!Logger.Exit) return;
         Environment.Exit(1);
@@ -15,7 +16,7 @@ public static class Logger
 {
     public static bool Exit { get; set; } = true;
     private const string _compilerError = " (roblox-cs compiler error)";
-    
+
     public static void Ok(string message)
     {
         Log(message, ConsoleColor.Green, "OK");
@@ -29,21 +30,22 @@ public static class Logger
     public static CleanExitException Error(string message)
     {
         Log(message, ConsoleColor.Red, "ERROR");
+
         return new CleanExitException(message);
     }
-    
+
     public static CleanExitException CompilerError(string message, SyntaxNode node) =>
         CodegenError(node, message + _compilerError);
-    
+
     public static CleanExitException CompilerError(string message, SyntaxToken token) =>
         CodegenError(token, message + _compilerError);
 
-    public static CleanExitException CompilerError(string message) =>
-        Error(message + _compilerError);
+    public static CleanExitException CompilerError(string message) => Error(message + _compilerError);
 
     public static CleanExitException CodegenError(SyntaxToken token, string message)
     {
         var lineSpan = token.GetLocation().GetLineSpan();
+
         return Error($"{message}\n\t- {FormatLocation(lineSpan)}");
     }
 
@@ -55,7 +57,7 @@ public static class Logger
 
     public static CleanExitException UnsupportedError(SyntaxNode node, string subject, bool useIs = false, bool useYet = true) =>
         UnsupportedError(node.GetFirstToken(), subject, useIs, useYet);
-    
+
     public static CleanExitException UnsupportedError(SyntaxToken token, string subject, bool useIs = false, bool useYet = true)
     {
         return CodegenError(token, $"{subject} {(useIs ? "is" : "are")} not {(useYet ? "yet " : "")}supported, sorry!");
@@ -74,6 +76,7 @@ public static class Logger
     public static void HandleDiagnostic(Diagnostic diagnostic)
     {
         HashSet<string> ignoredCodes = ["CS7022", "CS0017" /* more than one entry point */];
+
         if (ignoredCodes.Contains(diagnostic.Id)) return;
 
         var lineSpan = diagnostic.Location.GetLineSpan();
@@ -84,6 +87,7 @@ public static class Logger
             case DiagnosticSeverity.Error:
             {
                 Error(diagnosticMessage + location);
+
                 break;
             }
             case DiagnosticSeverity.Warning:
@@ -96,15 +100,16 @@ public static class Logger
                 {
                     Warn(diagnosticMessage + location);
                 }
+
                 break;
             }
             case DiagnosticSeverity.Info:
             {
                 Info(diagnosticMessage);
+
                 break;
             }
         }
-
     }
 
     public static void Warn(string message)

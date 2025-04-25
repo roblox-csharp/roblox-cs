@@ -13,11 +13,11 @@ public class MainTransformerTest
         var compilationUnit = Transform("namespace Abc;");
         Assert.Single(compilationUnit.Members);
         Assert.IsType<NamespaceDeclarationSyntax>(compilationUnit.Members.First());
-        
+
         var @namespace = (NamespaceDeclarationSyntax)compilationUnit.Members.First();
         Assert.Equal("Abc", @namespace.Name.ToString());
     }
-    
+
     [Fact]
     public void AddsExtraUsings()
     {
@@ -36,12 +36,13 @@ public class MainTransformerTest
 #pragma warning restore xUnit2002
         Assert.Equal("Roblox.Globals", usingRobloxGlobals.Name?.ToString());
     }
-    
+
     private static CompilationUnitSyntax Transform(string source)
     {
         var cleanTree = SyntaxFactory.ParseSyntaxTree(source);
         var transform = BuiltInTransformers.Main();
         var transformedTree = transform(cleanTree, new TransformState(), new ConfigData());
+
         return transformedTree.GetCompilationUnitRoot();
     }
 }

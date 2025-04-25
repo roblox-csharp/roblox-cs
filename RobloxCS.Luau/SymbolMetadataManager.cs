@@ -14,9 +14,8 @@ public static class SymbolMetadataManager
     public static SymbolMetadata Get(ISymbol symbol)
     {
         var metadata = _metadata.GetValueOrDefault(symbol);
-        if (metadata == null)
-            _metadata.Add(symbol, metadata = new SymbolMetadata());
-        
+        if (metadata == null) _metadata.Add(symbol, metadata = new SymbolMetadata());
+
         return metadata;
     }
 }

@@ -13,11 +13,13 @@ public class BaseWriter
     public void PopIndent() => _indent--;
     public void WriteLine() => Write('\n');
     public void WriteLine(char text) => WriteLine(text.ToString());
+
     public void WriteLine(string text)
     {
         if (string.IsNullOrEmpty(text))
         {
             _output.AppendLine();
+
             return;
         }
 
@@ -25,8 +27,9 @@ public class BaseWriter
         _output.Append(text);
         _output.Append('\n');
     }
-    
+
     public void Write(char text) => Write(text.ToString());
+
     public void Write(string text)
     {
         WriteIndent();
@@ -40,9 +43,8 @@ public class BaseWriter
 
     private bool WasLastCharacter(char character)
     {
-        if (_output.Length == 0)
-            return false;
-        
+        if (_output.Length == 0) return false;
+
         return _output[^1] == character;
     }
 }

@@ -13,9 +13,8 @@ public class InterpolatedString : Expression
     public override void Render(LuauWriter luau)
     {
         luau.Write('`');
-        foreach (var part in Parts)
-            part.Render(luau);
-                
+        foreach (var part in Parts) part.Render(luau);
+
         luau.Write('`');
     }
 }

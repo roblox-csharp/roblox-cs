@@ -17,10 +17,9 @@ public class NumericFor : Statement
         Body = body;
 
         AddChildren([Name, Minimum, Maximum]);
-        if (IncrementBy != null)
-            AddChild(IncrementBy);
-            
-        AddChild(Body); 
+        if (IncrementBy != null) AddChild(IncrementBy);
+
+        AddChild(Body);
     }
 
     public override void Render(LuauWriter luau)
@@ -36,11 +35,12 @@ public class NumericFor : Statement
             luau.Write(", ");
             IncrementBy.Render(luau);
         }
+
         luau.WriteLine(" do");
         luau.PushIndent();
-            
+
         Body.Render(luau);
-            
+
         luau.PopIndent();
         luau.WriteLine("end");
     }

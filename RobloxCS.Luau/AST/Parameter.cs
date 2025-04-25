@@ -2,7 +2,6 @@
 
 public class Parameter : Statement
 {
-
     public IdentifierName Name { get; }
     public Expression? Initializer { get; }
     public TypeRef? Type { get; }
@@ -17,10 +16,8 @@ public class Parameter : Statement
         IsVararg = isVararg;
 
         AddChild(Name);
-        if (Initializer != null)
-            AddChild(Initializer);
-        if (Type != null)
-            AddChild(FixType(Type));
+        if (Initializer != null) AddChild(Initializer);
+        if (Type != null) AddChild(FixType(Type));
     }
 
     public override void Render(LuauWriter luau)
@@ -42,6 +39,7 @@ public class Parameter : Statement
             if (type is ArrayType arrayType && IsVararg)
             {
                 type = arrayType.ElementType;
+
                 continue;
             }
 

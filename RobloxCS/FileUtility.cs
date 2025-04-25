@@ -12,9 +12,10 @@ public static class FileUtility
     public static string? GetRbxcsDirectory()
     {
         var directoryName = Path.GetDirectoryName(GetAssemblyDirectory());
+
         return directoryName == null ? null : FixPathSeparator(directoryName);
     }
-    
+
     public static List<PortableExecutableReference> GetCompilationReferences()
     {
         var runtimeLibAssemblyPath = string.Join('/', GetAssemblyDirectory(), _runtimeAssemblyName + ".dll");
@@ -25,11 +26,10 @@ public static class FileUtility
             Logger.Error($"Failed to find {_runtimeAssemblyName}.dll in {location}");
         }
 
-        List<PortableExecutableReference> references = [
-            MetadataReference.CreateFromFile(runtimeLibAssemblyPath)
-        ];
-        
+        List<PortableExecutableReference> references = [MetadataReference.CreateFromFile(runtimeLibAssemblyPath)];
+
         references.AddRange(GetCoreLibReferences());
+
         return references;
     }
 
@@ -44,24 +44,26 @@ public static class FileUtility
 
         references.Add(MetadataReference.CreateFromFile(typeof(Enumerable).Assembly.Location));
         references.Add(MetadataReference.CreateFromFile(typeof(List<>).Assembly.Location));
+
         // TODO: add references to installed packages
         return references;
     }
-    
+
     private static string FixPathSeparator(string path)
     {
         var cleanedPath = Path.TrimEndingDirectorySeparator(path)
-            .Replace(@"\\", "/")
-            .Replace('\\', '/')
-            .Replace("//", "/");
-        
+                              .Replace(@"\\", "/")
+                              .Replace('\\', '/')
+                              .Replace("//", "/");
+
         return Regex.Replace(cleanedPath, @"(?<!\.)\./", "");
     }
-    
+
     private static string GetAssemblyDirectory()
     {
         var location = FixPathSeparator(Assembly.GetExecutingAssembly().Location);
         var directoryName = Path.GetDirectoryName(location)!;
+
         return FixPathSeparator(directoryName);
     }
 }

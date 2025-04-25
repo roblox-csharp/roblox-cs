@@ -10,13 +10,13 @@ public abstract class Node
     public MacroKind? ExpandedByMacro { get; private set; }
 
     private List<Node>? _descendants;
+
     public List<Node> Descendants
     {
         get
         {
-            if (_descendants != null)
-                return _descendants;
-                
+            if (_descendants != null) return _descendants;
+
             _descendants = [];
             foreach (var child in Children)
             {
@@ -34,13 +34,12 @@ public abstract class Node
     public void MarkExpanded(MacroKind macroKind)
     {
         if (ExpandedByMacro != null)
-            throw Logger.CompilerError(
-                $"""
-                 Attempted to mark already macro-expanded node as expanded.
-                 Current macro kind: {ExpandedByMacro}
-                 Attempted expanding macro kind: {macroKind}
-                 """.Trim());
-            
+            throw Logger.CompilerError($"""
+                                        Attempted to mark already macro-expanded node as expanded.
+                                        Current macro kind: {ExpandedByMacro}
+                                        Attempted expanding macro kind: {macroKind}
+                                        """.Trim());
+
         ExpandedByMacro = macroKind;
     }
 
@@ -52,7 +51,6 @@ public abstract class Node
 
     protected void AddChildren(IEnumerable<Node> children)
     {
-        foreach (var child in children)
-            AddChild(child);
+        foreach (var child in children) AddChild(child);
     }
 }

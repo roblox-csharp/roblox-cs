@@ -10,7 +10,7 @@ public static class Program
             Console.WriteLine("No path was provided!");
             Environment.Exit(1);
         }
-        
+
         var source = File.ReadAllText(path).Trim();
         Console.WriteLine(Transpiler.Transpile(source));
     }

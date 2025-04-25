@@ -3,8 +3,9 @@
 public sealed class KeyOfCall : TypeRef
 {
     public TypeRef TypeRef { get; }
-        
-    public KeyOfCall(TypeRef typeRef) : base(typeRef.Path)
+
+    public KeyOfCall(TypeRef typeRef)
+        : base(typeRef.Path)
     {
         TypeRef = typeRef;
         AddChild(TypeRef);

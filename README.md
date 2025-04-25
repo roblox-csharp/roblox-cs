@@ -11,9 +11,12 @@
 	<a href="https://coveralls.io/github/roblox-csharp/roblox-cs?branch=master"><img src="https://coveralls.io/repos/github/roblox-csharp/roblox-cs/badge.svg?branch=master" alt="Coverage Status" /></a>
 </div>
 
-
 ### Introduction
-roblox-cs is a [C#](https://learn.microsoft.com/en-us/dotnet/csharp/) to [Luau](https://luau.org/) transpiler, which means we effectively translate C# code into Luau. This is done by taking the C# AST and converting it into a Luau AST (that is functionally the same) and then finally rendering the Luau AST into Luau source code.
+
+roblox-cs is a [C#](https://learn.microsoft.com/en-us/dotnet/csharp/) to [Luau](https://luau.org/) transpiler, which
+means we effectively translate C# code into Luau. This is done by taking the C# AST and converting it into a Luau AST (
+that is functionally the same) and then finally rendering the Luau AST into Luau source code.
 
 ### Join the Community!
+
 https://discord.gg/nFcsW3C33u

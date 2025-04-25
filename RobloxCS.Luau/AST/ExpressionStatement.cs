@@ -13,6 +13,7 @@ public class ExpressionStatement : Statement
     public override void Render(LuauWriter luau)
     {
         Expression.Render(luau);
+
         if (Expression is NoOpExpression) return;
         luau.WriteLine();
     }

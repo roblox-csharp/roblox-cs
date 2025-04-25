@@ -18,7 +18,7 @@ public static class AstUtility
             ? new Literal((value + 1).ToString())
             : new BinaryOperator(expression, "+", new Literal("1"));
     }
-        
+
     /// <summary>Subtracts one from the expression</summary>
     public static Expression SubtractOne(Expression expression)
     {
@@ -41,6 +41,7 @@ public static class AstUtility
             new IdentifierName("TypeInitializer"),
             new IdentifierName("ReflectedType"),
             new IdentifierName("IsAbstract"),
+
             // new IdentifierName("IsAnsiClass"),
             new IdentifierName("IsArray"),
             new IdentifierName("IsSealed"),
@@ -54,11 +55,13 @@ public static class AstUtility
             new IdentifierName("IsClass"),
             new IdentifierName("IsByRef"),
             new IdentifierName("IsByRefLike"),
+
             // new IdentifierName("IsAutoClass"),
             // new IdentifierName("IsAutoLayout"),
             // new IdentifierName("IsCOMObject"),
             new IdentifierName("IsContextful"),
             new IdentifierName("IsEnum"),
+
             // new IdentifierName("IsExplicitLayout"),
             // new IdentifierName("IsPointer"),
             // new IdentifierName("IsFunctionPointer"),
@@ -66,6 +69,7 @@ public static class AstUtility
             // new IdentifierName("IsLayoutSequential"),
             // new IdentifierName("IsMarshalByRef"),
             new IdentifierName("IsNested"),
+
             // new IdentifierName("IsNestedAssembly"),
             // new IdentifierName("IsNestedFamily"),
             // new IdentifierName("IsNestedFamANDAssem"),
@@ -75,15 +79,18 @@ public static class AstUtility
             new IdentifierName("IsNotPublic"),
             new IdentifierName("IsPublic"),
             new IdentifierName("IsSZArray"),
+
             // new IdentifierName("IsSecurityCritical"),
             // new IdentifierName("IsSecuritySafeCritical"),
             // new IdentifierName("IsSecurityTransparent"),
             new IdentifierName("IsSignatureType"),
             new IdentifierName("IsSpecialName"),
             new IdentifierName("IsTypeDefinition"),
+
             // new IdentifierName("IsUnicodeClass"),
             new IdentifierName("IsValueType"),
             new IdentifierName("IsVariableBoundArray"),
+
             // new IdentifierName("IsVisible"),
             // new IdentifierName("UnderlyingSystemType"),
             new IdentifierName("BaseType"),
@@ -94,6 +101,7 @@ public static class AstUtility
             new IdentifierName("CustomAttributes"),
             new IdentifierName("GetProperties")
         ];
+
         List<Expression> values =
         [
             type.FullName != null ? new Literal('"' + type.FullName + '"') : Nil,
@@ -102,6 +110,7 @@ public static class AstUtility
             type.TypeInitializer != null ? CreateMethodBase(type.TypeInitializer) : Nil,
             type.ReflectedType != null ? CreateTypeInfo(type.ReflectedType) : Nil,
             new Literal(type.IsAbstract.ToString().ToLower()),
+
             // new Literal(type.IsAnsiClass.ToString().ToLower()),
             new Literal(type.IsArray.ToString().ToLower()),
             new Literal(type.IsSealed.ToString().ToLower()),
@@ -115,11 +124,13 @@ public static class AstUtility
             new Literal(type.IsClass.ToString().ToLower()),
             new Literal(type.IsByRef.ToString().ToLower()),
             new Literal(type.IsByRefLike.ToString().ToLower()),
+
             // new Literal(type.IsAutoClass.ToString().ToLower()),
             // new Literal(type.IsAutoLayout.ToString().ToLower()),
             // new Literal(type.IsCOMObject.ToString().ToLower()),
             new Literal(type.IsContextful.ToString().ToLower()),
             new Literal(type.IsEnum.ToString().ToLower()),
+
             // new Literal(type.IsExplicitLayout.ToString().ToLower()),
             // new Literal(type.IsPointer.ToString().ToLower()),
             // new Literal(type.IsFunctionPointer.ToString().ToLower()),
@@ -127,6 +138,7 @@ public static class AstUtility
             // new Literal(type.IsLayoutSequential.ToString().ToLower()),
             // new Literal(type.IsMarshalByRef.ToString().ToLower()),
             new Literal(type.IsNested.ToString().ToLower()),
+
             // new Literal(type.IsNestedAssembly.ToString().ToLower()),
             // new Literal(type.IsNestedFamily.ToString().ToLower()),
             // new Literal(type.IsNestedFamANDAssem.ToString().ToLower()),
@@ -136,33 +148,36 @@ public static class AstUtility
             new Literal(type.IsNotPublic.ToString().ToLower()),
             new Literal(type.IsPublic.ToString().ToLower()),
             new Literal(type.IsSZArray.ToString().ToLower()),
+
             // new Literal(type.IsSecurityCritical.ToString().ToLower()),
             // new Literal(type.IsSecuritySafeCritical.ToString().ToLower()),
             // new Literal(type.IsSecurityTransparent.ToString().ToLower()),
             new Literal(type.IsSignatureType.ToString().ToLower()),
             new Literal(type.IsSpecialName.ToString().ToLower()),
             new Literal(type.IsTypeDefinition.ToString().ToLower()),
+
             // new Literal(type.IsUnicodeClass.ToString().ToLower()),
             new Literal(type.IsValueType.ToString().ToLower()),
             new Literal(type.IsVariableBoundArray.ToString().ToLower()),
+
             // new Literal(type.IsVisible.ToString().ToLower()),
             // type != type.UnderlyingSystemType ? CreateTypeInfo(type.UnderlyingSystemType) : Nil,
             type.BaseType != null ? CreateTypeInfo(type.BaseType) : Nil,
             type.DeclaringType != null ? CreateTypeInfo(type.DeclaringType) : Nil,
             new Literal(type.ContainsGenericParameters.ToString().ToLower()),
-            noAttributes ? TableInitializer.Empty : new TableInitializer(type.GenericTypeArguments.Select(CreateTypeInfo).OfType<Expression>().ToList()),
+            noAttributes
+                ? TableInitializer.Empty
+                : new TableInitializer(type.GenericTypeArguments.Select(CreateTypeInfo).OfType<Expression>().ToList()),
             new Literal($"\"{type.GUID}\""),
             new TableInitializer(type.CustomAttributes.Select(CreateCustomAttributeData).ToList<Expression>()),
-            new AnonymousFunction(
-                new ParameterList([new Parameter(new IdentifierName("self"))]),
-                null,
-                new Block([
-                    new Return(CreatePropertiesInfo(type.GetProperties()))
-                ]))
+            new AnonymousFunction(new ParameterList([new Parameter(new IdentifierName("self"))]),
+                                  null,
+                                  new Block([new Return(CreatePropertiesInfo(type.GetProperties()))]))
         ];
 
         if (keys.Count != values.Count)
-            throw Logger.CompilerError($"Failed to create runtime type info object: Keys and values have unequal sizes.\n\tKeys: {keys.Count}\n\tValues: {values.Count}");
+            throw
+                Logger.CompilerError($"Failed to create runtime type info object: Keys and values have unequal sizes.\n\tKeys: {keys.Count}\n\tValues: {values.Count}");
 
         return TableInitializer.Union(memberInfo, new TableInitializer(values, keys));
     }
@@ -171,48 +186,42 @@ public static class AstUtility
     private static TableInitializer CreatePropertiesInfo(PropertyInfo[] properties)
     {
         var propertyInfos = properties.Select<PropertyInfo, Expression>(property =>
-        {
-            var memberInfo = CreateMemberInfo(property);
-            List<Expression> keys =
-            [
-                new IdentifierName("CanRead"),
-                new IdentifierName("CanWrite"),
-                new IdentifierName("IsSpecialName"),
-                new IdentifierName("PropertyType"),
-                new IdentifierName("GetMethod"),
-                new IdentifierName("SetMethod")
-            ];
-            List<Expression> values =
-            [
-                new Literal(property.CanRead.ToString().ToLower()),
-                new Literal(property.CanWrite.ToString().ToLower()),
-                new Literal(property.IsSpecialName.ToString().ToLower()),
-                CreateTypeInfo(property.PropertyType),
-                property.GetMethod != null ? CreateMethodInfo(property.GetMethod) : Nil,
-                property.SetMethod != null ? CreateMethodInfo(property.SetMethod) : Nil
-            ];
-            
-            return TableInitializer.Union(memberInfo, new TableInitializer(values, keys));
-        }).ToList();
+                                      {
+                                          var memberInfo = CreateMemberInfo(property);
+                                          List<Expression> keys =
+                                          [
+                                              new IdentifierName("CanRead"),
+                                              new IdentifierName("CanWrite"),
+                                              new IdentifierName("IsSpecialName"),
+                                              new IdentifierName("PropertyType"),
+                                              new IdentifierName("GetMethod"),
+                                              new IdentifierName("SetMethod")
+                                          ];
+
+                                          List<Expression> values =
+                                          [
+                                              new Literal(property.CanRead.ToString().ToLower()),
+                                              new Literal(property.CanWrite.ToString().ToLower()),
+                                              new Literal(property.IsSpecialName.ToString().ToLower()),
+                                              CreateTypeInfo(property.PropertyType),
+                                              property.GetMethod != null ? CreateMethodInfo(property.GetMethod) : Nil,
+                                              property.SetMethod != null ? CreateMethodInfo(property.SetMethod) : Nil
+                                          ];
+
+                                          return TableInitializer.Union(memberInfo, new TableInitializer(values, keys));
+                                      })
+                                      .ToList();
 
         return new TableInitializer(propertyInfos);
     }
-    
+
     /// <summary>Creates method info table for runtime type objects</summary>
     private static TableInitializer CreateMethodInfo(MethodInfo method)
     {
         var methodBase = CreateMethodBase(method);
-        List<Expression> keys =
-        [
-            new IdentifierName("ReturnType"),
-            new IdentifierName("ReturnParameter"),
-        ];
-        List<Expression> values =
-        [
-            CreateTypeInfo(method.ReturnType),
-            CreateParameterInfo(method.ReturnParameter),
-        ];
-            
+        List<Expression> keys = [new IdentifierName("ReturnType"), new IdentifierName("ReturnParameter"),];
+        List<Expression> values = [CreateTypeInfo(method.ReturnType), CreateParameterInfo(method.ReturnParameter),];
+
         return TableInitializer.Union(methodBase, new TableInitializer(values, keys));
     }
 
@@ -233,6 +242,7 @@ public static class AstUtility
             new IdentifierName("ParameterType"),
             new IdentifierName("Member"),
         ];
+
         List<Expression> values =
         [
             parameter.Name != null ? new Literal('"' + parameter.Name + '"') : Nil,
@@ -248,7 +258,7 @@ public static class AstUtility
             CreateTypeInfo(parameter.ParameterType),
             CreateMemberInfo(parameter.Member),
         ];
-        
+
         return new TableInitializer(values, keys);
     }
 
@@ -271,6 +281,7 @@ public static class AstUtility
             new IdentifierName("IsConstructedGenericMethod"),
             new IdentifierName("IsGenericMethodDefinition"),
             new IdentifierName("IsHideBySig"),
+
             // new IdentifierName("IsSecurityCritical"),
             // new IdentifierName("IsSecuritySafeCritical"),
             // new IdentifierName("IsSecurityTransparent"),
@@ -279,6 +290,7 @@ public static class AstUtility
             new IdentifierName("MethodImplementationFlags"),
             new IdentifierName("Attributes")
         ];
+
         List<Expression> values =
         [
             new Literal(method.IsAbstract.ToString().ToLower()),
@@ -294,6 +306,7 @@ public static class AstUtility
             new Literal(method.IsConstructedGenericMethod.ToString().ToLower()),
             new Literal(method.IsGenericMethodDefinition.ToString().ToLower()),
             new Literal(method.IsHideBySig.ToString().ToLower()),
+
             // new Literal(method.IsSecurityCritical.ToString().ToLower()),
             // new Literal(method.IsSecuritySafeCritical.ToString().ToLower()),
             // new Literal(method.IsSecurityTransparent.ToString().ToLower()),
@@ -302,7 +315,7 @@ public static class AstUtility
             new Literal(((int)method.MethodImplementationFlags).ToString()),
             new Literal(((int)method.Attributes).ToString()),
         ];
-            
+
         return TableInitializer.Union(memberInfo, new TableInitializer(values, keys));
     }
 
@@ -311,35 +324,30 @@ public static class AstUtility
     {
         List<Expression> keys =
         [
-            new IdentifierName("Name"),
-            new IdentifierName("MemberType"),
-            new IdentifierName("IsCollectible"),
+            new IdentifierName("Name"), new IdentifierName("MemberType"), new IdentifierName("IsCollectible"),
+
             // new IdentifierName("DeclaringType"),
             // new IdentifierName("ReflectedType"),
         ];
+
         List<Expression> values =
         [
             new Literal('"' + member.Name + '"'),
             new Literal(((int)member.MemberType).ToString().ToLower()),
             new Literal(member.IsCollectible.ToString().ToLower()),
+
             // member.DeclaringType != null ? CreateTypeInfo(member.DeclaringType) : Nil,
             // member.ReflectedType != null ? CreateTypeInfo(member.ReflectedType) : Nil,
         ];
-        
+
         return new TableInitializer(values, keys);
     }
 
     private static TableInitializer CreateCustomAttributeData(CustomAttributeData data)
     {
-        List<Expression> keys =
-        [
-            new IdentifierName("AttributeType"),
-        ];
-        List<Expression> values =
-        [
-            CreateMemberInfo(data.AttributeType)
-        ];
-        
+        List<Expression> keys = [new IdentifierName("AttributeType"),];
+        List<Expression> values = [CreateMemberInfo(data.AttributeType)];
+
         return new TableInitializer(values, keys);
     }
 
@@ -359,72 +367,61 @@ public static class AstUtility
     /// </summary>
     public static Statement DefineGlobalOrMember(SyntaxNode node, SimpleName name)
     {
-        if (StandardUtility.IsGlobal(node))
-            return new ExpressionStatement(DefineGlobal(name, name));
-        
+        if (StandardUtility.IsGlobal(node)) return new ExpressionStatement(DefineGlobal(name, name));
+
         var fullParentName = GetFullParentName(node);
+
         if (fullParentName != null)
-            return new Assignment(
-                new MemberAccess(
-                    fullParentName,
-                    name
-                ),
-                name
-            );
+            return new Assignment(new MemberAccess(fullParentName,
+                                                   name),
+                                  name);
 
         return new NoOp();
     }
 
     /// <code>CS.defineGlobal(name, value)</code>
-    public static Call DefineGlobal(Name name, Expression type) =>
-        CSCall("defineGlobal", String(name.ToString()), type);
+    public static Call DefineGlobal(Name name, Expression type) => CSCall("defineGlobal", String(name.ToString()), type);
 
     /// <code>CS.getGlobal(name)</code>
-    public static Call GetGlobal(Name name) =>
-        CSCall("getGlobal", String(name.ToString()));
-    
+    public static Call GetGlobal(Name name) => CSCall("getGlobal", String(name.ToString()));
+
     /// <code>CS.is(value, type)</code>
-    public static Call Is(Expression value, Expression type) =>
-        CSCall("is", value, type);
-    
+    public static Call Is(Expression value, Expression type) => CSCall("is", value, type);
+
     /// <summary>
     /// Creates a call to a table library method
     /// </summary>
     public static Call TableCall(string methodName, params Expression[] arguments) =>
-        new(new MemberAccess(
-                new IdentifierName("table"),
-                new IdentifierName(methodName)),
+        new(new MemberAccess(new IdentifierName("table"),
+                             new IdentifierName(methodName)),
             CreateArgumentList(arguments.ToList()));
 
     /// <summary>
     /// Creates a call to a CS library method
     /// </summary>
     public static Call CSCall(string methodName, params Expression[] arguments) =>
-        new(new MemberAccess(
-                new IdentifierName("CS"),
-                new IdentifierName(methodName)),
+        new(new MemberAccess(new IdentifierName("CS"),
+                             new IdentifierName(methodName)),
             CreateArgumentList(arguments.ToList()));
 
     public static Call NewEnumerator(Expression items) =>
-        new(new MemberAccess(
-                new MemberAccess(
-                    new IdentifierName("CS"),
-                    new IdentifierName("Enumerator")),
-                new IdentifierName("new")),
+        new(new MemberAccess(new MemberAccess(new IdentifierName("CS"),
+                                              new IdentifierName("Enumerator")),
+                             new IdentifierName("new")),
             CreateArgumentList([items]));
 
     public static Variable SignalImport() =>
         new(new IdentifierName("Signal"),
             true,
+
             // temporary until RojoReader
-            RequireCall(new QualifiedName(
-                new IdentifierName("rbxcs_include"),
-                new IdentifierName("GoodSignal"))));
-        
+            RequireCall(new QualifiedName(new IdentifierName("rbxcs_include"),
+                                          new IdentifierName("GoodSignal"))));
+
     public static Call RequireCall(Expression modulePath) =>
         new(new IdentifierName("require"),
             CreateArgumentList([modulePath]));
-        
+
     public static Call PrintCall(params List<Expression> args) =>
         new(new IdentifierName("print"),
             CreateArgumentList(args));
@@ -433,9 +430,8 @@ public static class AstUtility
     /// Creates a call to a bit32 library method
     /// </summary>
     public static Call Bit32Call(string methodName, params Expression[] arguments) =>
-        new(new MemberAccess(
-                new IdentifierName("bit32"),
-                new IdentifierName(methodName)),
+        new(new MemberAccess(new IdentifierName("bit32"),
+                             new IdentifierName(methodName)),
             CreateArgumentList(arguments.ToList()));
 
     public static ArgumentList CreateArgumentList(List<Expression> arguments) =>
@@ -443,13 +439,14 @@ public static class AstUtility
 
     public static SimpleName TypeNameFromSymbol(ISymbol symbol)
     {
-        if (symbol is not INamedTypeSymbol { TypeParameters.Length: > 0 } namedTypeSymbol)
-            return new IdentifierName(symbol.Name);
-            
-        var typeParameters = namedTypeSymbol.TypeParameters.Select(typeParameter => TypeNameFromSymbol(typeParameter).ToString()).ToList();
+        if (symbol is not INamedTypeSymbol { TypeParameters.Length: > 0 } namedTypeSymbol) return new IdentifierName(symbol.Name);
+
+        var typeParameters = namedTypeSymbol.TypeParameters.Select(typeParameter => TypeNameFromSymbol(typeParameter).ToString())
+                                            .ToList();
+
         return new GenericName(symbol.Name, typeParameters);
     }
-        
+
     /// <summary>
     /// Returns the full name of a C# node's parent.
     /// This method is meant for getting the absolute location of classes, enums, etc.
@@ -466,6 +463,7 @@ public static class AstUtility
 
         var parentName = CreateSimpleName(node.Parent);
         var parentLocation = GetFullParentName(node.Parent);
+
         return parentLocation == null
             ? node.Parent.SyntaxTree == node.SyntaxTree
                 ? parentName
@@ -479,18 +477,16 @@ public static class AstUtility
     /// end
     /// </code>
     public static If DefaultValueInitializer(Name name, Expression initializer) =>
-        new(
-            new BinaryOperator(name, "==", Nil),
-            new Block([new Assignment(name, initializer)])
-        );
+        new(new BinaryOperator(name, "==", Nil),
+            new Block([new Assignment(name, initializer)]));
 
     /// <summary>
     /// Takes a <see cref="RobloxCS.Luau.MemberAccess"/> and converts it into a <see cref="QualifiedName"/>, given that <see cref="RobloxCS.Luau.MemberAccess.Expression"/> inherits from <see cref="Name"/>
     /// </summary>
     public static QualifiedName QualifiedNameFromMemberAccess(MemberAccess memberAccess)
     {
-        var left = memberAccess.Expression is MemberAccess leftMemberAccess ?
-            QualifiedNameFromMemberAccess(leftMemberAccess)
+        var left = memberAccess.Expression is MemberAccess leftMemberAccess
+            ? QualifiedNameFromMemberAccess(leftMemberAccess)
             : (Name)memberAccess.Expression;
 
         return new QualifiedName(left, memberAccess.Name);
@@ -500,14 +496,13 @@ public static class AstUtility
     /// Creates a discard variable if <see cref="valueParent"/> is an <see cref="ExpressionStatementSyntax"/>
     /// </summary>
     public static Node DiscardVariableIfExpressionStatement(SyntaxNode node, Node value, SyntaxNode? valueParent) =>
-        valueParent is ExpressionStatementSyntax ?
-            DiscardVariable(node, (Expression)value)
+        valueParent is ExpressionStatementSyntax
+            ? DiscardVariable(node, (Expression)value)
             : value;
 
     /// <code>local _ = discardedValue</code>
-    public static Variable DiscardVariable(SyntaxNode node, Expression value) =>
-        new(DiscardName, true, value);
-        
+    public static Variable DiscardVariable(SyntaxNode node, Expression value) => new(DiscardName, true, value);
+
     public static GenericName? GetGenericName(Name name) =>
         name switch
         {
@@ -515,7 +510,7 @@ public static class AstUtility
             QualifiedName { Right: GenericName rightName } => rightName,
             _ => null
         };
-        
+
     /// <summary>
     /// Takes a Name and converts it into a non-generic Name
     /// </summary>
@@ -526,16 +521,16 @@ public static class AstUtility
             SimpleName simpleName => GetNonGenericName(simpleName),
             _ => name
         };
-        
+
     /// <summary>
     /// Takes a QualifiedName and converts it into a non-generic QualifiedName
     /// </summary>
     public static QualifiedName GetNonGenericName(QualifiedName qualifiedName)
     {
-        if (qualifiedName.Right is IdentifierName)
-            return qualifiedName;
+        if (qualifiedName.Right is IdentifierName) return qualifiedName;
 
         var right = GetNonGenericName(qualifiedName.Right);
+
         return new QualifiedName(qualifiedName.Left, right);
     }
 
@@ -544,12 +539,11 @@ public static class AstUtility
     /// </summary>
     public static IdentifierName GetNonGenericName(SimpleName simpleName)
     {
-        if (simpleName is IdentifierName identifierName)
-            return identifierName;
-            
-        return new IdentifierName(simpleName is GenericName genericName 
-            ? genericName.Text
-            : simpleName.ToString());
+        if (simpleName is IdentifierName identifierName) return identifierName;
+
+        return new IdentifierName(simpleName is GenericName genericName
+                                      ? genericName.Text
+                                      : simpleName.ToString());
     }
 
     public static Name CreateName(SyntaxNode node, bool bypassReserved = false) =>
@@ -559,52 +553,59 @@ public static class AstUtility
     {
         Name name = CreateSimpleName(node, text, bypassReserved);
         var pieces = text.Split('.');
-        if (pieces.Length <= 0)
-            return name;
+
+        if (pieces.Length <= 0) return name;
 
         return pieces
-            .Skip(1)
-            .Aggregate(name, (current, piece) => new QualifiedName(current, CreateSimpleName(node, piece)));
+               .Skip(1)
+               .Aggregate(name, (current, piece) => new QualifiedName(current, CreateSimpleName(node, piece)));
     }
-        
-    public static TNameNode CreateSimpleName<TNameNode>(SyntaxNode node, bool bypassReserved = false, bool noGenerics = false) 
+
+    public static TNameNode CreateSimpleName<TNameNode>(SyntaxNode node, bool bypassReserved = false, bool noGenerics = false)
         where TNameNode : SimpleName
     {
         return (TNameNode)CreateSimpleName(node, bypassReserved, noGenerics);
     }
 
-    public static TNameNode CreateSimpleName<TNameNode>(SyntaxNode node, string name, bool bypassReserved = false, bool noGenerics = false) 
+    public static TNameNode CreateSimpleName<TNameNode>(SyntaxNode node,
+                                                        string name,
+                                                        bool bypassReserved = false,
+                                                        bool noGenerics = false)
         where TNameNode : SimpleName
     {
         return (TNameNode)CreateSimpleName(node, name, bypassReserved, noGenerics);
     }
-        
+
     public static SimpleName CreateSimpleName(SyntaxNode node, bool bypassReserved = false, bool noGenerics = false)
     {
-        return CreateSimpleName(node, string.Join("", StandardUtility.GetNamesFromNode(node, noGenerics)), bypassReserved, noGenerics);
+        return CreateSimpleName(node,
+                                string.Join("", StandardUtility.GetNamesFromNode(node, noGenerics)),
+                                bypassReserved,
+                                noGenerics);
     }
-    
+
     public static bool CheckReservedName(SyntaxNode node, string name) => CheckReservedName(node.GetFirstToken(), name);
+
     public static bool CheckReservedName(SyntaxToken token, string name)
     {
         var reserved = RESERVED_IDENTIFIERS.Contains(name);
-        if (reserved)
-            throw Logger.UnsupportedError(token, $"Using '{name}' as an identifier", useIs: true, useYet: false);
-        
+
+        if (reserved) throw Logger.UnsupportedError(token, $"Using '{name}' as an identifier", useIs: true, useYet: false);
+
         return reserved;
     }
-    
+
     public static SimpleName CreateSimpleName(SyntaxNode node, string name, bool bypassReserved = false, bool noGenerics = false)
     {
-        if (!bypassReserved && CheckReservedName(node, name))
-            return null!;
+        if (!bypassReserved && CheckReservedName(node, name)) return null!;
 
         var text = name.Replace("@", "");
+
         return !noGenerics && name.Contains('<') && name.Contains('>')
             ? new GenericName(text.Split('<').First(), StandardUtility.ExtractTypeArguments(text))
             : new IdentifierName(text);
     }
-    
+
     public static TypeRef? CreateTypeRef(string? typePath)
     {
         switch (typePath)
@@ -615,9 +616,9 @@ public static class AstUtility
         }
 
         var mappedTypePath = StandardUtility.GetMappedType(typePath);
-        if (mappedTypePath.EndsWith('?'))
-            return new OptionalType(CreateTypeRef(mappedTypePath.TrimEnd('?'))!);
-        
+
+        if (mappedTypePath.EndsWith('?')) return new OptionalType(CreateTypeRef(mappedTypePath.TrimEnd('?'))!);
+
         var functionMatch = Regex.Match(mappedTypePath, @"^\(\s*(.*?)\s*\)\s*->\s*(.+)$");
         if (functionMatch.Success)
         {
@@ -629,27 +630,28 @@ public static class AstUtility
 
             return new FunctionType(args, returnType);
         }
-        
+
         var mappedTypeMatch = Regex.Match(mappedTypePath, @"\{\s*\[([a-zA-Z0-9]+)\]:\s*(.*)\s*\}");
         if (mappedTypeMatch.Success)
         {
             var keyType = CreateTypeRef(mappedTypeMatch.Groups[1].Value)!;
             var valueType = CreateTypeRef(mappedTypeMatch.Groups[2].Value)!;
+
             return new MappedType(keyType, valueType);
         }
-        
+
         var arrayMatch = Regex.Match(mappedTypePath, @"\{\s*(.*)\s*\}");
-        if (arrayMatch.Success)
-            return new ArrayType(CreateTypeRef(arrayMatch.Groups[1].Value.Trim())!);
+
+        if (arrayMatch.Success) return new ArrayType(CreateTypeRef(arrayMatch.Groups[1].Value.Trim())!);
 
         return new TypeRef(mappedTypePath, rawPath: true);
     }
-    
+
     private static List<ParameterType> ParseFunctionArgs(string input)
     {
         var args = new List<ParameterType>();
-        if (string.IsNullOrWhiteSpace(input))
-            return args;
+
+        if (string.IsNullOrWhiteSpace(input)) return args;
 
         var depth = 0;
         var lastSplit = 0;
@@ -661,14 +663,17 @@ public static class AstUtility
                 case '<':
                 case '(':
                     depth++;
+
                     break;
                 case '>':
                 case ')':
                     depth--;
+
                     break;
                 case ',' when depth == 0:
                     args.Add(ParseSingleArg(input.Substring(lastSplit, i - lastSplit).Trim()));
                     lastSplit = i + 1;
+
                     break;
             }
         }
@@ -686,17 +691,19 @@ public static class AstUtility
         {
             var name = parts[0].Trim();
             var type = CreateTypeRef(parts[1].Trim())!;
+
             return new ParameterType(name, type);
         }
         else
         {
             var type = CreateTypeRef(raw)!;
+
             return new ParameterType(null, type);
         }
     }
 
     public static TypeRef? CreateTypeRef(TypeSyntax? type) => CreateTypeRef(type?.ToString());
-        
+
     public static Literal String(string text) => new($"\"{text}\"");
 
     public static IdentifierName Vararg { get; } = new("...");

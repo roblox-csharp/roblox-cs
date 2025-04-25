@@ -12,9 +12,8 @@ public class AST : Node
 
     public override void Render(LuauWriter luau)
     {
-        foreach (var statement in Statements)
-            statement.Render(luau);
-            
+        foreach (var statement in Statements) statement.Render(luau);
+
         luau.WriteReturn();
     }
 }

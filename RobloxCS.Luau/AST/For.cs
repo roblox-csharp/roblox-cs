@@ -20,12 +20,12 @@ public class For : Statement
     {
         luau.Write("for ");
         luau.WriteNodesCommaSeparated(Names);
-        
+
         luau.Write(" in ");
         Iterable.Render(luau);
         luau.WriteLine(" do");
         luau.PushIndent();
-        
+
         Body.Render(luau);
         luau.PopIndent();
         luau.WriteLine("end");

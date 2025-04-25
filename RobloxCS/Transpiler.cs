@@ -20,9 +20,9 @@ public static class Transpiler
         try
         {
             var tree = TranspilerUtility.ParseAndTransformTree(source, null); // temporary null config!!!1
-            var compiler = TranspilerUtility.GetCompiler([tree], null); // temporary null config!!!1
+            var compiler = TranspilerUtility.GetCompiler([tree], null);       // temporary null config!!!1
             foreach (var diagnostic in compiler.GetDiagnostics()
-                         .Where(diagnostic => !_ignoredDiagnostics.Contains(diagnostic.Id)))
+                                               .Where(diagnostic => !_ignoredDiagnostics.Contains(diagnostic.Id)))
                 Logger.HandleDiagnostic(diagnostic);
 
             return TranspilerUtility.GenerateLuau(tree, compiler);

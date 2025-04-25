@@ -1,4 +1,5 @@
 // ReSharper disable ConditionIsAlwaysTrueOrFalseAccordingToNullableAPIContract
+
 namespace RobloxCS;
 #pragma warning disable CS8618
 public sealed class CSharpOptions
@@ -11,8 +12,8 @@ public sealed class CSharpOptions
     public bool IsValid()
     {
         return !string.IsNullOrEmpty(EntryPointName)
-               && !string.IsNullOrEmpty(MainMethodName)
-               && !string.IsNullOrEmpty(AssemblyName);
+            && !string.IsNullOrEmpty(MainMethodName)
+            && !string.IsNullOrEmpty(AssemblyName);
     }
 }
 
@@ -28,10 +29,10 @@ public sealed class ConfigData
     public bool IsValid()
     {
         return !string.IsNullOrEmpty(SourceFolder)
-               && !string.IsNullOrEmpty(OutputFolder)
-               && !string.IsNullOrEmpty(RojoProjectName)
-               && CSharpOptions != null
-               && CSharpOptions.IsValid();
+            && !string.IsNullOrEmpty(OutputFolder)
+            && !string.IsNullOrEmpty(RojoProjectName)
+            && CSharpOptions != null
+            && CSharpOptions.IsValid();
     }
 }
 #pragma warning restore CS8618

@@ -8,7 +8,7 @@ public abstract class Generation
     {
         var tree = TranspilerUtility.ParseAndTransformTree(source.Trim(), null);
         var compiler = TranspilerUtility.GetCompiler([tree], null);
-        
+
         return TranspilerUtility.GetLuauAST(tree, compiler);
     }
 }

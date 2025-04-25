@@ -10,15 +10,16 @@ public class TableInitializer : Expression
     {
         var kvpComparer = new StandardUtility.KeyValuePairEqualityComparer<Expression, Expression>();
         var pairs = a.KeyValuePairs.Union(b.KeyValuePairs, kvpComparer).ToDictionary();
+
         return new TableInitializer(pairs.Values.ToList(), pairs.Keys.ToList());
     }
-    
+
     public List<Expression> Values { get; }
     public List<Expression> Keys { get; }
     public List<KeyValuePair<Expression, Expression>> KeyValuePairs { get; }
 
     public TableInitializer(List<Expression>? values = null,
-        List<Expression>? keys = null)
+                            List<Expression>? keys = null)
     {
         Values = values ?? [];
         Keys = keys ?? [];
@@ -28,11 +29,12 @@ public class TableInitializer : Expression
         {
             var key = Keys.ElementAtOrDefault(i);
             var value = Values.ElementAtOrDefault(i);
+
             if (key == null || value == null) continue;
-            
+
             KeyValuePairs.Add(KeyValuePair.Create(key, value));
         }
-            
+
         AddChildren(Values);
         AddChildren(Keys);
     }
@@ -47,36 +49,35 @@ public class TableInitializer : Expression
             luau.WriteLine();
             luau.PushIndent();
         }
-            
+
         for (var i = 0; i < Values.Count; i++)
         {
             var value = Values[i];
             var key = Keys.ElementAtOrDefault(i);
             if (key != null)
             {
-                if (key is not IdentifierName)
-                    luau.Write('[');
-                
+                if (key is not IdentifierName) luau.Write('[');
+
                 key.Render(luau);
-                if (key is not IdentifierName)
-                    luau.Write(']');
-                
+                if (key is not IdentifierName) luau.Write(']');
+
                 luau.Write(" = ");
             }
 
             value.Render(luau);
+
             if (value == Values.Last()) continue;
-                
+
             luau.Write(',');
             luau.Write(hasAnyKeys ? '\n' : ' ');
         }
-            
+
         if (hasAnyKeys)
-        { 
+        {
             luau.PopIndent();
             luau.WriteLine();
         }
-            
+
         luau.Write('}');
     }
 }

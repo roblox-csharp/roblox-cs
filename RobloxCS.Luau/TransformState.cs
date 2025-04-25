@@ -2,7 +2,8 @@
 
 namespace RobloxCS.Luau;
 
-public class TransformState {
+public class TransformState
+{
     private readonly Stack<List<Statement>> _prereqStatementsStack = [];
 
     public void Prereq(Statement statement) => _prereqStatementsStack.Peek().Add(statement);
@@ -12,14 +13,14 @@ public class TransformState {
     {
         List<Statement> statements = [];
         _prereqStatementsStack.Push(statements);
+
         return statements;
     }
 
     public List<Statement> PopPrereqStatementsStack()
     {
-        if (!_prereqStatementsStack.TryPop(out var popped))
-            Logger.CompilerError("Failed to pop prereq statements stack");
-                
+        if (!_prereqStatementsStack.TryPop(out var popped)) Logger.CompilerError("Failed to pop prereq statements stack");
+
         return popped!;
     }
 
@@ -27,6 +28,7 @@ public class TransformState {
     {
         PushPrereqStatementsStack();
         callback();
+
         return PopPrereqStatementsStack();
     }
 
@@ -34,6 +36,7 @@ public class TransformState {
     {
         T? value = default;
         var prereqs = CapturePrereqs(() => value = callback());
+
         return (value!, prereqs);
     }
 
@@ -43,7 +46,7 @@ public class TransformState {
         var statements = CapturePrereqs(() => expression = callback());
         if (statements.Count > 0)
             Logger.CompilerError("Assertion of no prereqs failed for " + (expression?.ToString() ?? "expression"));
-            
+
         return expression!;
     }
 }

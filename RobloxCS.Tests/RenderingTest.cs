@@ -11,52 +11,56 @@ public class RenderingTest
         var ast = new AST([statement]);
         var output = Render(ast);
         const string expectedOutput = """
-                                       print("bruh")
-                                       return nil
+                                      print("bruh")
+                                      return nil
 
-                                       """;
-        
+                                      """;
+
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
-    
+
     [Fact]
     public void Renders_Block()
     {
-        var statements = Enumerable.Repeat(new ExpressionStatement(AstUtility.PrintCall(AstUtility.String("bruh"))), 5).ToList<Statement>();
+        var statements = Enumerable.Repeat(new ExpressionStatement(AstUtility.PrintCall(AstUtility.String("bruh"))), 5)
+                                   .ToList<Statement>();
+
         var block = new Block(statements);
         var output = Render(block);
         const string expectedOutput = """
-                                       print("bruh")
-                                       print("bruh")
-                                       print("bruh")
-                                       print("bruh")
-                                       print("bruh")
+                                      print("bruh")
+                                      print("bruh")
+                                      print("bruh")
+                                      print("bruh")
+                                      print("bruh")
 
-                                       """;
-        
+                                      """;
+
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
-    
+
     [Fact]
     public void Renders_ScopedBlock()
     {
-        var statements = Enumerable.Repeat(new ExpressionStatement(AstUtility.PrintCall(AstUtility.String("bruh"))), 5).ToList<Statement>();
+        var statements = Enumerable.Repeat(new ExpressionStatement(AstUtility.PrintCall(AstUtility.String("bruh"))), 5)
+                                   .ToList<Statement>();
+
         var block = new ScopedBlock(statements);
         var output = Render(block);
         const string expectedOutput = """
-                              do
-                                print("bruh")
-                                print("bruh")
-                                print("bruh")
-                                print("bruh")
-                                print("bruh")
-                              end
+                                      do
+                                        print("bruh")
+                                        print("bruh")
+                                        print("bruh")
+                                        print("bruh")
+                                        print("bruh")
+                                      end
 
-                              """;
-        
+                                      """;
+
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
-    
+
     [Fact]
     public void Renders_MultiLineLineComment()
     {
@@ -70,22 +74,22 @@ public class RenderingTest
                                       roblox-cs is the best!
                                       roblox-cs is the best!
                                       ]]
-                                      
+
                                       """;
-        
+
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
-    
+
     [Fact]
     public void Renders_SingleLineComment()
     {
         var comment = new SingleLineComment("roblox-cs is the best!");
         var output = Render(comment);
         const string expectedOutput = "-- roblox-cs is the best!";
-        
+
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
-    
+
     [Fact]
     public void Renders_IterativeFor()
     {
@@ -100,10 +104,10 @@ public class RenderingTest
                                       end
 
                                       """;
-        
+
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
-    
+
     [Fact]
     public void Renders_NumericFor()
     {
@@ -112,7 +116,12 @@ public class RenderingTest
         var maximum = new Literal("69");
         var increment = new Literal("-1");
         var body = new ExpressionStatement(AstUtility.PrintCall(new Literal("\"balls\"")));
-        var forStatement = new NumericFor(name, minimum, maximum, increment, body);
+        var forStatement = new NumericFor(name,
+                                          minimum,
+                                          maximum,
+                                          increment,
+                                          body);
+
         var output = Render(forStatement);
         const string expectedOutput = """
                                       for i = 420, 69, -1 do
@@ -120,10 +129,10 @@ public class RenderingTest
                                       end
 
                                       """;
-        
+
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
-    
+
     [Fact]
     public void Renders_Repeat()
     {
@@ -137,10 +146,10 @@ public class RenderingTest
                                       until balls
 
                                       """;
-        
+
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
-    
+
     [Fact]
     public void Renders_While()
     {
@@ -154,10 +163,10 @@ public class RenderingTest
                                       end
 
                                       """;
-        
+
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
-    
+
     [Fact]
     public void Renders_IfExpression()
     {
@@ -168,7 +177,7 @@ public class RenderingTest
         var output = Render(ifExpression);
         Assert.Equal("if runicIsCool then \"im tha best\" else \"im washed\"", output);
     }
-    
+
     [Fact]
     public void Renders_If()
     {
@@ -190,35 +199,36 @@ public class RenderingTest
                                         print("uhhhh")
                                       end
                                       """;
-        
+
         Assert.Equal(expectedOutput.Replace("\r", "").Trim(), output.Replace("\r", "").Trim());
     }
-    
+
     [Fact]
     public void Renders_EmptyTableInitializer()
     {
         var tableInitializer = new TableInitializer();
         var output = Render(tableInitializer);
-        
+
         Assert.Equal("{}", output);
     }
-    
+
     [Fact]
     public void Renders_ArrayTableInitializer()
     {
         var tableInitializer = new TableInitializer([new Literal("69"), new Literal("420"), AstUtility.String("abc")]);
         var output = Render(tableInitializer);
-        
+
         Assert.Equal("{69, 420, \"abc\"}", output);
     }
-    
+
     [Fact]
     public void Renders_DictionaryTableInitializer()
     {
-        var tableInitializer = new TableInitializer(
-            [new Literal("69"), new Literal("420"), AstUtility.String("abc")],
-            [new IdentifierName("foo"), new IdentifierName("bar"), AstUtility.String("baz")]
-        );
+        var tableInitializer = new TableInitializer([new Literal("69"), new Literal("420"), AstUtility.String("abc")],
+        [
+            new IdentifierName("foo"), new IdentifierName("bar"), AstUtility.String("baz")
+        ]);
+
         var output = Render(tableInitializer);
         const string expectedOutput = """
                                       {
@@ -227,44 +237,44 @@ public class RenderingTest
                                         ["baz"] = "abc"
                                       }
                                       """;
-        
+
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
-    
+
     [Fact]
     public void Renders_Calls()
     {
         var arguments = AstUtility.CreateArgumentList([new Literal("69"), new Literal("420"), AstUtility.String("abc")]);
         var call = new Call(new IdentifierName("bigMen"), arguments);
         var output = Render(call);
-        
+
         Assert.Equal("bigMen(69, 420, \"abc\")", output);
     }
-    
+
     [Fact]
     public void Renders_TypeOfCall()
     {
         var typeOfCall = new TypeOfCall(new IdentifierName("bigMen"));
         var output = Render(typeOfCall);
-        
+
         Assert.Equal("typeof(bigMen)", output);
     }
-    
+
     [Fact]
     public void Renders_IndexCall()
     {
         var indexCall = new IndexCall(new TypeRef("MyRecord"), new TypeRef("string"));
         var output = Render(indexCall);
-        
+
         Assert.Equal("index<MyRecord, string>", output);
     }
-    
+
     [Fact]
     public void Renders_KeyOfCall()
     {
         var keyOfCall = new KeyOfCall(new TypeRef("MyRecord"));
         var output = Render(keyOfCall);
-        
+
         Assert.Equal("keyof<MyRecord>", output);
     }
 
@@ -273,16 +283,16 @@ public class RenderingTest
     {
         var arguments = AstUtility.CreateArgumentList([new Literal("69"), new Literal("420"), AstUtility.String("abc")]);
         var output = Render(arguments);
-        
+
         Assert.Equal("(69, 420, \"abc\")", output);
     }
-    
+
     [Fact]
     public void Renders_BuiltInAttributes()
     {
         var attribute = new AttributeList([new BuiltInAttribute(new IdentifierName("native"))]);
         var output = Render(attribute);
-        
+
         Assert.Equal("@native\n", output.Replace("\r", ""));
     }
 
@@ -291,46 +301,42 @@ public class RenderingTest
     {
         var mappedType = new MappedType(new TypeRef("string"), new TypeRef("number"));
         var output = Render(mappedType);
-        
+
         Assert.Equal("{ [string]: number }", output);
     }
-    
+
     [Fact]
     public void Renders_InterfaceTypes()
     {
-        var interfaceType = new InterfaceType(
-            [new FieldType("myField", new TypeRef("string"), true)],
-            null,
-            false
-        );
-        
+        var interfaceType = new InterfaceType([new FieldType("myField", new TypeRef("string"), true)],
+                                              null,
+                                              false);
+
         var output = Render(interfaceType);
         const string expectedOutput = """
                                       {
                                         read myField: string;
                                       }
                                       """;
-        
+
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
-    
+
     [Fact]
     public void Renders_OptionalTypes()
     {
         var optionalType = new OptionalType(new TypeRef("boolean"));
         var output = Render(optionalType);
-        
+
         Assert.Equal("boolean?", output);
     }
 
     [Fact]
     public void Renders_FunctionTypes()
     {
-        var functionType = new FunctionType(
-            [new ParameterType("myParam", new TypeRef("number"))],
-            new TypeRef("boolean")
-        );
-        
+        var functionType = new FunctionType([new ParameterType("myParam", new TypeRef("number"))],
+                                            new TypeRef("boolean"));
+
         var output = Render(functionType);
         Assert.Equal("(myParam: number) -> boolean", output);
     }
@@ -340,10 +346,10 @@ public class RenderingTest
     {
         var arrayType = new ArrayType(new TypeRef("string"));
         var output = Render(arrayType);
-        
+
         Assert.Equal("{ string }", output);
     }
-    
+
     [Fact]
     public void Renders_TypeAliases()
     {
@@ -351,10 +357,10 @@ public class RenderingTest
         var value = new TypeRef("string");
         var typeAlias = new TypeAlias(name, value);
         var output = Render(typeAlias);
-        
+
         Assert.Equal("type MyType = string\n", output);
     }
-    
+
     [Fact]
     public void Renders_TypeCasts()
     {
@@ -362,38 +368,38 @@ public class RenderingTest
         var typeRef = new TypeRef("MyType");
         var typeCast = new TypeCast(value, typeRef);
         var output = Render(typeCast);
-        
+
         Assert.Equal("myValue :: MyType", output);
     }
-    
+
     [Fact]
     public void Renders_ElementAccess()
     {
         var elementAccess = new ElementAccess(new IdentifierName("a"), new Literal("123"));
         var output = Render(elementAccess);
-        
+
         Assert.Equal("a[123]", output);
     }
-    
+
     [Fact]
     public void Renders_MemberAccess()
     {
         var memberAccess = new MemberAccess(new IdentifierName("a"), new IdentifierName("b"));
         var output = Render(memberAccess);
-        
+
         Assert.Equal("a.b", output);
     }
-    
+
     [Fact]
     public void Renders_UnaryOperators()
     {
         var operand = new IdentifierName("isActive");
         var unaryOp = new UnaryOperator("not ", operand);
         var output = Render(unaryOp);
-        
+
         Assert.Equal("not isActive", output);
     }
-    
+
     [Fact]
     public void Renders_BinaryOperators()
     {
@@ -401,10 +407,10 @@ public class RenderingTest
         var right = new Literal("420");
         var binaryOp = new BinaryOperator(left, "+", right);
         var output = Render(binaryOp);
-        
+
         Assert.Equal("69 + 420", output);
     }
-    
+
     [Fact]
     public void Renders_Assignment()
     {
@@ -414,46 +420,46 @@ public class RenderingTest
         var output = Render(assignment);
         Assert.Equal("a[69] = 420\n", output);
     }
-    
+
     [Fact]
     public void Renders_QualifiedName()
     {
         const string result = "Abc:myMethod";
         var name = new QualifiedName(new IdentifierName("Abc"), new IdentifierName("myMethod"), ':');
         var output = Render(name);
-        
+
         Assert.Equal(result, output);
         Assert.Equal(result, name.ToString());
     }
-    
+
     [Fact]
     public void Renders_GenericName()
     {
         const string result = "Abc<T, U>";
         var name = new GenericName("Abc", ["T", "U"]);
         var output = Render(name);
-        
+
         Assert.Equal(result, output);
         Assert.Equal(result, name.ToString());
     }
-    
+
     [Fact]
     public void Renders_IdentifierName()
     {
         const string text = "Abc";
         var name = new IdentifierName(text);
         var output = Render(name);
-        
+
         Assert.Equal(text, output);
         Assert.Equal(text, name.ToString());
     }
-    
+
     [Fact]
     public void Renders_Parenthesized()
     {
         var parenthesized = new Parenthesized(AstUtility.String("bruh"));
         var output = Render(parenthesized);
-        
+
         Assert.Equal("(\"bruh\")", output);
     }
 
@@ -461,15 +467,13 @@ public class RenderingTest
     public void Renders_InterpolatedStrings()
     {
         var stringInterpolation = new InterpolatedString([
-            new Literal("hello, "),
-            new Interpolation(new IdentifierName("name")),
-            new Literal("!"),
+            new Literal("hello, "), new Interpolation(new IdentifierName("name")), new Literal("!"),
         ]);
-        
+
         var output = Render(stringInterpolation);
         Assert.Equal("`hello, {name}!`", output);
     }
-    
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -482,7 +486,7 @@ public class RenderingTest
         var output = Render(variable);
         Assert.Equal($"{(isLocal ? "local " : "")}abc: number = 69\n", output);
     }
-    
+
     [Fact]
     public void Renders_VariableLists()
     {
@@ -498,12 +502,12 @@ public class RenderingTest
                                       local abc: number = 69
                                       local abc: number = 69
                                       local abc: number = 69
-                                      
+
                                       """;
-        
+
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
-    
+
     [Fact]
     public void Renders_ParametersWithDefault()
     {
@@ -514,7 +518,12 @@ public class RenderingTest
         var body = new Block([]);
         var parameter = new Parameter(parameterIdentifier, false, parameterDefault, parameterType);
         var parameters = new ParameterList([parameter]);
-        var function = new Function(identifier, true, parameters, null, body);
+        var function = new Function(identifier,
+                                    true,
+                                    parameters,
+                                    null,
+                                    body);
+
         var output = Render(function);
         const string expectedOutput = """
                                       local function myFunction(x: number?)
@@ -524,7 +533,7 @@ public class RenderingTest
                                       end
 
                                       """;
-        
+
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
 
@@ -537,17 +546,22 @@ public class RenderingTest
         var body = new Block([]);
         var parameter = new Parameter(parameterIdentifier, false, null, parameterType);
         var parameters = new ParameterList([parameter]);
-        var function = new Function(identifier, true, parameters, null, body);
+        var function = new Function(identifier,
+                                    true,
+                                    parameters,
+                                    null,
+                                    body);
+
         var output = Render(function);
         const string expectedOutput = """
                                       local function myFunction(x: number)
                                       end
 
                                       """;
-        
+
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
-    
+
     [Fact]
     public void Renders_VarargParameters()
     {
@@ -557,7 +571,12 @@ public class RenderingTest
         var body = new Block([]);
         var parameter = new Parameter(parameterIdentifier, true, null, parameterType);
         var parameters = new ParameterList([parameter]);
-        var function = new Function(identifier, true, parameters, null, body);
+        var function = new Function(identifier,
+                                    true,
+                                    parameters,
+                                    null,
+                                    body);
+
         var output = Render(function);
         const string expectedOutput = """
                                       local function myFunction(...: number)
@@ -565,7 +584,7 @@ public class RenderingTest
                                       end
 
                                       """;
-        
+
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
 
@@ -576,14 +595,14 @@ public class RenderingTest
         var function = new AnonymousFunction(new ParameterList([]), new TypeRef("number"), body);
         var output = Render(function);
         const string expectedOutput = """
-                              function(): number
-                                return 69
-                              end
-                              """;
-        
+                                      function(): number
+                                        return 69
+                                      end
+                                      """;
+
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
-    
+
     [Theory]
     [InlineData(true)]
     [InlineData(false)]
@@ -592,15 +611,20 @@ public class RenderingTest
         var identifier = new IdentifierName("myFunction");
         var body = new Block([new Return(new Literal("69"))]);
         var returnType = new TypeRef("number");
-        var function = new Function(identifier, isLocal, new ParameterList([]), returnType, body);
+        var function = new Function(identifier,
+                                    isLocal,
+                                    new ParameterList([]),
+                                    returnType,
+                                    body);
+
         var output = Render(function);
         var expectedOutput = $"""
                               {(isLocal ? "local " : "")}function myFunction(): number
                                 return 69
                               end
-                              
+
                               """;
-        
+
         Assert.Equal(expectedOutput.Replace("\r", ""), output.Replace("\r", ""));
     }
 
@@ -609,7 +633,7 @@ public class RenderingTest
     {
         var @continue = new Continue();
         var output = Render(@continue);
-        
+
         Assert.Equal("continue\n", output.Replace("\r", ""));
     }
 
@@ -618,7 +642,7 @@ public class RenderingTest
     {
         var @break = new Break();
         var output = Render(@break);
-        
+
         Assert.Equal("break\n", output.Replace("\r", ""));
     }
 
@@ -626,6 +650,7 @@ public class RenderingTest
     {
         var writer = new LuauWriter();
         node.Render(writer);
+
         return writer.ToString();
     }
 }
