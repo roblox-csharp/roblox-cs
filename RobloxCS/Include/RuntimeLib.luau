@@ -55,6 +55,16 @@ function CS.is(object: any, class: Class | string): boolean
 	return false
 end
 
+function CS.unpackTuple<K, T>(tuple: { [K & string]: T }): ...T
+	local list = {}
+	local i: number
+	for k, v in tuple do
+		i = tonumber(k:sub(5)) or error(`Invalid tuple index: {k}`)
+		list[i] = v
+	end
+	return table.unpack(list)
+end
+
 -- Enumerator class
 type EnumerationFunction<T> = () -> { () -> T }
 export type EnumeratorClass<T> = IClass<(items: { T } | EnumerationFunction<T>) -> IEnumerator<T>>;

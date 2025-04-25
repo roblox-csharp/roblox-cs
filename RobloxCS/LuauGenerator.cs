@@ -126,6 +126,12 @@ public sealed class LuauGenerator(
 
     public override OptionalType VisitNullableType(NullableTypeSyntax node) => new(AstUtility.CreateTypeRef(Visit<Name>(node.ElementType).ToString())!);
 
+    public override TableInitializer VisitTupleExpression(TupleExpressionSyntax node)
+    {
+        var expressions = node.Arguments.Select(argument => Visit<Expression>(argument.Expression)).ToList();
+        return new TableInitializer(expressions, expressions.Select((_, index) => new IdentifierName($"Item{index + 1}")).ToList<Expression>());
+    }
+
     public override IdentifierName VisitQueryExpression(QueryExpressionSyntax node)
     {
         List<Statement> statements = [];
@@ -912,7 +918,11 @@ public sealed class LuauGenerator(
 
         var initializerType = _semanticModel.GetTypeInfo(node.Right).Type;
         var value = Visit<Expression>(node.Right);
-        if (node.Left is DeclarationExpressionSyntax declarationExpression && initializerType is { ContainingNamespace.Name: "Roblox", Name: "LuaTuple" })
+        bool isCSharpTuple;
+
+        if (node.Left is DeclarationExpressionSyntax declarationExpression
+         && ((isCSharpTuple = initializerType is { ContainingNamespace.Name: "System", Name: "ValueTuple" })
+          || initializerType is { ContainingNamespace.Name: "Roblox", Name: "LuaTuple" }))
         {
             var designation = Visit<BaseVariable>(declarationExpression.Designation);
             var names = designation switch
@@ -922,7 +932,8 @@ public sealed class LuauGenerator(
                 _ => []
             };
 
-            return new MultipleVariable(names, designation.IsLocal, [value], designation.Type);
+            var finalValue = isCSharpTuple ? AstUtility.CSCall("unpackTuple", value) : value;
+            return new MultipleVariable(names, designation.IsLocal, [finalValue], designation.Type);
         }
 
         var mappedOperator = StandardUtility.GetMappedOperator(node.OperatorToken.Text);
