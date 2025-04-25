@@ -681,35 +681,42 @@ public sealed class LuauGenerator(
     {
         var iterableSymbol = _semanticModel.GetTypeInfo(node.Expression).Type;
         var isList = StandardUtility.DoesTypeInheritFrom(iterableSymbol, "Array")
-                  || StandardUtility.DoesTypeInheritFrom(iterableSymbol, "List");
+                  || StandardUtility.DoesTypeInheritFrom(iterableSymbol, "IEnumerable");
 
-        List<IdentifierName> names = [AstUtility.CreateSimpleName<IdentifierName>(node)];
+        occupiedIdentifiersStack.Push();
+        List<IdentifierName> names = [occupiedIdentifiersStack.AddIdentifier(node.Identifier)];
         if (isList) names = names.Prepend(AstUtility.DiscardName).ToList();
 
         var iterable = Visit<Expression>(node.Expression);
         var body = Visit<Statement>(node.Statement);
+        occupiedIdentifiersStack.Pop();
 
         return new For(names, iterable, body);
     }
 
     public override For VisitForEachVariableStatement(ForEachVariableStatementSyntax node)
     {
-        var iteratorType = _semanticModel.GetTypeInfo(node.Expression).Type;
-        if (iteratorType is INamedTypeSymbol { IsGenericType: true, TypeArguments: { Length: > 0 } typeArguments }
-         && StandardUtility.DoesTypeInheritFrom(iteratorType, "IEnumerable"))
-            iteratorType = typeArguments.First();
+        var iterableSymbol = _semanticModel.GetTypeInfo(node.Expression).Type;
+        var isList = StandardUtility.DoesTypeInheritFrom(iterableSymbol, "Array")
+                  || StandardUtility.DoesTypeInheritFrom(iterableSymbol, "IEnumerable");
 
+        if (isList && iterableSymbol is INamedTypeSymbol { IsGenericType: true, TypeArguments: { Length: > 0 } typeArguments })
+            iterableSymbol = typeArguments.First();
+
+        occupiedIdentifiersStack.Push();
         var variableNode = Visit<Statement>(node.Variable);
         var names = variableNode switch
         {
             Variable variable => [variable.Name],
-            MultipleVariable multipleVariable when iteratorType is { ContainingNamespace.Name: "Roblox", Name: "LuaTuple" } =>
+            MultipleVariable multipleVariable when iterableSymbol is { ContainingNamespace.Name: "Roblox", Name: "LuaTuple" } =>
                 multipleVariable.Names.ToList(),
             _ => []
         };
 
         var iterator = Visit<Expression>(node.Expression);
         var body = Visit<Statement>(node.Statement);
+        occupiedIdentifiersStack.Pop();
+        
         return new For(names, iterator, body);
     }
 

@@ -11,21 +11,27 @@ public static class AstUtility
 {
     public static readonly IdentifierName DiscardName = new("_");
 
+    public static IdentifierName Vararg { get; } = new("...");
+
+    public static Literal False { get; } = new("false");
+
+    public static Literal True { get; } = new("true");
+
+    public static Literal Nil { get; } = new("nil");
+
+    public static TypeRef AnyType { get; } = new("any");
+
     /// <summary>Adds one to the expression</summary>
-    public static Expression AddOne(Expression expression)
-    {
-        return expression is Literal literal && int.TryParse(literal.ValueText, out var value)
+    public static Expression AddOne(Expression expression) =>
+        expression is Literal literal && int.TryParse(literal.ValueText, out var value)
             ? new Literal((value + 1).ToString())
             : new BinaryOperator(expression, "+", new Literal("1"));
-    }
 
     /// <summary>Subtracts one from the expression</summary>
-    public static Expression SubtractOne(Expression expression)
-    {
-        return expression is Literal literal && int.TryParse(literal.ValueText, out var value)
+    public static Expression SubtractOne(Expression expression) =>
+        expression is Literal literal && int.TryParse(literal.ValueText, out var value)
             ? new Literal((value - 1).ToString())
             : new BinaryOperator(expression, "-", new Literal("1"));
-    }
 
     public static TableInitializer CreateTypeInfo(Type type) => CreateTypeInfo(type, false);
 
@@ -219,8 +225,8 @@ public static class AstUtility
     private static TableInitializer CreateMethodInfo(MethodInfo method)
     {
         var methodBase = CreateMethodBase(method);
-        List<Expression> keys = [new IdentifierName("ReturnType"), new IdentifierName("ReturnParameter"),];
-        List<Expression> values = [CreateTypeInfo(method.ReturnType), CreateParameterInfo(method.ReturnParameter),];
+        List<Expression> keys = [new IdentifierName("ReturnType"), new IdentifierName("ReturnParameter")];
+        List<Expression> values = [CreateTypeInfo(method.ReturnType), CreateParameterInfo(method.ReturnParameter)];
 
         return TableInitializer.Union(methodBase, new TableInitializer(values, keys));
     }
@@ -240,7 +246,7 @@ public static class AstUtility
             new IdentifierName("RawDefaultValue"),
             new IdentifierName("Position"),
             new IdentifierName("ParameterType"),
-            new IdentifierName("Member"),
+            new IdentifierName("Member")
         ];
 
         List<Expression> values =
@@ -256,7 +262,7 @@ public static class AstUtility
             CreateLuauValue(parameter.RawDefaultValue),
             new Literal(parameter.Position.ToString()),
             CreateTypeInfo(parameter.ParameterType),
-            CreateMemberInfo(parameter.Member),
+            CreateMemberInfo(parameter.Member)
         ];
 
         return new TableInitializer(values, keys);
@@ -313,7 +319,7 @@ public static class AstUtility
             new Literal(method.ContainsGenericParameters.ToString().ToLower()),
             new Literal(((int)method.CallingConvention).ToString()),
             new Literal(((int)method.MethodImplementationFlags).ToString()),
-            new Literal(((int)method.Attributes).ToString()),
+            new Literal(((int)method.Attributes).ToString())
         ];
 
         return TableInitializer.Union(memberInfo, new TableInitializer(values, keys));
@@ -324,7 +330,7 @@ public static class AstUtility
     {
         List<Expression> keys =
         [
-            new IdentifierName("Name"), new IdentifierName("MemberType"), new IdentifierName("IsCollectible"),
+            new IdentifierName("Name"), new IdentifierName("MemberType"), new IdentifierName("IsCollectible")
 
             // new IdentifierName("DeclaringType"),
             // new IdentifierName("ReflectedType"),
@@ -332,7 +338,7 @@ public static class AstUtility
 
         List<Expression> values =
         [
-            new Literal('"' + member.Name + '"'), new Literal(((int)member.MemberType).ToString().ToLower()), new Literal(member.IsCollectible.ToString().ToLower()),
+            new Literal('"' + member.Name + '"'), new Literal(((int)member.MemberType).ToString().ToLower()), new Literal(member.IsCollectible.ToString().ToLower())
 
             // member.DeclaringType != null ? CreateTypeInfo(member.DeclaringType) : Nil,
             // member.ReflectedType != null ? CreateTypeInfo(member.ReflectedType) : Nil,
@@ -343,25 +349,23 @@ public static class AstUtility
 
     private static TableInitializer CreateCustomAttributeData(CustomAttributeData data)
     {
-        List<Expression> keys = [new IdentifierName("AttributeType"),];
+        List<Expression> keys = [new IdentifierName("AttributeType")];
         List<Expression> values = [CreateMemberInfo(data.AttributeType)];
 
         return new TableInitializer(values, keys);
     }
 
-    public static Expression CreateLuauValue(object? value)
-    {
-        return value switch
+    public static Expression CreateLuauValue(object? value) =>
+        value switch
         {
             null => Nil,
             bool b => b ? True : False,
             string or char => new Literal('"' + value.ToString() + '"'),
             _ => string.IsNullOrEmpty(value.ToString()) ? Nil : new Literal(value.ToString()!)
         };
-    }
 
     /// <summary>
-    /// CS.defineGlobal(name, "name") or parentName.name = "name"
+    ///     CS.defineGlobal(name, "name") or parentName.name = "name"
     /// </summary>
     public static Statement DefineGlobalOrMember(SyntaxNode node, SimpleName name)
     {
@@ -387,7 +391,7 @@ public static class AstUtility
     public static Call Is(Expression value, Expression type) => CSCall("is", value, type);
 
     /// <summary>
-    /// Creates a call to a table library method
+    ///     Creates a call to a table library method
     /// </summary>
     public static Call TableCall(string methodName, params Expression[] arguments) =>
         new(new MemberAccess(new IdentifierName("table"),
@@ -395,7 +399,7 @@ public static class AstUtility
             CreateArgumentList(arguments.ToList()));
 
     /// <summary>
-    /// Creates a call to a CS library method
+    ///     Creates a call to a CS library method
     /// </summary>
     public static Call CSCall(string methodName, params Expression[] arguments) =>
         new(new MemberAccess(new IdentifierName("CS"),
@@ -425,7 +429,7 @@ public static class AstUtility
             CreateArgumentList(args));
 
     /// <summary>
-    /// Creates a call to a bit32 library method
+    ///     Creates a call to a bit32 library method
     /// </summary>
     public static Call Bit32Call(string methodName, params Expression[] arguments) =>
         new(new MemberAccess(new IdentifierName("bit32"),
@@ -445,9 +449,10 @@ public static class AstUtility
     }
 
     /// <summary>
-    /// Returns the full name of a C# node's parent.
-    /// This method is meant for getting the absolute location of classes, enums, etc.
-    /// For example a class under the namespace "Some.Namespace" would return a <see cref="RobloxCS.Luau.MemberAccess"/> that transpiles to "Some.Namespace".
+    ///     Returns the full name of a C# node's parent.
+    ///     This method is meant for getting the absolute location of classes, enums, etc.
+    ///     For example a class under the namespace "Some.Namespace" would return a <see cref="RobloxCS.Luau.MemberAccess" />
+    ///     that transpiles to "Some.Namespace".
     /// </summary>
     public static Expression? GetFullParentName(SyntaxNode node)
     {
@@ -478,7 +483,8 @@ public static class AstUtility
             new Block([new Assignment(name, initializer)]));
 
     /// <summary>
-    /// Takes a <see cref="RobloxCS.Luau.MemberAccess"/> and converts it into a <see cref="QualifiedName"/>, given that <see cref="RobloxCS.Luau.MemberAccess.Expression"/> inherits from <see cref="Name"/>
+    ///     Takes a <see cref="RobloxCS.Luau.MemberAccess" /> and converts it into a <see cref="QualifiedName" />, given that
+    ///     <see cref="RobloxCS.Luau.MemberAccess.Expression" /> inherits from <see cref="Name" />
     /// </summary>
     public static QualifiedName QualifiedNameFromMemberAccess(MemberAccess memberAccess)
     {
@@ -490,7 +496,7 @@ public static class AstUtility
     }
 
     /// <summary>
-    /// Creates a discard variable if <see cref="valueParent"/> is an <see cref="ExpressionStatementSyntax"/>
+    ///     Creates a discard variable if <see cref="valueParent" /> is an <see cref="ExpressionStatementSyntax" />
     /// </summary>
     public static Node DiscardVariableIfExpressionStatement(SyntaxNode node, Node value, SyntaxNode? valueParent) =>
         valueParent is ExpressionStatementSyntax
@@ -509,7 +515,7 @@ public static class AstUtility
         };
 
     /// <summary>
-    /// Takes a Name and converts it into a non-generic Name
+    ///     Takes a Name and converts it into a non-generic Name
     /// </summary>
     public static Name GetNonGenericName(Name name) =>
         name switch
@@ -520,7 +526,7 @@ public static class AstUtility
         };
 
     /// <summary>
-    /// Takes a QualifiedName and converts it into a non-generic QualifiedName
+    ///     Takes a QualifiedName and converts it into a non-generic QualifiedName
     /// </summary>
     public static QualifiedName GetNonGenericName(QualifiedName qualifiedName)
     {
@@ -532,7 +538,7 @@ public static class AstUtility
     }
 
     /// <summary>
-    /// Takes a SimpleName (which GenericName extends from) and converts it into a standard IdentifierName
+    ///     Takes a SimpleName (which GenericName extends from) and converts it into a standard IdentifierName
     /// </summary>
     public static IdentifierName GetNonGenericName(SimpleName simpleName)
     {
@@ -559,38 +565,21 @@ public static class AstUtility
     }
 
     public static TNameNode CreateSimpleName<TNameNode>(SyntaxNode node, bool bypassReserved = false, bool noGenerics = false)
-        where TNameNode : SimpleName
-    {
-        return (TNameNode)CreateSimpleName(node, bypassReserved, noGenerics);
-    }
+        where TNameNode : SimpleName =>
+        (TNameNode)CreateSimpleName(node, bypassReserved, noGenerics);
 
     public static TNameNode CreateSimpleName<TNameNode>(SyntaxNode node,
                                                         string name,
                                                         bool bypassReserved = false,
                                                         bool noGenerics = false)
-        where TNameNode : SimpleName
-    {
-        return (TNameNode)CreateSimpleName(node, name, bypassReserved, noGenerics);
-    }
+        where TNameNode : SimpleName =>
+        (TNameNode)CreateSimpleName(node, name, bypassReserved, noGenerics);
 
-    public static SimpleName CreateSimpleName(SyntaxNode node, bool bypassReserved = false, bool noGenerics = false)
-    {
-        return CreateSimpleName(node,
-                                string.Join("", StandardUtility.GetNamesFromNode(node, noGenerics)),
-                                bypassReserved,
-                                noGenerics);
-    }
-
-    public static bool CheckReservedName(SyntaxNode node, string name) => CheckReservedName(node.GetFirstToken(), name);
-
-    public static bool CheckReservedName(SyntaxToken token, string name)
-    {
-        var reserved = RESERVED_IDENTIFIERS.Contains(name);
-
-        if (reserved) throw Logger.UnsupportedError(token, $"Using '{name}' as an identifier", useIs: true, useYet: false);
-
-        return reserved;
-    }
+    public static SimpleName CreateSimpleName(SyntaxNode node, bool bypassReserved = false, bool noGenerics = false) =>
+        CreateSimpleName(node,
+                         string.Join("", StandardUtility.GetNamesFromNode(node, noGenerics)),
+                         bypassReserved,
+                         noGenerics);
 
     public static SimpleName CreateSimpleName(SyntaxNode node, string name, bool bypassReserved = false, bool noGenerics = false)
     {
@@ -601,6 +590,17 @@ public static class AstUtility
         return !noGenerics && name.Contains('<') && name.Contains('>')
             ? new GenericName(text.Split('<').First(), StandardUtility.ExtractTypeArguments(text))
             : new IdentifierName(text);
+    }
+
+    public static bool CheckReservedName(SyntaxNode node, string name) => CheckReservedName(node.GetFirstToken(), name);
+
+    public static bool CheckReservedName(SyntaxToken token, string name)
+    {
+        var reserved = RESERVED_IDENTIFIERS.Contains(name);
+
+        if (reserved) throw Logger.UnsupportedError(token, $"Using '{name}' as an identifier", true, false);
+
+        return reserved;
     }
 
     public static TypeRef? CreateTypeRef(string? typePath)
@@ -641,7 +641,7 @@ public static class AstUtility
 
         if (arrayMatch.Success) return new ArrayType(CreateTypeRef(arrayMatch.Groups[1].Value.Trim())!);
 
-        return new TypeRef(mappedTypePath, rawPath: true);
+        return new TypeRef(mappedTypePath, true);
     }
 
     private static List<ParameterType> ParseFunctionArgs(string input)
@@ -702,14 +702,4 @@ public static class AstUtility
     public static TypeRef? CreateTypeRef(TypeSyntax? type) => CreateTypeRef(type?.ToString());
 
     public static Literal String(string text) => new($"\"{text}\"");
-
-    public static IdentifierName Vararg { get; } = new("...");
-
-    public static Literal False { get; } = new("false");
-
-    public static Literal True { get; } = new("true");
-
-    public static Literal Nil { get; } = new("nil");
-
-    public static TypeRef AnyType { get; } = new("any");
 }
