@@ -1715,19 +1715,23 @@ public sealed class LuauGenerator(
     
     private void TryConvertGeneratorFunction(BlockSyntax? block, TypeRef? returnType, Block? luauBlock)
     {
-        var generatorFunctionReturn = CreateGeneratorFunctionReturn(returnType, block);
+        var generatorFunctionReturn = CreateGeneratorFunctionReturn(block);
         if (generatorFunctionReturn == null || luauBlock == null) return;
         
         luauBlock.Statements.Clear();
         luauBlock.Statements.Add(generatorFunctionReturn);
+        if (returnType == null) return;
+        
+        var typeArguments = StandardUtility.ExtractTypeArguments(returnType.Path).ConvertAll(StandardUtility.GetMappedType);
+        returnType.Path = "CS.IEnumerator<" + string.Join(", ", typeArguments) + ">";
     }
     
-    private Return? CreateGeneratorFunctionReturn(TypeRef? returnType, BlockSyntax? block)
+    private Return? CreateGeneratorFunctionReturn(BlockSyntax? block)
     {
         if (block == null) return null;
         
         var yields = CollectYields(block);
-        if (!IsGeneratorFunction(returnType, yields)) return null;
+        if (yields.Count == 0) return null;
 
         var yieldStatements = block.Statements.OfType<YieldStatementSyntax>().ToList();
         var yieldReturns = yieldStatements
@@ -1770,11 +1774,6 @@ public sealed class LuauGenerator(
                     new Return(new TableInitializer(enumerationFunctions))
                 ]))));
     }
-
-    private static bool IsGeneratorFunction(TypeRef? returnType, List<YieldStatementSyntax> yields) =>
-        returnType != null
-        && returnType.Path.StartsWith("CS.IEnumerator")
-        && yields.Count > 0;
 
     private static List<YieldStatementSyntax> CollectYields(BlockSyntax block) =>
         block.Statements

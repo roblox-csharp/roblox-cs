@@ -56,7 +56,8 @@ function CS.is(object: any, class: Class | string): boolean
 end
 
 -- Enumerator class
-export type EnumeratorClass<T> = IClass<(items: { T }) -> IEnumerator<T>>;
+type EnumerationFunction<T> = () -> { () -> T }
+export type EnumeratorClass<T> = IClass<(items: { T } | EnumerationFunction<T>) -> IEnumerator<T>>;
 export type IEnumerator<T> = EnumeratorClass<T> & {
 	_index: number;
 	read _isAdvanced: boolean;
@@ -68,18 +69,25 @@ type Enumerator = IEnumerator<unknown>
 local Enumerator
 do
 	local className = "Enumerator"
-	Enumerator = setmetatable({}, {
+	Enumerator = (setmetatable({}, {
 		__tostring = function(): string
 			return className
 		end
-	}) :: Enumerator
+	}) :: any) :: Enumerator
 	Enumerator.__index = Enumerator
 	Enumerator.__className = className
 
-	function Enumerator.new<T>(items: { T } | (() -> { () -> T })): IEnumerator<T>
+	function Enumerator.__iter(self: Enumerator)
+		return function()
+			self:MoveNext()
+			return self.Current
+		end
+	end
+
+	function Enumerator.new<T>(items: { T } | EnumerationFunction<T>): IEnumerator<T>
 		local isAdvanced = typeof(items) == "function"
 		return (setmetatable({
-			_items = if isAdvanced then items() else items,
+			_items = if isAdvanced then (items :: EnumerationFunction<T>)() else items,
 			_isAdvanced = isAdvanced,
 			_index = 0
 		}, Enumerator) :: any) :: IEnumerator<T>
@@ -90,11 +98,11 @@ do
 		local gotValue = self._index <= #self._items
 		local item = if gotValue then self._items[self._index] else nil
 		self.Current = if self._isAdvanced and typeof(item) == "function" then
-				item(function()
-					self._index = #self._items + 1
-				end)
+			item(function()
+				self._index = #self._items + 1
+			end)
 			else
-				item
+			item
 		return gotValue
 	end
 
@@ -123,11 +131,11 @@ export type Exception = ExceptionClass & {
 
 local Exception
 do
-	Exception = setmetatable({}, {
-		__tostring = function(self: Exception): string
-			return `{self.__className}: {self.Message}`
-		end
-	}) :: Exception
+	Exception = (setmetatable({}, {
+        __tostring = function(self: Exception): string
+            return `{self.__className}: {self.Message}`
+        end
+    }) :: any) :: Exception
 	Exception.__index = Exception
 	Exception.__className = "Exception"
 
