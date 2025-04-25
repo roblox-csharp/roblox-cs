@@ -7,6 +7,44 @@ namespace RobloxCS.Tests;
 public class GenerationTest : Generation
 {
     [Fact]
+    public void Generates_LuaTupleDestructuring_InForEach()
+    {
+        var ast = Generate("foreach (var (i, v) in pairs<int>([]) { }");
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<For>(statement);
+
+        var forStatement = (For)statement;
+        Assert.Equal(2, forStatement.Names.Count);
+        
+        var firstName = forStatement.Names[0];
+        var secondName = forStatement.Names[1];
+        Assert.Equal("i", firstName.ToString());
+        Assert.Equal("v", secondName.ToString());
+    }
+    
+    [Fact]
+    public void Generates_LuaTupleDestructuring()
+    {
+        var ast = Generate("var (success, result) = pcall(() => { })");
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<MultipleVariable>(statement);
+
+        var variable = (MultipleVariable)statement;
+        Assert.Single(variable.Initializers);
+        Assert.IsType<Call>(variable.Initializers.First());
+        Assert.Equal(2, variable.Names.Count);
+        
+        var enumerator = variable.Names.GetEnumerator();
+        enumerator.MoveNext();
+        var firstName = enumerator.Current;
+        enumerator.MoveNext();
+        var secondName = enumerator.Current;
+        
+        Assert.Equal("success", firstName.ToString());
+        Assert.Equal("result", secondName.ToString());
+    }
+    
+    [Fact]
     public void Generates_TupleDestructuring()
     {
         var ast = Generate("var (a, b, c) = (1, 2, 3)");
