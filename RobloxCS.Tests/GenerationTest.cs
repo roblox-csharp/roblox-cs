@@ -7,6 +7,83 @@ namespace RobloxCS.Tests;
 public class GenerationTest : Generation
 {
     [Fact]
+    public void Generates_MethodOverloads()
+    {
+        const string source = """
+                              var abc = new Abc();
+                              abc.Method("abc");
+                              abc.Method(true);
+                              abc.Method(69);
+
+                              class Abc
+                              {
+                                  public void Method(string a)
+                                  {
+                                  }
+                              
+                                  public void Method(bool a)
+                                  {
+                                  }
+                              
+                                  public void Method(int a)
+                                  {
+                                  }
+                              }
+                              """;
+
+        var ast = Generate(source);
+        var statements = ast.Statements.Skip(1).ToList();
+        Assert.NotEmpty(statements);
+        Assert.IsType<Block>(statements.First());
+
+        var classBlock = (Block)statements.First();
+        Assert.Equal(5, classBlock.Statements.Count);
+
+        var secondClassStatement = classBlock.Statements[1];
+        Assert.IsType<ScopedBlock>(secondClassStatement);
+
+        var classScope = (ScopedBlock)secondClassStatement;
+        var methodDeclarations = classScope.Statements.TakeLast(3).ToList();
+        var firstStatement = methodDeclarations[0];
+        var secondStatement = methodDeclarations[1];
+        var thirdStatement = methodDeclarations[2];
+        Assert.IsType<Function>(firstStatement);
+        Assert.IsType<Function>(secondStatement);
+        Assert.IsType<Function>(thirdStatement);
+
+        var firstMethod = (Function)firstStatement;
+        var secondMethod = (Function)secondStatement;
+        var thirdMethod = (Function)thirdStatement;
+        Assert.Equal("Abc:Method_impl1", firstMethod.Name.ToString());
+        Assert.Equal("Abc:Method_impl2", secondMethod.Name.ToString());
+        Assert.Equal("Abc:Method_impl3", thirdMethod.Name.ToString());
+
+        var expressions = statements
+                          .Skip(2)
+                          .OfType<ExpressionStatement>()
+                          .Select(e => e.Expression)
+                          .ToList();
+
+        expressions.ForEach(e => Assert.IsType<Call>(e));
+        var stringCall = (Call)expressions[0];
+        var boolCall = (Call)expressions[1];
+        var intCall = (Call)expressions[2];
+        Assert.IsType<MemberAccess>(stringCall.Callee);
+        Assert.IsType<MemberAccess>(boolCall.Callee);
+        Assert.IsType<MemberAccess>(intCall.Callee);
+
+        var first = (MemberAccess)stringCall.Callee;
+        var second = (MemberAccess)boolCall.Callee;
+        var third = (MemberAccess)intCall.Callee;
+        Assert.IsType<IdentifierName>(first.Name);
+        Assert.IsType<IdentifierName>(second.Name);
+        Assert.IsType<IdentifierName>(third.Name);
+        Assert.Equal("Method_impl1", first.Name.ToString());
+        Assert.Equal("Method_impl2", second.Name.ToString());
+        Assert.Equal("Method_impl3", third.Name.ToString());
+    }
+
+    [Fact]
     public void Generates_LuaTupleDestructuring_InForEach()
     {
         var ast = Generate("foreach (var (i, v) in pairs<int>([]) { }");
@@ -15,13 +92,13 @@ public class GenerationTest : Generation
 
         var forStatement = (For)statement;
         Assert.Equal(2, forStatement.Names.Count);
-        
+
         var firstName = forStatement.Names[0];
         var secondName = forStatement.Names[1];
         Assert.Equal("i", firstName.ToString());
         Assert.Equal("v", secondName.ToString());
     }
-    
+
     [Fact]
     public void Generates_LuaTupleDestructuring()
     {
@@ -33,17 +110,17 @@ public class GenerationTest : Generation
         Assert.Single(variable.Initializers);
         Assert.IsType<Call>(variable.Initializers.First());
         Assert.Equal(2, variable.Names.Count);
-        
+
         var enumerator = variable.Names.GetEnumerator();
         enumerator.MoveNext();
         var firstName = enumerator.Current;
         enumerator.MoveNext();
         var secondName = enumerator.Current;
-        
+
         Assert.Equal("success", firstName.ToString());
         Assert.Equal("result", secondName.ToString());
     }
-    
+
     [Fact]
     public void Generates_TupleDestructuring()
     {
@@ -55,19 +132,19 @@ public class GenerationTest : Generation
         Assert.Single(variable.Initializers);
         Assert.IsType<Call>(variable.Initializers.First());
         Assert.Equal(3, variable.Names.Count);
-        
+
         var unpackCall = (Call)variable.Initializers.First();
         Assert.IsType<MemberAccess>(unpackCall.Callee);
-        
+
         var memberAccess = (MemberAccess)unpackCall.Callee;
         Assert.IsType<IdentifierName>(memberAccess.Expression);
         Assert.IsType<IdentifierName>(memberAccess.Name);
         Assert.Equal("CS", memberAccess.Expression.ToString());
         Assert.Equal("unpackTuple", memberAccess.Name.ToString());
-            
+
         Assert.Single(unpackCall.ArgumentList.Arguments);
         Assert.IsType<TableInitializer>(unpackCall.ArgumentList.Arguments.First().Expression);
-        
+
         var enumerator = variable.Names.GetEnumerator();
         enumerator.MoveNext();
         var firstName = enumerator.Current;
@@ -75,12 +152,12 @@ public class GenerationTest : Generation
         var secondName = enumerator.Current;
         enumerator.MoveNext();
         var thirdName = enumerator.Current;
-        
+
         Assert.Equal("a", firstName.ToString());
         Assert.Equal("b", secondName.ToString());
         Assert.Equal("c", thirdName.ToString());
     }
-    
+
     [Fact]
     public void Generates_Tuples()
     {
