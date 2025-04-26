@@ -90,10 +90,11 @@ public sealed class LuauGenerator(
         void visitMember(MemberDeclarationSyntax member)
         {
             var (statement, prereqStatements) = transformState.Capture(() => Visit<Statement?>(member));
+            if (statement == null)
+                throw Logger.CompilerError($"Unhandled syntax node within {member.Kind()}", node);
 
-            if (statement == null) throw Logger.CompilerError($"Unhandled syntax node within {member.Kind()}", node);
-
-            if (prereqStatements.Count > 0) result.AddRange(prereqStatements);
+            if (prereqStatements.Count > 0)
+                result.AddRange(prereqStatements);
 
             result.Add(statement);
         }
@@ -320,8 +321,7 @@ public sealed class LuauGenerator(
     public override Statement? VisitFieldDeclaration(FieldDeclarationSyntax node)
     {
         var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node);
-
-        if (!IsStatic(node) || classDeclaration == null) return null;
+        if (!IsStatic(node) || HasSyntax(node.Modifiers, SyntaxKind.ConstKeyword) || classDeclaration == null) return null;
 
         // static fields
         List<Statement> statements = [];
@@ -983,8 +983,7 @@ public sealed class LuauGenerator(
         var expression = Visit<Expression>(node.Expression);
         var originalName = Visit<Name>(node.Name);
         if (originalName is not SimpleName simpleName)
-            throw Logger.CompilerError($"Member access name is not a simple name, instead it is '{originalName.GetType().Name}'",
-                                       node.Name);
+            throw Logger.CompilerError($"Member access name is not a simple name, instead it is '{originalName.GetType().Name}'", node.Name);
 
         var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
         if (symbol is IFieldSymbol { HasConstantValue: true } fieldSymbol)
@@ -1033,6 +1032,9 @@ public sealed class LuauGenerator(
         var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node);
         var method = FindFirstAncestor<MethodDeclarationSyntax>(node);
         var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
+        if (symbol is ILocalSymbol { HasConstantValue: true } localSymbol)
+            return AstUtility.CreateLuauConstant(localSymbol.ConstantValue);
+        
         var identifierText = occupiedIdentifiersStack.GetDuplicateText(node.Identifier.Text);
         if (symbol is IMethodSymbol methodSymbol
          && SymbolMetadataManager.Get(methodSymbol.ContainingType) is { MethodOverloads: not null }
@@ -1481,7 +1483,8 @@ public sealed class LuauGenerator(
         return parameterList;
     }
 
-    public override Statement VisitLocalDeclarationStatement(LocalDeclarationStatementSyntax node) => Visit<Statement>(node.Declaration);
+    public override Statement VisitLocalDeclarationStatement(LocalDeclarationStatementSyntax node) =>
+        node.IsConst ? new NoOp(false) : Visit<Statement>(node.Declaration);
 
     public override VariableList VisitVariableDeclaration(VariableDeclarationSyntax node)
     {
