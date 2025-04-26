@@ -6,6 +6,28 @@ namespace RobloxCS.Tests;
 
 public class GenerationTest : Generation
 {
+    [Theory]
+    [InlineData("var _ = sizeof(byte);", "1")]
+    [InlineData("var _ = sizeof(short);", "2")]
+    [InlineData("var _ = sizeof(ushort);", "2")]
+    [InlineData("var _ = sizeof(int);", "4")]
+    [InlineData("var _ = sizeof(uint);", "4")]
+    public void Generates_SizeOf(string sizeofCall, string luauValueText)
+    {
+        var ast = Generate(sizeofCall);
+        Assert.NotEmpty(ast.Statements);
+
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<VariableList>(statement);
+
+        var variableList = (VariableList)statement;
+        var initializer = variableList.Variables.First().Initializer;
+        Assert.IsType<Literal>(initializer);
+
+        var literal = (Literal)initializer;
+        Assert.Equal(luauValueText, literal.ValueText);
+    }
+    
     [Fact]
     public void Generates_MethodOverloads()
     {
