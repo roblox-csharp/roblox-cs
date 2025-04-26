@@ -22,13 +22,15 @@ public class MainTransformerTest
     public void AddsExtraUsings()
     {
         var compilationUnit = Transform("");
-        Assert.Equal(4, compilationUnit.Usings.Count);
+        Assert.Equal(5, compilationUnit.Usings.Count);
 
         var usingSystemCollectionsGeneric = compilationUnit.Usings[0];
-        var usingSystemLinq = compilationUnit.Usings[1];
-        var usingRoblox = compilationUnit.Usings[2];
-        var usingRobloxGlobals = compilationUnit.Usings[3];
+        var usingSystemCollections = compilationUnit.Usings[1];
+        var usingSystemLinq = compilationUnit.Usings[2];
+        var usingRoblox = compilationUnit.Usings[3];
+        var usingRobloxGlobals = compilationUnit.Usings[4];
         Assert.Equal("System.Collections.Generic", usingSystemCollectionsGeneric.Name?.ToString());
+        Assert.Equal("System.Collections", usingSystemCollections.Name?.ToString());
         Assert.Equal("System.Linq", usingSystemLinq.Name?.ToString());
         Assert.Equal("Roblox", usingRoblox.Name?.ToString());
 #pragma warning disable xUnit2002
