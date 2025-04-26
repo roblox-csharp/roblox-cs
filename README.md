@@ -13,9 +13,9 @@
 
 ### Introduction
 
-roblox-cs is a [C#](https://learn.microsoft.com/en-us/dotnet/csharp/) to [Luau](https://luau.org/) transpiler, which
-means we effectively translate C# code into Luau. This is done by taking the C# AST and converting it into a Luau AST (
-that is functionally the same) and then finally rendering the Luau AST into Luau source code.
+roblox-cs is a [C#](https://learn.microsoft.com/en-us/dotnet/csharp/) to [Luau](https://luau.org/) transpiler, which means we effectively translate C# code into
+Luau. This is done by taking the C# AST and converting it into a Luau AST (that is functionally the same) and then finally rendering the Luau AST into Luau
+source code.
 
 ### Join the Community!
 
