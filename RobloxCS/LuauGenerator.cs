@@ -810,6 +810,7 @@ public sealed class LuauGenerator(
     {
         var methodSymbolInfo = _semanticModel.GetSymbolInfo(node.Expression);
         var methodSymbol = methodSymbolInfo.Symbol;
+        var methodType = _semanticModel.GetTypeInfo(node.Expression).Type;
         if (methodSymbol == null
          && methodSymbolInfo.CandidateSymbols.IsEmpty
          && methodSymbolInfo.CandidateReason == CandidateReason.None
@@ -833,7 +834,8 @@ public sealed class LuauGenerator(
             };
         }
 
-        List<Statement> statements = [];
+        // TODO: PLEASE move this to AstUtility
+        List<Statement> refStatements = [];
         var arguments = node.ArgumentList.Arguments.Select(arg =>
                             {
                                 if (!arg.RefKindKeyword.IsKind(SyntaxKind.RefKeyword)
@@ -844,30 +846,30 @@ public sealed class LuauGenerator(
                                 if (arg.Expression.IsKind(SyntaxKind.DeclarationExpression))
                                 {
                                     variable = Visit<Variable>((arg.Expression as DeclarationExpressionSyntax)!.Designation as SingleVariableDesignationSyntax);
-                                    statements.Add(variable);
+                                    refStatements.Add(variable);
                                 }
 
-                                return new
-                                    Argument(new AnonymousFunction(new ParameterList([new Parameter(AstUtility.Vararg)]),
-                                                                   body: new Block([
-                                                                       new Variable(new IdentifierName("_val"),
-                                                                                    true,
-                                                                                    AstUtility.Vararg),
-                                                                       new If(new BinaryOperator(new Call(new IdentifierName("select"),
-                                                                                                          AstUtility.CreateArgumentList([
-                                                                                                              AstUtility.String("#"),
-                                                                                                              AstUtility.Vararg
-                                                                                                          ])),
-                                                                                                 "~=",
-                                                                                                 new Literal("0")),
-                                                                              new Block([
-                                                                                  new Assignment(variable?.Name
-                                                                                              ?? Visit<IdentifierName>(arg.Expression),
-                                                                                                 new IdentifierName("_val"))
-                                                                              ])),
-                                                                       new Return(variable?.Name
-                                                                               ?? Visit<IdentifierName>(arg.Expression))
-                                                                   ])));
+                                return new Argument(new AnonymousFunction(new ParameterList([new Parameter(AstUtility.Vararg)]),
+                                                                          body: new Block([
+                                                                              new Variable(new IdentifierName("_val"),
+                                                                                           true,
+                                                                                           AstUtility.Vararg),
+                                                                              new If(new BinaryOperator(new Call(new IdentifierName("select"),
+                                                                                                                 AstUtility.CreateArgumentList([
+                                                                                                                     AstUtility.String("#"),
+                                                                                                                     AstUtility.Vararg
+                                                                                                                 ])),
+                                                                                                        "~=",
+                                                                                                        new Literal("0")),
+                                                                                     new Block([
+                                                                                         new Assignment(variable?.Name
+                                                                                                     ?? Visit<IdentifierName>(arg
+                                                                                                                                  .Expression),
+                                                                                                        new IdentifierName("_val"))
+                                                                                     ])),
+                                                                              new Return(variable?.Name
+                                                                                      ?? Visit<IdentifierName>(arg.Expression))
+                                                                          ])));
                             })
                             .ToList();
 
@@ -878,16 +880,22 @@ public sealed class LuauGenerator(
         ];
 
         // dumb ass hack bc null warning suppression doesn't work here for some reason
-        if (callee.ExpandedByMacro != null && returnCalleeMacroKinds.Contains((MacroKind)callee.ExpandedByMacro)) return callee;
-
-        if (statements.Count > 0)
+        if (callee.ExpandedByMacro != null && returnCalleeMacroKinds.Contains((MacroKind)callee.ExpandedByMacro))
         {
-            statements.Add(new ExpressionStatement(new Call(callee, argumentList)));
+            var discard = methodSymbol is IMethodSymbol { ReturnType.Name: not "Void" }
+                 && callee is not NoOpExpression
+                 && node.Parent is ExpressionStatementSyntax;
 
-            return new Block(statements);
+            return discard
+                ? AstUtility.DiscardVariable(node, callee)
+                : callee;
         }
 
-        return new Call(callee, argumentList);
+        if (refStatements.Count <= 0)
+            return new Call(callee, argumentList);
+
+        refStatements.Add(new ExpressionStatement(new Call(callee, argumentList)));
+        return new Block(refStatements);
     }
 
     public override ArgumentList VisitArgumentList(ArgumentListSyntax node)
@@ -997,17 +1005,15 @@ public sealed class LuauGenerator(
         var name = AstUtility.GetNonGenericName(simpleName);
         var memberAccess = new MemberAccess(expression, name);
         var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
-        switch (symbol)
+        return symbol switch
         {
-            case IFieldSymbol { HasConstantValue: true } fieldSymbol:
-                return AstUtility.CreateLuauConstant(fieldSymbol.ConstantValue);
-            case IMethodSymbol methodSymbol when node.Parent is ArgumentSyntax:
-                return AstUtility.WrapNonStaticMethod(methodSymbol, memberAccess, file.OccupiedIdentifiers);
-        }
+            IFieldSymbol { HasConstantValue: true } fieldSymbol =>
+                AstUtility.CreateLuauConstant(fieldSymbol.ConstantValue),
+            IMethodSymbol methodSymbol when node.Parent is ArgumentSyntax =>
+                AstUtility.WrapNonStaticMethod(methodSymbol, memberAccess, file.OccupiedIdentifiers),
 
-        var expandedExpression = _macro.MemberAccess(Visit, node);
-
-        return expandedExpression ?? memberAccess;
+            _ => _macro.MemberAccess(Visit, node) ?? memberAccess
+        };
     }
 
     public override Node VisitImplicitElementAccess(ImplicitElementAccessSyntax node) => Visit<Expression>(node.ArgumentList.Arguments.First().Expression);

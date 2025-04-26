@@ -114,9 +114,9 @@ public class ListMacrosTest : Base.Generation
         Assert.NotEmpty(ast.Statements);
 
         var statement = ast.Statements.Skip(2).First();
-        Assert.IsType<ExpressionStatement>(statement);
+        Assert.IsType<Variable>(statement);
 
-        var expression = ((ExpressionStatement)statement).Expression;
+        var expression = ((Variable)statement).Initializer;
         Assert.IsType<BinaryOperator>(expression);
 
         var binaryOperator = (BinaryOperator)expression;
@@ -150,9 +150,9 @@ public class ListMacrosTest : Base.Generation
         Assert.NotEmpty(ast.Statements);
 
         var statement = ast.Statements.Skip(2).First();
-        Assert.IsType<ExpressionStatement>(statement);
+        Assert.IsType<Variable>(statement);
 
-        var expression = ((ExpressionStatement)statement).Expression;
+        var expression = ((Variable)statement).Initializer;
         Assert.IsType<Call>(expression);
 
         var call = (Call)expression;
@@ -229,9 +229,9 @@ public class ListMacrosTest : Base.Generation
         Assert.NotEmpty(ast.Statements);
 
         var statement = ast.Statements.Skip(2).First();
-        Assert.IsType<ExpressionStatement>(statement);
+        Assert.IsType<Variable>(statement);
 
-        var expression = ((ExpressionStatement)statement).Expression;
+        var expression = ((Variable)statement).Initializer;
         Assert.IsType<Call>(expression);
 
         var call = (Call)expression;
