@@ -992,7 +992,7 @@ public class GenerationTest : Generation
     public void Generates_Namespaces()
     {
         const string name = "MyNamespace";
-        var ast = Generate($"namespace {name} {{ enum Abc {{ A }} }}");
+        var ast = Generate($"namespace {name} {{ class Abc; }}");
         Assert.NotEmpty(ast.Statements);
 
         var globalStatements = ast.Statements.Skip(1).ToList();
@@ -1020,77 +1020,29 @@ public class GenerationTest : Generation
         Assert.NotEmpty(scopedBlock.Statements);
         Assert.IsType<Block>(scopedBlock.Statements.First());
 
-        var enumBlock = (Block)scopedBlock.Statements.First();
-        Assert.Equal(3, enumBlock.Statements.Count);
-        Assert.IsType<Variable>(enumBlock.Statements[0]);
-        Assert.IsType<Assignment>(enumBlock.Statements[1]);
-        Assert.IsType<TypeAlias>(enumBlock.Statements[2]);
-
-        var expressionStatement = (ExpressionStatement)thirdStatement;
-        Assert.IsType<Call>(expressionStatement.Expression);
-
-        var typeAlias = (TypeAlias)fourthStatement;
-        Assert.Equal(name, typeAlias.Name.ToString());
-        Assert.IsType<TypeOfCall>(typeAlias.Type);
+        var classBlock = (Block)scopedBlock.Statements.First();
+        Assert.Equal(4, classBlock.Statements.Count);
+        Assert.IsType<Variable>(classBlock.Statements[0]);
+        Assert.IsType<ScopedBlock>(classBlock.Statements[1]);
+        Assert.IsType<Assignment>(classBlock.Statements[2]);
+        Assert.IsType<TypeAlias>(classBlock.Statements[3]);
     }
 
     [Fact]
     public void Generates_Enums()
     {
         const string name = "Abc";
-        var ast = Generate($"enum {name} {{ A, B, C = 5, D, E = 10, F }}");
+        var ast = Generate($"enum {name} {{ A, B = 5, C }}; Abc.B;");
         Assert.NotEmpty(ast.Statements);
 
-        var globalStatements = ast.Statements.Skip(1).ToList();
-        Assert.IsType<Block>(globalStatements.First());
+        var globalStatements = ast.Statements.Skip(2).ToList();
+        Assert.IsType<ExpressionStatement>(globalStatements.First());
 
-        var block = (Block)globalStatements.First();
-        var statements = block.Statements;
-        Assert.Equal(4, statements.Count);
-        Assert.IsType<Variable>(statements[0]);
+        var expression = ((ExpressionStatement)globalStatements.First()).Expression;
+        Assert.IsType<Literal>(expression);
 
-        var variable = (Variable)statements[0];
-        Assert.Equal(name, variable.Name.ToString());
-        Assert.IsType<TableInitializer>(variable.Initializer);
-
-        var expectedTable = new Dictionary<string, string>
-        {
-            { "A", "0" },
-            { "B", "1" },
-            { "C", "5" },
-            { "D", "6" },
-            { "E", "10" },
-            { "F", "11" }
-        };
-
-        var table = (TableInitializer)variable.Initializer;
-        Assert.Equal(expectedTable.Count, table.KeyValuePairs.Count);
-
-        var index = 0;
-        foreach (var (expectedKey, expectedValueText) in expectedTable)
-        {
-            var actualEntry = table.KeyValuePairs.ElementAtOrDefault(index++);
-            Assert.IsType<IdentifierName>(actualEntry.Key);
-            Assert.IsType<Literal>(actualEntry.Value);
-
-            var keyName = (IdentifierName)actualEntry.Key;
-            Assert.Equal(expectedKey, keyName.ToString());
-
-            var literal = (Literal)actualEntry.Value;
-            Assert.Equal(expectedValueText, literal.ValueText);
-        }
-
-        Assert.IsType<ExpressionStatement>(statements[1]);
-
-        var expressionStatement = (ExpressionStatement)statements[1];
-        Assert.IsType<Call>(expressionStatement.Expression);
-
-        Assert.IsType<TypeAlias>(statements[2]);
-        var typeAlias = (TypeAlias)statements[2];
-        Assert.Equal(name, typeAlias.Name.ToString());
-        Assert.IsType<IndexCall>(typeAlias.Type);
-
-        Assert.IsType<NoOp>(statements[3]);
+        var literal = (Literal)expression;
+        Assert.Equal("5", literal.ValueText);
     }
 
     [Theory]
