@@ -6,7 +6,7 @@ using RobloxCS.Shared;
 
 namespace RobloxCS.Transformers;
 
-public sealed class MainTransformer(SyntaxTree tree, TransformState state, ConfigData config)
+public sealed class MainTransformer(SyntaxTree tree, Prerequisites state, ConfigData config)
     : BaseTransformer(tree, state, config)
 {
     // Add some implicit usings to the file

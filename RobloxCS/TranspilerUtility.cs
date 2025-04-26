@@ -6,7 +6,7 @@ using RobloxCS.Transformers;
 
 namespace RobloxCS;
 
-using TransformMethod = Func<SyntaxTree, TransformState, ConfigData, SyntaxTree>;
+using TransformMethod = Func<SyntaxTree, Prerequisites, ConfigData, SyntaxTree>;
 
 public static class TranspilerUtility
 {
@@ -20,7 +20,7 @@ public static class TranspilerUtility
 
     public static AST GetLuauAST(SyntaxTree tree, CSharpCompilation compiler)
     {
-        var generator = new LuauGenerator(tree, compiler, new TransformState(), new OccupiedIdentifiersStack());
+        var generator = new LuauGenerator(tree, compiler, new Prerequisites(), new OccupiedIdentifiersStack());
 
         return generator.GetLuauAST();
     }
@@ -31,10 +31,10 @@ public static class TranspilerUtility
 
         var compilationOptions = new CSharpCompilationOptions(OutputKind.ConsoleApplication);
 
-        return CSharpCompilation.Create(assemblyName: "test", //config.CSharpOptions.AssemblyName,
-                                        syntaxTrees: trees,
-                                        references: FileUtility.GetCompilationReferences(),
-                                        options: compilationOptions);
+        return CSharpCompilation.Create("test", //config.CSharpOptions.AssemblyName,
+                                        trees,
+                                        FileUtility.GetCompilationReferences(),
+                                        compilationOptions);
     }
 
     public static SyntaxTree ParseAndTransformTree(string source, ConfigData? config)
@@ -45,17 +45,16 @@ public static class TranspilerUtility
         return TransformTree(tree, transformers, config);
     }
 
-    public static SyntaxTree TransformTree(SyntaxTree cleanTree, HashSet<TransformMethod> transformMethods, ConfigData? config)
+    private static SyntaxTree TransformTree(SyntaxTree cleanTree, HashSet<TransformMethod> transformMethods, ConfigData? config)
     {
         // config ??= ConfigReader.UnitTestingConfig;
         config ??= new ConfigData();
 
-        var state = new TransformState();
-
-        return transformMethods.Aggregate(cleanTree, (current, transform) => transform(current, state, config));
+        var prerequisites = new Prerequisites();
+        return transformMethods.Aggregate(cleanTree, (current, transform) => transform(current, prerequisites, config));
     }
 
-    public static SyntaxTree ParseTree(string source, string sourceFile = "TestFile.cs")
+    private static SyntaxTree ParseTree(string source, string sourceFile = "TestFile.cs")
     {
         var cleanTree = CSharpSyntaxTree.ParseText(source);
         var compilationUnit = (CompilationUnitSyntax)cleanTree.GetRoot();

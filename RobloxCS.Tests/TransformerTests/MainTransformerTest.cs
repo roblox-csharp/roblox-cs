@@ -17,7 +17,7 @@ public class MainTransformerTest
                                   public string Def { get; } = def;
                               }
                               """;
-        
+
         var compilationUnit = Transform(source);
         var classDecl = compilationUnit.Members.OfType<ClassDeclarationSyntax>().Single();
         Assert.Null(classDecl.ParameterList); // removed primary ctor
@@ -30,7 +30,7 @@ public class MainTransformerTest
 
         var constructors = classDecl.Members.OfType<ConstructorDeclarationSyntax>().ToList();
         Assert.Single(constructors);
-        
+
         var constructor = constructors.First();
         Assert.Equal("MyClass", constructor.Identifier.Text);
 
@@ -43,21 +43,20 @@ public class MainTransformerTest
         Assert.Equal(2, statements.Length);
 
         var assignments = statements.Select(s => s.Expression).OfType<AssignmentExpressionSyntax>().ToArray();
-        Assert.All(assignments, assign =>
-        {
-            Assert.Equal(SyntaxKind.SimpleAssignmentExpression, assign.Kind());
-            Assert.IsType<MemberAccessExpressionSyntax>(assign.Left);
-            Assert.IsType<IdentifierNameSyntax>(assign.Right);
-        });
+        Assert.All(assignments,
+                   assign =>
+                   {
+                       Assert.Equal(SyntaxKind.SimpleAssignmentExpression, assign.Kind());
+                       Assert.IsType<MemberAccessExpressionSyntax>(assign.Left);
+                       Assert.IsType<IdentifierNameSyntax>(assign.Right);
+                   });
 
-        var assignedProperties = assignments.Select(a =>
-                                                        ((MemberAccessExpressionSyntax)a.Left).Name.Identifier.Text
-                                                   ).ToArray();
+        var assignedProperties = assignments.Select(a => ((MemberAccessExpressionSyntax)a.Left).Name.Identifier.Text).ToArray();
 
         Assert.Contains("Abc", assignedProperties);
         Assert.Contains("Def", assignedProperties);
     }
-    
+
     [Fact]
     public void Transforms_FileScopedNamespaces()
     {
@@ -94,7 +93,7 @@ public class MainTransformerTest
     {
         var cleanTree = SyntaxFactory.ParseSyntaxTree(source);
         var transform = BuiltInTransformers.Main();
-        var transformedTree = transform(cleanTree, new TransformState(), new ConfigData());
+        var transformedTree = transform(cleanTree, new Prerequisites(), new ConfigData());
 
         return transformedTree.GetCompilationUnitRoot();
     }

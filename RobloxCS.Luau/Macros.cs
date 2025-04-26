@@ -27,7 +27,7 @@ public enum MacroKind : byte
 
 public class MacroManager(
     SemanticModel semanticModel,
-    TransformState transformState,
+    Prerequisites prerequisites,
     OccupiedIdentifiersStack occupiedIdentifiersStack)
 {
     public Node? Assignment(Func<SyntaxNode, Node?> visit, AssignmentExpressionSyntax assignment)
@@ -274,39 +274,39 @@ public class MacroManager(
                 var foundIdentifier = occupiedIdentifiersStack.AddIdentifier("_found");
                 var defaultIdentifier = occupiedIdentifiersStack.AddIdentifier("_default");
                 var predicate = (Expression)visit(arguments.First().Expression)!;
-                transformState.Prereq(new Variable(foundIdentifier, true));
-                transformState.Prereq(new Variable(defaultIdentifier, true, predicate));
+                prerequisites.Add(new Variable(foundIdentifier, true));
+                prerequisites.Add(new Variable(defaultIdentifier, true, predicate));
 
                 occupiedIdentifiersStack.Push();
                 var valueIdentifier = occupiedIdentifiersStack.AddIdentifier("v");
-                transformState.Prereq(new If(new BinaryOperator(new Call(new IdentifierName("typeof"),
-                                                                         AstUtility.CreateArgumentList([defaultIdentifier])),
-                                                                "==",
-                                                                new Literal("\"function\"")),
-                                             new Block([
-                                                 new For([AstUtility.DiscardName, valueIdentifier],
-                                                         self,
+                prerequisites.Add(new If(new BinaryOperator(new Call(new IdentifierName("typeof"),
+                                                                     AstUtility.CreateArgumentList([defaultIdentifier])),
+                                                            "==",
+                                                            new Literal("\"function\"")),
+                                         new Block([
+                                             new For([AstUtility.DiscardName, valueIdentifier],
+                                                     self,
+                                                     new Block([
                                                          new Block([
-                                                             new Block([
-                                                                 new If(new UnaryOperator("not ",
-                                                                                          new
-                                                                                              Call(defaultIdentifier,
-                                                                                                   AstUtility
-                                                                                                       .CreateArgumentList([
-                                                                                                           valueIdentifier
-                                                                                                       ]))),
-                                                                        new Block([new Continue()]))
-                                                             ]),
-                                                             new Assignment(foundIdentifier, valueIdentifier),
-                                                             new Break()
-                                                         ]))
-                                             ]),
-                                             new Block([
-                                                 new Assignment(foundIdentifier,
-                                                                new BinaryOperator(new ElementAccess(self, one),
-                                                                                   "or",
-                                                                                   defaultIdentifier))
-                                             ])));
+                                                             new If(new UnaryOperator("not ",
+                                                                                      new
+                                                                                          Call(defaultIdentifier,
+                                                                                               AstUtility
+                                                                                                   .CreateArgumentList([
+                                                                                                       valueIdentifier
+                                                                                                   ]))),
+                                                                    new Block([new Continue()]))
+                                                         ]),
+                                                         new Assignment(foundIdentifier, valueIdentifier),
+                                                         new Break()
+                                                     ]))
+                                         ]),
+                                         new Block([
+                                             new Assignment(foundIdentifier,
+                                                            new BinaryOperator(new ElementAccess(self, one),
+                                                                               "or",
+                                                                               defaultIdentifier))
+                                         ])));
 
                 occupiedIdentifiersStack.Pop();
                 expanded = foundIdentifier;
@@ -333,41 +333,41 @@ public class MacroManager(
                 var foundIdentifier = occupiedIdentifiersStack.AddIdentifier("_found");
                 var defaultIdentifier = occupiedIdentifiersStack.AddIdentifier("_default");
                 var predicate = (Expression)visit(arguments.First().Expression)!;
-                transformState.Prereq(new Variable(foundIdentifier, true));
-                transformState.Prereq(new Variable(defaultIdentifier, true, predicate));
+                prerequisites.Add(new Variable(foundIdentifier, true));
+                prerequisites.Add(new Variable(defaultIdentifier, true, predicate));
 
                 occupiedIdentifiersStack.Push();
                 var valueIdentifier = occupiedIdentifiersStack.AddIdentifier("v");
-                transformState.Prereq(new If(new BinaryOperator(new Call(new IdentifierName("typeof"),
-                                                                         AstUtility.CreateArgumentList([defaultIdentifier])),
-                                                                "==",
-                                                                new Literal("\"function\"")),
-                                             new Block([
-                                                 new For([AstUtility.DiscardName, valueIdentifier],
-                                                         self,
+                prerequisites.Add(new If(new BinaryOperator(new Call(new IdentifierName("typeof"),
+                                                                     AstUtility.CreateArgumentList([defaultIdentifier])),
+                                                            "==",
+                                                            new Literal("\"function\"")),
+                                         new Block([
+                                             new For([AstUtility.DiscardName, valueIdentifier],
+                                                     self,
+                                                     new Block([
                                                          new Block([
-                                                             new Block([
-                                                                 new If(new UnaryOperator("not ",
-                                                                                          new
-                                                                                              Call(defaultIdentifier,
-                                                                                                   AstUtility
-                                                                                                       .CreateArgumentList([
-                                                                                                           valueIdentifier
-                                                                                                       ]))),
-                                                                        new Block([new Continue()]))
-                                                             ]),
-                                                             new Assignment(foundIdentifier, valueIdentifier)
-                                                         ]))
-                                             ]),
-                                             new Block([
-                                                 new Assignment(foundIdentifier,
-                                                                new BinaryOperator(new ElementAccess(self,
-                                                                                                     new
-                                                                                                         UnaryOperator("#",
-                                                                                                                       self)),
-                                                                                   "or",
-                                                                                   defaultIdentifier))
-                                             ])));
+                                                             new If(new UnaryOperator("not ",
+                                                                                      new
+                                                                                          Call(defaultIdentifier,
+                                                                                               AstUtility
+                                                                                                   .CreateArgumentList([
+                                                                                                       valueIdentifier
+                                                                                                   ]))),
+                                                                    new Block([new Continue()]))
+                                                         ]),
+                                                         new Assignment(foundIdentifier, valueIdentifier)
+                                                     ]))
+                                         ]),
+                                         new Block([
+                                             new Assignment(foundIdentifier,
+                                                            new BinaryOperator(new ElementAccess(self,
+                                                                                                 new
+                                                                                                     UnaryOperator("#",
+                                                                                                                   self)),
+                                                                               "or",
+                                                                               defaultIdentifier))
+                                         ])));
 
                 occupiedIdentifiersStack.Pop();
                 expanded = foundIdentifier;
@@ -393,8 +393,8 @@ public class MacroManager(
                 var appendedIdentifier = occupiedIdentifiersStack.AddIdentifier("_appended");
                 var element = (Expression)visit(arguments.First().Expression)!;
 
-                transformState.Prereq(new Variable(appendedIdentifier, true, AstUtility.TableCall("clone", self)));
-                transformState.Prereq(new ExpressionStatement(AstUtility.TableCall("insert", appendedIdentifier, element)));
+                prerequisites.Add(new Variable(appendedIdentifier, true, AstUtility.TableCall("clone", self)));
+                prerequisites.Add(new ExpressionStatement(AstUtility.TableCall("insert", appendedIdentifier, element)));
                 expanded = appendedIdentifier;
 
                 break;
@@ -404,8 +404,8 @@ public class MacroManager(
                 var prependedIdentifier = occupiedIdentifiersStack.AddIdentifier("_prepended");
                 var element = (Expression)visit(arguments.First().Expression)!;
 
-                transformState.Prereq(new Variable(prependedIdentifier, true, AstUtility.TableCall("clone", self)));
-                transformState.Prereq(new ExpressionStatement(AstUtility.TableCall("insert", prependedIdentifier, one, element)));
+                prerequisites.Add(new Variable(prependedIdentifier, true, AstUtility.TableCall("clone", self)));
+                prerequisites.Add(new ExpressionStatement(AstUtility.TableCall("insert", prependedIdentifier, one, element)));
                 expanded = prependedIdentifier;
 
                 break;
@@ -417,18 +417,18 @@ public class MacroManager(
                 var valueIdentifier = occupiedIdentifiersStack.AddIdentifier("v");
                 var seenValue = new ElementAccess(seenIdentifier, valueIdentifier);
 
-                transformState.Prereq(new Variable(distinctIdentifier, true, TableInitializer.Empty));
-                transformState.Prereq(new Variable(seenIdentifier, true, TableInitializer.Empty));
-                transformState.Prereq(new For([AstUtility.DiscardName, valueIdentifier],
-                                              self,
-                                              new Block([
-                                                  new If(seenValue,
-                                                         new Block([new Continue()])),
-                                                  new Assignment(seenValue, AstUtility.True),
-                                                  new ExpressionStatement(AstUtility.TableCall("insert",
-                                                                                               distinctIdentifier,
-                                                                                               valueIdentifier))
-                                              ])));
+                prerequisites.Add(new Variable(distinctIdentifier, true, TableInitializer.Empty));
+                prerequisites.Add(new Variable(seenIdentifier, true, TableInitializer.Empty));
+                prerequisites.Add(new For([AstUtility.DiscardName, valueIdentifier],
+                                          self,
+                                          new Block([
+                                              new If(seenValue,
+                                                     new Block([new Continue()])),
+                                              new Assignment(seenValue, AstUtility.True),
+                                              new ExpressionStatement(AstUtility.TableCall("insert",
+                                                                                           distinctIdentifier,
+                                                                                           valueIdentifier))
+                                          ])));
 
                 expanded = distinctIdentifier;
 
@@ -440,14 +440,14 @@ public class MacroManager(
                 var valueIdentifier = occupiedIdentifiersStack.AddIdentifier("v");
                 var other = (Expression)visit(arguments.First().Expression)!;
 
-                transformState.Prereq(new Variable(resultIdentifier, true, AstUtility.TableCall("clone", self)));
-                transformState.Prereq(new For([AstUtility.DiscardName, valueIdentifier],
-                                              other,
-                                              new Block([
-                                                  new ExpressionStatement(AstUtility.TableCall("insert",
-                                                                                               resultIdentifier,
-                                                                                               valueIdentifier))
-                                              ])));
+                prerequisites.Add(new Variable(resultIdentifier, true, AstUtility.TableCall("clone", self)));
+                prerequisites.Add(new For([AstUtility.DiscardName, valueIdentifier],
+                                          other,
+                                          new Block([
+                                              new ExpressionStatement(AstUtility.TableCall("insert",
+                                                                                           resultIdentifier,
+                                                                                           valueIdentifier))
+                                          ])));
 
                 expanded = resultIdentifier;
 
@@ -460,23 +460,23 @@ public class MacroManager(
                 var secondIdentifier = occupiedIdentifiersStack.AddIdentifier("b");
                 var other = (Expression)visit(arguments.First().Expression)!;
 
-                transformState.Prereq(new Variable(resultIdentifier, true, TableInitializer.Empty));
-                transformState.Prereq(new For([AstUtility.DiscardName, firstIdentifier],
-                                              self,
-                                              new Block([
-                                                  new For([AstUtility.DiscardName, secondIdentifier],
-                                                          other,
-                                                          new Block([
-                                                              new If(new BinaryOperator(firstIdentifier,
-                                                                                        "~=",
-                                                                                        secondIdentifier),
-                                                                     new Block([new Continue()])),
-                                                              new ExpressionStatement(AstUtility
-                                                                                          .TableCall("insert",
-                                                                                                     resultIdentifier,
-                                                                                                     firstIdentifier))
-                                                          ]))
-                                              ])));
+                prerequisites.Add(new Variable(resultIdentifier, true, TableInitializer.Empty));
+                prerequisites.Add(new For([AstUtility.DiscardName, firstIdentifier],
+                                          self,
+                                          new Block([
+                                              new For([AstUtility.DiscardName, secondIdentifier],
+                                                      other,
+                                                      new Block([
+                                                          new If(new BinaryOperator(firstIdentifier,
+                                                                                    "~=",
+                                                                                    secondIdentifier),
+                                                                 new Block([new Continue()])),
+                                                          new ExpressionStatement(AstUtility
+                                                                                      .TableCall("insert",
+                                                                                                 resultIdentifier,
+                                                                                                 firstIdentifier))
+                                                      ]))
+                                          ])));
 
                 expanded = resultIdentifier;
 
@@ -724,7 +724,7 @@ public class MacroManager(
         if (listExpression is not IdentifierName name)
         {
             self = occupiedIdentifiersStack.AddIdentifier("_exp");
-            transformState.Prereq(new Variable((IdentifierName)self, true, listExpression));
+            prerequisites.Add(new Variable((IdentifierName)self, true, listExpression));
         }
         else
         {
@@ -740,8 +740,8 @@ public class MacroManager(
                 var wasAddedIdentifier = occupiedIdentifiersStack.AddIdentifier("_wasAdded");
                 var selfAtElement = new ElementAccess(self, element);
 
-                transformState.Prereq(new Variable(wasAddedIdentifier, true, new BinaryOperator(selfAtElement, "==", AstUtility.Nil)));
-                transformState.Prereq(new Assignment(selfAtElement, AstUtility.True));
+                prerequisites.Add(new Variable(wasAddedIdentifier, true, new BinaryOperator(selfAtElement, "==", AstUtility.Nil)));
+                prerequisites.Add(new Assignment(selfAtElement, AstUtility.True));
                 expanded = wasAddedIdentifier;
 
                 break;
@@ -753,8 +753,8 @@ public class MacroManager(
                 var wasRemovedIdentifier = occupiedIdentifiersStack.AddIdentifier("_wasRemoved");
                 var selfAtElement = new ElementAccess(self, element);
 
-                transformState.Prereq(new Variable(wasRemovedIdentifier, true, new BinaryOperator(selfAtElement, "~=", AstUtility.Nil)));
-                transformState.Prereq(new Assignment(selfAtElement, new TypeCast(AstUtility.Nil, AstUtility.AnyType)));
+                prerequisites.Add(new Variable(wasRemovedIdentifier, true, new BinaryOperator(selfAtElement, "~=", AstUtility.Nil)));
+                prerequisites.Add(new Assignment(selfAtElement, new TypeCast(AstUtility.Nil, AstUtility.AnyType)));
                 expanded = wasRemovedIdentifier;
 
                 break;
@@ -769,7 +769,7 @@ public class MacroManager(
                 var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
                 var element = arguments.First();
                 expanded = new ElementAccess(self, element);
-                
+
                 break;
             }
         }
@@ -791,7 +791,7 @@ public class MacroManager(
         if (listExpression is not IdentifierName name)
         {
             self = occupiedIdentifiersStack.AddIdentifier("_exp");
-            transformState.Prereq(new Variable((IdentifierName)self, true, listExpression));
+            prerequisites.Add(new Variable((IdentifierName)self, true, listExpression));
         }
         else
         {
@@ -835,7 +835,7 @@ public class MacroManager(
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
                 var filterFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_filterFunc");
 
-                transformState.Prereq(new Block([
+                prerequisites.Add(new Block([
                     new Variable(filterFuncIdentifier, true, arguments.First()),
                     new Variable(expression, true, AstUtility.False),
                     new For([key, value],
@@ -859,7 +859,7 @@ public class MacroManager(
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
                 var filterFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_filterFunc");
 
-                transformState.Prereq(new Block([
+                prerequisites.Add(new Block([
                     new Variable(expression, true, AstUtility.Nil),
                     new Variable(filterFuncIdentifier, true, arguments.First()),
                     new For([key, value],
@@ -883,7 +883,7 @@ public class MacroManager(
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
                 var filterFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_filterFunc");
 
-                transformState.Prereq(new Block([
+                prerequisites.Add(new Block([
                     new Variable(filterFuncIdentifier, true, arguments.First()),
                     new Variable(expression, true),
                     new For([key, value],
@@ -907,7 +907,7 @@ public class MacroManager(
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
                 var filterFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_filterFunc");
 
-                transformState.Prereq(new Block([
+                prerequisites.Add(new Block([
                     new Variable(filterFuncIdentifier, true, arguments.First()),
                     new Variable(expression, true, new TableInitializer()),
                     new For([key, value],
@@ -934,9 +934,9 @@ public class MacroManager(
                 var key = occupiedIdentifiersStack.AddIdentifier("_k");
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
 
-                transformState.Prereq(new For([key, value],
-                                              arguments.First(),
-                                              new Block([new ExpressionStatement(AstUtility.TableCall("insert", self, value))])));
+                prerequisites.Add(new For([key, value],
+                                          arguments.First(),
+                                          new Block([new ExpressionStatement(AstUtility.TableCall("insert", self, value))])));
 
                 expanded = new NoOpExpression();
 
@@ -948,13 +948,13 @@ public class MacroManager(
                 var callbackIdentifier = occupiedIdentifiersStack.AddIdentifier("_callback");
                 var valueName = occupiedIdentifiersStack.AddIdentifier("_v");
 
-                transformState.Prereq(new Variable(callbackIdentifier, true, args.First()));
-                transformState.Prereq(new For([AstUtility.DiscardName, valueName],
-                                              self,
-                                              new Block([
-                                                  new ExpressionStatement(new Call(callbackIdentifier,
-                                                                                   AstUtility.CreateArgumentList([valueName])))
-                                              ])));
+                prerequisites.Add(new Variable(callbackIdentifier, true, args.First()));
+                prerequisites.Add(new For([AstUtility.DiscardName, valueName],
+                                          self,
+                                          new Block([
+                                              new ExpressionStatement(new Call(callbackIdentifier,
+                                                                               AstUtility.CreateArgumentList([valueName])))
+                                          ])));
 
                 expanded = new NoOpExpression();
 
@@ -968,7 +968,7 @@ public class MacroManager(
                 var value = occupiedIdentifiersStack.AddIdentifier("_v");
                 var convertFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_convertFunc");
 
-                transformState.Prereq(new Block([
+                prerequisites.Add(new Block([
                     new Variable(convertFuncIdentifier, true, arguments.First()),
                     new Variable(expression,
                                  true,
@@ -1006,7 +1006,7 @@ public class MacroManager(
 
                 if (invocation.ArgumentList.Arguments.Count == 1)
                 {
-                    transformState.Prereq(new Block([
+                    prerequisites.Add(new Block([
                         new Variable(filterFuncIdentifier, true, arguments.First()),
                         new Variable(expression, true),
                         new For([key, value],
@@ -1025,7 +1025,7 @@ public class MacroManager(
                         : new UnaryOperator("#", self);
 
                     var indexIdentifier = occupiedIdentifiersStack.AddIdentifier("_i");
-                    transformState.Prereq(new Block([
+                    prerequisites.Add(new Block([
                         new Variable(filterFuncIdentifier,
                                      true,
                                      invocation.ArgumentList.Arguments.Count == 2
@@ -1061,7 +1061,7 @@ public class MacroManager(
 
                 if (invocation.ArgumentList.Arguments.Count == 1)
                 {
-                    transformState.Prereq(new Block([
+                    prerequisites.Add(new Block([
                         new Variable(filterFuncIdentifier, true, arguments.First()),
                         new Variable(expression, true),
                         new For([key, value],
@@ -1080,7 +1080,7 @@ public class MacroManager(
                         : new UnaryOperator("#", self);
 
                     var indexIdentifier = occupiedIdentifiersStack.AddIdentifier("_i");
-                    transformState.Prereq(new Block([
+                    prerequisites.Add(new Block([
                         new Variable(filterFuncIdentifier,
                                      true,
                                      invocation.ArgumentList.Arguments.Count == 2
@@ -1157,7 +1157,7 @@ public class MacroManager(
 
                 if (shouldCreateVariable) block.Insert(0, new Variable(new IdentifierName("_val"), true, arguments.First()));
 
-                transformState.PrereqList(block);
+                prerequisites.AddList(block);
 
                 expanded = expressionName;
 
@@ -1216,7 +1216,7 @@ public class MacroManager(
                 var key = arguments.First();
                 var value = arguments.Last();
 
-                transformState.Prereq(new Assignment(new ElementAccess(self, key), value));
+                prerequisites.Add(new Assignment(new ElementAccess(self, key), value));
                 expanded = new NoOpExpression();
 
                 break;

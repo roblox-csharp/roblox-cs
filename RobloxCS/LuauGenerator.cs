@@ -30,7 +30,7 @@ internal class LinqQueryClauseInfo(LinqQueryClauseInfoKind kind, IdentifierName 
 public sealed class LuauGenerator(
     SyntaxTree tree,
     CSharpCompilation compiler,
-    TransformState transformState,
+    Prerequisites prerequisites,
     OccupiedIdentifiersStack occupiedIdentifiersStack)
     : BaseGenerator(tree, compiler)
 {
@@ -83,14 +83,14 @@ public sealed class LuauGenerator(
                 root = (CompilationUnitSyntax)newRoot;
                 _compiler = _compiler.ReplaceSyntaxTree(lastSyntaxTree, root.SyntaxTree);
                 _semanticModel = _compiler.GetSemanticModel(root.SyntaxTree);
-                _macro = new MacroManager(_semanticModel, transformState, occupiedIdentifiersStack);
+                _macro = new MacroManager(_semanticModel, prerequisites, occupiedIdentifiersStack);
                 lastSyntaxTree = root.SyntaxTree;
             }
         }
 
         void visitMember(MemberDeclarationSyntax member)
         {
-            var (statement, prereqStatements) = transformState.Capture(() => Visit<Statement?>(member));
+            var (statement, prereqStatements) = prerequisites.Capture(() => Visit<Statement?>(member));
             if (statement == null)
                 throw Logger.CompilerError($"Unhandled syntax node within {member.Kind()}", node);
 
@@ -103,7 +103,7 @@ public sealed class LuauGenerator(
         node = loopMembersToHoist(node);
         _compiler = _compiler.ReplaceSyntaxTree(lastSyntaxTree, node.SyntaxTree);
         _semanticModel = _compiler.GetSemanticModel(node.SyntaxTree);
-        _macro = new MacroManager(_semanticModel, transformState, occupiedIdentifiersStack);
+        _macro = new MacroManager(_semanticModel, prerequisites, occupiedIdentifiersStack);
 
         if (node.DescendantNodes()
                 .Any(descendant => descendant.IsKind(SyntaxKind.EventDeclaration)
@@ -135,9 +135,9 @@ public sealed class LuauGenerator(
     public override IdentifierName VisitQueryExpression(QueryExpressionSyntax node)
     {
         List<Statement> statements = [];
-        statements.AddRange(transformState.CapturePrereqs(() => Visit(node.Body)));
-        statements.AddRange(transformState.CapturePrereqs(() => Visit(node.FromClause)));
-        transformState.PrereqList(statements);
+        statements.AddRange(prerequisites.CaptureOnlyPrereqs(() => Visit(node.Body)));
+        statements.AddRange(prerequisites.CaptureOnlyPrereqs(() => Visit(node.FromClause)));
+        prerequisites.AddList(statements);
 
         return new IdentifierName(occupiedIdentifiersStack.GetDuplicateText("_result"));
     }
@@ -173,11 +173,11 @@ public sealed class LuauGenerator(
                                                 [new IdentifierName("key"), new IdentifierName("value")]);
 
         var body = new Block([new Return(groupingInfo)]);
-        transformState.Prereq(new Function(name,
-                                           true,
-                                           parameters,
-                                           null,
-                                           body));
+        prerequisites.Add(new Function(name,
+                                       true,
+                                       parameters,
+                                       null,
+                                       body));
 
         occupiedIdentifiersStack.Pop();
 
@@ -200,11 +200,11 @@ public sealed class LuauGenerator(
 
         var condition = Visit<Expression>(node.Condition);
         var body = new Block([new Return(condition)]);
-        transformState.Prereq(new Function(name,
-                                           true,
-                                           parameters,
-                                           new TypeRef("boolean"),
-                                           body));
+        prerequisites.Add(new Function(name,
+                                       true,
+                                       parameters,
+                                       new TypeRef("boolean"),
+                                       body));
 
         occupiedIdentifiersStack.Pop();
 
@@ -227,11 +227,11 @@ public sealed class LuauGenerator(
 
         var expression = Visit<Expression>(node.Expression);
         var body = new Block([new Return(expression)]);
-        transformState.Prereq(new Function(name,
-                                           true,
-                                           parameters,
-                                           null,
-                                           body));
+        prerequisites.Add(new Function(name,
+                                       true,
+                                       parameters,
+                                       null,
+                                       body));
 
         occupiedIdentifiersStack.Pop();
 
@@ -276,22 +276,22 @@ public sealed class LuauGenerator(
         });
 
         var comparatorName = occupiedIdentifiersStack.AddIdentifier(name.Text + "Comparator");
-        transformState.Prereq(new Function(name,
-                                           true,
-                                           parameters,
-                                           null,
-                                           body));
+        prerequisites.Add(new Function(name,
+                                       true,
+                                       parameters,
+                                       null,
+                                       body));
 
-        transformState.Prereq(new Function(comparatorName,
-                                           true,
-                                           new ParameterList([new Parameter(a), new Parameter(b)]),
-                                           new TypeRef("boolean"),
-                                           new Block([
-                                               new Variable(orderedA, true, new Call(name, AstUtility.CreateArgumentList([a]))),
-                                               new Variable(orderedB, true, new Call(name, AstUtility.CreateArgumentList([b]))),
-                                               ..orderClauses,
-                                               new Return(AstUtility.False)
-                                           ])));
+        prerequisites.Add(new Function(comparatorName,
+                                       true,
+                                       new ParameterList([new Parameter(a), new Parameter(b)]),
+                                       new TypeRef("boolean"),
+                                       new Block([
+                                           new Variable(orderedA, true, new Call(name, AstUtility.CreateArgumentList([a]))),
+                                           new Variable(orderedB, true, new Call(name, AstUtility.CreateArgumentList([b]))),
+                                           ..orderClauses,
+                                           new Return(AstUtility.False)
+                                       ])));
 
         return null;
     }
@@ -378,7 +378,7 @@ public sealed class LuauGenerator(
 
     public override Block VisitArrowExpressionClause(ArrowExpressionClauseSyntax node)
     {
-        var (expression, prereqStatements) = transformState.Capture(() => Visit<Expression>(node.Expression));
+        var (expression, prereqStatements) = prerequisites.Capture(() => Visit<Expression>(node.Expression));
 
         return new Block([..prereqStatements, new Return(expression)]);
     }
@@ -584,7 +584,7 @@ public sealed class LuauGenerator(
     public override Expression VisitConditionalAccessExpression(ConditionalAccessExpressionSyntax node)
     {
         var comparand = Visit<Expression>(node.Expression);
-        var (whenNotNull, prereqs) = transformState.Capture(() => Visit<Expression>(node.WhenNotNull));
+        var (whenNotNull, prereqs) = prerequisites.Capture(() => Visit<Expression>(node.WhenNotNull));
         var name = node.WhenNotNull.DescendantNodes().LastOrDefault(d => d is NameSyntax);
         var comparandTempNameText = name != null ? "_" + name : "_exp";
         var isWhenNotNullBranch = node.Ancestors().Any(a => a.IsKind(SyntaxKind.ConditionalAccessExpression));
@@ -594,7 +594,7 @@ public sealed class LuauGenerator(
 
         var condition = new BinaryOperator(comparandTempName, "~=", AstUtility.Nil);
         List<Statement> ifBody = [new Assignment(comparandTempName, whenNotNull), ..prereqs];
-        transformState.Prereq(new If(condition, new Block(ifBody)));
+        prerequisites.Add(new If(condition, new Block(ifBody)));
 
         return isWhenNotNullBranch ? comparand : comparandTempName;
     }
@@ -617,7 +617,7 @@ public sealed class LuauGenerator(
 
     public override Statement VisitForStatement(ForStatementSyntax node)
     {
-        var (initializer, initializerPrereqs) = transformState.Capture(() => Visit<VariableList?>(node.Declaration)?.Variables.FirstOrDefault());
+        var (initializer, initializerPrereqs) = prerequisites.Capture(() => Visit<VariableList?>(node.Declaration)?.Variables.FirstOrDefault());
 
         var condition = Visit<Expression?>(node.Condition) ?? AstUtility.True;
         var isNumericLoop = initializer is { Initializer: Literal literal } && int.TryParse(literal.ValueText, out _);
@@ -967,7 +967,7 @@ public sealed class LuauGenerator(
         }
 
         var isAlone = node.Parent is ExpressionStatementSyntax;
-        if (!isAlone) transformState.Prereq(returning);
+        if (!isAlone) prerequisites.Add(returning);
 
         return isAlone ? returning : returningName;
     }
@@ -1113,7 +1113,7 @@ public sealed class LuauGenerator(
         occupiedIdentifiersStack.Push();
         var statements = node.Statements.Select(statement =>
                              {
-                                 var (visitedStatement, prereqStatements) = transformState.Capture(() => Visit<Statement>(statement));
+                                 var (visitedStatement, prereqStatements) = prerequisites.Capture(() => Visit<Statement>(statement));
 
                                  if (prereqStatements.Count <= 0) return visitedStatement;
 
@@ -1163,7 +1163,7 @@ public sealed class LuauGenerator(
         var mappedOperator = StandardUtility.GetMappedOperator(node.OperatorToken.Text);
         var increment = new BinaryOperator(operand, mappedOperator, new Literal("1"));
         var isAlone = node.Parent is ExpressionStatementSyntax or ForStatementSyntax;
-        if (!isAlone) transformState.PrereqList([new Variable(originalIdentifier, true, operand), new ExpressionStatement(increment)]);
+        if (!isAlone) prerequisites.AddList([new Variable(originalIdentifier, true, operand), new ExpressionStatement(increment)]);
 
         return isAlone ? increment : originalIdentifier;
     }
@@ -1225,7 +1225,7 @@ public sealed class LuauGenerator(
         if (discardPattern != null) statements.Add(new Assignment(newValueIdentifier, Visit<Expression>(discardPattern.Expression)));
 
         prereqStatements.Add(new Repeat(AstUtility.True, new Block(statements)));
-        transformState.PrereqList(prereqStatements);
+        prerequisites.AddList(prereqStatements);
 
         return newValueIdentifier;
     }
@@ -1360,7 +1360,7 @@ public sealed class LuauGenerator(
         Block? body;
         if (node.ExpressionBody != null)
         {
-            var (expression, prereqStatements) = transformState.Capture(() => Visit<Expression>(node.ExpressionBody));
+            var (expression, prereqStatements) = prerequisites.Capture(() => Visit<Expression>(node.ExpressionBody));
 
             body = new Block([..prereqStatements, new Return(expression)]);
         }
@@ -1386,7 +1386,7 @@ public sealed class LuauGenerator(
         Block? body;
         if (node.ExpressionBody != null)
         {
-            var (expression, prereqStatements) = transformState.Capture(() => Visit<Expression>(node.ExpressionBody));
+            var (expression, prereqStatements) = prerequisites.Capture(() => Visit<Expression>(node.ExpressionBody));
 
             body = new Block([..prereqStatements, new Return(expression)]);
         }
@@ -1412,7 +1412,7 @@ public sealed class LuauGenerator(
         Block? body;
         if (node.ExpressionBody != null)
         {
-            var (expression, prereqStatements) = transformState.Capture(() => Visit<Expression>(node.ExpressionBody));
+            var (expression, prereqStatements) = prerequisites.Capture(() => Visit<Expression>(node.ExpressionBody));
 
             body = new Block([..prereqStatements, new Return(expression)]);
         }
@@ -1616,7 +1616,7 @@ public sealed class LuauGenerator(
                 {
                     var name = Visit<SimpleName>(assignment.Left);
                     var value = Visit<Expression>(assignment.Right);
-                    transformState.Prereq(new Assignment(new QualifiedName(binding, name), value));
+                    prerequisites.Add(new Assignment(new QualifiedName(binding, name), value));
 
                     break;
                 }
@@ -1638,7 +1638,7 @@ public sealed class LuauGenerator(
             var clauseKind = GetLinqQueryClauseKind(queryClauseSyntax);
             var identifierName = occupiedIdentifiersStack.AddIdentifier('_' + clauseKind.ToString().ToLower());
             clauseInfos.Add(new LinqQueryClauseInfo(clauseKind, identifierName));
-            transformState.PrereqList(transformState.CapturePrereqs(() => Visit(queryClauseSyntax)));
+            prerequisites.AddList(prerequisites.CaptureOnlyPrereqs(() => Visit(queryClauseSyntax)));
         }
 
         foreach (var clause in body.Clauses) addClauseInfo(clause);
@@ -1744,11 +1744,11 @@ public sealed class LuauGenerator(
             firstClause = false;
         }
 
-        transformState.PrereqList(prereqStatements);
+        prerequisites.AddList(prereqStatements);
 
         if (body.Continuation == null) return null;
 
-        transformState.PrereqList(transformState.CapturePrereqs(() => Visit(body.Continuation)));
+        prerequisites.AddList(prerequisites.CaptureOnlyPrereqs(() => Visit(body.Continuation)));
 
         return resultIdentifier;
     }
@@ -2116,7 +2116,7 @@ public sealed class LuauGenerator(
                 occupiedIdentifiersStack.AddIdentifier(singleDesignation.Identifier)
         };
 
-        transformState.Prereq(new Variable(newName, true, new TypeCast(originalValue, new TypeRef(oldTypeName.ToString()))));
+        prerequisites.Add(new Variable(newName, true, new TypeCast(originalValue, new TypeRef(oldTypeName.ToString()))));
 
         return PatternIsType(originalValue, csharpOriginalValue, typeName);
     }
@@ -2191,7 +2191,7 @@ public sealed class LuauGenerator(
     private IdentifierName PushToVariable(string name, Expression initializer)
     {
         var identifier = occupiedIdentifiersStack.AddIdentifier(name);
-        transformState.Prereq(new Variable(identifier, true, initializer));
+        prerequisites.Add(new Variable(identifier, true, initializer));
 
         return identifier;
     }
