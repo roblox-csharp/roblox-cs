@@ -13,31 +13,40 @@ public static class StandardUtility
     {
         var fullyQualifiedName = GetFullSymbolName(typeSymbol);
 
-        Type? type;
+        Type? type = null;
+        var assemblyContainsError = false;
         using (var memoryStream = new MemoryStream())
         {
+            /** var emitResult = */
             semanticModel.Compilation.Emit(memoryStream);
 
+            // var errors = emitResult.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToList();
+            // if (errors.Count > 0)
+            //     Logger.CodegenWarning(node, $"[GetRuntimeType()] Semantic model compilation had errors:\n{string.Join('\n', errors.Select(e => e.GetMessage()))}");
+
             memoryStream.Seek(0, SeekOrigin.Begin);
-            Assembly assembly;
+            Assembly? assembly = null;
             try
             {
                 assembly = Assembly.Load(memoryStream.ToArray());
             }
             catch (Exception e)
             {
-                throw Logger.CodegenError(node, $"Failed to resolve runtime type '{fullyQualifiedName}' because the assembly could not be loaded: {e.Message}");
+                assemblyContainsError = true;
+
+                // temporarily commented
+                // throw Logger.CodegenError(node, $"Failed to resolve runtime type '{fullyQualifiedName}' because the assembly could not be loaded: {e.Message}");
             }
 
-            // get the type from the loaded assembly
-            type = assembly.GetType(fullyQualifiedName);
+            if (assembly != null)
+                type = assembly.GetType(fullyQualifiedName); // get the type from the loaded assembly
         }
 
         type ??= Type.GetType(fullyQualifiedName);
+        if (type == null && !assemblyContainsError)
+            throw Logger.CodegenError(node, $"[GetRuntimeType()]: Unable to resolve type '{fullyQualifiedName}'.");
 
-        if (type == null) throw Logger.CodegenError(node, $"[GetRuntimeType()]: Unable to resolve type '{fullyQualifiedName}'.");
-
-        return type;
+        return type!;
     }
 
     public static string GetFullSymbolName(ISymbol symbol)

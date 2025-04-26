@@ -9,7 +9,7 @@ namespace RobloxCS.Transformers;
 public sealed class MainTransformer(SyntaxTree tree, TransformState state, ConfigData config)
     : BaseTransformer(tree, state, config)
 {
-    // Add `using Roblox` and `using static Roblox.Globals` to top of file
+    // Add some implicit usings to the file
     public override SyntaxNode? VisitCompilationUnit(CompilationUnitSyntax node)
     {
         var usings = node.Usings;

@@ -43,7 +43,8 @@ public static class AstUtility
         [
             new IdentifierName("FullName"),
             new IdentifierName("Namespace"),
-            new IdentifierName("AssemblyQualifiedName"),
+
+            // new IdentifierName("AssemblyQualifiedName"),
             new IdentifierName("TypeInitializer"),
             new IdentifierName("ReflectedType"),
             new IdentifierName("IsAbstract"),
@@ -112,7 +113,8 @@ public static class AstUtility
         [
             type.FullName != null ? new Literal('"' + type.FullName + '"') : Nil,
             type.Namespace != null ? new Literal('"' + type.Namespace + '"') : Nil,
-            type.AssemblyQualifiedName != null ? new Literal('"' + type.AssemblyQualifiedName + '"') : Nil,
+
+            // type.AssemblyQualifiedName != null ? new Literal('"' + type.AssemblyQualifiedName + '"') : Nil,
             type.TypeInitializer != null ? CreateMethodBase(type.TypeInitializer) : Nil,
             type.ReflectedType != null ? CreateTypeInfo(type.ReflectedType) : Nil,
             new Literal(type.IsAbstract.ToString().ToLower()),
@@ -239,7 +241,8 @@ public static class AstUtility
             new IdentifierName("IsIn"),
             new IdentifierName("IsOut"),
             new IdentifierName("IsOptional"),
-            new IdentifierName("IsLcid"),
+
+            // new IdentifierName("IsLcid"),
             new IdentifierName("IsRetval"),
             new IdentifierName("HasDefaultValue"),
             new IdentifierName("DefaultValue"),
@@ -255,7 +258,8 @@ public static class AstUtility
             new Literal(parameter.IsIn.ToString().ToLower()),
             new Literal(parameter.IsOut.ToString().ToLower()),
             new Literal(parameter.IsOptional.ToString().ToLower()),
-            new Literal(parameter.IsLcid.ToString().ToLower()),
+
+            // new Literal(parameter.IsLcid.ToString().ToLower()),
             new Literal(parameter.IsRetval.ToString().ToLower()),
             new Literal(parameter.HasDefaultValue.ToString().ToLower()),
             CreateLuauValue(parameter.DefaultValue),
@@ -286,15 +290,16 @@ public static class AstUtility
             new IdentifierName("IsGenericMethod"),
             new IdentifierName("IsConstructedGenericMethod"),
             new IdentifierName("IsGenericMethodDefinition"),
-            new IdentifierName("IsHideBySig"),
 
+            // new IdentifierName("IsHideBySig"),
             // new IdentifierName("IsSecurityCritical"),
             // new IdentifierName("IsSecuritySafeCritical"),
             // new IdentifierName("IsSecurityTransparent"),
             new IdentifierName("ContainsGenericParameters"),
             new IdentifierName("CallingConvention"),
-            new IdentifierName("MethodImplementationFlags"),
-            new IdentifierName("Attributes")
+            new IdentifierName("MethodImplementationFlags")
+
+            // new IdentifierName("Attributes")
         ];
 
         List<Expression> values =
@@ -311,8 +316,8 @@ public static class AstUtility
             new Literal(method.IsGenericMethod.ToString().ToLower()),
             new Literal(method.IsConstructedGenericMethod.ToString().ToLower()),
             new Literal(method.IsGenericMethodDefinition.ToString().ToLower()),
-            new Literal(method.IsHideBySig.ToString().ToLower()),
 
+            // new Literal(method.IsHideBySig.ToString().ToLower()),
             // new Literal(method.IsSecurityCritical.ToString().ToLower()),
             // new Literal(method.IsSecuritySafeCritical.ToString().ToLower()),
             // new Literal(method.IsSecurityTransparent.ToString().ToLower()),
@@ -374,8 +379,7 @@ public static class AstUtility
         var fullParentName = GetFullParentName(node);
 
         if (fullParentName != null)
-            return new Assignment(new MemberAccess(fullParentName,
-                                                   name),
+            return new Assignment(new MemberAccess(fullParentName, name),
                                   name);
 
         return new NoOp();
