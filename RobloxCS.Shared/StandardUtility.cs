@@ -17,7 +17,7 @@ public static class StandardUtility
         var assemblyContainsError = false;
         using (var memoryStream = new MemoryStream())
         {
-            /** var emitResult = */
+            // var emitResult =
             semanticModel.Compilation.Emit(memoryStream);
 
             // var errors = emitResult.Diagnostics.Where(diagnostic => diagnostic.Severity == DiagnosticSeverity.Error).ToList();

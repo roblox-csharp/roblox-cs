@@ -844,7 +844,18 @@ public sealed class LuauGenerator(
             }
 
         var callee = Visit<Expression>(node.Expression);
-        if (methodSymbol != null && callee is MemberAccess memberAccess) memberAccess.Operator = methodSymbol.IsStatic ? '.' : ':';
+        if (methodSymbol != null)
+        {
+            switch (callee)
+            {
+                case MemberAccess memberAccess:
+                    memberAccess.Operator = methodSymbol.IsStatic ? '.' : ':';
+                    break;
+                case QualifiedName qualifiedName:
+                    qualifiedName.Operator = methodSymbol.IsStatic ? '.' : ':';
+                    break;
+            }
+        }
 
         List<Statement> statements = [];
         var arguments = node.ArgumentList.Arguments.Select(arg =>

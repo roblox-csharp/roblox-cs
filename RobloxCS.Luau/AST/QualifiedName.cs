@@ -2,10 +2,6 @@
 
 public class QualifiedName : Name
 {
-    public Name Left { get; }
-    public char Operator { get; }
-    public SimpleName Right { get; }
-
     public QualifiedName(Name left, SimpleName right, char @operator = '.')
     {
         Left = left;
@@ -14,6 +10,10 @@ public class QualifiedName : Name
         AddChildren([Left, Right]);
     }
 
+    public Name Left { get; }
+    public char Operator { get; set; }
+    public SimpleName Right { get; }
+
     public override void Render(LuauWriter luau)
     {
         Left.Render(luau);
@@ -21,8 +21,5 @@ public class QualifiedName : Name
         Right.Render(luau);
     }
 
-    public override string ToString()
-    {
-        return Left.ToString() + Operator + Right.ToString();
-    }
+    public override string ToString() => Left.ToString() + Operator + Right;
 }
