@@ -6,15 +6,89 @@ namespace RobloxCS.Tests;
 
 public class GenerationTest : Generation
 {
+    [Fact]
+    public void Generates_NonStaticMethodWrap()
+    {
+        const string source = """
+                              Abc abc = null!;
+                              var x = abc.MyMethod;
+                              CallFunction(abc.MyMethod);
+                              CallFunction(abc.MyOtherMethod);
+
+                              void CallFunction(Action<int> f) => f(69);
+
+                              interface Abc
+                              {
+                                  public void MyMethod(int p);
+                                  public static void MyOtherMethod(char c);
+                              }
+                              """;
+        
+        var ast = Generate(source);
+        Assert.NotEmpty(ast.Statements);
+
+        var statements = ast.Statements.Skip(4).Take(3).ToList();
+        Assert.IsType<VariableList>(statements[0]);
+        Assert.IsType<ExpressionStatement>(statements[1]);
+        Assert.IsType<ExpressionStatement>(statements[2]);
+        
+        var variableList = (VariableList)statements[0];
+        var variable = variableList.Variables.First();
+        Assert.Equal("x", variable.Name.ToString());
+        Assert.IsType<MemberAccess>(variable.Initializer);
+        
+        var memberAccess = (MemberAccess)variable.Initializer;
+        Assert.Equal("abc", memberAccess.Expression.ToString());
+        Assert.Equal("MyMethod", memberAccess.Name.ToString());
+        
+        var firstExpression = ((ExpressionStatement)statements[1]).Expression;
+        Assert.IsType<Call>(firstExpression);
+        
+        var firstCall = (Call)firstExpression;
+        Assert.Single(firstCall.ArgumentList.Arguments);
+        Assert.IsType<AnonymousFunction>(firstCall.ArgumentList.Arguments.First().Expression);
+        
+        var anonymousFunction = (AnonymousFunction)firstCall.ArgumentList.Arguments.First().Expression;
+        Assert.Equal(firstCall.ArgumentList.Arguments.Count, anonymousFunction.ParameterList.Parameters.Count);
+        Assert.NotNull(anonymousFunction.Body);
+        Assert.Single(anonymousFunction.Body.Statements);
+        
+        var statement = anonymousFunction.Body.Statements.First();
+        Assert.IsType<Return>(statement);
+        
+        var returnStatement = (Return)statement;
+        Assert.IsType<Call>(returnStatement.Expression);
+        
+        var wrappedCall = (Call)returnStatement.Expression;
+        Assert.Equal(anonymousFunction.ParameterList.Parameters.Count, wrappedCall.ArgumentList.Arguments.Count);
+        Assert.IsType<MemberAccess>(wrappedCall.Callee);
+        
+        var callMemberAccess = (MemberAccess)wrappedCall.Callee;
+        Assert.Equal(':', callMemberAccess.Operator);
+        Assert.IsType<IdentifierName>(callMemberAccess.Expression);
+        Assert.IsType<IdentifierName>(callMemberAccess.Name);
+        
+        var secondExpression = ((ExpressionStatement)statements[2]).Expression;
+        Assert.IsType<Call>(secondExpression);
+        
+        var secondCall = (Call)secondExpression;
+        Assert.Single(secondCall.ArgumentList.Arguments);
+        Assert.IsType<MemberAccess>(secondCall.ArgumentList.Arguments.First().Expression);
+        
+        var argumentMemberAccess = (MemberAccess)secondCall.ArgumentList.Arguments.First().Expression;
+        Assert.Equal('.', argumentMemberAccess.Operator);
+        Assert.IsType<IdentifierName>(argumentMemberAccess.Expression);
+        Assert.IsType<IdentifierName>(argumentMemberAccess.Name);
+    }
     [Theory]
     [InlineData("var _ = sizeof(byte);", "1")]
     [InlineData("var _ = sizeof(short);", "2")]
     [InlineData("var _ = sizeof(ushort);", "2")]
     [InlineData("var _ = sizeof(int);", "4")]
     [InlineData("var _ = sizeof(uint);", "4")]
-    public void Generates_SizeOf(string sizeofCall, string luauValueText)
+    public void Generates_SizeOf(string source, string luauValueText)
     {
-        var ast = Generate(sizeofCall);
+        var ast = Generate(source);
         Assert.NotEmpty(ast.Statements);
 
         var statement = ast.Statements.Skip(1).First();
