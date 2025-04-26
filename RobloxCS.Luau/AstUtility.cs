@@ -629,8 +629,8 @@ public static class AstUtility
         }
 
         var mappedTypePath = StandardUtility.GetMappedType(typePath);
-
-        if (mappedTypePath.EndsWith('?')) return new OptionalType(CreateTypeRef(mappedTypePath.TrimEnd('?'))!);
+        if (mappedTypePath.EndsWith('?'))
+            return new OptionalType(CreateTypeRef(mappedTypePath.TrimEnd('?'))!);
 
         var functionMatch = Regex.Match(mappedTypePath, @"^\(\s*(.*?)\s*\)\s*->\s*(.+)$");
         if (functionMatch.Success)
@@ -653,7 +653,7 @@ public static class AstUtility
 
         return new TypeRef(mappedTypePath, true);
     }
-    
+
     private static MappedType? TryParseMappedType(string input)
     {
         input = input.Trim();

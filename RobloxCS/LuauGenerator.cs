@@ -355,7 +355,7 @@ public sealed class LuauGenerator(
         var fullName = new QualifiedName(className, name, IsStatic(node) ? '.' : ':');
         var parameterList = Visit<ParameterList>(node.ParameterList);
 
-        var returnType = AstUtility.CreateTypeRef(Visit<Name>(node.ReturnType).ToString());
+        var returnType = AstUtility.CreateTypeRef(Visit<Name>(node.ReturnType).ToString())!;
         var body = node.ExpressionBody != null
             ? Visit<Block>(node.ExpressionBody)
             : Visit<Block?>(node.Body);
@@ -1416,7 +1416,6 @@ public sealed class LuauGenerator(
         }
 
         TryConvertGeneratorFunction(node.Block, returnType, body);
-
         return new AnonymousFunction(parameterList, returnType, body);
     }
 
@@ -1425,7 +1424,7 @@ public sealed class LuauGenerator(
         var name = occupiedIdentifiersStack.AddIdentifier(node.Identifier);
         var parameterList = Visit<ParameterList?>(node.ParameterList) ?? new ParameterList([]);
         var typeParameters = node.TypeParameterList?.Parameters.Select(p => new IdentifierName(p.Identifier.Text)).ToList();
-        var returnType = AstUtility.CreateTypeRef(node.ReturnType);
+        var returnType = AstUtility.CreateTypeRef(node.ReturnType)!;
         var body = node.ExpressionBody != null
             ? Visit<Block>(node.ExpressionBody)
             : Visit<Block?>(node.Body);
@@ -1748,25 +1747,27 @@ public sealed class LuauGenerator(
         return resultIdentifier;
     }
 
-    private void TryConvertGeneratorFunction(BlockSyntax? block, TypeRef? returnType, Block? luauBlock)
+    private void TryConvertGeneratorFunction(BlockSyntax? block, TypeRef returnType, Block? luauBlock)
     {
-        var generatorFunctionReturn = CreateGeneratorFunctionReturn(block);
+        var typeArguments = StandardUtility.ExtractTypeArguments(returnType.Path);
+        var mappedTypeArguments = typeArguments.ConvertAll(StandardUtility.GetMappedType);
+        var typeArgumentsText = string.Join(", ", mappedTypeArguments);
+        var generateEnumerable = returnType.Path.StartsWith("IEnumerable<");
+        var generatorFunctionReturn = CreateGeneratorFunctionReturn(block, generateEnumerable);
         if (generatorFunctionReturn == null || luauBlock == null) return;
 
         luauBlock.Statements.Clear();
         luauBlock.Statements.Add(generatorFunctionReturn);
-        if (returnType == null) return;
-
-        var typeArguments = StandardUtility.ExtractTypeArguments(returnType.Path).ConvertAll(StandardUtility.GetMappedType);
-        returnType.Path = "CS.IEnumerator<" + string.Join(", ", typeArguments) + ">";
+        returnType.Path = generateEnumerable
+            ? $"{{ {typeArgumentsText} }}"
+            : $"CS.IEnumerator<{typeArgumentsText}>";
     }
 
-    private Return? CreateGeneratorFunctionReturn(BlockSyntax? block)
+    private Return? CreateGeneratorFunctionReturn(BlockSyntax? block, bool isEnumerable)
     {
         if (block == null) return null;
 
         var yields = CollectYields(block);
-
         if (yields.Count == 0) return null;
 
         var yieldStatements = block.Statements.OfType<YieldStatementSyntax>().ToList();
@@ -1774,11 +1775,13 @@ public sealed class LuauGenerator(
                            .TakeWhile(yield => !yield.ReturnOrBreakKeyword.IsKind(SyntaxKind.BreakKeyword))
                            .ToList();
 
-        if (block.Statements.Count == yieldStatements.Count)
+        var isSimple = block.Statements.Count == yieldStatements.Count;
+        if (isSimple)
         {
             var yieldedExpressions = yieldReturns.ConvertAll(yield => Visit<Expression>(yield.Expression!));
+            var yieldedTable = new TableInitializer(yieldedExpressions);
 
-            return new Return(AstUtility.NewEnumerator(new TableInitializer(yieldedExpressions)));
+            return new Return(isEnumerable ? yieldedTable : AstUtility.NewEnumerator(yieldedTable));
         }
 
         List<List<StatementSyntax>> enumerationBlocks = [];
@@ -1795,29 +1798,25 @@ public sealed class LuauGenerator(
 
         var enumerationFunctions = enumerationBlocks
                                    .ConvertAll(statements => new AnonymousFunction(new ParameterList([
-                                                                                       new
-                                                                                           Parameter(new
-                                                                                                         IdentifierName("_breakIteration"),
+                                                                                       new Parameter(new IdentifierName("_breakIteration"),
                                                                                                      false,
                                                                                                      null,
-                                                                                                     new
-                                                                                                         FunctionType([],
-                                                                                                                      new
-                                                                                                                          TypeRef("()")))
+                                                                                                     FunctionType.NoOp)
                                                                                    ]),
                                                                                    null,
-                                                                                   new Block(statements
-                                                                                                 .ConvertAll(Visit<Statement>))))
+                                                                                   new Block(statements.ConvertAll(Visit<Statement>))))
                                    .OfType<Expression>()
                                    .ToList();
 
-        return new Return(AstUtility.NewEnumerator(new AnonymousFunction(new ParameterList([]),
-                                                                         null,
-                                                                         new Block([
-                                                                             new
-                                                                                 Return(new
-                                                                                            TableInitializer(enumerationFunctions))
-                                                                         ]))));
+        var enumeratorConstruction = AstUtility.NewEnumerator(new AnonymousFunction(new ParameterList([]),
+                                                                                    null,
+                                                                                    new Block([new Return(new TableInitializer(enumerationFunctions))])));
+
+        Expression returnExpression = isEnumerable
+            ? new Call(new MemberAccess(enumeratorConstruction, new IdentifierName("_collect"), ':')) // collect into table
+            : enumeratorConstruction;
+
+        return new Return(returnExpression);
     }
 
     private static List<YieldStatementSyntax> CollectYields(BlockSyntax block) =>
