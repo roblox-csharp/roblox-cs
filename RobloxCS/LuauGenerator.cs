@@ -439,6 +439,7 @@ public sealed class LuauGenerator(
         var name = AstUtility.CreateSimpleName(node);
         var nonGenericName = AstUtility.GetNonGenericName(name);
         occupiedIdentifiersStack.AddIdentifier(nonGenericName.Text);
+        occupiedIdentifiersStack.Push();
 
         var members = node.Members
                           .Select(Visit<Statement?>)
@@ -528,45 +529,11 @@ public sealed class LuauGenerator(
 
         if (node.Parent is CompilationUnitSyntax) statements.Add(new NoOp()); // for the newline
 
+        occupiedIdentifiersStack.Pop();
         return new Block(statements);
     }
 
-    public override Block VisitEnumDeclaration(EnumDeclarationSyntax node)
-    {
-        List<Expression> enumKeys = [];
-        List<Expression> enumValues = [];
-
-        // List<TypeRef> enumTypes = [];
-        var index = 0;
-
-        foreach (var member in node.Members)
-        {
-            var explicitValue = member.EqualsValue?.Value;
-            var value = explicitValue?.ToString() ?? index.ToString();
-
-            // enumTypes.Add(new TypeRef(value));
-            enumKeys.Add(new IdentifierName(member.Identifier.Text));
-            enumValues.Add(new Literal(value));
-
-            index = (explicitValue != null ? int.Parse(explicitValue.ToString()) : index) + 1;
-        }
-
-        var name = occupiedIdentifiersStack.AddIdentifier(node.Identifier);
-        var enumType = new TypeOfCall(name);
-        var finalType = new IndexCall(enumType, new KeyOfCall(enumType));
-        List<Statement> statements =
-        [
-            new Variable(name,
-                         true,
-                         new TableInitializer(enumValues, enumKeys)),
-            AstUtility.DefineGlobalOrMember(node, name),
-            new TypeAlias(name, finalType)
-        ];
-
-        if (node.Parent is CompilationUnitSyntax) statements.Add(new NoOp()); // for the newline
-
-        return new Block(statements);
-    }
+    public override NoOp VisitEnumDeclaration(EnumDeclarationSyntax node) => new(false);
 
     public override Block VisitNamespaceDeclaration(NamespaceDeclarationSyntax node)
     {
@@ -784,7 +751,7 @@ public sealed class LuauGenerator(
         var typeName = Visit<Name>(node.Type);
         if (expression is TypeCast)
             expression = new Parenthesized(expression);
-        
+
         return new TypeCast(expression, AstUtility.CreateTypeRef(typeName.ToString())!);
     }
 
@@ -847,7 +814,6 @@ public sealed class LuauGenerator(
 
         var callee = Visit<Expression>(node.Expression);
         if (methodSymbol != null)
-        {
             switch (callee)
             {
                 case MemberAccess memberAccess:
@@ -857,7 +823,6 @@ public sealed class LuauGenerator(
                     qualifiedName.Operator = methodSymbol.IsStatic ? '.' : ':';
                     break;
             }
-        }
 
         List<Statement> statements = [];
         var arguments = node.ArgumentList.Arguments.Select(arg =>
@@ -1017,10 +982,13 @@ public sealed class LuauGenerator(
     {
         var expression = Visit<Expression>(node.Expression);
         var originalName = Visit<Name>(node.Name);
-
         if (originalName is not SimpleName simpleName)
             throw Logger.CompilerError($"Member access name is not a simple name, instead it is '{originalName.GetType().Name}'",
                                        node.Name);
+
+        var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
+        if (symbol is IFieldSymbol { HasConstantValue: true } fieldSymbol)
+            return AstUtility.CreateLuauConstant(fieldSymbol.ConstantValue);
 
         var name = AstUtility.GetNonGenericName(simpleName);
         var memberAccess = new MemberAccess(expression, name);

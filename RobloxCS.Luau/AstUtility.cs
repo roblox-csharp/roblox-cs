@@ -263,8 +263,8 @@ public static class AstUtility
             // Bool(parameter.IsLcid),
             Bool(parameter.IsRetval),
             Bool(parameter.HasDefaultValue),
-            CreateLuauValue(parameter.DefaultValue),
-            CreateLuauValue(parameter.RawDefaultValue),
+            CreateLuauConstant(parameter.DefaultValue),
+            CreateLuauConstant(parameter.RawDefaultValue),
             new Literal(parameter.Position.ToString()),
             CreateTypeInfo(parameter.ParameterType, noProperties: noProperties),
             CreateMemberInfo(parameter.Member)
@@ -374,7 +374,7 @@ public static class AstUtility
         return new TableInitializer(values, keys);
     }
 
-    public static Expression CreateLuauValue(object? value) =>
+    public static Expression CreateLuauConstant(object? value) =>
         value switch
         {
             null => Nil,
