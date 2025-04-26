@@ -211,6 +211,44 @@ public class GenerationTest : Generation
         Assert.Equal("2", secondLiteral.ValueText);
         Assert.Equal("3", thirdLiteral.ValueText);
     }
+    
+    [Fact]
+    public void Generates_ComplexGeneratorFunction_IntoEnumerable()
+    {
+        var ast = Generate("""
+                           IEnumerable<int> GetEnumerator()
+                           {
+                               print("a");
+                               yield return 1;
+                           }
+                           """);
+
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<Function>(statement);
+
+        var function = (Function)statement;
+        Assert.Empty(function.ParameterList.Parameters);
+        Assert.True(function.IsLocal);
+        Assert.NotNull(function.ReturnType);
+        Assert.Equal("{ number }", function.ReturnType.Path);
+        Assert.NotNull(function.Body);
+        Assert.Single(function.Body.Statements);
+
+        var bodyStatement = function.Body.Statements.First();
+        Assert.IsType<Return>(bodyStatement);
+
+        var returnStatement = (Return)bodyStatement;
+        Assert.IsType<Call>(returnStatement.Expression);
+        
+        var call = (Call)returnStatement.Expression;
+        Assert.IsType<MemberAccess>(call.Callee);
+        
+        var memberAccess = (MemberAccess)call.Callee;
+        Assert.Equal(':', memberAccess.Operator);
+        Assert.IsType<Call>(memberAccess.Expression);
+        Assert.IsType<IdentifierName>(memberAccess.Name);
+        Assert.Equal("_collect", memberAccess.Name.ToString());
+    }
 
     [Fact]
     public void Generates_ComplexGeneratorFunction()
@@ -334,6 +372,51 @@ public class GenerationTest : Generation
         var thirdReturnValue = (Literal)thirdReturn.Expression;
         Assert.Equal("3", thirdReturnValue.ValueText);
     }
+    
+    [Fact]
+    public void Generates_SimpleGeneratorFunction_IntoEnumerable()
+    {
+        var ast = Generate("""
+                           IEnumerable<int> GetEnumerator()
+                           {
+                             yield return 1;
+                             yield return 2;
+                             yield return 3;
+                           }
+                           """);
+
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<Function>(statement);
+
+        var function = (Function)statement;
+        Assert.Empty(function.ParameterList.Parameters);
+        Assert.True(function.IsLocal);
+        Assert.NotNull(function.ReturnType);
+        Assert.Equal("{ number }", function.ReturnType.Path);
+        Assert.NotNull(function.Body);
+        Assert.Single(function.Body.Statements);
+
+        var bodyStatement = function.Body.Statements.First();
+        Assert.IsType<Return>(bodyStatement);
+
+        var returnStatement = (Return)bodyStatement;
+        Assert.IsType<TableInitializer>(returnStatement.Expression);
+
+        var tableInitializer = (TableInitializer)returnStatement.Expression;
+        Assert.Equal(3, tableInitializer.Values.Count);
+
+        var firstValue = tableInitializer.Values[0];
+        var secondValue = tableInitializer.Values[1];
+        var thirdValue = tableInitializer.Values[2];
+        Assert.IsType<Literal>(firstValue);
+
+        var firstLiteral = (Literal)firstValue;
+        var secondLiteral = (Literal)secondValue;
+        var thirdLiteral = (Literal)thirdValue;
+        Assert.Equal("1", firstLiteral.ValueText);
+        Assert.Equal("2", secondLiteral.ValueText);
+        Assert.Equal("3", thirdLiteral.ValueText);
+    }
 
     [Fact]
     public void Generates_SimpleGeneratorFunction_WithBreak()
@@ -442,11 +525,17 @@ public class GenerationTest : Generation
         var tableInitializer = (TableInitializer)argumentExpression;
         Assert.Equal(3, tableInitializer.Values.Count);
 
-        var value = tableInitializer.Values.First();
-        Assert.IsType<Literal>(value);
+        var firstValue = tableInitializer.Values[0];
+        var secondValue = tableInitializer.Values[1];
+        var thirdValue = tableInitializer.Values[2];
+        Assert.IsType<Literal>(firstValue);
 
-        var literal = (Literal)value;
-        Assert.Equal("1", literal.ValueText);
+        var firstLiteral = (Literal)firstValue;
+        var secondLiteral = (Literal)secondValue;
+        var thirdLiteral = (Literal)thirdValue;
+        Assert.Equal("1", firstLiteral.ValueText);
+        Assert.Equal("2", secondLiteral.ValueText);
+        Assert.Equal("3", thirdLiteral.ValueText);
     }
 
     [Fact]
