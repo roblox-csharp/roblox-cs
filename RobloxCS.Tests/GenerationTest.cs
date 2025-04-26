@@ -211,7 +211,7 @@ public class GenerationTest : Generation
         Assert.Equal("2", secondLiteral.ValueText);
         Assert.Equal("3", thirdLiteral.ValueText);
     }
-    
+
     [Fact]
     public void Generates_ComplexGeneratorFunction_IntoEnumerable()
     {
@@ -239,10 +239,10 @@ public class GenerationTest : Generation
 
         var returnStatement = (Return)bodyStatement;
         Assert.IsType<Call>(returnStatement.Expression);
-        
+
         var call = (Call)returnStatement.Expression;
         Assert.IsType<MemberAccess>(call.Callee);
-        
+
         var memberAccess = (MemberAccess)call.Callee;
         Assert.Equal(':', memberAccess.Operator);
         Assert.IsType<Call>(memberAccess.Expression);
@@ -372,7 +372,7 @@ public class GenerationTest : Generation
         var thirdReturnValue = (Literal)thirdReturn.Expression;
         Assert.Equal("3", thirdReturnValue.ValueText);
     }
-    
+
     [Fact]
     public void Generates_SimpleGeneratorFunction_IntoEnumerable()
     {
@@ -1195,6 +1195,160 @@ public class GenerationTest : Generation
         Assert.IsType<ScopedBlock>(classBlock.Statements[1]);
         Assert.IsType<Assignment>(classBlock.Statements[2]);
         Assert.IsType<TypeAlias>(classBlock.Statements[3]);
+    }
+
+    [Fact]
+    public void Generates_Classes()
+    {
+        const string name = "MyClass";
+        const string nameString = $"\"{name}\"";
+        var ast = Generate($"class {name};");
+        Assert.NotEmpty(ast.Statements);
+
+        var globalStatements = ast.Statements.Skip(1).ToList();
+        Assert.Single(globalStatements);
+        Assert.IsType<Block>(globalStatements.First());
+
+        var classBlock = (Block)globalStatements.First();
+        Assert.Equal(5, classBlock.Statements.Count);
+        Assert.IsType<Variable>(classBlock.Statements[0]);
+        Assert.IsType<ScopedBlock>(classBlock.Statements[1]);
+        Assert.IsType<ExpressionStatement>(classBlock.Statements[2]);
+        Assert.IsType<TypeAlias>(classBlock.Statements[3]);
+
+        var variable = (Variable)classBlock.Statements[0];
+        Assert.Equal(name, variable.Name.ToString());
+        Assert.Null(variable.Initializer);
+
+        var classStatements = ((ScopedBlock)classBlock.Statements[1]).Statements;
+        Assert.Equal(5, classStatements.Count);
+        Assert.IsType<Assignment>(classStatements[0]);
+        Assert.IsType<Assignment>(classStatements[1]);
+        Assert.IsType<Assignment>(classStatements[2]);
+        Assert.IsType<Function>(classStatements[3]);
+        Assert.IsType<Function>(classStatements[4]);
+
+        var classAssignment = (Assignment)classStatements[0];
+        Assert.IsType<IdentifierName>(classAssignment.Target);
+        Assert.IsType<Call>(classAssignment.Value);
+        Assert.Equal(name, classAssignment.Target.ToString());
+
+        var assignmentCall = (Call)classAssignment.Value;
+        Assert.IsType<IdentifierName>(assignmentCall.Callee);
+        Assert.Equal("setmetatable", assignmentCall.Callee.ToString());
+        Assert.Equal(2, assignmentCall.ArgumentList.Arguments.Count);
+        Assert.IsType<TableInitializer>(assignmentCall.ArgumentList.Arguments.First().Expression);
+        Assert.IsType<TableInitializer>(assignmentCall.ArgumentList.Arguments.Last().Expression);
+
+        var emptyTable = (TableInitializer)assignmentCall.ArgumentList.Arguments.First().Expression;
+        var metaTable = (TableInitializer)assignmentCall.ArgumentList.Arguments.Last().Expression;
+        Assert.Empty(emptyTable.KeyValuePairs);
+        Assert.Single(metaTable.KeyValuePairs);
+
+        var firstMainMeta = metaTable.KeyValuePairs.First();
+        Assert.IsType<IdentifierName>(firstMainMeta.Key);
+        Assert.IsType<AnonymousFunction>(firstMainMeta.Value);
+        Assert.Equal("__tostring", firstMainMeta.Key.ToString());
+
+        var tostringFunction = (AnonymousFunction)firstMainMeta.Value;
+        Assert.NotNull(tostringFunction.Body);
+        Assert.Single(tostringFunction.Body.Statements);
+        Assert.IsType<Return>(tostringFunction.Body.Statements.First());
+
+        var returnClassName = (Return)tostringFunction.Body.Statements.First();
+        Assert.IsType<Literal>(returnClassName.Expression);
+
+        var classNameLiteral = (Literal)returnClassName.Expression;
+        Assert.Equal(nameString, classNameLiteral.ValueText);
+
+        var indexAssignment = (Assignment)classStatements[1];
+        Assert.IsType<MemberAccess>(indexAssignment.Target);
+        Assert.IsType<IdentifierName>(indexAssignment.Value);
+        Assert.Equal(name, indexAssignment.Value.ToString());
+
+        var indexAssignmentTarget = (MemberAccess)indexAssignment.Target;
+        Assert.IsType<IdentifierName>(indexAssignmentTarget.Expression);
+        Assert.IsType<IdentifierName>(indexAssignmentTarget.Name);
+        Assert.Equal(name, indexAssignmentTarget.Expression.ToString());
+        Assert.Equal("__index", indexAssignmentTarget.Name.ToString());
+
+        var classNameAssignment = (Assignment)classStatements[2];
+        Assert.IsType<MemberAccess>(classNameAssignment.Target);
+        Assert.IsType<Literal>(classNameAssignment.Value);
+
+        var classNameLiteral2 = (Literal)classNameAssignment.Value;
+        Assert.Equal(nameString, classNameLiteral2.ValueText);
+
+        var classNameAssignmentTarget = (MemberAccess)classNameAssignment.Target;
+        Assert.IsType<IdentifierName>(classNameAssignmentTarget.Expression);
+        Assert.IsType<IdentifierName>(classNameAssignmentTarget.Name);
+        Assert.Equal(name, classNameAssignmentTarget.Expression.ToString());
+        Assert.Equal("__className", classNameAssignmentTarget.Name.ToString());
+
+        var constructor = (Function)classStatements[3];
+        Assert.Equal($"{name}.new", constructor.Name.ToString());
+        Assert.False(constructor.IsLocal);
+        Assert.NotNull(constructor.Body);
+        Assert.Equal(2, constructor.Body.Statements.Count);
+        Assert.IsType<Variable>(constructor.Body.Statements.First());
+        Assert.IsType<Return>(constructor.Body.Statements.Last());
+
+        var selfVariable = (Variable)constructor.Body.Statements.First();
+        Assert.Equal("self", selfVariable.Name.ToString());
+        Assert.IsType<TypeCast>(selfVariable.Initializer);
+
+        var selfCast = (TypeCast)selfVariable.Initializer;
+        Assert.Equal(name, selfCast.Type.Path);
+        Assert.IsType<Parenthesized>(selfCast.Expression); // change this denis (to TableInitializer)
+
+        var returnSelf = (Return)constructor.Body.Statements.Last();
+        Assert.IsType<BinaryOperator>(returnSelf.Expression);
+
+        var binaryOperator = (BinaryOperator)returnSelf.Expression;
+        Assert.Equal("or", binaryOperator.Operator);
+        Assert.IsType<Call>(binaryOperator.Left);
+        Assert.IsType<IdentifierName>(binaryOperator.Right);
+        Assert.Equal("self", binaryOperator.Right.ToString());
+
+        var constructorCall = (Call)binaryOperator.Left;
+        Assert.Empty(constructorCall.ArgumentList.Arguments);
+        Assert.IsType<MemberAccess>(constructorCall.Callee);
+
+        var memberAccess = (MemberAccess)constructorCall.Callee;
+        Assert.Equal(':', memberAccess.Operator);
+        Assert.IsType<IdentifierName>(memberAccess.Expression);
+        Assert.IsType<IdentifierName>(memberAccess.Name);
+        Assert.Equal("self", memberAccess.Expression.ToString());
+        Assert.Equal(name, memberAccess.Name.ToString());
+
+        var constructorImplementation = (Function)classStatements[4];
+        Assert.Equal($"{name}:{name}", constructorImplementation.Name.ToString()); // change this denis
+        Assert.False(constructorImplementation.IsLocal);                           // change this denis
+        Assert.NotNull(constructorImplementation.Body);
+        Assert.Single(constructorImplementation.Body.Statements);
+
+        var callStatement = (ExpressionStatement)classBlock.Statements[2];
+        Assert.IsType<Call>(callStatement.Expression);
+
+        var call = (Call)callStatement.Expression;
+        Assert.IsType<MemberAccess>(call.Callee);
+        Assert.Equal(2, call.ArgumentList.Arguments.Count);
+        Assert.IsType<Literal>(call.ArgumentList.Arguments.First().Expression);
+        Assert.IsType<IdentifierName>(call.ArgumentList.Arguments.Last().Expression);
+        Assert.Equal(name, call.ArgumentList.Arguments.Last().Expression.ToString());
+
+        var nameLiteral = (Literal)call.ArgumentList.Arguments.First().Expression;
+        Assert.Equal(nameString, nameLiteral.ValueText);
+
+        var memberAccess2 = (MemberAccess)call.Callee;
+        Assert.IsType<IdentifierName>(memberAccess2.Expression);
+        Assert.IsType<IdentifierName>(memberAccess2.Name);
+        Assert.Equal("CS", memberAccess2.Expression.ToString());
+        Assert.Equal("defineGlobal", memberAccess2.Name.ToString());
+
+        var typeAlias = (TypeAlias)classBlock.Statements[3];
+        Assert.Equal(name, typeAlias.Name.ToString());
+        Assert.IsType<TypeOfCall>(typeAlias.Type); // probably temporary
     }
 
     [Fact]
