@@ -9,32 +9,6 @@ namespace RobloxCS.Shared;
 
 public static class StandardUtility
 {
-    public class KeyValuePairEqualityComparer<TKey, TValue> : IEqualityComparer<KeyValuePair<TKey, TValue>>
-    {
-        private readonly IEqualityComparer<TKey> _keyComparer;
-        private readonly IEqualityComparer<TValue> _valueComparer;
-
-        public KeyValuePairEqualityComparer(IEqualityComparer<TKey> keyComparer = null!,
-                                            IEqualityComparer<TValue> valueComparer = null!)
-        {
-            _keyComparer = keyComparer ?? EqualityComparer<TKey>.Default;
-            _valueComparer = valueComparer ?? EqualityComparer<TValue>.Default;
-        }
-
-        public bool Equals(KeyValuePair<TKey, TValue> x, KeyValuePair<TKey, TValue> y)
-        {
-            return _keyComparer.Equals(x.Key, y.Key) && _valueComparer.Equals(x.Value, y.Value);
-        }
-
-        public int GetHashCode(KeyValuePair<TKey, TValue> obj)
-        {
-            var hashKey = _keyComparer.GetHashCode(obj.Key!);
-            var hashValue = _valueComparer.GetHashCode(obj.Value!);
-
-            return hashKey ^ hashValue;
-        }
-    }
-
     public static Type GetRuntimeType(SemanticModel semanticModel, SyntaxNode node, ITypeSymbol typeSymbol)
     {
         var fullyQualifiedName = GetFullSymbolName(typeSymbol);
@@ -45,7 +19,15 @@ public static class StandardUtility
             semanticModel.Compilation.Emit(memoryStream);
 
             memoryStream.Seek(0, SeekOrigin.Begin);
-            var assembly = Assembly.Load(memoryStream.ToArray());
+            Assembly assembly;
+            try
+            {
+                assembly = Assembly.Load(memoryStream.ToArray());
+            }
+            catch (Exception e)
+            {
+                throw Logger.CodegenError(node, $"Failed to resolve runtime type '{fullyQualifiedName}' because the assembly could not be loaded: {e.Message}");
+            }
 
             // get the type from the loaded assembly
             type = assembly.GetType(fullyQualifiedName);
@@ -104,10 +86,7 @@ public static class StandardUtility
     public static ISymbol? FindMember(INamespaceSymbol namespaceSymbol, string memberName)
     {
         var member = namespaceSymbol.GetMembers().FirstOrDefault<ISymbol?>(member => member?.Name == memberName, null);
-        if (member == null && namespaceSymbol.ContainingNamespace != null)
-        {
-            member = FindMember(namespaceSymbol.ContainingNamespace, memberName);
-        }
+        if (member == null && namespaceSymbol.ContainingNamespace != null) member = FindMember(namespaceSymbol.ContainingNamespace, memberName);
 
         return member;
     }
@@ -115,10 +94,7 @@ public static class StandardUtility
     public static ISymbol? FindMemberDeep(INamedTypeSymbol namedTypeSymbol, string memberName)
     {
         var member = namedTypeSymbol.GetMembers().FirstOrDefault(member => member.Name == memberName);
-        if (namedTypeSymbol.BaseType != null && member == null)
-        {
-            return FindMemberDeep(namedTypeSymbol.BaseType, memberName);
-        }
+        if (namedTypeSymbol.BaseType != null && member == null) return FindMemberDeep(namedTypeSymbol.BaseType, memberName);
 
         return member;
     }
@@ -196,9 +172,8 @@ public static class StandardUtility
         };
     }
 
-    public static string? GetBit32MethodName(string bitOp)
-    {
-        return bitOp switch
+    public static string? GetBit32MethodName(string bitOp) =>
+        bitOp switch
         {
             "&=" or "&" => "band",
             "|=" or "|" => "bor",
@@ -209,11 +184,9 @@ public static class StandardUtility
             "~" => "bnot",
             _ => null
         };
-    }
 
-    public static string GetMappedOperator(string op)
-    {
-        return op switch
+    public static string GetMappedOperator(string op) =>
+        op switch
         {
             "++" => "+=",
             "--" => "-=",
@@ -223,7 +196,6 @@ public static class StandardUtility
             "||" => "or",
             _ => op
         };
-    }
 
     public static bool IsFromSystemNamespace(ISymbol? typeSymbol)
     {
@@ -344,5 +316,29 @@ public static class StandardUtility
         if (qualifiedNameNodes.Count <= 1) names.AddRange(simpleNameNodes.Select(simpleNameNode => simpleNameNode.ToString().Trim()));
 
         return noGenerics ? names : addGenerics(names);
+    }
+
+    public class KeyValuePairEqualityComparer<TKey, TValue> : IEqualityComparer<KeyValuePair<TKey, TValue>>
+    {
+        private readonly IEqualityComparer<TKey> _keyComparer;
+        private readonly IEqualityComparer<TValue> _valueComparer;
+
+        public KeyValuePairEqualityComparer(IEqualityComparer<TKey> keyComparer = null!,
+                                            IEqualityComparer<TValue> valueComparer = null!)
+        {
+            _keyComparer = keyComparer ?? EqualityComparer<TKey>.Default;
+            _valueComparer = valueComparer ?? EqualityComparer<TValue>.Default;
+        }
+
+        public bool Equals(KeyValuePair<TKey, TValue> x, KeyValuePair<TKey, TValue> y) =>
+            _keyComparer.Equals(x.Key, y.Key) && _valueComparer.Equals(x.Value, y.Value);
+
+        public int GetHashCode(KeyValuePair<TKey, TValue> obj)
+        {
+            var hashKey = _keyComparer.GetHashCode(obj.Key!);
+            var hashValue = _valueComparer.GetHashCode(obj.Value!);
+
+            return hashKey ^ hashValue;
+        }
     }
 }
