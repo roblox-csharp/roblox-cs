@@ -33,10 +33,11 @@ public static class AstUtility
             ? new Literal((value - 1).ToString())
             : new BinaryOperator(expression, "-", new Literal("1"));
 
+    /// <summary> Creates type info table for runtime type objects</summary>
     public static TableInitializer CreateTypeInfo(Type type) => CreateTypeInfo(type, false);
 
     /// <summary> Creates type info table for runtime type objects</summary>
-    public static TableInitializer CreateTypeInfo(Type type, bool noAttributes)
+    public static TableInitializer CreateTypeInfo(Type type, bool noAttributes = false, bool noProperties = false)
     {
         var memberInfo = CreateMemberInfo(type);
         List<Expression> keys =
@@ -90,8 +91,8 @@ public static class AstUtility
             // new IdentifierName("IsSecurityCritical"),
             // new IdentifierName("IsSecuritySafeCritical"),
             // new IdentifierName("IsSecurityTransparent"),
-            new IdentifierName("IsSignatureType"),
-            new IdentifierName("IsSpecialName"),
+            // new IdentifierName("IsSignatureType"),
+            // new IdentifierName("IsSpecialName"),
             new IdentifierName("IsTypeDefinition"),
 
             // new IdentifierName("IsUnicodeClass"),
@@ -111,10 +112,10 @@ public static class AstUtility
 
         List<Expression> values =
         [
-            type.FullName != null ? new Literal('"' + type.FullName + '"') : Nil,
-            type.Namespace != null ? new Literal('"' + type.Namespace + '"') : Nil,
+            type.FullName != null ? String(type.FullName) : Nil,
+            type.Namespace != null ? String(type.Namespace) : Nil,
 
-            // type.AssemblyQualifiedName != null ? new Literal('"' + type.AssemblyQualifiedName + '"') : Nil,
+            // type.AssemblyQualifiedName != null ? String(type.AssemblyQualifiedName : Nil,
             type.TypeInitializer != null ? CreateMethodBase(type.TypeInitializer) : Nil,
             type.ReflectedType != null ? CreateTypeInfo(type.ReflectedType) : Nil,
             new Literal(type.IsAbstract.ToString().ToLower()),
@@ -160,8 +161,8 @@ public static class AstUtility
             // new Literal(type.IsSecurityCritical.ToString().ToLower()),
             // new Literal(type.IsSecuritySafeCritical.ToString().ToLower()),
             // new Literal(type.IsSecurityTransparent.ToString().ToLower()),
-            new Literal(type.IsSignatureType.ToString().ToLower()),
-            new Literal(type.IsSpecialName.ToString().ToLower()),
+            // new Literal(type.IsSignatureType.ToString().ToLower()),
+            // new Literal(type.IsSpecialName.ToString().ToLower()),
             new Literal(type.IsTypeDefinition.ToString().ToLower()),
 
             // new Literal(type.IsUnicodeClass.ToString().ToLower()),
@@ -180,7 +181,7 @@ public static class AstUtility
             new TableInitializer(type.CustomAttributes.Select(CreateCustomAttributeData).ToList<Expression>()),
             new AnonymousFunction(new ParameterList([new Parameter(new IdentifierName("self"))]),
                                   null,
-                                  new Block([new Return(CreatePropertiesInfo(type.GetProperties()))]))
+                                  new Block([new Return(noProperties ? TableInitializer.Empty : CreatePropertiesInfo(type.GetProperties()))]))
         ];
 
         if (keys.Count != values.Count)
@@ -208,12 +209,12 @@ public static class AstUtility
 
                                           List<Expression> values =
                                           [
-                                              new Literal(property.CanRead.ToString().ToLower()),
-                                              new Literal(property.CanWrite.ToString().ToLower()),
-                                              new Literal(property.IsSpecialName.ToString().ToLower()),
-                                              CreateTypeInfo(property.PropertyType),
-                                              property.GetMethod != null ? CreateMethodInfo(property.GetMethod) : Nil,
-                                              property.SetMethod != null ? CreateMethodInfo(property.SetMethod) : Nil
+                                              Bool(property.CanRead),
+                                              Bool(property.CanWrite),
+                                              Bool(property.IsSpecialName),
+                                              CreateTypeInfo(property.PropertyType, noProperties: true),
+                                              property.GetMethod != null ? CreateMethodInfo(property.GetMethod, true) : Nil,
+                                              property.SetMethod != null ? CreateMethodInfo(property.SetMethod, true) : Nil
                                           ];
 
                                           return TableInitializer.Union(memberInfo, new TableInitializer(values, keys));
@@ -224,16 +225,16 @@ public static class AstUtility
     }
 
     /// <summary>Creates method info table for runtime type objects</summary>
-    private static TableInitializer CreateMethodInfo(MethodInfo method)
+    private static TableInitializer CreateMethodInfo(MethodInfo method, bool noProperties = false)
     {
         var methodBase = CreateMethodBase(method);
         List<Expression> keys = [new IdentifierName("ReturnType"), new IdentifierName("ReturnParameter")];
-        List<Expression> values = [CreateTypeInfo(method.ReturnType), CreateParameterInfo(method.ReturnParameter)];
+        List<Expression> values = [CreateTypeInfo(method.ReturnType, noProperties: noProperties), CreateParameterInfo(method.ReturnParameter, noProperties)];
 
         return TableInitializer.Union(methodBase, new TableInitializer(values, keys));
     }
 
-    private static TableInitializer CreateParameterInfo(ParameterInfo parameter)
+    private static TableInitializer CreateParameterInfo(ParameterInfo parameter, bool noProperties = false)
     {
         List<Expression> keys =
         [
@@ -254,20 +255,24 @@ public static class AstUtility
 
         List<Expression> values =
         [
-            parameter.Name != null ? new Literal('"' + parameter.Name + '"') : Nil,
-            new Literal(parameter.IsIn.ToString().ToLower()),
-            new Literal(parameter.IsOut.ToString().ToLower()),
-            new Literal(parameter.IsOptional.ToString().ToLower()),
+            parameter.Name != null ? String(parameter.Name) : Nil,
+            Bool(parameter.IsIn),
+            Bool(parameter.IsOut),
+            Bool(parameter.IsOptional),
 
-            // new Literal(parameter.IsLcid.ToString().ToLower()),
-            new Literal(parameter.IsRetval.ToString().ToLower()),
-            new Literal(parameter.HasDefaultValue.ToString().ToLower()),
+            // Bool(parameter.IsLcid),
+            Bool(parameter.IsRetval),
+            Bool(parameter.HasDefaultValue),
             CreateLuauValue(parameter.DefaultValue),
             CreateLuauValue(parameter.RawDefaultValue),
             new Literal(parameter.Position.ToString()),
-            CreateTypeInfo(parameter.ParameterType),
+            CreateTypeInfo(parameter.ParameterType, noProperties: noProperties),
             CreateMemberInfo(parameter.Member)
         ];
+
+        if (keys.Count != values.Count)
+            throw
+                Logger.CompilerError($"Failed to create runtime parameter info object: Keys and values have unequal sizes.\n\tKeys: {keys.Count}\n\tValues: {values.Count}");
 
         return new TableInitializer(values, keys);
     }
@@ -295,10 +300,10 @@ public static class AstUtility
             // new IdentifierName("IsSecurityCritical"),
             // new IdentifierName("IsSecuritySafeCritical"),
             // new IdentifierName("IsSecurityTransparent"),
-            new IdentifierName("ContainsGenericParameters"),
-            new IdentifierName("CallingConvention"),
-            new IdentifierName("MethodImplementationFlags")
+            new IdentifierName("ContainsGenericParameters")
 
+            // new IdentifierName("CallingConvention"),
+            // new IdentifierName("MethodImplementationFlags")
             // new IdentifierName("Attributes")
         ];
 
@@ -321,11 +326,16 @@ public static class AstUtility
             // new Literal(method.IsSecurityCritical.ToString().ToLower()),
             // new Literal(method.IsSecuritySafeCritical.ToString().ToLower()),
             // new Literal(method.IsSecurityTransparent.ToString().ToLower()),
-            new Literal(method.ContainsGenericParameters.ToString().ToLower()),
-            new Literal(((int)method.CallingConvention).ToString()),
-            new Literal(((int)method.MethodImplementationFlags).ToString()),
-            new Literal(((int)method.Attributes).ToString())
+            new Literal(method.ContainsGenericParameters.ToString().ToLower())
+
+            // new Literal(((int)method.CallingConvention).ToString()),
+            // new Literal(((int)method.MethodImplementationFlags).ToString()),
+            // new Literal(((int)method.Attributes).ToString())
         ];
+
+        if (keys.Count != values.Count)
+            throw
+                Logger.CompilerError($"Failed to create runtime method base object: Keys and values have unequal sizes.\n\tKeys: {keys.Count}\n\tValues: {values.Count}");
 
         return TableInitializer.Union(memberInfo, new TableInitializer(values, keys));
     }
@@ -335,7 +345,7 @@ public static class AstUtility
     {
         List<Expression> keys =
         [
-            new IdentifierName("Name"), new IdentifierName("MemberType"), new IdentifierName("IsCollectible")
+            new IdentifierName("Name")
 
             // new IdentifierName("DeclaringType"),
             // new IdentifierName("ReflectedType"),
@@ -343,11 +353,15 @@ public static class AstUtility
 
         List<Expression> values =
         [
-            new Literal('"' + member.Name + '"'), new Literal(((int)member.MemberType).ToString().ToLower()), new Literal(member.IsCollectible.ToString().ToLower())
+            String(member.Name)
 
             // member.DeclaringType != null ? CreateTypeInfo(member.DeclaringType) : Nil,
             // member.ReflectedType != null ? CreateTypeInfo(member.ReflectedType) : Nil,
         ];
+
+        if (keys.Count != values.Count)
+            throw
+                Logger.CompilerError($"Failed to create runtime member info object: Keys and values have unequal sizes.\n\tKeys: {keys.Count}\n\tValues: {values.Count}");
 
         return new TableInitializer(values, keys);
     }
@@ -369,15 +383,13 @@ public static class AstUtility
             _ => string.IsNullOrEmpty(value.ToString()) ? Nil : new Literal(value.ToString()!)
         };
 
-    /// <summary>
-    ///     CS.defineGlobal(name, "name") or parentName.name = "name"
-    /// </summary>
+    /// <summary><code>CS.defineGlobal(name, "name")</code> or <code>parentName.name = "name"</code></summary>
     public static Statement DefineGlobalOrMember(SyntaxNode node, SimpleName name)
     {
-        if (StandardUtility.IsGlobal(node)) return new ExpressionStatement(DefineGlobal(name, name));
+        if (StandardUtility.IsGlobal(node))
+            return new ExpressionStatement(DefineGlobal(name, name));
 
         var fullParentName = GetFullParentName(node);
-
         if (fullParentName != null)
             return new Assignment(new MemberAccess(fullParentName, name),
                                   name);
@@ -706,4 +718,5 @@ public static class AstUtility
     public static TypeRef? CreateTypeRef(TypeSyntax? type) => CreateTypeRef(type?.ToString());
 
     public static Literal String(string text) => new($"\"{text}\"");
+    public static Literal Bool(bool value) => value ? True : False;
 }
