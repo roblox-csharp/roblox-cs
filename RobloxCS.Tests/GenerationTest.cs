@@ -1197,6 +1197,45 @@ public class GenerationTest : Generation
         Assert.IsType<TypeAlias>(classBlock.Statements[3]);
     }
 
+    [Theory]
+    [InlineData("class MyClass { private readonly int _myMember = 69; }")]
+    [InlineData("class MyClass { private int _myMember { get; } = 69; }")]
+    public void Generates_ClassFieldsAndProperties(string source)
+    {
+        var ast = Generate(source);
+        Assert.NotEmpty(ast.Statements);
+
+        var globalStatements = ast.Statements.Skip(1).ToList();
+        Assert.Single(globalStatements);
+        Assert.IsType<Block>(globalStatements.First());
+
+        var classBlock = (Block)globalStatements.First();
+        Assert.True(classBlock.Statements.Count >= 2);
+        Assert.IsType<ScopedBlock>(classBlock.Statements[1]);
+        
+        var classStatements = ((ScopedBlock)classBlock.Statements[1]).Statements;
+        Assert.True(classStatements.Count >= 4);
+        Assert.IsType<Function>(classStatements[4]);
+        
+        var constructor = (Function)classStatements[4];
+        Assert.NotNull(constructor.Body);
+        Assert.Equal(2, constructor.Body.Statements.Count);
+        Assert.IsType<Assignment>(constructor.Body.Statements.First());
+        
+        var fieldAssignment = (Assignment)constructor.Body.Statements.First();
+        Assert.IsType<MemberAccess>(fieldAssignment.Target);
+        Assert.IsType<Literal>(fieldAssignment.Value);
+        
+        var memberAccess = (MemberAccess)fieldAssignment.Target;
+        Assert.IsType<IdentifierName>(memberAccess.Expression);
+        Assert.IsType<IdentifierName>(memberAccess.Name);
+        Assert.Equal("self", memberAccess.Expression.ToString());
+        Assert.Equal("_myMember", memberAccess.Name.ToString());
+        
+        var value = (Literal)fieldAssignment.Value;
+        Assert.Equal("69", value.ValueText);
+    }
+
     [Fact]
     public void Generates_Classes()
     {
