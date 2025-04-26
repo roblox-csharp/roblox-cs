@@ -340,9 +340,11 @@ public sealed class LuauGenerator(
     {
         var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node)!;
         var parameterList = Visit<ParameterList>(node.ParameterList);
-        var body = Visit<Block?>(node.Body);
-        var attributeLists = node.AttributeLists.Select(Visit<AttributeList>).ToList();
+        var body = node.ExpressionBody != null
+            ? Visit<Block>(node.ExpressionBody)
+            : Visit<Block?>(node.Body);
 
+        var attributeLists = node.AttributeLists.Select(Visit<AttributeList>).ToList();
         return GenerateConstructor(classDeclaration, parameterList, body, attributeLists);
     }
 
@@ -1046,6 +1048,7 @@ public sealed class LuauGenerator(
          && GetMethodName(methodSymbol) is { } methodName)
             identifierText = methodName;
 
+        var parent = node.Parent;
         node = node.WithIdentifier(SyntaxFactory.Identifier(identifierText));
 
         var name = AstUtility.CreateSimpleName(node);
@@ -1059,7 +1062,7 @@ public sealed class LuauGenerator(
         if (classDeclaration == null
          || symbol is not (IFieldSymbol or IPropertySymbol or IMethodSymbol { MethodKind: MethodKind.Ordinary })
          || symbol.ContainingType.Name != classDeclaration.Identifier.Text
-         || IsAlreadyQualified(node))
+         || IsAlreadyQualified(node, parent))
             return name;
 
         var qualifier = symbol.IsStatic
@@ -2210,10 +2213,24 @@ public sealed class LuauGenerator(
         return identifier;
     }
 
-    private bool IsAlreadyQualified(IdentifierNameSyntax node)
+    private bool IsAlreadyQualified(IdentifierNameSyntax node, SyntaxNode? parent)
     {
-        if (FindFirstAncestor<MemberAccessExpressionSyntax>(node) is { } memberAccess) return memberAccess.Name == node;
-        if (FindFirstAncestor<QualifiedNameSyntax>(node) is { } qualifiedName) return qualifiedName.Right == node;
+        {
+            if (FindFirstAncestor<MemberAccessExpressionSyntax>(node) is { } memberAccess)
+                return memberAccess.Name == node;
+
+            if (FindFirstAncestor<QualifiedNameSyntax>(node) is { } qualifiedName)
+                return qualifiedName.Right == node;
+        }
+
+        if (parent != null)
+        {
+            if (parent.FirstAncestorOrSelf<MemberAccessExpressionSyntax>() is { } memberAccess)
+                return memberAccess.Name == node;
+
+            if (parent.FirstAncestorOrSelf<QualifiedNameSyntax>() is { } qualifiedName)
+                return qualifiedName.Right == node;
+        }
 
         return false;
     }
