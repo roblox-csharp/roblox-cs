@@ -540,6 +540,86 @@ public class GenerationTest : Generation
     }
 
     [Fact]
+    public void Generates_HashSetType()
+    {
+        var ast = Generate("HashSet<int> set = [];");
+        Assert.NotEmpty(ast.Statements);
+
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<VariableList>(statement);
+
+        var variableList = (VariableList)statement;
+        var variable = variableList.Variables.First();
+        Assert.Equal("set", variable.Name.ToString());
+        Assert.IsType<TableInitializer>(variable.Initializer);
+        Assert.IsType<MappedType>(variable.Type);
+
+        var mappedType = (MappedType)variable.Type;
+        Assert.Equal("number", mappedType.KeyType.Path);
+        Assert.Equal("boolean", mappedType.ValueType.Path);
+    }
+
+    [Fact]
+    public void Generates_NestedHashSetType()
+    {
+        var ast = Generate("HashSet<HashSet<int>> set = [];");
+        Assert.NotEmpty(ast.Statements);
+
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<VariableList>(statement);
+
+        var variableList = (VariableList)statement;
+        var variable = variableList.Variables.First();
+        Assert.Equal("set", variable.Name.ToString());
+        Assert.IsType<TableInitializer>(variable.Initializer);
+        Assert.IsType<MappedType>(variable.Type);
+
+        var mappedType = (MappedType)variable.Type;
+        Assert.IsType<MappedType>(mappedType.KeyType);
+        Assert.Equal("boolean", mappedType.ValueType.Path);
+
+        var nestedMappedType = (MappedType)mappedType.KeyType;
+        Assert.Equal("number", nestedMappedType.KeyType.Path);
+        Assert.Equal("boolean", nestedMappedType.ValueType.Path);
+    }
+
+    [Theory]
+    [InlineData("var set = new HashSet<int>() { 1 };")]
+    [InlineData("HashSet<int> set = [1];", false)]
+    public void Generates_HashSetCreation(string source, bool isMacro = true)
+    {
+        var ast = Generate(source);
+        Assert.NotEmpty(ast.Statements);
+
+        var statement = ast.Statements.Skip(1).First();
+        Assert.IsType<VariableList>(statement);
+
+        var variableList = (VariableList)statement;
+        var variable = variableList.Variables.First();
+        Assert.Equal("set", variable.Name.ToString());
+        Assert.NotNull(variable.Initializer);
+        if (isMacro)
+        {
+            Assert.NotNull(variable.Initializer.ExpandedByMacro);
+            Assert.Equal(MacroKind.HashSetConstruction, variable.Initializer.ExpandedByMacro);
+        }
+
+        Assert.IsType<TableInitializer>(variable.Initializer);
+
+        var table = (TableInitializer)variable.Initializer;
+        Assert.Single(table.Values);
+
+        var pair = table.KeyValuePairs.First();
+        Assert.IsType<Literal>(pair.Key);
+        Assert.IsType<Literal>(pair.Value);
+
+        var value = (Literal)pair.Key;
+        var initializer = (Literal)pair.Value;
+        Assert.Equal("1", value.ValueText);
+        Assert.Equal("true", initializer.ValueText);
+    }
+
+    [Fact]
     public void Generates_ListType()
     {
         var ast = Generate("List<int> l = [];");
@@ -1186,10 +1266,11 @@ public class GenerationTest : Generation
         var variableList = (VariableList)statement;
         var variable = variableList.Variables.First();
         Assert.Equal(expectedLuauType, variable.Type?.ToString());
-        
+
         if (expectedValueText == null) return;
+
         Assert.IsType<Literal>(variable.Initializer);
-        
+
         var literal = (Literal)variable.Initializer;
         Assert.Equal(expectedValueText, literal.ValueText);
     }

@@ -637,7 +637,6 @@ public static class AstUtility
         {
             var argsRaw = functionMatch.Groups[1].Value;
             var returnTypeRaw = functionMatch.Groups[2].Value.Trim();
-
             var args = ParseFunctionArgs(argsRaw);
             var returnType = CreateTypeRef(returnTypeRaw)!;
 
@@ -646,18 +645,61 @@ public static class AstUtility
 
         var mappedTypeMatch = Regex.Match(mappedTypePath, @"\{\s*\[([a-zA-Z0-9]+)\]:\s*(.*)\s*\}");
         if (mappedTypeMatch.Success)
-        {
-            var keyType = CreateTypeRef(mappedTypeMatch.Groups[1].Value)!;
-            var valueType = CreateTypeRef(mappedTypeMatch.Groups[2].Value)!;
-
-            return new MappedType(keyType, valueType);
-        }
+            return TryParseMappedType(mappedTypePath);
 
         var arrayMatch = Regex.Match(mappedTypePath, @"\{\s*(.*)\s*\}");
-
-        if (arrayMatch.Success) return new ArrayType(CreateTypeRef(arrayMatch.Groups[1].Value.Trim())!);
+        if (arrayMatch.Success)
+            return new ArrayType(CreateTypeRef(arrayMatch.Groups[1].Value.Trim())!);
 
         return new TypeRef(mappedTypePath, true);
+    }
+    
+    private static MappedType? TryParseMappedType(string input)
+    {
+        input = input.Trim();
+        if (!input.StartsWith('{') || !input.EndsWith('}'))
+            return null;
+
+        input = input.Substring(1, input.Length - 2).Trim();
+        if (!input.StartsWith('['))
+            return null;
+
+        var index = 0;
+        var bracketLevel = 0;
+        var colonIndex = -1;
+        for (; index < input.Length; index++)
+        {
+            var c = input[index];
+            if (c == '[')
+            {
+                bracketLevel++;
+            }
+            else if (c == ']')
+            {
+                bracketLevel--;
+            }
+            else if (c == ':' && bracketLevel == 0)
+            {
+                colonIndex = index;
+                break;
+            }
+        }
+
+        if (colonIndex == -1)
+            return null;
+
+        var keyPart = input[..colonIndex].Trim(); // includes [ ... ]
+        var valuePart = input[(colonIndex + 1)..].Trim();
+        if (!keyPart.StartsWith('[') || !keyPart.EndsWith(']'))
+            return null;
+
+        var keyContent = keyPart.Substring(1, keyPart.Length - 2).Trim(); // remove [ and ]
+        var keyType = CreateTypeRef(keyContent);
+        var valueType = CreateTypeRef(valuePart);
+        if (keyType != null && valueType != null)
+            return new MappedType(keyType, valueType);
+
+        return null;
     }
 
     private static List<ParameterType> ParseFunctionArgs(string input)

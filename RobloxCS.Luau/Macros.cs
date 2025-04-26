@@ -89,7 +89,7 @@ public class MacroManager(
     /// <summary>
     ///     Takes a C# generic name and expands the name into a macro'd type
     /// </summary>
-    public Name? GenericName(Func<SyntaxNode, Node?> visit, GenericNameSyntax genericName)
+    public Name? GenericName(GenericNameSyntax genericName, List<string> typeArguments)
     {
         var typeSymbol = semanticModel.GetTypeInfo(genericName).Type;
         if (StandardUtility.IsFromSystemNamespace(typeSymbol))
@@ -100,8 +100,7 @@ public class MacroManager(
                 case "List":
                 case "IEnumerable":
                 {
-                    var elementTypeName = visit(genericName.TypeArgumentList.Arguments.First())!;
-                    var expanded = new IdentifierName($"{{ {StandardUtility.GetMappedType(elementTypeName.ToString()!)} }}");
+                    var expanded = new IdentifierName($"{{ {typeArguments.First()} }}");
                     expanded.MarkExpanded(MacroKind.IEnumerableType);
 
                     return expanded;
@@ -110,8 +109,7 @@ public class MacroManager(
                 case "HashSet":
                 case "ISet":
                 {
-                    var elementTypeName = visit(genericName.TypeArgumentList.Arguments.First())!;
-                    var expanded = new IdentifierName($"{{ [{StandardUtility.GetMappedType(elementTypeName.ToString()!)}]: boolean }}");
+                    var expanded = new IdentifierName($"{{ [{typeArguments.First()}]: boolean }}");
                     expanded.MarkExpanded(MacroKind.ISetType);
 
                     return expanded;

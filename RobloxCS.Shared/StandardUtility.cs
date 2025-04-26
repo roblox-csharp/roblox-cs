@@ -164,7 +164,7 @@ public static class StandardUtility
         if (csharpType.StartsWith("HashSet<"))
         {
             var elementType = GetMappedType(ExtractTypeArguments(csharpType).First());
-            return $"CS.IEnumerator<{elementType}>";
+            return $"{{ [{elementType}]: boolean }}";
         }
 
         if (csharpType.StartsWith("Roblox.Enum"))
