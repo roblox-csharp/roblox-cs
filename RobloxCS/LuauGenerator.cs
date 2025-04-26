@@ -998,9 +998,9 @@ public sealed class LuauGenerator(
     public override Node VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
     {
         var expression = Visit<Expression>(node.Expression);
-        var originalName = Visit<Name>(node.Name);
-        if (originalName is not SimpleName simpleName)
-            throw Logger.CompilerError($"Member access name is not a simple name, instead it is '{originalName.GetType().Name}'", node.Name);
+        var original = Visit<Expression>(node.Name);
+        if (original is not SimpleName simpleName)
+            return original; // hot fucking trash
 
         var name = AstUtility.GetNonGenericName(simpleName);
         var memberAccess = new MemberAccess(expression, name);
@@ -1039,7 +1039,7 @@ public sealed class LuauGenerator(
         return new QualifiedName(left, right);
     }
 
-    public override Node VisitIdentifierName(IdentifierNameSyntax node)
+    public override Expression VisitIdentifierName(IdentifierNameSyntax node)
     {
         var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
         if (symbol is ILocalSymbol { HasConstantValue: true } localSymbol)
