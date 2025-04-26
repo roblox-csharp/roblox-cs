@@ -27,8 +27,7 @@ public sealed class RojoProject
     [JsonPropertyName("emitLegacyScripts")]
     public bool EmitLegacyScripts { get; init; } = true;
 
-    public bool IsValid() =>
-        !string.IsNullOrEmpty(Name) && Tree != null;
+    public bool IsValid() => !string.IsNullOrEmpty(Name) && Tree != null;
 }
 
 public sealed class InstanceDescription
@@ -65,18 +64,18 @@ public static class RojoReader
         { "StarterPlayer", "game:GetService(\"Players\").LocalPlayer" }, { "StarterPlayerScripts", "PlayerScripts" }
     };
 
-    public static RojoProject Read(string configPath)
+    public static RojoProject Read(string projectPath)
     {
         var jsonContent = "";
         RojoProject? project = null;
 
         try
         {
-            jsonContent = File.ReadAllText(configPath);
+            jsonContent = File.ReadAllText(projectPath);
         }
         catch (Exception e)
         {
-            FailToRead(configPath, e.Message);
+            FailToRead(projectPath, e.Message);
         }
 
         try
@@ -85,24 +84,35 @@ public static class RojoReader
         }
         catch (Exception e)
         {
-            FailToRead(configPath, e.ToString());
+            FailToRead(projectPath, e.ToString());
         }
 
         if (project == null || !project.IsValid())
-            FailToRead(configPath, "Invalid Rojo project! Make sure it has all required fields ('name' and 'tree').");
+            FailToRead(projectPath, "Invalid Rojo project! Make sure it has all required fields ('name' and 'tree').");
 
         UpdateChildInstances(project!.Tree);
         return project!;
     }
 
-    public static string? FindProjectPath(string directoryPath, string projectName) =>
-        Directory.GetFiles(directoryPath).FirstOrDefault(file => Path.GetFileName(file) == $"{projectName}.project.json");
+    public static RojoProject? ReadFromDirectory(string inputDirectory, string projectName)
+    {
+        if (projectName == "UNIT_TESTING") return null;
+
+        var path = FindProjectPath(inputDirectory, projectName);
+        if (path == null)
+            throw Logger.Error($"Failed to find Rojo project file \"{projectName}.project.json\"!");
+
+        return Read(path);
+    }
 
     public static string? ResolveInstancePath(RojoProject project, string filePath)
     {
         var path = TraverseInstanceTree(project.Tree, StandardUtility.FixPathSeparator(filePath));
         return path == null ? null : FormatInstancePath(StandardUtility.FixPathSeparator(path));
     }
+
+    private static string? FindProjectPath(string directoryPath, string projectName) =>
+        Directory.GetFiles(directoryPath).FirstOrDefault(file => Path.GetFileName(file) == $"{projectName}.project.json");
 
     private static string? TraverseInstanceTree(InstanceDescription instance, string filePath)
     {
@@ -156,5 +166,5 @@ public static class RojoReader
             UpdateChildInstances(childInstance);
     }
 
-    private static void FailToRead(string configPath, string message) => Logger.Error($"Failed to read {configPath}!\n{message}");
+    private static void FailToRead(string configPath, string message) => throw Logger.Error($"Failed to read {configPath}!\n{message}");
 }

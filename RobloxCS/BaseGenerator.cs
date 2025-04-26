@@ -7,7 +7,7 @@ using RobloxCS.Shared;
 namespace RobloxCS;
 
 /// <summary>Basically just defines utility methods for LuauGenerator</summary>
-public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharpSyntaxVisitor<Node>
+public class BaseGenerator(FileCompilation file, CSharpCompilation compiler) : CSharpSyntaxVisitor<Node>
 {
     private readonly SyntaxKind[] _commentSyntaxes =
     [
@@ -16,10 +16,10 @@ public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharp
         SyntaxKind.MultiLineCommentTrivia,
         SyntaxKind.MultiLineDocumentationCommentTrivia
     ];
+    protected readonly FileCompilation _file = file;
 
     private readonly HashSet<SyntaxKind> _multiLineCommentSyntaxes = [SyntaxKind.MultiLineCommentTrivia, SyntaxKind.MultiLineDocumentationCommentTrivia];
-    protected readonly SyntaxTree _tree = tree;
-    protected SemanticModel _semanticModel = compiler.GetSemanticModel(tree);
+    protected SemanticModel _semanticModel = compiler.GetSemanticModel(file.Tree);
 
     protected TNode Visit<TNode>(SyntaxNode? node)
         where TNode : Node? =>
@@ -50,7 +50,7 @@ public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharp
             {
                 var initializer = GetFieldOrPropertyInitializer(classDeclaration, field.Declaration.Type, declarator.Initializer);
                 if (initializer == null) continue;
-                
+
                 // stupid hack
                 body.Statements.Insert(0,
                                        new Assignment(new MemberAccess(new IdentifierName("self"),
@@ -63,7 +63,7 @@ public class BaseGenerator(SyntaxTree tree, CSharpCompilation compiler) : CSharp
         {
             var initializer = GetFieldOrPropertyInitializer(classDeclaration, property.Type, property.Initializer);
             if (initializer == null) continue;
-            
+
             body.Statements.Insert(0,
                                    new Assignment(new MemberAccess(new IdentifierName("self"),
                                                                    AstUtility.CreateSimpleName(property)),

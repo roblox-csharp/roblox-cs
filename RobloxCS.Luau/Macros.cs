@@ -27,8 +27,7 @@ public enum MacroKind : byte
 
 public class MacroManager(
     SemanticModel semanticModel,
-    Prerequisites prerequisites,
-    OccupiedIdentifiersStack occupiedIdentifiersStack)
+    FileCompilation file)
 {
     public Node? Assignment(Func<SyntaxNode, Node?> visit, AssignmentExpressionSyntax assignment)
     {
@@ -271,44 +270,44 @@ public class MacroManager(
                     break;
                 }
 
-                var foundIdentifier = occupiedIdentifiersStack.AddIdentifier("_found");
-                var defaultIdentifier = occupiedIdentifiersStack.AddIdentifier("_default");
+                var foundIdentifier = file.OccupiedIdentifiers.AddIdentifier("_found");
+                var defaultIdentifier = file.OccupiedIdentifiers.AddIdentifier("_default");
                 var predicate = (Expression)visit(arguments.First().Expression)!;
-                prerequisites.Add(new Variable(foundIdentifier, true));
-                prerequisites.Add(new Variable(defaultIdentifier, true, predicate));
+                file.Prerequisites.Add(new Variable(foundIdentifier, true));
+                file.Prerequisites.Add(new Variable(defaultIdentifier, true, predicate));
 
-                occupiedIdentifiersStack.Push();
-                var valueIdentifier = occupiedIdentifiersStack.AddIdentifier("v");
-                prerequisites.Add(new If(new BinaryOperator(new Call(new IdentifierName("typeof"),
-                                                                     AstUtility.CreateArgumentList([defaultIdentifier])),
-                                                            "==",
-                                                            new Literal("\"function\"")),
-                                         new Block([
-                                             new For([AstUtility.DiscardName, valueIdentifier],
-                                                     self,
-                                                     new Block([
-                                                         new Block([
-                                                             new If(new UnaryOperator("not ",
-                                                                                      new
-                                                                                          Call(defaultIdentifier,
-                                                                                               AstUtility
-                                                                                                   .CreateArgumentList([
-                                                                                                       valueIdentifier
-                                                                                                   ]))),
-                                                                    new Block([new Continue()]))
-                                                         ]),
-                                                         new Assignment(foundIdentifier, valueIdentifier),
-                                                         new Break()
-                                                     ]))
-                                         ]),
-                                         new Block([
-                                             new Assignment(foundIdentifier,
-                                                            new BinaryOperator(new ElementAccess(self, one),
-                                                                               "or",
-                                                                               defaultIdentifier))
-                                         ])));
+                file.OccupiedIdentifiers.Push();
+                var valueIdentifier = file.OccupiedIdentifiers.AddIdentifier("v");
+                file.Prerequisites.Add(new If(new BinaryOperator(new Call(new IdentifierName("typeof"),
+                                                                          AstUtility.CreateArgumentList([defaultIdentifier])),
+                                                                 "==",
+                                                                 new Literal("\"function\"")),
+                                              new Block([
+                                                  new For([AstUtility.DiscardName, valueIdentifier],
+                                                          self,
+                                                          new Block([
+                                                              new Block([
+                                                                  new If(new UnaryOperator("not ",
+                                                                                           new
+                                                                                               Call(defaultIdentifier,
+                                                                                                    AstUtility
+                                                                                                        .CreateArgumentList([
+                                                                                                            valueIdentifier
+                                                                                                        ]))),
+                                                                         new Block([new Continue()]))
+                                                              ]),
+                                                              new Assignment(foundIdentifier, valueIdentifier),
+                                                              new Break()
+                                                          ]))
+                                              ]),
+                                              new Block([
+                                                  new Assignment(foundIdentifier,
+                                                                 new BinaryOperator(new ElementAccess(self, one),
+                                                                                    "or",
+                                                                                    defaultIdentifier))
+                                              ])));
 
-                occupiedIdentifiersStack.Pop();
+                file.OccupiedIdentifiers.Pop();
                 expanded = foundIdentifier;
 
                 break;
@@ -330,46 +329,46 @@ public class MacroManager(
                     break;
                 }
 
-                var foundIdentifier = occupiedIdentifiersStack.AddIdentifier("_found");
-                var defaultIdentifier = occupiedIdentifiersStack.AddIdentifier("_default");
+                var foundIdentifier = file.OccupiedIdentifiers.AddIdentifier("_found");
+                var defaultIdentifier = file.OccupiedIdentifiers.AddIdentifier("_default");
                 var predicate = (Expression)visit(arguments.First().Expression)!;
-                prerequisites.Add(new Variable(foundIdentifier, true));
-                prerequisites.Add(new Variable(defaultIdentifier, true, predicate));
+                file.Prerequisites.Add(new Variable(foundIdentifier, true));
+                file.Prerequisites.Add(new Variable(defaultIdentifier, true, predicate));
 
-                occupiedIdentifiersStack.Push();
-                var valueIdentifier = occupiedIdentifiersStack.AddIdentifier("v");
-                prerequisites.Add(new If(new BinaryOperator(new Call(new IdentifierName("typeof"),
-                                                                     AstUtility.CreateArgumentList([defaultIdentifier])),
-                                                            "==",
-                                                            new Literal("\"function\"")),
-                                         new Block([
-                                             new For([AstUtility.DiscardName, valueIdentifier],
-                                                     self,
-                                                     new Block([
-                                                         new Block([
-                                                             new If(new UnaryOperator("not ",
-                                                                                      new
-                                                                                          Call(defaultIdentifier,
-                                                                                               AstUtility
-                                                                                                   .CreateArgumentList([
-                                                                                                       valueIdentifier
-                                                                                                   ]))),
-                                                                    new Block([new Continue()]))
-                                                         ]),
-                                                         new Assignment(foundIdentifier, valueIdentifier)
-                                                     ]))
-                                         ]),
-                                         new Block([
-                                             new Assignment(foundIdentifier,
-                                                            new BinaryOperator(new ElementAccess(self,
-                                                                                                 new
-                                                                                                     UnaryOperator("#",
-                                                                                                                   self)),
-                                                                               "or",
-                                                                               defaultIdentifier))
-                                         ])));
+                file.OccupiedIdentifiers.Push();
+                var valueIdentifier = file.OccupiedIdentifiers.AddIdentifier("v");
+                file.Prerequisites.Add(new If(new BinaryOperator(new Call(new IdentifierName("typeof"),
+                                                                          AstUtility.CreateArgumentList([defaultIdentifier])),
+                                                                 "==",
+                                                                 new Literal("\"function\"")),
+                                              new Block([
+                                                  new For([AstUtility.DiscardName, valueIdentifier],
+                                                          self,
+                                                          new Block([
+                                                              new Block([
+                                                                  new If(new UnaryOperator("not ",
+                                                                                           new
+                                                                                               Call(defaultIdentifier,
+                                                                                                    AstUtility
+                                                                                                        .CreateArgumentList([
+                                                                                                            valueIdentifier
+                                                                                                        ]))),
+                                                                         new Block([new Continue()]))
+                                                              ]),
+                                                              new Assignment(foundIdentifier, valueIdentifier)
+                                                          ]))
+                                              ]),
+                                              new Block([
+                                                  new Assignment(foundIdentifier,
+                                                                 new BinaryOperator(new ElementAccess(self,
+                                                                                                      new
+                                                                                                          UnaryOperator("#",
+                                                                                                                        self)),
+                                                                                    "or",
+                                                                                    defaultIdentifier))
+                                              ])));
 
-                occupiedIdentifiersStack.Pop();
+                file.OccupiedIdentifiers.Pop();
                 expanded = foundIdentifier;
 
                 break;
@@ -390,45 +389,45 @@ public class MacroManager(
             }
             case "Append":
             {
-                var appendedIdentifier = occupiedIdentifiersStack.AddIdentifier("_appended");
+                var appendedIdentifier = file.OccupiedIdentifiers.AddIdentifier("_appended");
                 var element = (Expression)visit(arguments.First().Expression)!;
 
-                prerequisites.Add(new Variable(appendedIdentifier, true, AstUtility.TableCall("clone", self)));
-                prerequisites.Add(new ExpressionStatement(AstUtility.TableCall("insert", appendedIdentifier, element)));
+                file.Prerequisites.Add(new Variable(appendedIdentifier, true, AstUtility.TableCall("clone", self)));
+                file.Prerequisites.Add(new ExpressionStatement(AstUtility.TableCall("insert", appendedIdentifier, element)));
                 expanded = appendedIdentifier;
 
                 break;
             }
             case "Prepend":
             {
-                var prependedIdentifier = occupiedIdentifiersStack.AddIdentifier("_prepended");
+                var prependedIdentifier = file.OccupiedIdentifiers.AddIdentifier("_prepended");
                 var element = (Expression)visit(arguments.First().Expression)!;
 
-                prerequisites.Add(new Variable(prependedIdentifier, true, AstUtility.TableCall("clone", self)));
-                prerequisites.Add(new ExpressionStatement(AstUtility.TableCall("insert", prependedIdentifier, one, element)));
+                file.Prerequisites.Add(new Variable(prependedIdentifier, true, AstUtility.TableCall("clone", self)));
+                file.Prerequisites.Add(new ExpressionStatement(AstUtility.TableCall("insert", prependedIdentifier, one, element)));
                 expanded = prependedIdentifier;
 
                 break;
             }
             case "Distinct":
             {
-                var distinctIdentifier = occupiedIdentifiersStack.AddIdentifier("_distinct");
-                var seenIdentifier = occupiedIdentifiersStack.AddIdentifier("_seen");
-                var valueIdentifier = occupiedIdentifiersStack.AddIdentifier("v");
+                var distinctIdentifier = file.OccupiedIdentifiers.AddIdentifier("_distinct");
+                var seenIdentifier = file.OccupiedIdentifiers.AddIdentifier("_seen");
+                var valueIdentifier = file.OccupiedIdentifiers.AddIdentifier("v");
                 var seenValue = new ElementAccess(seenIdentifier, valueIdentifier);
 
-                prerequisites.Add(new Variable(distinctIdentifier, true, TableInitializer.Empty));
-                prerequisites.Add(new Variable(seenIdentifier, true, TableInitializer.Empty));
-                prerequisites.Add(new For([AstUtility.DiscardName, valueIdentifier],
-                                          self,
-                                          new Block([
-                                              new If(seenValue,
-                                                     new Block([new Continue()])),
-                                              new Assignment(seenValue, AstUtility.True),
-                                              new ExpressionStatement(AstUtility.TableCall("insert",
-                                                                                           distinctIdentifier,
-                                                                                           valueIdentifier))
-                                          ])));
+                file.Prerequisites.Add(new Variable(distinctIdentifier, true, TableInitializer.Empty));
+                file.Prerequisites.Add(new Variable(seenIdentifier, true, TableInitializer.Empty));
+                file.Prerequisites.Add(new For([AstUtility.DiscardName, valueIdentifier],
+                                               self,
+                                               new Block([
+                                                   new If(seenValue,
+                                                          new Block([new Continue()])),
+                                                   new Assignment(seenValue, AstUtility.True),
+                                                   new ExpressionStatement(AstUtility.TableCall("insert",
+                                                                                                distinctIdentifier,
+                                                                                                valueIdentifier))
+                                               ])));
 
                 expanded = distinctIdentifier;
 
@@ -436,18 +435,18 @@ public class MacroManager(
             }
             case "Concat":
             {
-                var resultIdentifier = occupiedIdentifiersStack.AddIdentifier("_result");
-                var valueIdentifier = occupiedIdentifiersStack.AddIdentifier("v");
+                var resultIdentifier = file.OccupiedIdentifiers.AddIdentifier("_result");
+                var valueIdentifier = file.OccupiedIdentifiers.AddIdentifier("v");
                 var other = (Expression)visit(arguments.First().Expression)!;
 
-                prerequisites.Add(new Variable(resultIdentifier, true, AstUtility.TableCall("clone", self)));
-                prerequisites.Add(new For([AstUtility.DiscardName, valueIdentifier],
-                                          other,
-                                          new Block([
-                                              new ExpressionStatement(AstUtility.TableCall("insert",
-                                                                                           resultIdentifier,
-                                                                                           valueIdentifier))
-                                          ])));
+                file.Prerequisites.Add(new Variable(resultIdentifier, true, AstUtility.TableCall("clone", self)));
+                file.Prerequisites.Add(new For([AstUtility.DiscardName, valueIdentifier],
+                                               other,
+                                               new Block([
+                                                   new ExpressionStatement(AstUtility.TableCall("insert",
+                                                                                                resultIdentifier,
+                                                                                                valueIdentifier))
+                                               ])));
 
                 expanded = resultIdentifier;
 
@@ -455,28 +454,28 @@ public class MacroManager(
             }
             case "Intersect":
             {
-                var resultIdentifier = occupiedIdentifiersStack.AddIdentifier("_result");
-                var firstIdentifier = occupiedIdentifiersStack.AddIdentifier("a");
-                var secondIdentifier = occupiedIdentifiersStack.AddIdentifier("b");
+                var resultIdentifier = file.OccupiedIdentifiers.AddIdentifier("_result");
+                var firstIdentifier = file.OccupiedIdentifiers.AddIdentifier("a");
+                var secondIdentifier = file.OccupiedIdentifiers.AddIdentifier("b");
                 var other = (Expression)visit(arguments.First().Expression)!;
 
-                prerequisites.Add(new Variable(resultIdentifier, true, TableInitializer.Empty));
-                prerequisites.Add(new For([AstUtility.DiscardName, firstIdentifier],
-                                          self,
-                                          new Block([
-                                              new For([AstUtility.DiscardName, secondIdentifier],
-                                                      other,
-                                                      new Block([
-                                                          new If(new BinaryOperator(firstIdentifier,
-                                                                                    "~=",
-                                                                                    secondIdentifier),
-                                                                 new Block([new Continue()])),
-                                                          new ExpressionStatement(AstUtility
-                                                                                      .TableCall("insert",
-                                                                                                 resultIdentifier,
-                                                                                                 firstIdentifier))
-                                                      ]))
-                                          ])));
+                file.Prerequisites.Add(new Variable(resultIdentifier, true, TableInitializer.Empty));
+                file.Prerequisites.Add(new For([AstUtility.DiscardName, firstIdentifier],
+                                               self,
+                                               new Block([
+                                                   new For([AstUtility.DiscardName, secondIdentifier],
+                                                           other,
+                                                           new Block([
+                                                               new If(new BinaryOperator(firstIdentifier,
+                                                                                         "~=",
+                                                                                         secondIdentifier),
+                                                                      new Block([new Continue()])),
+                                                               new ExpressionStatement(AstUtility
+                                                                                           .TableCall("insert",
+                                                                                                      resultIdentifier,
+                                                                                                      firstIdentifier))
+                                                           ]))
+                                               ])));
 
                 expanded = resultIdentifier;
 
@@ -723,8 +722,8 @@ public class MacroManager(
 
         if (listExpression is not IdentifierName name)
         {
-            self = occupiedIdentifiersStack.AddIdentifier("_exp");
-            prerequisites.Add(new Variable((IdentifierName)self, true, listExpression));
+            self = file.OccupiedIdentifiers.AddIdentifier("_exp");
+            file.Prerequisites.Add(new Variable((IdentifierName)self, true, listExpression));
         }
         else
         {
@@ -737,11 +736,11 @@ public class MacroManager(
             {
                 var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
                 var element = arguments.First();
-                var wasAddedIdentifier = occupiedIdentifiersStack.AddIdentifier("_wasAdded");
+                var wasAddedIdentifier = file.OccupiedIdentifiers.AddIdentifier("_wasAdded");
                 var selfAtElement = new ElementAccess(self, element);
 
-                prerequisites.Add(new Variable(wasAddedIdentifier, true, new BinaryOperator(selfAtElement, "==", AstUtility.Nil)));
-                prerequisites.Add(new Assignment(selfAtElement, AstUtility.True));
+                file.Prerequisites.Add(new Variable(wasAddedIdentifier, true, new BinaryOperator(selfAtElement, "==", AstUtility.Nil)));
+                file.Prerequisites.Add(new Assignment(selfAtElement, AstUtility.True));
                 expanded = wasAddedIdentifier;
 
                 break;
@@ -750,11 +749,11 @@ public class MacroManager(
             {
                 var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
                 var element = arguments.First();
-                var wasRemovedIdentifier = occupiedIdentifiersStack.AddIdentifier("_wasRemoved");
+                var wasRemovedIdentifier = file.OccupiedIdentifiers.AddIdentifier("_wasRemoved");
                 var selfAtElement = new ElementAccess(self, element);
 
-                prerequisites.Add(new Variable(wasRemovedIdentifier, true, new BinaryOperator(selfAtElement, "~=", AstUtility.Nil)));
-                prerequisites.Add(new Assignment(selfAtElement, new TypeCast(AstUtility.Nil, AstUtility.AnyType)));
+                file.Prerequisites.Add(new Variable(wasRemovedIdentifier, true, new BinaryOperator(selfAtElement, "~=", AstUtility.Nil)));
+                file.Prerequisites.Add(new Assignment(selfAtElement, new TypeCast(AstUtility.Nil, AstUtility.AnyType)));
                 expanded = wasRemovedIdentifier;
 
                 break;
@@ -790,8 +789,8 @@ public class MacroManager(
 
         if (listExpression is not IdentifierName name)
         {
-            self = occupiedIdentifiersStack.AddIdentifier("_exp");
-            prerequisites.Add(new Variable((IdentifierName)self, true, listExpression));
+            self = file.OccupiedIdentifiers.AddIdentifier("_exp");
+            file.Prerequisites.Add(new Variable((IdentifierName)self, true, listExpression));
         }
         else
         {
@@ -830,12 +829,12 @@ public class MacroManager(
             case "Exists":
             {
                 var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
-                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var key = occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = occupiedIdentifiersStack.AddIdentifier("_v");
-                var filterFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_filterFunc");
+                var expression = file.OccupiedIdentifiers.AddIdentifier("_newValue");
+                var key = file.OccupiedIdentifiers.AddIdentifier("_k");
+                var value = file.OccupiedIdentifiers.AddIdentifier("_v");
+                var filterFuncIdentifier = file.OccupiedIdentifiers.AddIdentifier("_filterFunc");
 
-                prerequisites.Add(new Block([
+                file.Prerequisites.Add(new Block([
                     new Variable(filterFuncIdentifier, true, arguments.First()),
                     new Variable(expression, true, AstUtility.False),
                     new For([key, value],
@@ -854,12 +853,12 @@ public class MacroManager(
             case "Find":
             {
                 var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
-                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var key = occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = occupiedIdentifiersStack.AddIdentifier("_v");
-                var filterFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_filterFunc");
+                var expression = file.OccupiedIdentifiers.AddIdentifier("_newValue");
+                var key = file.OccupiedIdentifiers.AddIdentifier("_k");
+                var value = file.OccupiedIdentifiers.AddIdentifier("_v");
+                var filterFuncIdentifier = file.OccupiedIdentifiers.AddIdentifier("_filterFunc");
 
-                prerequisites.Add(new Block([
+                file.Prerequisites.Add(new Block([
                     new Variable(expression, true, AstUtility.Nil),
                     new Variable(filterFuncIdentifier, true, arguments.First()),
                     new For([key, value],
@@ -878,12 +877,12 @@ public class MacroManager(
             case "FindLast":
             {
                 var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
-                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var key = occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = occupiedIdentifiersStack.AddIdentifier("_v");
-                var filterFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_filterFunc");
+                var expression = file.OccupiedIdentifiers.AddIdentifier("_newValue");
+                var key = file.OccupiedIdentifiers.AddIdentifier("_k");
+                var value = file.OccupiedIdentifiers.AddIdentifier("_v");
+                var filterFuncIdentifier = file.OccupiedIdentifiers.AddIdentifier("_filterFunc");
 
-                prerequisites.Add(new Block([
+                file.Prerequisites.Add(new Block([
                     new Variable(filterFuncIdentifier, true, arguments.First()),
                     new Variable(expression, true),
                     new For([key, value],
@@ -902,12 +901,12 @@ public class MacroManager(
             case "FindAll":
             {
                 var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
-                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var key = occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = occupiedIdentifiersStack.AddIdentifier("_v");
-                var filterFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_filterFunc");
+                var expression = file.OccupiedIdentifiers.AddIdentifier("_newValue");
+                var key = file.OccupiedIdentifiers.AddIdentifier("_k");
+                var value = file.OccupiedIdentifiers.AddIdentifier("_v");
+                var filterFuncIdentifier = file.OccupiedIdentifiers.AddIdentifier("_filterFunc");
 
-                prerequisites.Add(new Block([
+                file.Prerequisites.Add(new Block([
                     new Variable(filterFuncIdentifier, true, arguments.First()),
                     new Variable(expression, true, new TableInitializer()),
                     new For([key, value],
@@ -931,12 +930,12 @@ public class MacroManager(
             case "AddRange":
             {
                 var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
-                var key = occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = occupiedIdentifiersStack.AddIdentifier("_v");
+                var key = file.OccupiedIdentifiers.AddIdentifier("_k");
+                var value = file.OccupiedIdentifiers.AddIdentifier("_v");
 
-                prerequisites.Add(new For([key, value],
-                                          arguments.First(),
-                                          new Block([new ExpressionStatement(AstUtility.TableCall("insert", self, value))])));
+                file.Prerequisites.Add(new For([key, value],
+                                               arguments.First(),
+                                               new Block([new ExpressionStatement(AstUtility.TableCall("insert", self, value))])));
 
                 expanded = new NoOpExpression();
 
@@ -945,16 +944,16 @@ public class MacroManager(
             case "ForEach":
             {
                 var args = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
-                var callbackIdentifier = occupiedIdentifiersStack.AddIdentifier("_callback");
-                var valueName = occupiedIdentifiersStack.AddIdentifier("_v");
+                var callbackIdentifier = file.OccupiedIdentifiers.AddIdentifier("_callback");
+                var valueName = file.OccupiedIdentifiers.AddIdentifier("_v");
 
-                prerequisites.Add(new Variable(callbackIdentifier, true, args.First()));
-                prerequisites.Add(new For([AstUtility.DiscardName, valueName],
-                                          self,
-                                          new Block([
-                                              new ExpressionStatement(new Call(callbackIdentifier,
-                                                                               AstUtility.CreateArgumentList([valueName])))
-                                          ])));
+                file.Prerequisites.Add(new Variable(callbackIdentifier, true, args.First()));
+                file.Prerequisites.Add(new For([AstUtility.DiscardName, valueName],
+                                               self,
+                                               new Block([
+                                                   new ExpressionStatement(new Call(callbackIdentifier,
+                                                                                    AstUtility.CreateArgumentList([valueName])))
+                                               ])));
 
                 expanded = new NoOpExpression();
 
@@ -963,12 +962,12 @@ public class MacroManager(
             case "ConvertAll":
             {
                 var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
-                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var key = occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = occupiedIdentifiersStack.AddIdentifier("_v");
-                var convertFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_convertFunc");
+                var expression = file.OccupiedIdentifiers.AddIdentifier("_newValue");
+                var key = file.OccupiedIdentifiers.AddIdentifier("_k");
+                var value = file.OccupiedIdentifiers.AddIdentifier("_v");
+                var convertFuncIdentifier = file.OccupiedIdentifiers.AddIdentifier("_convertFunc");
 
-                prerequisites.Add(new Block([
+                file.Prerequisites.Add(new Block([
                     new Variable(convertFuncIdentifier, true, arguments.First()),
                     new Variable(expression,
                                  true,
@@ -999,14 +998,14 @@ public class MacroManager(
             case "FindIndex":
             {
                 var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression).ToList();
-                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var key = occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = occupiedIdentifiersStack.AddIdentifier("_v");
-                var filterFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_filterFunc");
+                var expression = file.OccupiedIdentifiers.AddIdentifier("_newValue");
+                var key = file.OccupiedIdentifiers.AddIdentifier("_k");
+                var value = file.OccupiedIdentifiers.AddIdentifier("_v");
+                var filterFuncIdentifier = file.OccupiedIdentifiers.AddIdentifier("_filterFunc");
 
                 if (invocation.ArgumentList.Arguments.Count == 1)
                 {
-                    prerequisites.Add(new Block([
+                    file.Prerequisites.Add(new Block([
                         new Variable(filterFuncIdentifier, true, arguments.First()),
                         new Variable(expression, true),
                         new For([key, value],
@@ -1024,8 +1023,8 @@ public class MacroManager(
                         ? new BinaryOperator(arguments.First(), "+", arguments.ElementAt(1))
                         : new UnaryOperator("#", self);
 
-                    var indexIdentifier = occupiedIdentifiersStack.AddIdentifier("_i");
-                    prerequisites.Add(new Block([
+                    var indexIdentifier = file.OccupiedIdentifiers.AddIdentifier("_i");
+                    file.Prerequisites.Add(new Block([
                         new Variable(filterFuncIdentifier,
                                      true,
                                      invocation.ArgumentList.Arguments.Count == 2
@@ -1054,14 +1053,14 @@ public class MacroManager(
             case "FindLastIndex":
             {
                 var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression).ToList();
-                var expression = occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var key = occupiedIdentifiersStack.AddIdentifier("_k");
-                var value = occupiedIdentifiersStack.AddIdentifier("_v");
-                var filterFuncIdentifier = occupiedIdentifiersStack.AddIdentifier("_filterFunc");
+                var expression = file.OccupiedIdentifiers.AddIdentifier("_newValue");
+                var key = file.OccupiedIdentifiers.AddIdentifier("_k");
+                var value = file.OccupiedIdentifiers.AddIdentifier("_v");
+                var filterFuncIdentifier = file.OccupiedIdentifiers.AddIdentifier("_filterFunc");
 
                 if (invocation.ArgumentList.Arguments.Count == 1)
                 {
-                    prerequisites.Add(new Block([
+                    file.Prerequisites.Add(new Block([
                         new Variable(filterFuncIdentifier, true, arguments.First()),
                         new Variable(expression, true),
                         new For([key, value],
@@ -1079,8 +1078,8 @@ public class MacroManager(
                         ? new BinaryOperator(arguments.First(), "+", arguments.ElementAt(1))
                         : new UnaryOperator("#", self);
 
-                    var indexIdentifier = occupiedIdentifiersStack.AddIdentifier("_i");
-                    prerequisites.Add(new Block([
+                    var indexIdentifier = file.OccupiedIdentifiers.AddIdentifier("_i");
+                    file.Prerequisites.Add(new Block([
                         new Variable(filterFuncIdentifier,
                                      true,
                                      invocation.ArgumentList.Arguments.Count == 2
@@ -1131,8 +1130,8 @@ public class MacroManager(
             case "LastIndexOf":
             {
                 var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression).ToList();
-                var expressionName = occupiedIdentifiersStack.AddIdentifier("_newValue");
-                var indexName = occupiedIdentifiersStack.AddIdentifier("_i");
+                var expressionName = file.OccupiedIdentifiers.AddIdentifier("_newValue");
+                var indexName = file.OccupiedIdentifiers.AddIdentifier("_i");
                 var shouldCreateVariable = invocation.ArgumentList.Arguments.First().Expression is not LiteralExpressionSyntax;
 
                 var init = arguments.ElementAtOrDefault(1);
@@ -1157,7 +1156,7 @@ public class MacroManager(
 
                 if (shouldCreateVariable) block.Insert(0, new Variable(new IdentifierName("_val"), true, arguments.First()));
 
-                prerequisites.AddList(block);
+                file.Prerequisites.AddList(block);
 
                 expanded = expressionName;
 
@@ -1216,7 +1215,7 @@ public class MacroManager(
                 var key = arguments.First();
                 var value = arguments.Last();
 
-                prerequisites.Add(new Assignment(new ElementAccess(self, key), value));
+                file.Prerequisites.Add(new Assignment(new ElementAccess(self, key), value));
                 expanded = new NoOpExpression();
 
                 break;
@@ -1245,7 +1244,7 @@ public class MacroManager(
     }
 
     private IdentifierName AddIdentifierWithSelfName(ExpressionSyntax self, string identifier) =>
-        occupiedIdentifiersStack.AddIdentifier(self is NameSyntax name
+        file.OccupiedIdentifiers.AddIdentifier(self is NameSyntax name
                                                    ? name + identifier
                                                    : identifier);
 }

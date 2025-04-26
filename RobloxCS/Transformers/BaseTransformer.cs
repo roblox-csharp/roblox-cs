@@ -5,14 +5,11 @@ using RobloxCS.Shared;
 
 namespace RobloxCS.Transformers;
 
-public abstract class BaseTransformer(SyntaxTree tree, Prerequisites state, ConfigData config) : CSharpSyntaxRewriter
+public abstract class BaseTransformer(FileCompilation file) : CSharpSyntaxRewriter
 {
-    protected readonly ConfigData _config = config;
-    protected readonly SyntaxNode _root = tree.GetRoot();
-    protected readonly Prerequisites _state = state;
-    protected readonly SyntaxTree _tree = tree;
+    protected readonly FileCompilation _file = file;
 
-    public SyntaxTree TransformTree() => _tree.WithRootAndOptions(Visit(_root), _tree.Options);
+    public SyntaxTree TransformTree() => _file.Tree = _file.Tree.WithRootAndOptions(Visit(_file.Tree.GetRoot()), _file.Tree.Options);
     protected static string? TryGetName(SyntaxNode node) => StandardUtility.GetNamesFromNode(node).FirstOrDefault();
     protected static string GetName(SyntaxNode node) => StandardUtility.GetNamesFromNode(node).First();
     protected static bool HasSyntax(SyntaxTokenList tokens, SyntaxKind syntax) => tokens.Any(token => token.IsKind(syntax));

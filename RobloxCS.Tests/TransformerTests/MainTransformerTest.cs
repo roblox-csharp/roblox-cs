@@ -1,6 +1,7 @@
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RobloxCS.Luau;
+using RobloxCS.Shared;
 using RobloxCS.Transformers;
 
 namespace RobloxCS.Tests.TransformerTests;
@@ -93,7 +94,8 @@ public class MainTransformerTest
     {
         var cleanTree = SyntaxFactory.ParseSyntaxTree(source);
         var transform = BuiltInTransformers.Main();
-        var transformedTree = transform(cleanTree, new Prerequisites(), new ConfigData());
+        var compilation = new FileCompilation { Tree = cleanTree, RojoProject = null, Config = new ConfigData() }; // ConfigReader.UnitTestingConfig
+        var transformedTree = transform(compilation);
 
         return transformedTree.GetCompilationUnitRoot();
     }

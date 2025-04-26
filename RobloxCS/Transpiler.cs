@@ -1,12 +1,10 @@
-using Microsoft.CodeAnalysis;
-using Microsoft.CodeAnalysis.CSharp;
 using RobloxCS.Shared;
 
 namespace RobloxCS;
 
 /// <summary>
-/// This class contains everything needed to transpile C# to Luau.
-/// In the future this class will not be static and will take in C# source files as well as ConfigData.
+///     This class contains everything needed to transpile C# to Luau.
+///     In the future this class will not be static and will take in C# source files as well as ConfigData.
 /// </summary>
 public static class Transpiler
 {
@@ -15,26 +13,23 @@ public static class Transpiler
         "CS5001" // more than 2 entry points
     ];
 
+    public static string TranspileDirectory(string directoryPath, ConfigData config)
+    {
+        var rojoProject = RojoReader.ReadFromDirectory(directoryPath, config.RojoProjectName);
+        return "";
+    }
 
-
-
-
-
-
-
-
-
-    public static string Transpile(string source)
+    public static string TranspileSource(string source, RojoProject? rojoProject, ConfigData? config)
     {
         try
         {
-            var tree = TranspilerUtility.ParseAndTransformTree(source, null); // temporary null config!!!1
-            var compiler = TranspilerUtility.GetCompiler([tree], null);       // temporary null config!!!1
+            var file = TranspilerUtility.ParseAndTransformTree(source, rojoProject, config); // temporary
+            var compiler = TranspilerUtility.GetCompiler([file.Tree], config);
             foreach (var diagnostic in compiler.GetDiagnostics()
                                                .Where(diagnostic => !_ignoredDiagnostics.Contains(diagnostic.Id)))
                 Logger.HandleDiagnostic(diagnostic);
 
-            return TranspilerUtility.GenerateLuau(tree, compiler);
+            return TranspilerUtility.GenerateLuau(file, compiler);
         }
         catch (CleanExitException)
         {

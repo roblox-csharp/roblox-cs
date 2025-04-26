@@ -12,6 +12,6 @@ public static class Program
         }
 
         var source = File.ReadAllText(path).Trim();
-        Console.WriteLine(Transpiler.Transpile(source));
+        Console.WriteLine(Transpiler.TranspileSource(source, new RojoProject(), null)); // temporary!
     }
 }

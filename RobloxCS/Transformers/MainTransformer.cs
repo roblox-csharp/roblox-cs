@@ -6,8 +6,8 @@ using RobloxCS.Shared;
 
 namespace RobloxCS.Transformers;
 
-public sealed class MainTransformer(SyntaxTree tree, Prerequisites state, ConfigData config)
-    : BaseTransformer(tree, state, config)
+public sealed class MainTransformer(FileCompilation file)
+    : BaseTransformer(file)
 {
     // Add some implicit usings to the file
     public override SyntaxNode? VisitCompilationUnit(CompilationUnitSyntax node)
