@@ -58,10 +58,28 @@ public class MacroManager(
                 var left = (Expression)visit(assignment.Left)!;
                 var right = (Expression)visit(assignment.Right)!;
 
-                return new Variable(connectionName,
-                                    true,
-                                    new Call(new MemberAccess(left, new IdentifierName("Connect"), ':'),
-                                             new ArgumentList([new Argument(right)])));
+                var disconnectsInside = right is AnonymousFunction && ((AnonymousFunction)right).Body.Descendants.Exists(node => {
+                    if (node is Call call) {
+                        if (call.Callee is MemberAccess memberAccess) {
+                            if (memberAccess.Expression is IdentifierName identifierName && memberAccess.Name is IdentifierName name) {
+                                if (identifierName.Text == connectionName.Text && name.Text == "Disconnect") {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                    return false;
+                });
+                var body = new Call(new MemberAccess(left, new IdentifierName("Connect"), ':'),
+                                             new ArgumentList([new Argument(right)]));
+
+                if (disconnectsInside)
+                    return new Block([
+                        new Variable(connectionName, true),
+                        new Assignment(connectionName, body),
+                        ]);
+                 
+                return new Variable(connectionName, true, body);
             case "-=":
                 return new Call(new MemberAccess(connectionName, new IdentifierName("Disconnect"), ':'),
                                 new ArgumentList([]));
