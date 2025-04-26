@@ -17,6 +17,89 @@ roblox-cs is a [C#](https://learn.microsoft.com/en-us/dotnet/csharp/) to [Luau](
 Luau. This is done by taking the C# AST and converting it into a Luau AST (that is functionally the same) and then finally rendering the Luau AST into Luau
 source code.
 
-### Join the Community!
+### Examples
 
-https://discord.gg/nFcsW3C33u
+#### Hello, world!
+**Note:** In the future this example will automatically call `Main()`.
+
+```cs
+void Main() => print("Hello, roblox-cs!");
+```
+```luau
+-- Compiled with roblox-cs v2.0.0
+
+local function Main(): ()
+  print("Hello, roblox-cs!")
+end
+return nil
+```
+
+#### Classes
+**Note:** In the future this example will import the `CS` library. It will also probably abandon `typeof()`.
+
+```cs
+var myClass = new MyClass(69);
+myClass.DoSomething();
+print(myClass.MyProperty); // 69
+print(myClass.MyField); // 0
+
+class MyClass(int value)
+{
+  public readonly int MyField;
+  public int MyProperty { get; } = value;
+
+  public void DoSomething() =>
+    print("doing something!");
+}
+```
+```luau
+-- Compiled with roblox-cs v2.0.0
+
+local MyClass
+do
+  MyClass = setmetatable({}, {
+    __tostring = function(): string
+      return "MyClass"
+    end
+  })
+  MyClass.__index = MyClass
+  MyClass.__className = "MyClass"
+  function MyClass.new(value: number): MyClass
+    local self = (setmetatable({}, MyClass) :: any) :: MyClass
+    return self:MyClass(value) or self
+  end
+  function MyClass:DoSomething(): ()
+    return print("doing something!")
+  end
+  function MyClass:MyClass(value: number): MyClass?
+    return nil
+  end
+end
+CS.defineGlobal("MyClass", MyClass)
+type MyClass = typeof(MyClass)
+
+local myClass = MyClass.new(69)
+myClass:DoSomething()
+print(myClass.MyProperty)
+print(myClass.MyField)
+return nil
+```
+
+#### Type Reflection
+**Note:** `Object.GetType()` is not supported.
+
+```cs
+var intType = typeof(int);
+print(intType.Name); // Int32
+print(intType.Namespace); // System
+print(intType.BaseType.Name); // ValueType
+```
+```luau
+local intType = { --[[ insert type info here ]] }; 
+print(intType.Name);
+print(intType.Namespace);
+print(intType.BaseType.Name);
+```
+
+### Join the Community!
+<a href="https://discord.gg/nFcsW3C33u"><img src="https://discordapp.com/api/guilds/1136305719226937425/embed.png" alt="Discord server" /></a>
