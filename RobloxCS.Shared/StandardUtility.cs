@@ -106,6 +106,16 @@ public static class StandardUtility
         return member;
     }
 
+    public static string FixPathSeparator(string path)
+    {
+        path = Path.TrimEndingDirectorySeparator(path)
+                   .Replace(@"\\", "/")
+                   .Replace('\\', '/')
+                   .Replace("//", "/");
+
+        return Regex.Replace(path, @"(?<!\.)\./", "");
+    }
+
     public static string Capitalize(string name)
     {
         if (string.IsNullOrEmpty(name))
