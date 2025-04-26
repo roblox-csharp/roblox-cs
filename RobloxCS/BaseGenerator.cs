@@ -44,6 +44,10 @@ public class BaseGenerator(FileCompilation file, CSharpCompilation compiler) : C
                                                   .OfType<PropertyDeclarationSyntax>()
                                                   .Where(field => !HasSyntax(field.Modifiers, SyntaxKind.StaticKeyword));
 
+        var nonStaticEvents = classDeclaration.Members
+                                              .OfType<EventFieldDeclarationSyntax>()
+                                              .Where(field => !HasSyntax(field.Modifiers, SyntaxKind.StaticKeyword));
+
         foreach (var field in nonStaticFields)
         {
             foreach (var declarator in field.Declaration.Variables)
@@ -51,7 +55,6 @@ public class BaseGenerator(FileCompilation file, CSharpCompilation compiler) : C
                 var initializer = GetFieldOrPropertyInitializer(classDeclaration, field.Declaration.Type, declarator.Initializer);
                 if (initializer == null) continue;
 
-                // stupid hack
                 body.Statements.Insert(0,
                                        new Assignment(new MemberAccess(new IdentifierName("self"),
                                                                        AstUtility.CreateSimpleName(declarator)),
@@ -70,8 +73,18 @@ public class BaseGenerator(FileCompilation file, CSharpCompilation compiler) : C
                                                   initializer));
         }
 
-        // add an explicit return (for native codegen) if there isn't one
-        if (!body.Statements.Any(statement => statement is Return)) body.Statements.Add(new Return(AstUtility.Nil));
+        foreach (var eventField in nonStaticEvents)
+        {
+            foreach (var declarator in eventField.Declaration.Variables)
+                body.Statements.Insert(0,
+                                       new Assignment(new MemberAccess(new IdentifierName("self"),
+                                                                       AstUtility.CreateSimpleName(declarator)),
+                                                      AstUtility.NewSignal()));
+        }
+
+        // add an explicit return (for strict mode) if there isn't one
+        if (!body.Statements.Any(statement => statement is Return))
+            body.Statements.Add(new Return(AstUtility.Nil));
 
         return new Function(new QualifiedName(nonGenericName, className, ':'),
                             false,

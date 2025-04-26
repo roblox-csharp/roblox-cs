@@ -883,8 +883,8 @@ public sealed class LuauGenerator(
         if (callee.ExpandedByMacro != null && returnCalleeMacroKinds.Contains((MacroKind)callee.ExpandedByMacro))
         {
             var discard = methodSymbol is IMethodSymbol { ReturnType.Name: not "Void" }
-                 && callee is not NoOpExpression
-                 && node.Parent is ExpressionStatementSyntax;
+                       && callee is not NoOpExpression
+                       && node.Parent is ExpressionStatementSyntax;
 
             return discard
                 ? AstUtility.DiscardVariable(node, callee)
@@ -1005,15 +1005,21 @@ public sealed class LuauGenerator(
         var name = AstUtility.GetNonGenericName(simpleName);
         var memberAccess = new MemberAccess(expression, name);
         var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
-        return symbol switch
+        switch (symbol)
         {
-            IFieldSymbol { HasConstantValue: true } fieldSymbol =>
-                AstUtility.CreateLuauConstant(fieldSymbol.ConstantValue),
-            IMethodSymbol methodSymbol when node.Parent is ArgumentSyntax =>
-                AstUtility.WrapNonStaticMethod(methodSymbol, memberAccess, file.OccupiedIdentifiers),
+            case IFieldSymbol { HasConstantValue: true } fieldSymbol:
+                return AstUtility.CreateLuauConstant(fieldSymbol.ConstantValue);
+            case IMethodSymbol methodSymbol when node.Parent is ArgumentSyntax or AssignmentExpressionSyntax { OperatorToken.Text: "+=" or "-=" }:
+            {
+                if (node.Parent is AssignmentExpressionSyntax assignment
+                 && _semanticModel.GetSymbolInfo(assignment.Left).Symbol is not IEventSymbol)
+                    break;
 
-            _ => _macro.MemberAccess(Visit, node) ?? memberAccess
-        };
+                return AstUtility.WrapNonStaticMethod(methodSymbol, memberAccess, _file.OccupiedIdentifiers);
+            }
+        }
+
+        return _macro.MemberAccess(Visit, node) ?? memberAccess;
     }
 
     public override Node VisitImplicitElementAccess(ImplicitElementAccessSyntax node) => Visit<Expression>(node.ArgumentList.Arguments.First().Expression);
@@ -1071,7 +1077,7 @@ public sealed class LuauGenerator(
         }
 
         if (classDeclaration == null
-         || symbol is not (IFieldSymbol or IPropertySymbol or IMethodSymbol { MethodKind: MethodKind.Ordinary })
+         || symbol is not (IFieldSymbol or IPropertySymbol or IEventSymbol or IMethodSymbol { MethodKind: MethodKind.Ordinary })
          || symbol.ContainingType.Name != classDeclaration.Identifier.Text
          || IsAlreadyQualified(node, parent))
             return name;
@@ -1328,22 +1334,15 @@ public sealed class LuauGenerator(
                              new FunctionType(parameterTypes, new TypeRef(node.ReturnType.ToString())));
     }
 
-    public override Block VisitEventFieldDeclaration(EventFieldDeclarationSyntax node)
+    public override Block? VisitEventFieldDeclaration(EventFieldDeclarationSyntax node)
     {
-        var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node)!;
-        var statements = node.Declaration.Variables.Select(variable => new Assignment(new MemberAccess(new IdentifierName(classDeclaration
-                                                                                                                          .Identifier
-                                                                                                                          .Text),
-                                                                                                       new IdentifierName(variable
-                                                                                                                          .Identifier
-                                                                                                                          .Text)),
-                                                                                      new
-                                                                                          Call(new
-                                                                                                   QualifiedName(new
-                                                                                                                     IdentifierName("Signal"),
-                                                                                                                 new
-                                                                                                                     IdentifierName("new")),
-                                                                                               new ArgumentList([]))))
+        var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node);
+        if (!IsStatic(node) || classDeclaration == null) return null;
+
+        var statements = node.Declaration.Variables
+                             .Select(variable => new Assignment(new MemberAccess(AstUtility.CreateSimpleName(classDeclaration, noGenerics: true),
+                                                                                 AstUtility.CreateSimpleName(variable, noGenerics: true)),
+                                                                AstUtility.NewSignal()))
                              .ToList<Statement>();
 
         return new Block(statements);

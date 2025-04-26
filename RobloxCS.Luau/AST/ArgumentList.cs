@@ -2,13 +2,15 @@
 
 public class ArgumentList : Expression
 {
-    public List<Argument> Arguments { get; set; }
+    public static readonly ArgumentList Empty = new([]);
 
     public ArgumentList(List<Argument> arguments)
     {
         Arguments = arguments;
         AddChildren(Arguments);
     }
+
+    public List<Argument> Arguments { get; }
 
     public override void Render(LuauWriter luau)
     {

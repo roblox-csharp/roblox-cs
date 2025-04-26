@@ -44,8 +44,9 @@ public class MacroManager(
         }
 
         var leftSymbol = semanticModel.GetSymbolInfo(assignment.Left).Symbol;
-
+        var rightSymbol = semanticModel.GetSymbolInfo(assignment.Right).Symbol;
         if (leftSymbol is not IEventSymbol eventSymbol) return null;
+        if (rightSymbol is not IMethodSymbol methodSymbol) return null;
 
         var symbolMetadata = SymbolMetadataManager.Get(eventSymbol);
         symbolMetadata.EventConnectionName ??= AstUtility.CreateSimpleName<IdentifierName>(assignment, "conn_" + eventSymbol.Name, true);
@@ -56,14 +57,17 @@ public class MacroManager(
             case "+=":
                 var left = (Expression)visit(assignment.Left)!;
                 var right = (Expression)visit(assignment.Right)!;
+                var callback = !eventSymbol.IsStatic && right is Luau.MemberAccess or QualifiedName
+                    ? AstUtility.TryWrapNonStaticMethod(methodSymbol, right, file.OccupiedIdentifiers)!
+                    : right;
 
                 return new Variable(connectionName,
                                     true,
                                     new Call(new MemberAccess(left, new IdentifierName("Connect"), ':'),
-                                             new ArgumentList([new Argument(right)])));
+                                             AstUtility.CreateArgumentList([callback])));
             case "-=":
                 return new Call(new MemberAccess(connectionName, new IdentifierName("Disconnect"), ':'),
-                                new ArgumentList([]));
+                                ArgumentList.Empty);
         }
 
         return null;

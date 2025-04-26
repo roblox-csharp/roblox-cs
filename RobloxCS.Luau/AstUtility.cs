@@ -428,6 +428,10 @@ public static class AstUtility
                              new IdentifierName("new")),
             CreateArgumentList([items]));
 
+    public static Call NewSignal() =>
+        new(new QualifiedName(new IdentifierName("Signal"),
+                              new IdentifierName("new")));
+
     public static Variable SignalImport() =>
         new(new IdentifierName("Signal"),
             true,
@@ -454,18 +458,40 @@ public static class AstUtility
 
     public static ArgumentList CreateArgumentList(List<Expression> arguments) => new(arguments.ConvertAll(expression => new Argument(expression)));
 
+    public static AnonymousFunction? TryWrapNonStaticMethod(IMethodSymbol methodSymbol, Expression expression, OccupiedIdentifiersStack occupiedIdentifiers) =>
+        expression switch
+        {
+            MemberAccess memberAccess => WrapNonStaticMethod(methodSymbol, memberAccess, occupiedIdentifiers),
+            QualifiedName qualifiedName => WrapNonStaticMethod(methodSymbol, qualifiedName, occupiedIdentifiers),
+            _ => null
+        };
+
     public static AnonymousFunction WrapNonStaticMethod(IMethodSymbol methodSymbol, MemberAccess memberAccess, OccupiedIdentifiersStack occupiedIdentifiers)
+    {
+        if (!methodSymbol.IsStatic)
+            memberAccess = memberAccess.WithOperator(':');
+
+        return CreateMethodWrapper(methodSymbol, memberAccess, occupiedIdentifiers);
+    }
+
+    public static AnonymousFunction WrapNonStaticMethod(IMethodSymbol methodSymbol, QualifiedName qualifiedName, OccupiedIdentifiersStack occupiedIdentifiers)
+    {
+        if (!methodSymbol.IsStatic)
+            qualifiedName = qualifiedName.WithOperator(':');
+
+        return CreateMethodWrapper(methodSymbol, qualifiedName, occupiedIdentifiers);
+    }
+
+    private static AnonymousFunction CreateMethodWrapper(IMethodSymbol methodSymbol, Expression callee, OccupiedIdentifiersStack occupiedIdentifiers)
     {
         var parameters = methodSymbol.Parameters.Select(p => ParameterFromSymbol(p, occupiedIdentifiers)).ToList();
         var returnType = CreateTypeRef(methodSymbol.ReturnType.Name);
         var typeParameters = methodSymbol.TypeParameters.Select(p => new IdentifierName(p.Name)).ToList();
         var arguments = parameters.ConvertAll<Expression>(p => p.Name);
-        if (!methodSymbol.IsStatic)
-            memberAccess = memberAccess.WithOperator(':');
 
         return new AnonymousFunction(new ParameterList(parameters),
                                      returnType,
-                                     new Block([new Return(new Call(memberAccess, CreateArgumentList(arguments)))]),
+                                     new Block([new Return(new Call(callee, CreateArgumentList(arguments)))]),
                                      null,
                                      typeParameters);
     }

@@ -1,26 +1,25 @@
-﻿namespace RobloxCS.Luau
+﻿namespace RobloxCS.Luau;
+
+public sealed class Call : Expression
 {
-    public sealed class Call : Expression
+    public Call(Expression callee, ArgumentList? argumentList = null)
     {
-        public Expression Callee { get; }
-        public ArgumentList ArgumentList { get; }
+        // monkey patch for https://github.com/roblox-csharp/roblox-cs/issues/44
+        if (callee is Name name) callee = AstUtility.GetNonGenericName(name);
 
-        public Call(Expression callee, ArgumentList? argumentList = null)
-        {
-            // monkey patch for https://github.com/roblox-csharp/roblox-cs/issues/44
-            if (callee is Name name) callee = AstUtility.GetNonGenericName(name);
+        Callee = callee;
+        ArgumentList = argumentList ?? ArgumentList.Empty;
+        AddChildren([Callee, ArgumentList]);
+    }
 
-            Callee = callee;
-            ArgumentList = argumentList ?? new ArgumentList([]);
-            AddChildren([Callee, ArgumentList]);
-        }
+    public Expression Callee { get; }
+    public ArgumentList ArgumentList { get; }
 
-        public override void Render(LuauWriter luau)
-        {
-            Callee.Render(luau);
-            luau.Write('(');
-            luau.WriteNodesCommaSeparated(ArgumentList.Arguments);
-            luau.Write(')');
-        }
+    public override void Render(LuauWriter luau)
+    {
+        Callee.Render(luau);
+        luau.Write('(');
+        luau.WriteNodesCommaSeparated(ArgumentList.Arguments);
+        luau.Write(')');
     }
 }

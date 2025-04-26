@@ -23,5 +23,5 @@ public class QualifiedName : Name
 
     public override string ToString() => Left.ToString() + Operator + Right;
 
-    public MemberAccess WithOperator(char @operator) => new(Left, Right, @operator);
+    public QualifiedName WithOperator(char @operator) => new(Left, Right, @operator);
 }
