@@ -870,7 +870,7 @@ public sealed class LuauGenerator(
         var argumentList = new ArgumentList(arguments);
         List<MacroKind> returnCalleeMacroKinds =
         [
-            MacroKind.NewInstance, MacroKind.EnumerableMethod, MacroKind.ListMethod, MacroKind.DictionaryMethod, MacroKind.ObjectMethod
+            MacroKind.NewInstance, MacroKind.EnumerableMethod, MacroKind.ListMethod, MacroKind.HashSetMethod, MacroKind.DictionaryMethod, MacroKind.ObjectMethod
         ];
 
         // dumb ass hack bc null warning suppression doesn't work here for some reason

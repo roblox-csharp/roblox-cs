@@ -18,6 +18,7 @@ public enum MacroKind : byte
     ObjectMethod,
     EnumerableMethod,
     ListMethod,
+    HashSetMethod,
     DictionaryMethod,
     ListProperty,
     BitOperation,
@@ -194,9 +195,11 @@ public class MacroManager(
                 {
                     case "Dictionary":
                     {
-                        if (EnumerableMethod(visit, memberAccess, invocation, out var enumerableExpanded)) return enumerableExpanded;
+                        if (EnumerableMethod(visit, memberAccess, invocation, out var enumerableExpanded))
+                            return enumerableExpanded;
 
-                        if (DictionaryMethod(visit, memberAccess, invocation, out var expanded)) return expanded;
+                        if (DictionaryMethod(visit, memberAccess, invocation, out var expanded))
+                            return expanded;
 
                         break;
                     }
@@ -204,9 +207,19 @@ public class MacroManager(
                     case "IEnumerable":
                     case "List":
                     {
-                        if (EnumerableMethod(visit, memberAccess, invocation, out var enumerableExpanded)) return enumerableExpanded;
+                        if (EnumerableMethod(visit, memberAccess, invocation, out var enumerableExpanded))
+                            return enumerableExpanded;
 
-                        if (ListMethod(visit, memberAccess, invocation, out var expanded)) return expanded;
+                        if (ListMethod(visit, memberAccess, invocation, out var expanded))
+                            return expanded;
+
+                        break;
+                    }
+
+                    case "HashSet":
+                    {
+                        if (HashSetMethod(visit, memberAccess, invocation, out var expanded))
+                            return expanded;
 
                         break;
                     }
@@ -698,6 +711,73 @@ public class MacroManager(
         return expanded != null;
     }
 
+    /// <summary>Macros <see cref="HashSet" /> methods</summary>
+    private bool HashSetMethod(Func<SyntaxNode, Node?> visit,
+                               MemberAccessExpressionSyntax memberAccess,
+                               InvocationExpressionSyntax invocation,
+                               out Node? expanded)
+    {
+        expanded = null;
+        var listExpression = (Expression)visit(memberAccess.Expression)!;
+        Expression self;
+
+        if (listExpression is not IdentifierName name)
+        {
+            self = occupiedIdentifiersStack.AddIdentifier("_exp");
+            transformState.Prereq(new Variable((IdentifierName)self, true, listExpression));
+        }
+        else
+        {
+            self = name;
+        }
+
+        switch (memberAccess.Name.Identifier.Text)
+        {
+            case "Add":
+            {
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
+                var element = arguments.First();
+                var wasAddedIdentifier = occupiedIdentifiersStack.AddIdentifier("_wasAdded");
+                var selfAtElement = new ElementAccess(self, element);
+
+                transformState.Prereq(new Variable(wasAddedIdentifier, true, new BinaryOperator(selfAtElement, "==", AstUtility.Nil)));
+                transformState.Prereq(new Assignment(selfAtElement, AstUtility.True));
+                expanded = wasAddedIdentifier;
+
+                break;
+            }
+            case "Remove":
+            {
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
+                var element = arguments.First();
+                var wasRemovedIdentifier = occupiedIdentifiersStack.AddIdentifier("_wasRemoved");
+                var selfAtElement = new ElementAccess(self, element);
+
+                transformState.Prereq(new Variable(wasRemovedIdentifier, true, new BinaryOperator(selfAtElement, "~=", AstUtility.Nil)));
+                transformState.Prereq(new Assignment(selfAtElement, new TypeCast(AstUtility.Nil, AstUtility.AnyType)));
+                expanded = wasRemovedIdentifier;
+
+                break;
+            }
+            case "Clear":
+            {
+                expanded = AstUtility.TableCall("clear", self);
+                break;
+            }
+            case "Contains":
+            {
+                var arguments = ((ArgumentList)visit(invocation.ArgumentList)!).Arguments.Select(arg => arg.Expression);
+                var element = arguments.First();
+                expanded = new ElementAccess(self, element);
+                
+                break;
+            }
+        }
+
+        expanded?.MarkExpanded(MacroKind.HashSetMethod);
+        return expanded != null;
+    }
+
     /// <summary>Macros <see cref="List" /> methods</summary>
     private bool ListMethod(Func<SyntaxNode, Node?> visit,
                             MemberAccessExpressionSyntax memberAccess,
@@ -745,7 +825,6 @@ public class MacroManager(
             case "Clear":
             {
                 expanded = AstUtility.TableCall("clear", self);
-
                 break;
             }
             case "Exists":
