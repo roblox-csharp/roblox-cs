@@ -2217,19 +2217,19 @@ public sealed class LuauGenerator(
     {
         {
             if (FindFirstAncestor<MemberAccessExpressionSyntax>(node) is { } memberAccess)
-                return memberAccess.Name == node;
+                return memberAccess.Name.ToString() == node.ToString();
 
             if (FindFirstAncestor<QualifiedNameSyntax>(node) is { } qualifiedName)
-                return qualifiedName.Right == node;
+                return qualifiedName.Right.ToString() == node.ToString();
         }
 
         if (parent != null)
         {
             if (parent.FirstAncestorOrSelf<MemberAccessExpressionSyntax>() is { } memberAccess)
-                return memberAccess.Name == node;
+                return memberAccess.Name.ToString() == node.ToString();
 
             if (parent.FirstAncestorOrSelf<QualifiedNameSyntax>() is { } qualifiedName)
-                return qualifiedName.Right == node;
+                return qualifiedName.Right.ToString() == node.ToString();
         }
 
         return false;
