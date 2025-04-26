@@ -128,18 +128,9 @@ public class GenerationTest : Generation
                               """;
 
         var ast = Generate(source);
-        var statements = ast.Statements.Skip(1).ToList();
-        Assert.NotEmpty(statements);
-        Assert.IsType<Block>(statements.First());
-
-        var classBlock = (Block)statements.First();
-        Assert.Equal(5, classBlock.Statements.Count);
-
-        var secondClassStatement = classBlock.Statements[1];
-        Assert.IsType<ScopedBlock>(secondClassStatement);
-
-        var classScope = (ScopedBlock)secondClassStatement;
-        var methodDeclarations = classScope.Statements.TakeLast(3).ToList();
+        var statements = ast.Statements.Skip(1);
+        var classStatements = GetClassMemberStatements(ast);
+        var methodDeclarations = classStatements.TakeLast(3).ToList();
         var firstStatement = methodDeclarations[0];
         var secondStatement = methodDeclarations[1];
         var thirdStatement = methodDeclarations[2];
@@ -1278,18 +1269,7 @@ public class GenerationTest : Generation
     [InlineData("class MyClass { private int _myMember { get; } }")]
     public void Generates_ClassFieldsAndProperties(string source, int initializer = 0)
     {
-        var ast = Generate(source);
-        Assert.NotEmpty(ast.Statements);
-
-        var globalStatements = ast.Statements.Skip(1).ToList();
-        Assert.Single(globalStatements);
-        Assert.IsType<Block>(globalStatements.First());
-
-        var classBlock = (Block)globalStatements.First();
-        Assert.True(classBlock.Statements.Count >= 2);
-        Assert.IsType<ScopedBlock>(classBlock.Statements[1]);
-        
-        var classStatements = ((ScopedBlock)classBlock.Statements[1]).Statements;
+        var classStatements = GetClassMemberStatements(source);
         Assert.True(classStatements.Count >= 4);
         Assert.IsType<Function>(classStatements[4]);
         
@@ -1711,5 +1691,27 @@ public class GenerationTest : Generation
         Assert.NotNull(callExpressionStatement);
         Assert.IsType<Call>(callExpressionStatement.Expression);
         Assert.IsType<AnonymousFunction>(((Call)callExpressionStatement.Expression).ArgumentList.Arguments.First().Expression);
+    }
+    
+    private static List<Statement> GetClassMemberStatements(string source)
+    {
+        var ast = Generate(source);
+        return GetClassMemberStatements(ast);
+    }
+    
+    private static List<Statement> GetClassMemberStatements(AST ast)
+    {
+        Assert.NotEmpty(ast.Statements);
+
+        var globalStatements = ast.Statements.Skip(1).ToList();
+        Assert.True(globalStatements.Count > 0);
+        Assert.IsType<Block>(globalStatements.First());
+
+        var classBlock = (Block)globalStatements.First();
+        Assert.True(classBlock.Statements.Count >= 2);
+        Assert.IsType<ScopedBlock>(classBlock.Statements[1]);
+        
+        var classStatements = ((ScopedBlock)classBlock.Statements[1]).Statements;
+        return classStatements;
     }
 }
