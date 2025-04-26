@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
@@ -1089,6 +1090,25 @@ public sealed class LuauGenerator(
         Expression? expandedExpression = _macro.GenericName(Visit, node);
 
         return expandedExpression ?? new GenericName(node.Identifier.Text, typeArguments);
+    }
+
+    public override Literal VisitSizeOfExpression(SizeOfExpressionSyntax node)
+    {
+        var typeSymbol = _semanticModel.GetTypeInfo(node.Type).Type;
+        if (typeSymbol == null) throw Logger.CompilerError($"Failed to resolve type '{node.Type}' used in sizeof()", node);
+
+        var type = StandardUtility.GetRuntimeType(_semanticModel, node.Type, typeSymbol);
+        int size;
+        try
+        {
+            size = Marshal.SizeOf(type);
+        }
+        catch (Exception e)
+        {
+            throw Logger.CompilerError($"Failed to resolve size of type '{node.Type}': {e.Message}", node);
+        }
+
+        return new Literal(size.ToString());
     }
 
     public override Break VisitBreakStatement(BreakStatementSyntax node) => new();
