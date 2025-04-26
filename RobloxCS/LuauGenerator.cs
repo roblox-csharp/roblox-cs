@@ -51,7 +51,7 @@ public sealed class LuauGenerator(
     public override AST VisitCompilationUnit(CompilationUnitSyntax node)
     {
         occupiedIdentifiersStack.Push();
-        List<Statement> result = [new SingleLineComment(Shared.Constants.HeaderComment + "\n\n")];
+        List<Statement> result = [new SingleLineComment(Constants.HeaderComment + "\n\n")];
 
         var lastSyntaxTree = node.SyntaxTree;
         var i = 0;
@@ -72,20 +72,17 @@ public sealed class LuauGenerator(
 
                 var difference = members.Count - nonHoisted.Count;
                 var member = nonHoisted.ElementAtOrDefault(i - difference);
-
                 if (member == null) return root;
 
                 i++;
+                if (!TryHoistNode(root, member, out var newRoot)) continue;
 
-                if (TryHoistNode(root, member, out var newRoot))
-                {
-                    alreadyHoisted.Add(member);
-                    root = (CompilationUnitSyntax)newRoot;
-                    _compiler = _compiler.ReplaceSyntaxTree(lastSyntaxTree, root.SyntaxTree);
-                    _semanticModel = _compiler.GetSemanticModel(root.SyntaxTree);
-                    _macro = new MacroManager(_semanticModel, transformState, occupiedIdentifiersStack);
-                    lastSyntaxTree = root.SyntaxTree;
-                }
+                alreadyHoisted.Add(member);
+                root = (CompilationUnitSyntax)newRoot;
+                _compiler = _compiler.ReplaceSyntaxTree(lastSyntaxTree, root.SyntaxTree);
+                _semanticModel = _compiler.GetSemanticModel(root.SyntaxTree);
+                _macro = new MacroManager(_semanticModel, transformState, occupiedIdentifiersStack);
+                lastSyntaxTree = root.SyntaxTree;
             }
         }
 
@@ -397,6 +394,21 @@ public sealed class LuauGenerator(
         return new TableInitializer(initializers.ToList());
     }
 
+    public override NoOp VisitBaseList(BaseListSyntax node)
+    {
+        foreach (var baseType in node.Types)
+        {
+            var type = _semanticModel.GetTypeInfo(baseType.Type).Type;
+            var disallowedName = Constants.DISALLOWED_BASE_TYPES.FirstOrDefault(name => StandardUtility.DoesTypeInheritFrom(type, name));
+            if (disallowedName == null) continue;
+
+            throw Logger.CodegenError(baseType, $"Types that have macros may not be inherited from ({disallowedName})");
+        }
+
+        // do nothing (for now)
+        return new NoOp();
+    }
+
     public override TypeAlias VisitInterfaceDeclaration(InterfaceDeclarationSyntax node)
     {
         var name = new IdentifierName(node.Identifier.Text);
@@ -420,6 +432,8 @@ public sealed class LuauGenerator(
 
             return null;
         }
+
+        if (node.BaseList != null) Visit(node.BaseList); // TODO: do something with it
 
         var name = AstUtility.CreateSimpleName(node);
         var nonGenericName = AstUtility.GetNonGenericName(name);
