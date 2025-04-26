@@ -14,11 +14,11 @@ public sealed class MainTransformer(SyntaxTree tree, TransformState state, Confi
     {
         var usings = node.Usings;
         usings = usings
-                 .Add(SyntaxFactory.UsingDirective(SyntaxFactory.QualifiedName(SyntaxFactory.QualifiedName(SyntaxFactory
-                                                                                                               .IdentifierName("System"),
-                                                                                                           SyntaxFactory
-                                                                                                               .IdentifierName("Collections")),
+                 .Add(SyntaxFactory.UsingDirective(SyntaxFactory.QualifiedName(SyntaxFactory.QualifiedName(SyntaxFactory.IdentifierName("System"),
+                                                                                                           SyntaxFactory.IdentifierName("Collections")),
                                                                                SyntaxFactory.IdentifierName("Generic"))))
+                 .Add(SyntaxFactory.UsingDirective(SyntaxFactory.QualifiedName(SyntaxFactory.IdentifierName("System"),
+                                                                               SyntaxFactory.IdentifierName("Collections"))))
                  .Add(SyntaxFactory.UsingDirective(SyntaxFactory.QualifiedName(SyntaxFactory.IdentifierName("System"),
                                                                                SyntaxFactory.IdentifierName("Linq"))))
                  .Add(SyntaxFactory.UsingDirective(SyntaxFactory.IdentifierName("Roblox")))
@@ -120,12 +120,10 @@ public sealed class MainTransformer(SyntaxTree tree, TransformState state, Confi
 
     public override SyntaxNode? VisitElseClause(ElseClauseSyntax node) => base.VisitElseClause(SyntaxFactory.ElseClause(node.ElseKeyword, Blockify(node.Statement)));
 
-    private static StatementSyntax Blockify(StatementSyntax statement)
-    {
-        return statement is BlockSyntax
+    private static StatementSyntax Blockify(StatementSyntax statement) =>
+        statement is BlockSyntax
             ? statement
             : SyntaxFactory.Block(SyntaxList.Create([statement]));
-    }
 
     private ExpressionSyntax? ProcessWhenNotNull(ExpressionSyntax expression, ExpressionSyntax? whenNotNull)
     {
