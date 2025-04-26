@@ -1196,11 +1196,13 @@ public class GenerationTest : Generation
         Assert.IsType<Assignment>(classBlock.Statements[2]);
         Assert.IsType<TypeAlias>(classBlock.Statements[3]);
     }
-
+    
     [Theory]
-    [InlineData("class MyClass { private readonly int _myMember = 69; }")]
-    [InlineData("class MyClass { private int _myMember { get; } = 69; }")]
-    public void Generates_ClassFieldsAndProperties(string source)
+    [InlineData("class MyClass { private readonly int _myMember = 69; }", 69)]
+    [InlineData("class MyClass { private int _myMember { get; } = 69; }", 69)]
+    [InlineData("class MyClass { private readonly int _myMember; }")]
+    [InlineData("class MyClass { private int _myMember { get; } }")]
+    public void Generates_ClassFieldsAndProperties(string source, int initializer = 0)
     {
         var ast = Generate(source);
         Assert.NotEmpty(ast.Statements);
@@ -1233,7 +1235,7 @@ public class GenerationTest : Generation
         Assert.Equal("_myMember", memberAccess.Name.ToString());
         
         var value = (Literal)fieldAssignment.Value;
-        Assert.Equal("69", value.ValueText);
+        Assert.Equal(initializer.ToString(), value.ValueText);
     }
 
     [Fact]
