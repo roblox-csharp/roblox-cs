@@ -27,7 +27,7 @@ public class GenerationTest : Generation
         var literal = (Literal)initializer;
         Assert.Equal(luauValueText, literal.ValueText);
     }
-    
+
     [Fact]
     public void Generates_MethodOverloads()
     {
@@ -1152,6 +1152,25 @@ public class GenerationTest : Generation
     }
 
     [Theory]
+    [InlineData("const int a = 1; a;", "1")]
+    [InlineData("const bool a = false; a;", "false")]
+    [InlineData("const string a = \"foobar\"; a;", "\"foobar\"")]
+    public void Generates_ConstantDeclarations(string csharpSource, string expectedValueText)
+    {
+        var ast = Generate(csharpSource);
+        Assert.NotEmpty(ast.Statements);
+
+        var statement = ast.Statements.Skip(2).First();
+        Assert.IsType<ExpressionStatement>(statement);
+
+        var expression = ((ExpressionStatement)statement).Expression;
+        Assert.IsType<Literal>(expression);
+
+        var literal = (Literal)expression;
+        Assert.Equal(expectedValueText, literal.ValueText);
+    }
+
+    [Theory]
     [InlineData("var a = 1;", null, "1")]
     [InlineData("int b = 2;", "number", "2")]
     [InlineData("string foo = \"bar\"", "string", "\"bar\"")]
@@ -1167,7 +1186,12 @@ public class GenerationTest : Generation
         var variableList = (VariableList)statement;
         var variable = variableList.Variables.First();
         Assert.Equal(expectedLuauType, variable.Type?.ToString());
-        Assert.Equal(expectedValueText, (variable.Initializer as Literal)?.ValueText);
+        
+        if (expectedValueText == null) return;
+        Assert.IsType<Literal>(variable.Initializer);
+        
+        var literal = (Literal)variable.Initializer;
+        Assert.Equal(expectedValueText, literal.ValueText);
     }
 
     [Theory]
