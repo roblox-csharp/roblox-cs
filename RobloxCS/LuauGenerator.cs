@@ -58,6 +58,7 @@ public sealed class LuauGenerator(
         var i = 0;
         HashSet<SyntaxNode> alreadyHoisted = [];
 
+        // TODO: handle nested types
         CompilationUnitSyntax loopMembersToHoist(CompilationUnitSyntax root)
         {
             while (true)
@@ -307,11 +308,11 @@ public sealed class LuauGenerator(
     public override Statement? VisitPropertyDeclaration(PropertyDeclarationSyntax node)
     {
         var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node);
-
         if (!IsStatic(node) || classDeclaration == null) return null;
 
         // static props
-        var initializer = GetFieldInitializer(node.Type, node.Initializer);
+        var initializer = GetFieldOrPropertyInitializer(classDeclaration, node.Type, node.Initializer);
+        if (initializer == null) return null;
 
         return new Assignment(new MemberAccess(AstUtility.CreateSimpleName(classDeclaration, noGenerics: true),
                                                AstUtility.CreateSimpleName(node)),
@@ -327,7 +328,9 @@ public sealed class LuauGenerator(
         List<Statement> statements = [];
         foreach (var declarator in node.Declaration.Variables)
         {
-            var initializer = GetFieldInitializer(node.Declaration.Type, declarator.Initializer);
+            var initializer = GetFieldOrPropertyInitializer(classDeclaration, node.Declaration.Type, declarator.Initializer);
+            if (initializer == null) continue;
+
             statements.Add(new Assignment(new MemberAccess(AstUtility.CreateSimpleName(classDeclaration, noGenerics: true),
                                                            AstUtility.CreateSimpleName(declarator)),
                                           initializer));
@@ -1872,15 +1875,12 @@ public sealed class LuauGenerator(
         if (nodeToHoist is GlobalStatementSyntax globalStatement) nodeToHoist = globalStatement.Statement;
 
         var shouldHoist = _hoistedSyntaxes.Contains(nodeToHoist.Kind());
-
         if (!shouldHoist) return false;
 
         var hoistTarget = GetHoistInsertionTarget(nodeToHoist);
-
         if (hoistTarget == null) return false; // nothing to do
 
         var originalParent = originalNodeToHoist.Parent;
-
         if (originalParent == null) return false;
 
         var modifiedRoot = root
@@ -1891,7 +1891,6 @@ public sealed class LuauGenerator(
         if (updatedNodeToHoist == null)
         {
             newRoot = modifiedRoot;
-
             return true;
         }
 
@@ -1899,7 +1898,6 @@ public sealed class LuauGenerator(
         if (updatedParent == null)
         {
             newRoot = modifiedRoot;
-
             return true;
         }
 
@@ -1907,7 +1905,6 @@ public sealed class LuauGenerator(
         if (updatedTarget == null)
         {
             newRoot = modifiedRoot;
-
             return true;
         }
 
@@ -1915,7 +1912,6 @@ public sealed class LuauGenerator(
         if (container == null)
         {
             newRoot = modifiedRoot;
-
             return true;
         }
 
@@ -1925,7 +1921,6 @@ public sealed class LuauGenerator(
             case BlockSyntax block:
             {
                 var statements = block.Statements;
-
                 if (statements.Count <= 1) return false;
 
                 var targetIndex = statements.IndexOf((StatementSyntax)updatedTarget);
@@ -1939,7 +1934,6 @@ public sealed class LuauGenerator(
             case ClassDeclarationSyntax declaration:
             {
                 var members = declaration.Members;
-
                 if (members.Count <= 1) return false;
 
                 // stupid hack this code sucks so bad
@@ -1996,7 +1990,6 @@ public sealed class LuauGenerator(
 
             default:
                 newRoot = modifiedRoot;
-
                 return true;
         }
     }
@@ -2004,31 +1997,21 @@ public sealed class LuauGenerator(
     private SyntaxNode? GetHoistInsertionTarget(SyntaxNode node)
     {
         var location = FindHoistTarget(node);
-
         if (location == null) return null;
 
         var scope = GetHoistScope(node);
-
         return scope?
                .ChildNodes()
                .FirstOrDefault(n => n.SpanStart >= location.SourceSpan.Start);
     }
 
     private static SyntaxNode? GetHoistScope(SyntaxNode node) =>
-        node.FirstAncestorOrSelf<SyntaxNode>(n =>
-        {
-            return node switch
-            {
-                ClassDeclarationSyntax => n is BlockSyntax or CompilationUnitSyntax or NamespaceDeclarationSyntax,
-                NamespaceDeclarationSyntax => n is BlockSyntax or CompilationUnitSyntax or ClassDeclarationSyntax,
-                _ => n is BlockSyntax or CompilationUnitSyntax or NamespaceDeclarationSyntax or ClassDeclarationSyntax
-            };
-        });
+        node.Ancestors()
+            .FirstOrDefault(n => n is BlockSyntax or CompilationUnitSyntax or NamespaceDeclarationSyntax or ClassDeclarationSyntax);
 
     private Location? FindHoistTarget(SyntaxNode node)
     {
         var scope = GetHoistScope(node);
-
         if (scope == null) return null;
 
         var calledMethods = node
@@ -2060,10 +2043,10 @@ public sealed class LuauGenerator(
                            .OrderBy(d => d?.SpanStart)
                            .ToList();
 
-        if (dependencies.Count == 0) return Location.Create(node.SyntaxTree, new TextSpan(scope.SpanStart, 0));
+        if (dependencies.Count == 0)
+            return Location.Create(node.SyntaxTree, new TextSpan(scope.SpanStart, 0));
 
         var lastDependency = dependencies.MaxBy(d => d?.Span.End)!;
-
         return Location.Create(node.SyntaxTree, new TextSpan(lastDependency.Span.End + 1, 0));
     }
 
