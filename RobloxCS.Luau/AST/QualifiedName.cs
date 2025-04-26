@@ -11,7 +11,7 @@ public class QualifiedName : Name
     }
 
     public Name Left { get; }
-    public char Operator { get; set; }
+    public char Operator { get; }
     public SimpleName Right { get; }
 
     public override void Render(LuauWriter luau)
@@ -22,4 +22,6 @@ public class QualifiedName : Name
     }
 
     public override string ToString() => Left.ToString() + Operator + Right;
+
+    public MemberAccess WithOperator(char @operator) => new(Left, Right, @operator);
 }

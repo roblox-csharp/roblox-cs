@@ -454,11 +454,38 @@ public static class AstUtility
 
     public static ArgumentList CreateArgumentList(List<Expression> arguments) => new(arguments.ConvertAll(expression => new Argument(expression)));
 
+    public static AnonymousFunction WrapNonStaticMethod(IMethodSymbol methodSymbol, MemberAccess memberAccess, OccupiedIdentifiersStack occupiedIdentifiers)
+    {
+        var parameters = methodSymbol.Parameters.Select(p => ParameterFromSymbol(p, occupiedIdentifiers)).ToList();
+        var returnType = CreateTypeRef(methodSymbol.ReturnType.Name);
+        var typeParameters = methodSymbol.TypeParameters.Select(p => new IdentifierName(p.Name)).ToList();
+        var arguments = parameters.ConvertAll<Expression>(p => p.Name);
+        if (!methodSymbol.IsStatic)
+            memberAccess = memberAccess.WithOperator(':');
+
+        return new AnonymousFunction(new ParameterList(parameters),
+                                     returnType,
+                                     new Block([new Return(new Call(memberAccess, CreateArgumentList(arguments)))]),
+                                     null,
+                                     typeParameters);
+    }
+
+    public static Parameter ParameterFromSymbol(IParameterSymbol symbol, OccupiedIdentifiersStack occupiedIdentifiers)
+    {
+        var defaultValue = symbol.HasExplicitDefaultValue ? CreateLuauConstant(symbol.ExplicitDefaultValue) : null;
+        var name = occupiedIdentifiers.AddIdentifier(symbol.Name);
+        var type = CreateTypeRef(symbol.Type.Name);
+
+        return new Parameter(name, false, defaultValue, type);
+    }
+
     public static SimpleName TypeNameFromSymbol(ISymbol symbol)
     {
-        if (symbol is not INamedTypeSymbol { TypeParameters.Length: > 0 } namedTypeSymbol) return new IdentifierName(symbol.Name);
+        if (symbol is not INamedTypeSymbol { TypeParameters.Length: > 0 } namedTypeSymbol)
+            return new IdentifierName(symbol.Name);
 
-        var typeParameters = namedTypeSymbol.TypeParameters.Select(typeParameter => TypeNameFromSymbol(typeParameter).ToString())
+        var typeParameters = namedTypeSymbol.TypeParameters
+                                            .Select(typeParameter => TypeNameFromSymbol(typeParameter).ToString())
                                             .ToList();
 
         return new GenericName(symbol.Name, typeParameters);
@@ -515,7 +542,7 @@ public static class AstUtility
     ///     Creates a discard variable if <see cref="valueParent" /> is an <see cref="ExpressionStatementSyntax" />
     /// </summary>
     public static Node DiscardVariableIfExpressionStatement(SyntaxNode node, Node value, SyntaxNode? valueParent) =>
-        valueParent is ExpressionStatementSyntax
+        valueParent?.FirstAncestorOrSelf<ExpressionStatementSyntax>() != null
             ? DiscardVariable(node, (Expression)value)
             : value;
 

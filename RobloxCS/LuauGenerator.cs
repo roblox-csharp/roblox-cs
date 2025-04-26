@@ -9,6 +9,7 @@ using Microsoft.CodeAnalysis.Text;
 using RobloxCS.Luau;
 using RobloxCS.Macros;
 using RobloxCS.Shared;
+using Expression = RobloxCS.Luau.Expression;
 
 namespace RobloxCS;
 
@@ -817,20 +818,20 @@ public sealed class LuauGenerator(
             switch (identifier.Identifier.Text)
             {
                 case "nameof":
-                    return new Literal('"' + node.ArgumentList.Arguments.First().Expression.ToString() + '"');
+                    return AstUtility.String(node.ArgumentList.Arguments.First().Expression.ToString());
             }
 
         var callee = Visit<Expression>(node.Expression);
         if (methodSymbol != null)
-            switch (callee)
+        {
+            var @operator = methodSymbol.IsStatic ? '.' : ':';
+            callee = callee switch
             {
-                case MemberAccess memberAccess:
-                    memberAccess.Operator = methodSymbol.IsStatic ? '.' : ':';
-                    break;
-                case QualifiedName qualifiedName:
-                    qualifiedName.Operator = methodSymbol.IsStatic ? '.' : ':';
-                    break;
-            }
+                MemberAccess memberAccess => memberAccess.WithOperator(@operator),
+                QualifiedName qualifiedName => qualifiedName.WithOperator(@operator),
+                _ => callee
+            };
+        }
 
         List<Statement> statements = [];
         var arguments = node.ArgumentList.Arguments.Select(arg =>
@@ -993,17 +994,20 @@ public sealed class LuauGenerator(
         if (originalName is not SimpleName simpleName)
             throw Logger.CompilerError($"Member access name is not a simple name, instead it is '{originalName.GetType().Name}'", node.Name);
 
-        var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
-        if (symbol is IFieldSymbol { HasConstantValue: true } fieldSymbol)
-            return AstUtility.CreateLuauConstant(fieldSymbol.ConstantValue);
-
         var name = AstUtility.GetNonGenericName(simpleName);
         var memberAccess = new MemberAccess(expression, name);
-        var luauNode = AstUtility.DiscardVariableIfExpressionStatement(node, memberAccess, node.Parent);
-        var expandedExpression = _macro.MemberAccess(Visit, node);
-        if (expandedExpression != null) luauNode = expandedExpression;
+        var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
+        switch (symbol)
+        {
+            case IFieldSymbol { HasConstantValue: true } fieldSymbol:
+                return AstUtility.CreateLuauConstant(fieldSymbol.ConstantValue);
+            case IMethodSymbol methodSymbol when node.Parent is ArgumentSyntax:
+                return AstUtility.WrapNonStaticMethod(methodSymbol, memberAccess, file.OccupiedIdentifiers);
+        }
 
-        return luauNode;
+        var expandedExpression = _macro.MemberAccess(Visit, node);
+
+        return expandedExpression ?? memberAccess;
     }
 
     public override Node VisitImplicitElementAccess(ImplicitElementAccessSyntax node) => Visit<Expression>(node.ArgumentList.Arguments.First().Expression);
@@ -1523,7 +1527,6 @@ public sealed class LuauGenerator(
     public override Node VisitExpressionStatement(ExpressionStatementSyntax node)
     {
         var expressionNode = Visit<Node>(node.Expression);
-
         return expressionNode is Expression expression
             ? new ExpressionStatement(expression)
             : expressionNode;
