@@ -106,12 +106,15 @@ public static class StandardUtility
         return member;
     }
 
-    public static List<T> FilterDuplicates<T>(IEnumerable<T> items, IEqualityComparer<T> comparer)
-        where T : notnull
+    public static string Capitalize(string name)
     {
-        var seen = new Dictionary<T, bool>(comparer);
+        if (string.IsNullOrEmpty(name))
+            return name;
 
-        return items.Where(item => seen.TryAdd(item, true)).ToList();
+        if (char.IsUpper(name[0]))
+            return name;
+
+        return char.ToUpper(name[0]) + name[1..];
     }
 
     public static string GetMappedType(string csharpType)
