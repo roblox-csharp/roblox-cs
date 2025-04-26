@@ -62,9 +62,7 @@ public static class StandardUtility
     {
         if (derived == null) return false;
 
-        return derived.BaseType != null
-            ? derived.Name == typeName || derived.BaseType.Name == typeName || DoesTypeInheritFrom(derived.BaseType, typeName)
-            : derived.Name == typeName;
+        return derived.Name == typeName || derived.BaseType != null && DoesTypeInheritFrom(derived.BaseType, typeName);
     }
 
     public static bool DoesTypeInheritFrom(ITypeSymbol derived, ITypeSymbol baseType)
@@ -160,21 +158,28 @@ public static class StandardUtility
         if (csharpType.StartsWith("IEnumerator<"))
         {
             var elementType = GetMappedType(ExtractTypeArguments(csharpType).First());
-
             return $"CS.IEnumerator<{elementType}>";
         }
 
-        if (csharpType.StartsWith("Roblox.Enum")) return GetMappedType(csharpType.Replace("Roblox.Enum", "Enum"));
+        if (csharpType.StartsWith("HashSet<"))
+        {
+            var elementType = GetMappedType(ExtractTypeArguments(csharpType).First());
+            return $"CS.IEnumerator<{elementType}>";
+        }
+
+        if (csharpType.StartsWith("Roblox.Enum"))
+            return GetMappedType(csharpType.Replace("Roblox.Enum", "Enum"));
 
         return csharpType switch
         {
-            "Object" or "object" or "dynamic" or "Type" => "any",
+            "Object" or "object" or "dynamic" => "any",
             "void" or "Void" => "()",
             "null" => "nil",
             "char" or "Char" or "String" => "string",
             "Boolean" or "bool" => "boolean",
             "System.Index" or "Index" => "number",
             "Roblox.Buffer" or "Buffer" => "buffer",
+            "System.Type" or "Type" => "any", // "CS.Type",
             _ => INTEGER_TYPES.Contains(csharpType) || DECIMAL_TYPES.Contains(csharpType)
                 ? "number"
                 : csharpType

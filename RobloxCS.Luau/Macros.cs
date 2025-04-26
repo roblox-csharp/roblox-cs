@@ -12,8 +12,9 @@ public enum MacroKind : byte
     GetService,
     ListConstruction,
     DictionaryConstruction,
+    HashSetConstruction,
     IEnumerableType,
-    DictionaryType,
+    ISetType,
     ObjectMethod,
     EnumerableMethod,
     ListMethod,
@@ -68,7 +69,7 @@ public class MacroManager(
         return null;
     }
 
-    public Expression? BinaryExpression(Func<SyntaxNode, Node?> visit, BinaryExpressionSyntax binaryExpression)
+    public static Expression? BinaryExpression(Func<SyntaxNode, Node?> visit, BinaryExpressionSyntax binaryExpression)
     {
         var mappedOperator = StandardUtility.GetMappedOperator(binaryExpression.OperatorToken.Text);
         var bit32MethodName = StandardUtility.GetBit32MethodName(mappedOperator);
@@ -86,13 +87,13 @@ public class MacroManager(
     }
 
     /// <summary>
-    /// Takes a C# generic name and expands the name into a macro'd type
+    ///     Takes a C# generic name and expands the name into a macro'd type
     /// </summary>
     public Name? GenericName(Func<SyntaxNode, Node?> visit, GenericNameSyntax genericName)
     {
-        var typeInfo = ModelExtensions.GetTypeInfo(semanticModel, genericName);
-        if (StandardUtility.IsFromSystemNamespace(typeInfo.Type))
-            switch (genericName.Identifier.Text)
+        var typeSymbol = semanticModel.GetTypeInfo(genericName).Type;
+        if (StandardUtility.IsFromSystemNamespace(typeSymbol))
+            switch (typeSymbol?.Name)
             {
                 // lord i am sorry for my sins
                 // returning IdentifierName because when visiting GenericNameSyntax (C#) it expects that a Name (luau) is returned
@@ -101,20 +102,17 @@ public class MacroManager(
                 {
                     var elementTypeName = visit(genericName.TypeArgumentList.Arguments.First())!;
                     var expanded = new IdentifierName($"{{ {StandardUtility.GetMappedType(elementTypeName.ToString()!)} }}");
-
                     expanded.MarkExpanded(MacroKind.IEnumerableType);
 
                     return expanded;
                 }
 
-                case "Dictionary":
+                case "HashSet":
+                case "ISet":
                 {
-                    var keyTypeName = visit(genericName.TypeArgumentList.Arguments.First())!;
-                    var valueTypeName = visit(genericName.TypeArgumentList.Arguments.Last())!;
-                    var expanded = new
-                        IdentifierName($"{{ [{StandardUtility.GetMappedType(keyTypeName.ToString()!)}]: {StandardUtility.GetMappedType(valueTypeName.ToString()!)} }}");
-
-                    expanded.MarkExpanded(MacroKind.DictionaryType);
+                    var elementTypeName = visit(genericName.TypeArgumentList.Arguments.First())!;
+                    var expanded = new IdentifierName($"{{ [{StandardUtility.GetMappedType(elementTypeName.ToString()!)}]: boolean }}");
+                    expanded.MarkExpanded(MacroKind.ISetType);
 
                     return expanded;
                 }
@@ -185,17 +183,13 @@ public class MacroManager(
                 {
                     if (StandardUtility.DoesTypeInheritFrom(expressionType, "Object")
                      && ObjectMethod(visit, memberAccess, invocation, out var expanded))
-                    {
                         return expanded;
-                    }
                 }
 
                 {
                     if (StandardUtility.DoesTypeInheritFrom(expressionType, "Instance")
                      && InstanceMethod(visit, memberAccess, invocation, out var expanded))
-                    {
                         return expanded;
-                    }
                 }
 
                 switch (expressionType?.Name)
@@ -422,7 +416,7 @@ public class MacroManager(
                                                   new Assignment(seenValue, AstUtility.True),
                                                   new ExpressionStatement(AstUtility.TableCall("insert",
                                                                                                distinctIdentifier,
-                                                                                               valueIdentifier)),
+                                                                                               valueIdentifier))
                                               ])));
 
                 expanded = distinctIdentifier;
@@ -441,7 +435,7 @@ public class MacroManager(
                                               new Block([
                                                   new ExpressionStatement(AstUtility.TableCall("insert",
                                                                                                resultIdentifier,
-                                                                                               valueIdentifier)),
+                                                                                               valueIdentifier))
                                               ])));
 
                 expanded = resultIdentifier;
@@ -534,10 +528,12 @@ public class MacroManager(
             {
                 Expression finalExpression = new TableInitializer();
                 if (baseObjectCreation.Initializer != null)
+                {
                     finalExpression = new TableInitializer(baseObjectCreation.Initializer.Expressions
                                                                              .Select(visit)
                                                                              .OfType<Expression>()
                                                                              .ToList());
+                }
                 else if (baseObjectCreation.ArgumentList is { Arguments.Count: > 0 })
                 {
                     var expression = baseObjectCreation.ArgumentList.Arguments.First().Expression;
@@ -553,6 +549,35 @@ public class MacroManager(
 
                 return finalExpression;
             }
+            case "HashSet":
+            {
+                Expression finalExpression = new TableInitializer();
+                if (baseObjectCreation.Initializer != null)
+                {
+                    var elements = baseObjectCreation.Initializer.Expressions
+                                                     .Select(visit)
+                                                     .OfType<Expression>()
+                                                     .ToList();
+
+                    var initializers = elements.ConvertAll(_ => AstUtility.Bool(true)).ToList<Expression>();
+                    finalExpression = new TableInitializer(initializers, elements);
+                }
+                else if (baseObjectCreation.ArgumentList is { Arguments.Count: > 0 })
+                {
+                    throw Logger.UnsupportedError(baseObjectCreation.ArgumentList, "Hash set constructor arguments");
+
+                    var expression = baseObjectCreation.ArgumentList.Arguments.First().Expression;
+                    var expressionType = semanticModel.GetTypeInfo(expression).Type;
+                    if (expressionType != null && Constants.INTEGER_TYPES.Contains(expressionType.Name))
+                        throw Logger.UnsupportedError(expression, "Fixed hash set capacities", useYet: false);
+
+                    finalExpression = (Expression)visit(expression)!;
+                }
+
+                finalExpression.MarkExpanded(MacroKind.HashSetConstruction);
+
+                return finalExpression;
+            }
             case "Dictionary":
             {
                 Expression finalExpression = new TableInitializer();
@@ -562,7 +587,6 @@ public class MacroManager(
                     List<Expression> keys = [];
 
                     foreach (var expression in baseObjectCreation.Initializer.Expressions)
-                    {
                         switch (expression)
                         {
                             case AssignmentExpressionSyntax assignmentExpression:
@@ -590,7 +614,6 @@ public class MacroManager(
                                 throw Logger.CompilerError($"Unsupported dictionary initializer expression '{expression.Kind()}'",
                                                            expression);
                         }
-                    }
 
                     finalExpression = new TableInitializer(values, keys);
                 }
@@ -603,9 +626,7 @@ public class MacroManager(
 
                             return type is { Name: "EqualityComparer" or "IEqualityComparer" };
                         }))
-                    {
                         throw Logger.UnsupportedError(baseObjectCreation.ArgumentList, "Equality comparers");
-                    }
 
                     throw Logger.UnsupportedError(baseObjectCreation.ArgumentList, "Dictionary constructor arguments");
                 }
@@ -695,7 +716,9 @@ public class MacroManager(
             transformState.Prereq(new Variable((IdentifierName)self, true, listExpression));
         }
         else
+        {
             self = name;
+        }
 
         switch (memberAccess.Name.Identifier.Text)
         {

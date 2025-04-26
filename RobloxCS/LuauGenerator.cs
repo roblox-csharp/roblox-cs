@@ -759,9 +759,14 @@ public sealed class LuauGenerator(
 
     public override TableInitializer VisitCollectionExpression(CollectionExpressionSyntax node)
     {
+        var typeSymbol = _semanticModel.GetTypeInfo(node).ConvertedType;
         var elements = node.Elements.Select(Visit<Expression>).ToList();
 
-        return new TableInitializer(elements);
+        if (!StandardUtility.DoesTypeInheritFrom(typeSymbol, "HashSet"))
+            return new TableInitializer(elements);
+
+        var initializers = elements.ConvertAll(_ => AstUtility.Bool(true)).ToList<Expression>();
+        return new TableInitializer(initializers, elements);
     }
 
     public override Expression VisitImplicitObjectCreationExpression(ImplicitObjectCreationExpressionSyntax node)
@@ -1034,7 +1039,7 @@ public sealed class LuauGenerator(
         var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
         if (symbol is ILocalSymbol { HasConstantValue: true } localSymbol)
             return AstUtility.CreateLuauConstant(localSymbol.ConstantValue);
-        
+
         var identifierText = occupiedIdentifiersStack.GetDuplicateText(node.Identifier.Text);
         if (symbol is IMethodSymbol methodSymbol
          && SymbolMetadataManager.Get(methodSymbol.ContainingType) is { MethodOverloads: not null }
@@ -1123,7 +1128,7 @@ public sealed class LuauGenerator(
 
     public override Node VisitBinaryExpression(BinaryExpressionSyntax node)
     {
-        var expanded = _macro.BinaryExpression(Visit, node);
+        var expanded = MacroManager.BinaryExpression(Visit, node);
 
         if (expanded != null) return expanded;
 

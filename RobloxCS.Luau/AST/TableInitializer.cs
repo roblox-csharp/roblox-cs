@@ -6,18 +6,6 @@ public class TableInitializer : Expression
 {
     public static readonly TableInitializer Empty = new();
 
-    public static TableInitializer Union(TableInitializer a, TableInitializer b)
-    {
-        var kvpComparer = new StandardUtility.KeyValuePairEqualityComparer<Expression, Expression>();
-        var pairs = a.KeyValuePairs.Union(b.KeyValuePairs, kvpComparer).ToDictionary();
-
-        return new TableInitializer(pairs.Values.ToList(), pairs.Keys.ToList());
-    }
-
-    public List<Expression> Values { get; }
-    public List<Expression> Keys { get; }
-    public List<KeyValuePair<Expression, Expression>> KeyValuePairs { get; }
-
     public TableInitializer(List<Expression>? values = null,
                             List<Expression>? keys = null)
     {
@@ -37,6 +25,18 @@ public class TableInitializer : Expression
 
         AddChildren(Values);
         AddChildren(Keys);
+    }
+
+    public List<Expression> Values { get; }
+    public List<Expression> Keys { get; }
+    public List<KeyValuePair<Expression, Expression>> KeyValuePairs { get; }
+
+    public static TableInitializer Union(TableInitializer a, TableInitializer b)
+    {
+        var kvpComparer = new StandardUtility.KeyValuePairEqualityComparer<Expression, Expression>();
+        var pairs = a.KeyValuePairs.Union(b.KeyValuePairs, kvpComparer).ToDictionary();
+
+        return new TableInitializer(pairs.Values.ToList(), pairs.Keys.ToList());
     }
 
     public override void Render(LuauWriter luau)
@@ -66,7 +66,7 @@ public class TableInitializer : Expression
 
             value.Render(luau);
 
-            if (value == Values.Last()) continue;
+            if (i == Values.Count - 1) continue;
 
             luau.Write(',');
             luau.Write(hasAnyKeys ? '\n' : ' ');
