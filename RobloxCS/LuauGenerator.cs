@@ -1075,8 +1075,7 @@ public sealed class LuauGenerator(
                                 .Select(typeArg => StandardUtility.GetMappedType(Visit<Name>(typeArg).ToString()))
                                 .ToList();
 
-        Expression? expandedExpression = _macro.GenericName(Visit, node);
-
+        Expression? expandedExpression = _macro.GenericName(node, typeArguments);
         return expandedExpression ?? new GenericName(node.Identifier.Text, typeArguments);
     }
 
