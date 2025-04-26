@@ -441,6 +441,14 @@ public sealed class LuauGenerator(
         occupiedIdentifiersStack.AddIdentifier(nonGenericName.Text);
         occupiedIdentifiersStack.Push();
 
+        var shouldGenerateWithMetatable = node.ChildNodes().Any(node => {
+            if (node is MethodDeclarationSyntax method) {
+                if (method.Modifiers.All(m => !m.IsKind(SyntaxKind.StaticKeyword))) return true;
+            }
+
+            return false;
+        });
+
         var members = node.Members
                           .Select(Visit<Statement?>)
                           .OfType<Statement>()
@@ -487,7 +495,7 @@ public sealed class LuauGenerator(
                          new Block([
                              new Variable(new IdentifierName("self"),
                                           true,
-                                          new TypeCast(new Parenthesized(new TypeCast(new
+                                          new TypeCast(shouldGenerateWithMetatable ? new Parenthesized(new TypeCast(new
                                                                                           Call(new
                                                                                                    IdentifierName("setmetatable"),
                                                                                                AstUtility
@@ -496,7 +504,7 @@ public sealed class LuauGenerator(
                                                                                                            .Empty,
                                                                                                        nonGenericName
                                                                                                    ])),
-                                                                                      AstUtility.AnyType)),
+                                                                                      AstUtility.AnyType)) : new TableInitializer(),
                                                        typeRef)),
                              new Return(new BinaryOperator(new Call(new MemberAccess(new IdentifierName("self"),
                                                                                      nonGenericName,
