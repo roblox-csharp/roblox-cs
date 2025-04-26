@@ -1004,20 +1004,8 @@ public sealed class LuauGenerator(
 
         var name = AstUtility.GetNonGenericName(simpleName);
         var memberAccess = new MemberAccess(expression, name);
-        var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
-        switch (symbol)
-        {
-            case IFieldSymbol { HasConstantValue: true } fieldSymbol:
-                return AstUtility.CreateLuauConstant(fieldSymbol.ConstantValue);
-            case IMethodSymbol methodSymbol when node.Parent is ArgumentSyntax or AssignmentExpressionSyntax { OperatorToken.Text: "+=" or "-=" }:
-            {
-                if (node.Parent is AssignmentExpressionSyntax assignment
-                 && _semanticModel.GetSymbolInfo(assignment.Left).Symbol is not IEventSymbol)
-                    break;
-
-                return AstUtility.WrapNonStaticMethod(methodSymbol, memberAccess, _file.OccupiedIdentifiers);
-            }
-        }
+        if (TryMethodWrap(node, memberAccess, out var wrapped))
+            return wrapped;
 
         return _macro.MemberAccess(Visit, node) ?? memberAccess;
     }
@@ -1053,40 +1041,45 @@ public sealed class LuauGenerator(
 
     public override Node VisitIdentifierName(IdentifierNameSyntax node)
     {
-        var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node);
-        var method = FindFirstAncestor<MethodDeclarationSyntax>(node);
         var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
         if (symbol is ILocalSymbol { HasConstantValue: true } localSymbol)
             return AstUtility.CreateLuauConstant(localSymbol.ConstantValue);
-
+        
         var identifierText = _file.OccupiedIdentifiers.GetDuplicateText(node.Identifier.Text);
         if (symbol is IMethodSymbol methodSymbol
          && SymbolMetadataManager.Get(methodSymbol.ContainingType) is { MethodOverloads: not null }
          && GetMethodName(methodSymbol) is { } methodName)
             identifierText = methodName;
 
-        var parent = node.Parent;
-        node = node.WithIdentifier(SyntaxFactory.Identifier(identifierText));
+        var name = new IdentifierName(identifierText);
+        var method = FindFirstAncestor<MethodDeclarationSyntax>(node);
+        var shouldCallRefFunction = method != null
+                    && node.Parent is not AssignmentExpressionSyntax
+                    && GetRefKindParameters(method.ParameterList).Contains(identifierText);
 
-        var name = AstUtility.CreateSimpleName(node);
-        if (method != null && node.Parent is not AssignmentExpressionSyntax)
-        {
-            var refKinds = GetRefKindParameters(method.ParameterList);
+        if (shouldCallRefFunction)
+            return new Call(name);
 
-            if (refKinds.Contains(node.Identifier.Text)) return new Call(name);
-        }
+        var classDeclaration = FindFirstAncestor<ClassDeclarationSyntax>(node);
+        var shouldQualifyClassMember = classDeclaration != null
+                                    && symbol is IFieldSymbol or IPropertySymbol or IEventSymbol or IMethodSymbol { MethodKind: MethodKind.Ordinary }
+                                    && symbol.ContainingType.Name == classDeclaration.Identifier.Text
+                                    && !IsAlreadyQualified(node, node.Parent);
+        
+        if (!shouldQualifyClassMember)
+            return TryMethodWrap(node, name, out var wrapped)
+                ? wrapped
+                : name;
 
-        if (classDeclaration == null
-         || symbol is not (IFieldSymbol or IPropertySymbol or IEventSymbol or IMethodSymbol { MethodKind: MethodKind.Ordinary })
-         || symbol.ContainingType.Name != classDeclaration.Identifier.Text
-         || IsAlreadyQualified(node, parent))
-            return name;
-
-        var qualifier = symbol.IsStatic
-            ? AstUtility.CreateSimpleName(node, classDeclaration.Identifier.Text, noGenerics: true)
+        var qualifier = symbol!.IsStatic
+            ? AstUtility.CreateSimpleName(node, classDeclaration!.Identifier.Text, noGenerics: true)
             : new IdentifierName("self");
 
-        return new QualifiedName(qualifier, name, symbol is IMethodSymbol ? ':' : '.');
+        var useColon = symbol is IMethodSymbol && node.Parent is InvocationExpressionSyntax;
+        var qualifiedClassMember = new QualifiedName(qualifier, name, useColon ? ':' : '.');
+        return TryMethodWrap(node, qualifiedClassMember, out var wrappedQualified)
+            ? wrappedQualified
+            : qualifiedClassMember;
     }
 
     public override Expression VisitGenericName(GenericNameSyntax node)
@@ -1606,6 +1599,30 @@ public sealed class LuauGenerator(
         }
 
         return new Literal(valueText);
+    }
+
+    private bool TryMethodWrap(ExpressionSyntax node, Expression expression, [MaybeNullWhen(false)] out Expression wrapped)
+    {
+        var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
+        switch (symbol)
+        {
+            case IFieldSymbol { HasConstantValue: true } fieldSymbol:
+                wrapped = AstUtility.CreateLuauConstant(fieldSymbol.ConstantValue);
+                return true;
+            case IMethodSymbol methodSymbol
+                when node.Parent is ArgumentSyntax or AssignmentExpressionSyntax { OperatorToken.Text: "+=" or "-=" }:
+            {
+                if (node.Parent is AssignmentExpressionSyntax assignment
+                 && _semanticModel.GetSymbolInfo(assignment.Left).Symbol is not IEventSymbol)
+                    break;
+
+                wrapped = AstUtility.TryWrapNonStaticMethod(methodSymbol, expression, _file.OccupiedIdentifiers)!;
+                return true;
+            }
+        }
+
+        wrapped = null;
+        return false;
     }
 
     private IdentifierName? HandleObjectCreationInitializer(InitializerExpressionSyntax? initializer,
