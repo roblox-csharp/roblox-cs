@@ -1147,7 +1147,7 @@ public sealed class LuauGenerator(
         var leftType = _semanticModel.GetTypeInfo(node.Left).Type;
         var rightType = _semanticModel.GetTypeInfo(node.Right).Type;
         var mappedOperator = StandardUtility.GetMappedOperator(node.OperatorToken.Text);
-        if (leftType is { Name: "String" or "Char" } || rightType is { Name: "String" or "Char" }) mappedOperator = "..";
+        if ((leftType is { Name: "String" or "Char" } || rightType is { Name: "String" or "Char" }) && mappedOperator is "+=" or "+") mappedOperator = "..";
 
         var left = Visit<Expression>(node.Left);
         var right = Visit<Expression>(node.Right);
