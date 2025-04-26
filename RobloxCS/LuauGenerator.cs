@@ -782,7 +782,9 @@ public sealed class LuauGenerator(
     {
         var expression = Visit<Expression>(node.Expression);
         var typeName = Visit<Name>(node.Type);
-
+        if (expression is TypeCast)
+            expression = new Parenthesized(expression);
+        
         return new TypeCast(expression, AstUtility.CreateTypeRef(typeName.ToString())!);
     }
 
