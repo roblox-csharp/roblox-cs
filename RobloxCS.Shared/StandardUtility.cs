@@ -106,12 +106,25 @@ public static class StandardUtility
         return member;
     }
 
-    public static List<T> FilterDuplicates<T>(IEnumerable<T> items, IEqualityComparer<T> comparer)
-        where T : notnull
+    public static string FixPathSeparator(string path)
     {
-        var seen = new Dictionary<T, bool>(comparer);
+        path = Path.TrimEndingDirectorySeparator(path)
+                   .Replace(@"\\", "/")
+                   .Replace('\\', '/')
+                   .Replace("//", "/");
 
-        return items.Where(item => seen.TryAdd(item, true)).ToList();
+        return Regex.Replace(path, @"(?<!\.)\./", "");
+    }
+
+    public static string Capitalize(string name)
+    {
+        if (string.IsNullOrEmpty(name))
+            return name;
+
+        if (char.IsUpper(name[0]))
+            return name;
+
+        return char.ToUpper(name[0]) + name[1..];
     }
 
     public static string GetMappedType(string csharpType)

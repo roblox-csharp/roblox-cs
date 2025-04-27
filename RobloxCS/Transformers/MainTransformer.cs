@@ -6,8 +6,8 @@ using RobloxCS.Shared;
 
 namespace RobloxCS.Transformers;
 
-public sealed class MainTransformer(SyntaxTree tree, TransformState state, ConfigData config)
-    : BaseTransformer(tree, state, config)
+public sealed class MainTransformer(FileCompilation file)
+    : BaseTransformer(file)
 {
     // Add some implicit usings to the file
     public override SyntaxNode? VisitCompilationUnit(CompilationUnitSyntax node)
@@ -70,6 +70,73 @@ public sealed class MainTransformer(SyntaxTree tree, TransformState state, Confi
                .WithMembers([childNamespace]);
 
         return base.VisitNamespaceDeclaration(node);
+    }
+
+    public override SyntaxNode? VisitClassDeclaration(ClassDeclarationSyntax node)
+    {
+        if (node.ParameterList == null)
+            return base.VisitClassDeclaration(node);
+
+        var parameterList = node.ParameterList;
+        var parameterNames = parameterList.Parameters.Select(p => p.Identifier.Text).ToHashSet();
+
+        // Fix properties: remove initializers that use primary parameters
+        var newMembers = new List<MemberDeclarationSyntax>();
+
+        foreach (var member in node.Members)
+            if (member is PropertyDeclarationSyntax property)
+            {
+                if (property.Initializer != null
+                 && property.Initializer.Value is IdentifierNameSyntax identifier
+                 && parameterNames.Contains(identifier.Identifier.Text))
+
+                    // Remove initializer (because parameter won't be in scope anymore)
+                    property = property.WithInitializer(null)
+                                       .WithSemicolonToken(SyntaxFactory.Token(SyntaxKind.SemicolonToken));
+
+                newMembers.Add(property);
+            }
+            else
+            {
+                newMembers.Add(member);
+            }
+
+        // Create assignments inside the constructor
+        var assignments = new List<StatementSyntax>();
+        foreach (var param in parameterList.Parameters)
+        {
+            var paramName = param.Identifier.Text;
+            var matchingProperty = node.Members
+                                       .OfType<PropertyDeclarationSyntax>()
+                                       .FirstOrDefault(p => string.Equals(p.Identifier.Text,
+                                                                          StandardUtility.Capitalize(paramName),
+                                                                          StringComparison.OrdinalIgnoreCase));
+
+            if (matchingProperty == null) continue;
+
+            var assignment = SyntaxFactory.ExpressionStatement(SyntaxFactory.AssignmentExpression(SyntaxKind.SimpleAssignmentExpression,
+                                                                                                  SyntaxFactory.MemberAccessExpression(SyntaxKind
+                                                                                                                                           .SimpleMemberAccessExpression,
+                                                                                                                                       SyntaxFactory
+                                                                                                                                           .ThisExpression(),
+                                                                                                                                       SyntaxFactory
+                                                                                                                                           .IdentifierName(matchingProperty
+                                                                                                                                                               .Identifier)),
+                                                                                                  SyntaxFactory.IdentifierName(paramName)));
+
+            assignments.Add(assignment);
+        }
+
+        var constructor = SyntaxFactory.ConstructorDeclaration(node.Identifier)
+                                       .WithModifiers(SyntaxFactory.TokenList(SyntaxFactory.Token(SyntaxKind.PublicKeyword)))
+                                       .WithParameterList(parameterList)
+                                       .WithBody(SyntaxFactory.Block(assignments));
+
+        var newNode = node
+                      .WithParameterList(null)
+                      .WithMembers(SyntaxFactory.List(newMembers.Append(constructor)));
+
+        return base.VisitClassDeclaration(newNode);
     }
 
     // Return an IsPatternExpression if the binary operator is `is`

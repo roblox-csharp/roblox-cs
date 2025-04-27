@@ -12,9 +12,11 @@ public class ObjectMacrosTest : Base.Generation
         Assert.NotEmpty(ast.Statements);
 
         var statement = ast.Statements.Skip(1).First();
-        Assert.IsType<ExpressionStatement>(statement);
+        Assert.IsType<Variable>(statement);
 
-        var expression = ((ExpressionStatement)statement).Expression;
+        var expression = ((Variable)statement).Initializer;
+        Assert.NotNull(expression);
+        
         var call = (Call)expression;
         Assert.NotNull(call.ExpandedByMacro);
         Assert.Equal(MacroKind.ObjectMethod, call.ExpandedByMacro);

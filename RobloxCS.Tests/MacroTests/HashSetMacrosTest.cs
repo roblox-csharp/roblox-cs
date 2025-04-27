@@ -14,7 +14,7 @@ public class HashSetMacrosTest : Base.Generation
         var statements = ast.Statements.Skip(2).ToList();
         Assert.IsType<Variable>(statements[0]);
         Assert.IsType<Assignment>(statements[1]);
-        Assert.IsType<ExpressionStatement>(statements[2]);
+        Assert.IsType<Variable>(statements[2]);
         
         var variable = (Variable)statements[0];
         Assert.Equal("_wasAdded", variable.Name.Text);
@@ -40,7 +40,8 @@ public class HashSetMacrosTest : Base.Generation
         var index = (Literal)elementAccess.Index;
         Assert.Equal("69", index.ValueText);
 
-        var expression = ((ExpressionStatement)statements[2]).Expression;
+        var expression = ((Variable)statements[2]).Initializer;
+        Assert.NotNull(expression);
         Assert.NotNull(expression.ExpandedByMacro);
         Assert.Equal(MacroKind.HashSetMethod, expression.ExpandedByMacro);
         Assert.IsType<IdentifierName>(expression);
@@ -56,7 +57,8 @@ public class HashSetMacrosTest : Base.Generation
         var statements = ast.Statements.Skip(2).ToList();
         Assert.IsType<Variable>(statements[0]);
         Assert.IsType<Assignment>(statements[1]);
-        Assert.IsType<ExpressionStatement>(statements[2]);
+        Assert.IsType<Variable>(statements[2]);
+
         
         var variable = (Variable)statements[0];
         Assert.Equal("_wasRemoved", variable.Name.Text);
@@ -85,7 +87,8 @@ public class HashSetMacrosTest : Base.Generation
         var index = (Literal)elementAccess.Index;
         Assert.Equal("69", index.ValueText);
 
-        var expression = ((ExpressionStatement)statements[2]).Expression;
+        var expression = ((Variable)statements[2]).Initializer;
+        Assert.NotNull(expression);
         Assert.NotNull(expression.ExpandedByMacro);
         Assert.Equal(MacroKind.HashSetMethod, expression.ExpandedByMacro);
         Assert.IsType<IdentifierName>(expression);
@@ -99,9 +102,9 @@ public class HashSetMacrosTest : Base.Generation
         Assert.NotEmpty(ast.Statements);
 
         var statement = ast.Statements.Skip(2).First();
-        Assert.IsType<ExpressionStatement>(statement);
+        Assert.IsType<Variable>(statement);
 
-        var expression = ((ExpressionStatement)statement).Expression;
+        var expression = ((Variable)statement).Initializer;
         Assert.IsType<ElementAccess>(expression);
 
         var elementAccess = (ElementAccess)expression;

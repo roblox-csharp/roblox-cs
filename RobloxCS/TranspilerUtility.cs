@@ -2,60 +2,63 @@ using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RobloxCS.Luau;
+using RobloxCS.Shared;
 using RobloxCS.Transformers;
 
 namespace RobloxCS;
 
-using TransformMethod = Func<SyntaxTree, TransformState, ConfigData, SyntaxTree>;
+using TransformMethod = Func<FileCompilation, SyntaxTree>;
 
 public static class TranspilerUtility
 {
-    public static string GenerateLuau(SyntaxTree tree, CSharpCompilation compiler)
+    public static string GenerateLuau(FileCompilation file, CSharpCompilation compiler)
     {
-        var luauAST = GetLuauAST(tree, compiler);
+        var luauAST = GetLuauAST(file, compiler);
         var luau = new LuauWriter();
 
         return luau.Render(luauAST);
     }
 
-    public static AST GetLuauAST(SyntaxTree tree, CSharpCompilation compiler)
+    public static AST GetLuauAST(FileCompilation file, CSharpCompilation compiler)
     {
-        var generator = new LuauGenerator(tree, compiler, new TransformState(), new OccupiedIdentifiersStack());
+        var generator = new LuauGenerator(file, compiler);
 
         return generator.GetLuauAST();
     }
 
-    public static CSharpCompilation GetCompiler(List<SyntaxTree> trees, ConfigData? config)
+    public static CSharpCompilation GetCompiler(List<SyntaxTree> trees, ConfigData config)
     {
         // config ??= ConfigReader.UnitTestingConfig;
 
         var compilationOptions = new CSharpCompilationOptions(OutputKind.ConsoleApplication);
 
-        return CSharpCompilation.Create(assemblyName: "test", //config.CSharpOptions.AssemblyName,
-                                        syntaxTrees: trees,
-                                        references: FileUtility.GetCompilationReferences(),
-                                        options: compilationOptions);
+        return CSharpCompilation.Create("test", //config.CSharpOptions.AssemblyName,
+                                        trees,
+                                        FileUtility.GetCompilationReferences(),
+                                        compilationOptions);
     }
 
-    public static SyntaxTree ParseAndTransformTree(string source, ConfigData? config)
-    {
-        var tree = ParseTree(source);
-        HashSet<TransformMethod> transformers = [BuiltInTransformers.Main()];
-
-        return TransformTree(tree, transformers, config);
-    }
-
-    public static SyntaxTree TransformTree(SyntaxTree cleanTree, HashSet<TransformMethod> transformMethods, ConfigData? config)
+    public static FileCompilation ParseAndTransformTree(string source, RojoProject? rojoProject, ConfigData config)
     {
         // config ??= ConfigReader.UnitTestingConfig;
-        config ??= new ConfigData();
 
-        var state = new TransformState();
+        var tree = ParseTree(source);
+        var file = GetFileCompilation(tree, rojoProject, config);
+        HashSet<TransformMethod> transformers = [BuiltInTransformers.Main()];
 
-        return transformMethods.Aggregate(cleanTree, (current, transform) => transform(current, state, config));
+        TransformTree(file, transformers);
+        return file;
     }
 
-    public static SyntaxTree ParseTree(string source, string sourceFile = "TestFile.cs")
+    public static FileCompilation GetFileCompilation(SyntaxTree tree, RojoProject? rojoProject, ConfigData config) =>
+        new() { Tree = tree, RojoProject = rojoProject, Config = config };
+
+    private static SyntaxTree TransformTree(FileCompilation file, HashSet<TransformMethod> transformMethods) =>
+
+        // config ??= ConfigReader.UnitTestingConfig;
+        transformMethods.Aggregate(file.Tree, (_, transform) => transform(file));
+
+    private static SyntaxTree ParseTree(string source, string sourceFile = "TestFile.cs")
     {
         var cleanTree = CSharpSyntaxTree.ParseText(source);
         var compilationUnit = (CompilationUnitSyntax)cleanTree.GetRoot();

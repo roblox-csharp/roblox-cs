@@ -87,13 +87,6 @@ do
 	Enumerator.__index = Enumerator
 	Enumerator.__className = className
 
-	function Enumerator.__iter(self: Enumerator)
-		return function()
-			self:MoveNext()
-			return self.Current
-		end
-	end
-
 	function Enumerator.new<T>(items: { T } | EnumerationFunction<T>): IEnumerator<T>
 		local isAdvanced = typeof(items) == "function"
 		return (setmetatable({
@@ -125,6 +118,21 @@ do
 		self._items = nil
 		setmetatable(self, nil)
 	end
+	
+	-- internal function to collect into table
+	function Enumerator:_collect()
+	    local function iter()
+             self:MoveNext()
+             return self.Current
+        end
+        
+        local result = {}
+        for v in iter do
+            table.insert(result, v)
+        end
+        
+        return result
+    end
 end
 CS.defineGlobal("Enumerator", Enumerator)
 CS.Enumerator = Enumerator
