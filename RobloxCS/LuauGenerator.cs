@@ -445,6 +445,14 @@ public sealed class LuauGenerator(
         _file.OccupiedIdentifiers.AddIdentifier(nonGenericName.Text);
         _file.OccupiedIdentifiers.Push();
 
+        var shouldGenerateWithMetatable = node.ChildNodes().Any(node => {
+            if (node is MethodDeclarationSyntax method) {
+                if (method.Modifiers.All(m => !m.IsKind(SyntaxKind.StaticKeyword))) return true;
+            }
+
+            return false;
+        });
+
         var members = node.Members
                           .Select(Visit<Statement?>)
                           .OfType<Statement>()
@@ -455,6 +463,7 @@ public sealed class LuauGenerator(
         var constructor = explicitConstructor == null
             ? GenerateConstructor(node, new ParameterList([]))
             : Visit<Function>(explicitConstructor);
+        var constructorArguments = AstUtility.CreateArgumentList(constructor.ParameterList.Parameters.ConvertAll<Expression>(parameter => parameter.Name));
 
         // TODO: maybe move this to AstUtility, this shit is huge
         var typeRef = AstUtility.CreateTypeRef(name.ToString())!;
@@ -491,7 +500,7 @@ public sealed class LuauGenerator(
                          new Block([
                              new Variable(new IdentifierName("self"),
                                           true,
-                                          new TypeCast(new Parenthesized(new TypeCast(new
+                                          new TypeCast(shouldGenerateWithMetatable ? new Parenthesized(new TypeCast(new
                                                                                           Call(new
                                                                                                    IdentifierName("setmetatable"),
                                                                                                AstUtility
@@ -500,17 +509,10 @@ public sealed class LuauGenerator(
                                                                                                            .Empty,
                                                                                                        nonGenericName
                                                                                                    ])),
-                                                                                      AstUtility.AnyType)),
+                                                                                      AstUtility.AnyType)) : new TableInitializer(),
                                                        typeRef)),
-                             new Return(new BinaryOperator(new Call(new MemberAccess(new IdentifierName("self"),
-                                                                                     nonGenericName,
-                                                                                     ':'),
-                                                                    AstUtility.CreateArgumentList(constructor
-                                                                                                  .ParameterList
-                                                                                                  .Parameters
-                                                                                                  .ConvertAll<
-                                                                                                      Expression>(parameter => parameter
-                                                                                                                      .Name))),
+                             new Return(new BinaryOperator(new Call(new IdentifierName("constructor"),
+                                                                    constructorArguments),
                                                            "or",
                                                            new IdentifierName("self")))
                          ]),
@@ -520,7 +522,13 @@ public sealed class LuauGenerator(
                              : null)
         ];
 
-        if (explicitConstructor == null) classMemberStatements.Add(constructor);
+        if (explicitConstructor == null) classMemberStatements.Insert(0, constructor);
+        else {
+            var constructorInList = members.First(m => m is Function function && function.Name.ToString() == constructor.Name.ToString());
+            var Index = members.IndexOf(constructorInList);
+            members.RemoveAt(Index);
+            classMemberStatements.Insert(3, constructorInList);
+        }
 
         classMemberStatements.AddRange(members);
         List<Statement> statements =

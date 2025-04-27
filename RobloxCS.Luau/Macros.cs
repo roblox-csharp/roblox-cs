@@ -55,16 +55,32 @@ public class MacroManager(
         switch (mappedOperator)
         {
             case "+=":
+            {
                 var left = (Expression)visit(assignment.Left)!;
                 var right = (Expression)visit(assignment.Right)!;
                 var callback = !eventSymbol.IsStatic && right is Luau.MemberAccess or QualifiedName
                     ? AstUtility.TryWrapNonStaticMethod(methodSymbol, right, file.OccupiedIdentifiers)!
                     : right;
 
-                return new Variable(connectionName,
-                                    true,
-                                    new Call(new MemberAccess(left, new IdentifierName("Connect"), ':'),
-                                             AstUtility.CreateArgumentList([callback])));
+                var disconnectsInside = right is AnonymousFunction anonymousFunction
+                                     &&anonymousFunction.Body.Descendants.Exists(node => node is Call call
+                                                                                      && call.Callee is MemberAccess memberAccess
+                                                                                      && memberAccess.Expression is IdentifierName exprName
+                                                                                      && memberAccess.Name is IdentifierName name
+                                                                                      && exprName.Text == connectionName.Text
+                                                                                      && name.Text == "Disconnect");
+            
+                var body = new Call(new MemberAccess(left, new IdentifierName("Connect"), ':'),
+                                             AstUtility.CreateArgumentList([callback]));
+
+                if (disconnectsInside)
+                    return new Block([
+                        new Variable(connectionName, true),
+                        new Assignment(connectionName, body),
+                        ]);
+                 
+                return new Variable(connectionName, true, body); 
+            }
             case "-=":
                 return new Call(new MemberAccess(connectionName, new IdentifierName("Disconnect"), ':'),
                                 ArgumentList.Empty);

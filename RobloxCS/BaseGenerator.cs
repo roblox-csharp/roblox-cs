@@ -31,6 +31,7 @@ public class BaseGenerator(FileCompilation file, CSharpCompilation compiler) : C
                                            Block? body = null,
                                            List<AttributeList>? attributeLists = null)
     {
+        parameterList.Parameters.Insert(0, new Parameter(new("self"), type: new TypeRef(classDeclaration.Identifier.Text)));
         var className = AstUtility.CreateSimpleName(classDeclaration);
         var nonGenericName = AstUtility.GetNonGenericName(className);
         body ??= new Block([]);
@@ -86,8 +87,8 @@ public class BaseGenerator(FileCompilation file, CSharpCompilation compiler) : C
         if (!body.Statements.Any(statement => statement is Return))
             body.Statements.Add(new Return(AstUtility.Nil));
 
-        return new Function(new QualifiedName(nonGenericName, className, ':'),
-                            false,
+        return new Function(new IdentifierName("constructor"),
+                            true,
                             parameterList,
                             new OptionalType(AstUtility.CreateTypeRef(className.ToString())!),
                             body,
