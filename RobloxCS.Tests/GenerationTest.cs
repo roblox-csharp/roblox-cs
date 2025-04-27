@@ -23,7 +23,7 @@ public class GenerationTest : Generation
                                   public static void MyOtherMethod(char c);
                               }
                               """;
-        
+
         var ast = Generate(source);
         Assert.NotEmpty(ast.Statements);
 
@@ -31,55 +31,56 @@ public class GenerationTest : Generation
         Assert.IsType<VariableList>(statements[0]);
         Assert.IsType<ExpressionStatement>(statements[1]);
         Assert.IsType<ExpressionStatement>(statements[2]);
-        
+
         var variableList = (VariableList)statements[0];
         var variable = variableList.Variables.First();
         Assert.Equal("x", variable.Name.ToString());
         Assert.IsType<MemberAccess>(variable.Initializer);
-        
+
         var memberAccess = (MemberAccess)variable.Initializer;
         Assert.Equal("abc", memberAccess.Expression.ToString());
         Assert.Equal("MyMethod", memberAccess.Name.ToString());
-        
+
         var firstExpression = ((ExpressionStatement)statements[1]).Expression;
         Assert.IsType<Call>(firstExpression);
-        
+
         var firstCall = (Call)firstExpression;
         Assert.Single(firstCall.ArgumentList.Arguments);
         Assert.IsType<AnonymousFunction>(firstCall.ArgumentList.Arguments.First().Expression);
-        
+
         var anonymousFunction = (AnonymousFunction)firstCall.ArgumentList.Arguments.First().Expression;
         Assert.Equal(firstCall.ArgumentList.Arguments.Count, anonymousFunction.ParameterList.Parameters.Count);
         Assert.NotNull(anonymousFunction.Body);
         Assert.Single(anonymousFunction.Body.Statements);
-        
+
         var statement = anonymousFunction.Body.Statements.First();
         Assert.IsType<Return>(statement);
-        
+
         var returnStatement = (Return)statement;
         Assert.IsType<Call>(returnStatement.Expression);
-        
+
         var wrappedCall = (Call)returnStatement.Expression;
         Assert.Equal(anonymousFunction.ParameterList.Parameters.Count, wrappedCall.ArgumentList.Arguments.Count);
         Assert.IsType<MemberAccess>(wrappedCall.Callee);
-        
+
         var callMemberAccess = (MemberAccess)wrappedCall.Callee;
         Assert.Equal(':', callMemberAccess.Operator);
         Assert.IsType<IdentifierName>(callMemberAccess.Expression);
         Assert.IsType<IdentifierName>(callMemberAccess.Name);
-        
+
         var secondExpression = ((ExpressionStatement)statements[2]).Expression;
         Assert.IsType<Call>(secondExpression);
-        
+
         var secondCall = (Call)secondExpression;
         Assert.Single(secondCall.ArgumentList.Arguments);
         Assert.IsType<MemberAccess>(secondCall.ArgumentList.Arguments.First().Expression);
-        
+
         var argumentMemberAccess = (MemberAccess)secondCall.ArgumentList.Arguments.First().Expression;
         Assert.Equal('.', argumentMemberAccess.Operator);
         Assert.IsType<IdentifierName>(argumentMemberAccess.Expression);
         Assert.IsType<IdentifierName>(argumentMemberAccess.Name);
     }
+
     [Theory]
     [InlineData("var _ = sizeof(byte);", "1")]
     [InlineData("var _ = sizeof(short);", "2")]
@@ -669,24 +670,25 @@ public class GenerationTest : Generation
     }
 
     [Fact]
-    public void Generates_MetatableOnNonStaticMethodsOnly() {
+    public void Generates_MetatableOnNonStaticMethodsOnly()
+    {
         var ast = Generate("class Abc { public void Method() {} }");
         Assert.NotEmpty(ast.Statements);
-        var statement = ((Block)(ast.Statements.Skip(1).First())).Statements.ElementAt(1);
+        var statement = ((Block)ast.Statements.Skip(1).First()).Statements.ElementAt(1);
         Assert.IsType<ScopedBlock>(statement);
         var classScope = (ScopedBlock)statement;
         var newFunction = (Function)classScope.Statements.Where(s => s is not NoOp).ElementAt(4);
         Assert.IsType<Function>(newFunction);
-        Assert.IsType<Parenthesized>(((TypeCast)((Variable)(newFunction.Body!.Statements.First())).Initializer!).Expression);
+        Assert.IsType<Parenthesized>(((TypeCast)((Variable)newFunction.Body!.Statements.First()).Initializer!).Expression);
 
         ast = Generate("class Abc { public static void Method() {} }");
         Assert.NotEmpty(ast.Statements);
-        statement = ((Block)(ast.Statements.Skip(1).First())).Statements.ElementAt(1);
+        statement = ((Block)ast.Statements.Skip(1).First()).Statements.ElementAt(1);
         Assert.IsType<ScopedBlock>(statement);
         classScope = (ScopedBlock)statement;
         newFunction = (Function)classScope.Statements.Where(s => s is not NoOp).ElementAt(4);
         Assert.IsType<Function>(newFunction);
-        Assert.IsType<TableInitializer>(((TypeCast)((Variable)(newFunction.Body!.Statements.First())).Initializer!).Expression);
+        Assert.IsType<TableInitializer>(((TypeCast)((Variable)newFunction.Body!.Statements.First()).Initializer!).Expression);
     }
 
     [Fact]
@@ -1282,7 +1284,7 @@ public class GenerationTest : Generation
         Assert.IsType<Assignment>(classBlock.Statements[2]);
         Assert.IsType<TypeAlias>(classBlock.Statements[3]);
     }
-    
+
     [Theory]
     [InlineData("class MyClass { private readonly int _myMember = 69; }", 69)]
     [InlineData("class MyClass { private int _myMember { get; } = 69; }", 69)]
@@ -1291,24 +1293,24 @@ public class GenerationTest : Generation
     public void Generates_ClassFieldsAndProperties(string source, int initializer = 0)
     {
         var classStatements = GetClassMemberStatements(source);
-        Assert.True(classStatements.Count >= 4);
-        Assert.IsType<Function>(classStatements[4]);
-        
-        var constructor = (Function)classStatements[4];
+        Assert.True(classStatements.Count >= 3);
+        Assert.IsType<Function>(classStatements[3]);
+
+        var constructor = (Function)classStatements[3];
         Assert.NotNull(constructor.Body);
         Assert.Equal(2, constructor.Body.Statements.Count);
         Assert.IsType<Assignment>(constructor.Body.Statements.First());
-        
+
         var fieldAssignment = (Assignment)constructor.Body.Statements.First();
         Assert.IsType<MemberAccess>(fieldAssignment.Target);
         Assert.IsType<Literal>(fieldAssignment.Value);
-        
+
         var memberAccess = (MemberAccess)fieldAssignment.Target;
         Assert.IsType<IdentifierName>(memberAccess.Expression);
         Assert.IsType<IdentifierName>(memberAccess.Name);
         Assert.Equal("self", memberAccess.Expression.ToString());
         Assert.Equal("_myMember", memberAccess.Name.ToString());
-        
+
         var value = (Literal)fieldAssignment.Value;
         Assert.Equal(initializer.ToString(), value.ValueText);
     }
@@ -1401,7 +1403,13 @@ public class GenerationTest : Generation
         Assert.Equal(name, classNameAssignmentTarget.Expression.ToString());
         Assert.Equal("__className", classNameAssignmentTarget.Name.ToString());
 
-        var constructor = (Function)classStatements[3];
+        var constructorImplementation = (Function)classStatements[3];
+        Assert.Equal("constructor", constructorImplementation.Name.ToString());
+        Assert.True(constructorImplementation.IsLocal);
+        Assert.NotNull(constructorImplementation.Body);
+        Assert.Single(constructorImplementation.Body.Statements);
+
+        var constructor = (Function)classStatements[4];
         Assert.Equal($"{name}.new", constructor.Name.ToString());
         Assert.False(constructor.IsLocal);
         Assert.NotNull(constructor.Body);
@@ -1415,7 +1423,7 @@ public class GenerationTest : Generation
 
         var selfCast = (TypeCast)selfVariable.Initializer;
         Assert.Equal(name, selfCast.Type.Path);
-        Assert.IsType<Parenthesized>(selfCast.Expression); // change this denis (to TableInitializer)
+        Assert.IsType<TableInitializer>(selfCast.Expression);
 
         var returnSelf = (Return)constructor.Body.Statements.Last();
         Assert.IsType<BinaryOperator>(returnSelf.Expression);
@@ -1427,21 +1435,9 @@ public class GenerationTest : Generation
         Assert.Equal("self", binaryOperator.Right.ToString());
 
         var constructorCall = (Call)binaryOperator.Left;
-        Assert.Empty(constructorCall.ArgumentList.Arguments);
-        Assert.IsType<MemberAccess>(constructorCall.Callee);
-
-        var memberAccess = (MemberAccess)constructorCall.Callee;
-        Assert.Equal(':', memberAccess.Operator);
-        Assert.IsType<IdentifierName>(memberAccess.Expression);
-        Assert.IsType<IdentifierName>(memberAccess.Name);
-        Assert.Equal("self", memberAccess.Expression.ToString());
-        Assert.Equal(name, memberAccess.Name.ToString());
-
-        var constructorImplementation = (Function)classStatements[4];
-        Assert.Equal($"{name}:{name}", constructorImplementation.Name.ToString()); // change this denis
-        Assert.False(constructorImplementation.IsLocal);                           // change this denis
-        Assert.NotNull(constructorImplementation.Body);
-        Assert.Single(constructorImplementation.Body.Statements);
+        Assert.Single(constructorCall.ArgumentList.Arguments);
+        Assert.IsType<IdentifierName>(constructorCall.Callee);
+        Assert.Equal("constructor", constructorCall.Callee.ToString());
 
         var callStatement = (ExpressionStatement)classBlock.Statements[2];
         Assert.IsType<Call>(callStatement.Expression);
@@ -1713,13 +1709,13 @@ public class GenerationTest : Generation
         Assert.IsType<Call>(callExpressionStatement.Expression);
         Assert.IsType<AnonymousFunction>(((Call)callExpressionStatement.Expression).ArgumentList.Arguments.First().Expression);
     }
-    
+
     private static List<Statement> GetClassMemberStatements(string source)
     {
         var ast = Generate(source);
         return GetClassMemberStatements(ast);
     }
-    
+
     private static List<Statement> GetClassMemberStatements(AST ast)
     {
         Assert.NotEmpty(ast.Statements);
@@ -1731,7 +1727,7 @@ public class GenerationTest : Generation
         var classBlock = (Block)globalStatements.First();
         Assert.True(classBlock.Statements.Count >= 2);
         Assert.IsType<ScopedBlock>(classBlock.Statements[1]);
-        
+
         var classStatements = ((ScopedBlock)classBlock.Statements[1]).Statements;
         return classStatements;
     }
