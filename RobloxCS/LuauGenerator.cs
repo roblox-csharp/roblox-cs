@@ -766,15 +766,14 @@ public sealed class LuauGenerator(
             ? new Parenthesized(TableInitializer.Empty)
             : TableInitializer.Empty;
 
-        Func<KeyValuePair<ITypeSymbol, HashSet<string>>, bool> predicate =
-            pair => SymbolEqualityComparer.Default.Equals(pair.Key, typeTypeSymbol);
-        
-        if (!analysisResult.TypeMemberUses.Any(predicate))
+        Func<KeyValuePair<ITypeSymbol, TypeClassInfo>, bool> predicate = pair => SymbolEqualityComparer.Default.Equals(pair.Key, typeTypeSymbol);
+
+        if (!analysisResult.TypeClassInfos.Any(predicate))
             return empty;
 
-        var memberUses = analysisResult.TypeMemberUses.First(predicate).Value;
+        var typeClassInfo = analysisResult.TypeClassInfos.First(predicate).Value;
         var type = StandardUtility.GetRuntimeType(_semanticModel, node, typeSymbol);
-        var typeInfoTable = AstUtility.CreateTypeInfo(type, memberUses);
+        var typeInfoTable = AstUtility.CreateTypeInfo(type, typeClassInfo);
         return wrap
             ? new Parenthesized(typeInfoTable)
             : typeInfoTable;
@@ -1034,7 +1033,6 @@ public sealed class LuauGenerator(
 
         var expression = Visit<Expression>(node.Expression);
         var simpleName = Visit<SimpleName>(node.Name);
-
         var name = AstUtility.GetNonGenericName(simpleName);
         var memberAccess = new MemberAccess(expression, name);
         if (TryMethodWrap(node, memberAccess, out var wrapped))

@@ -1,4 +1,5 @@
-﻿using System.Reflection;
+﻿using System.Numerics;
+using System.Reflection;
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
@@ -33,15 +34,24 @@ public static class AstUtility
             ? new Literal((value - 1).ToString())
             : new BinaryOperator(expression, "-", new Literal("1"));
 
-    public static Expression GetTypeInfoMember(Type type, string name) =>
+    /// <summary> Creates type info table for runtime type objects</summary>
+    public static TableInitializer CreateTypeInfo(Type type, TypeClassInfo typeClassInfo)
+    {
+        var keys = typeClassInfo.MemberUses.Select(name => new IdentifierName(name)).ToList<Expression>();
+        var values = typeClassInfo.MemberUses.Select(name => GetTypeInfoMember(type, typeClassInfo, name)).ToList();
+        return new TableInitializer(values, keys);
+    }
+
+    private static Expression GetTypeInfoMember(Type type, TypeClassInfo typeClassInfo, string name) =>
         GetMemberInfoMember(type, name)
      ?? name switch
         {
             "AssemblyQualifiedName" => type.AssemblyQualifiedName != null ? String(type.AssemblyQualifiedName) : Nil,
             "Namespace" => type.Namespace != null ? String(type.Namespace) : Nil,
             "FullName" => type.FullName != null ? String(type.FullName) : Nil,
-            "Attributes" => new Literal(type.Attributes.ToString()),
-            "GenericParameterAttributes" => new Literal(type.GenericParameterAttributes.ToString()),
+            "Attributes" => Number((int)type.Attributes),
+            "GenericParameterAttributes" => Number((int)type.GenericParameterAttributes),
+            "Assembly" => CreateAssemblyInfo(type.Assembly, typeClassInfo.AssemblyClassInfo),
             "ContainsGenericParameters" => Bool(type.ContainsGenericParameters),
             "HasElementType" => Bool(type.HasElementType),
             "IsAbstract" => Bool(type.IsAbstract),
@@ -91,7 +101,8 @@ public static class AstUtility
             "IsVisible" => Bool(type.IsVisible),
             "IsValueType" => Bool(type.IsValueType),
             "IsVariableBoundArray" => Bool(type.IsVariableBoundArray),
-            "GetProperties" => GetPropertiesMethod(type),
+
+            // "GetProperties" => GetPropertiesMethod(type),
             "GetArrayRank" => new AnonymousFunction(ParameterList.Empty,
                                                     new TypeRef("number"),
                                                     new Block([new Return(new Literal(type.GetArrayRank().ToString()))])),
@@ -99,180 +110,46 @@ public static class AstUtility
             _ => throw Logger.CompilerError($"Member '{name}' is not yet supported on the Type class")
         };
 
-    /// <summary> Creates type info table for runtime type objects</summary>
-    public static TableInitializer CreateTypeInfo(Type type, HashSet<string> memberUses) => CreateTypeInfo(type, memberUses, false);
-
-    /// <summary> Creates type info table for runtime type objects</summary>
-    public static TableInitializer CreateTypeInfo(Type type, HashSet<string> memberUses, bool noAttributes = false, bool noProperties = false)
+    /// <summary>Creates assembly info table for runtime type objects</summary>
+    private static TableInitializer CreateAssemblyInfo(Assembly assembly, AssemblyClassInfo assemblyClassInfo)
     {
-        var keys = memberUses.Select(name => new IdentifierName(name)).ToList<Expression>();
-        var values = memberUses.Select(name => GetTypeInfoMember(type, name)).ToList();
-        return new TableInitializer(values, keys);
-    }
-
-    private static AnonymousFunction GetPropertiesMethod(Type type, bool noProperties = false) =>
-        new(new ParameterList([new Parameter(new IdentifierName("self"))]),
-            null,
-            new Block([new Return(noProperties ? TableInitializer.Empty : CreatePropertiesInfo(type.GetProperties()))]));
-
-    /// <summary>Creates array of property infos for runtime type objects</summary>
-    private static TableInitializer CreatePropertiesInfo(PropertyInfo[] properties)
-    {
-        var propertyInfos = properties.Select<PropertyInfo, Expression>(property =>
-                                      {
-                                          var memberInfo = CreateMemberInfo(property);
-                                          List<Expression> keys =
-                                          [
-                                              new IdentifierName("CanRead"),
-                                              new IdentifierName("CanWrite"),
-                                              new IdentifierName("IsSpecialName"),
-                                              new IdentifierName("PropertyType"),
-                                              new IdentifierName("GetMethod"),
-                                              new IdentifierName("SetMethod")
-                                          ];
-
-                                          List<Expression> values =
-                                          [
-                                              Bool(property.CanRead),
-                                              Bool(property.CanWrite),
-                                              Bool(property.IsSpecialName),
-
-                                              // temp
-                                              CreateTypeInfo(property.PropertyType, keys.ConvertAll(k => k.ToString()).ToHashSet()!, noProperties: true),
-                                              property.GetMethod != null ? CreateMethodInfo(property.GetMethod, true) : Nil,
-                                              property.SetMethod != null ? CreateMethodInfo(property.SetMethod, true) : Nil
-                                          ];
-
-                                          return TableInitializer.Union(memberInfo, new TableInitializer(values, keys));
-                                      })
-                                      .ToList();
-
-        return new TableInitializer(propertyInfos);
-    }
-
-    /// <summary>Creates method info table for runtime type objects</summary>
-    private static TableInitializer CreateMethodInfo(MethodInfo method, bool noProperties = false)
-    {
-        var methodBase = CreateMethodBase(method);
-        List<Expression> keys = [new IdentifierName("ReturnType"), new IdentifierName("ReturnParameter")];
-
-        // temp
-        List<Expression> values =
-        [
-            CreateTypeInfo(method.ReturnType, keys.ConvertAll(k => k.ToString()).ToHashSet()!, noProperties: noProperties),
-            CreateParameterInfo(method.ReturnParameter, noProperties)
-        ];
-
-        return TableInitializer.Union(methodBase, new TableInitializer(values, keys));
-    }
-
-    private static TableInitializer CreateParameterInfo(ParameterInfo parameter, bool noProperties = false)
-    {
-        List<Expression> keys =
-        [
-            new IdentifierName("Name"),
-            new IdentifierName("IsIn"),
-            new IdentifierName("IsOut"),
-            new IdentifierName("IsOptional"),
-
-            // new IdentifierName("IsLcid"),
-            new IdentifierName("IsRetval"),
-            new IdentifierName("HasDefaultValue"),
-            new IdentifierName("DefaultValue"),
-            new IdentifierName("RawDefaultValue"),
-            new IdentifierName("Position"),
-            new IdentifierName("ParameterType"),
-            new IdentifierName("Member")
-        ];
-
-        List<Expression> values =
-        [
-            parameter.Name != null ? String(parameter.Name) : Nil,
-            Bool(parameter.IsIn),
-            Bool(parameter.IsOut),
-            Bool(parameter.IsOptional),
-
-            // Bool(parameter.IsLcid),
-            Bool(parameter.IsRetval),
-            Bool(parameter.HasDefaultValue),
-            CreateLuauConstant(parameter.DefaultValue),
-            CreateLuauConstant(parameter.RawDefaultValue),
-            new Literal(parameter.Position.ToString()),
-
-            // temp
-            CreateTypeInfo(parameter.ParameterType, keys.ConvertAll(k => k.ToString()).ToHashSet()!, noProperties: noProperties),
-            CreateMemberInfo(parameter.Member)
-        ];
-
-        if (keys.Count != values.Count)
-            throw
-                Logger.CompilerError($"Failed to create runtime parameter info object: Keys and values have unequal sizes.\n\tKeys: {keys.Count}\n\tValues: {values.Count}");
+        var keys = assemblyClassInfo.MemberUses.Select(name => new IdentifierName(name)).ToList<Expression>();
+        var values = assemblyClassInfo.MemberUses.Select(name => GetAssemblyInfoMember(assembly, assemblyClassInfo, name)).ToList();
 
         return new TableInitializer(values, keys);
     }
 
-    /// <summary>Creates method info table for runtime type objects</summary>
-    private static TableInitializer CreateMethodBase(MethodBase method)
-    {
-        var memberInfo = CreateMemberInfo(method);
-        List<Expression> keys =
-        [
-            new IdentifierName("IsAbstract"),
-            new IdentifierName("IsSpecialName"),
-            new IdentifierName("IsConstructor"),
-            new IdentifierName("IsPublic"),
-            new IdentifierName("IsPrivate"),
-            new IdentifierName("IsStatic"),
-            new IdentifierName("IsAssembly"),
-            new IdentifierName("IsFinal"),
-            new IdentifierName("IsVirtual"),
-            new IdentifierName("IsGenericMethod"),
-            new IdentifierName("IsConstructedGenericMethod"),
-            new IdentifierName("IsGenericMethodDefinition"),
+    private static Expression GetAssemblyInfoMember(Assembly assembly, AssemblyClassInfo assemblyClassInfo, string name) =>
+        name switch
+        {
+            "ImageRuntimeVersion" => String(assembly.ImageRuntimeVersion),
+            "HostContext" => new Literal(assembly.HostContext.ToString()),
+            "Location" => String(assembly.Location),
+            "FullName" => assembly.FullName != null ? String(assembly.FullName) : Nil,
+            "SecurityRuleSet" => Number((byte)assembly.SecurityRuleSet),
+            "ReflectionOnly" => Bool(assembly.ReflectionOnly),
+            "IsCollectible" => Bool(assembly.IsCollectible),
+            "IsDynamic" => Bool(assembly.IsDynamic),
+            "IsFullyTrusted" => Bool(assembly.IsFullyTrusted),
+            "GetManifestResourceNames" => new AnonymousFunction(ParameterList.Empty,
+                                                                new TypeRef("string"),
+                                                                new Block([
+                                                                    new Return(new TableInitializer(assembly.GetManifestResourceNames()
+                                                                                                            .Select(String)
+                                                                                                            .ToList<Expression>()))
+                                                                ])),
 
-            // new IdentifierName("IsHideBySig"),
-            // new IdentifierName("IsSecurityCritical"),
-            // new IdentifierName("IsSecuritySafeCritical"),
-            // new IdentifierName("IsSecurityTransparent"),
-            new IdentifierName("ContainsGenericParameters")
+            _ => throw Logger.CompilerError($"Member '{name}' is not yet supported on the Assembly class")
+        };
 
-            // new IdentifierName("CallingConvention"),
-            // new IdentifierName("MethodImplementationFlags")
-            // new IdentifierName("Attributes")
-        ];
+    private static Literal Number<T>(T number)
+        where T : INumber<T> =>
+        new(number.ToString() ?? "0");
 
-        List<Expression> values =
-        [
-            new Literal(method.IsAbstract.ToString().ToLower()),
-            new Literal(method.IsSpecialName.ToString().ToLower()),
-            new Literal(method.IsConstructor.ToString().ToLower()),
-            new Literal(method.IsPublic.ToString().ToLower()),
-            new Literal(method.IsPrivate.ToString().ToLower()),
-            new Literal(method.IsStatic.ToString().ToLower()),
-            new Literal(method.IsAssembly.ToString().ToLower()),
-            new Literal(method.IsFinal.ToString().ToLower()),
-            new Literal(method.IsVirtual.ToString().ToLower()),
-            new Literal(method.IsGenericMethod.ToString().ToLower()),
-            new Literal(method.IsConstructedGenericMethod.ToString().ToLower()),
-            new Literal(method.IsGenericMethodDefinition.ToString().ToLower()),
-
-            // new Literal(method.IsHideBySig.ToString().ToLower()),
-            // new Literal(method.IsSecurityCritical.ToString().ToLower()),
-            // new Literal(method.IsSecuritySafeCritical.ToString().ToLower()),
-            // new Literal(method.IsSecurityTransparent.ToString().ToLower()),
-            new Literal(method.ContainsGenericParameters.ToString().ToLower())
-
-            // new Literal(((int)method.CallingConvention).ToString()),
-            // new Literal(((int)method.MethodImplementationFlags).ToString()),
-            // new Literal(((int)method.Attributes).ToString())
-        ];
-
-        if (keys.Count != values.Count)
-            throw
-                Logger.CompilerError($"Failed to create runtime method base object: Keys and values have unequal sizes.\n\tKeys: {keys.Count}\n\tValues: {values.Count}");
-
-        return TableInitializer.Union(memberInfo, new TableInitializer(values, keys));
-    }
+    // private static AnonymousFunction GetPropertiesMethod(Type type) =>
+    //     new(new ParameterList([new Parameter(new IdentifierName("self"))]),
+    //         null,
+    //         new Block([new Return(CreatePropertiesInfo(type.GetProperties()))]));
 
     private static Expression? GetMemberInfoMember(MemberInfo member, string name) =>
         name switch
@@ -286,39 +163,11 @@ public static class AstUtility
             _ => null
         };
 
-    /// <summary>Creates member info table for runtime type objects</summary>
-    private static TableInitializer CreateMemberInfo(MemberInfo member)
-    {
-        List<Expression> keys =
-        [
-            new IdentifierName("Name")
+    private static TableInitializer CreateCustomAttributeData(CustomAttributeData data) =>
 
-            // new IdentifierName("DeclaringType"),
-            // new IdentifierName("ReflectedType"),
-        ];
-
-        List<Expression> values =
-        [
-            String(member.Name)
-
-            // member.DeclaringType != null ? CreateTypeInfo(member.DeclaringType) : Nil,
-            // member.ReflectedType != null ? CreateTypeInfo(member.ReflectedType) : Nil,
-        ];
-
-        if (keys.Count != values.Count)
-            throw
-                Logger.CompilerError($"Failed to create runtime member info object: Keys and values have unequal sizes.\n\tKeys: {keys.Count}\n\tValues: {values.Count}");
-
-        return new TableInitializer(values, keys);
-    }
-
-    private static TableInitializer CreateCustomAttributeData(CustomAttributeData data)
-    {
-        List<Expression> keys = [new IdentifierName("AttributeType")];
-        List<Expression> values = [CreateMemberInfo(data.AttributeType)];
-
-        return new TableInitializer(values, keys);
-    }
+        // List<Expression> keys = [new IdentifierName("AttributeType")];
+        // List<Expression> values = [CreateMemberInfo(data.AttributeType)];
+        TableInitializer.Empty;
 
     public static Expression CreateLuauConstant(object? value) =>
         value switch
