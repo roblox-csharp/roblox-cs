@@ -141,7 +141,7 @@ public class MacroManager(
 
     /// <summary>Takes a C# member access and expands the macro into a Luau expression</summary>
     /// <returns>The expanded expression of the macro, or null if no macro was applied</returns>
-    public Node? MemberAccess(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess)
+    public Expression? MemberAccess(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess)
     {
         var expressionType = ModelExtensions.GetTypeInfo(semanticModel, memberAccess.Expression).Type;
         var expressionSymbol = ModelExtensions.GetSymbolInfo(semanticModel, memberAccess.Expression).Symbol;
@@ -155,7 +155,6 @@ public class MacroManager(
                                         new ArgumentList([new Argument(new Literal('"' + serviceName + '"'))]));
 
                 expanded.MarkExpanded(MacroKind.GetService);
-
                 return expanded;
             }
         }
@@ -250,7 +249,8 @@ public class MacroManager(
                 {
                     case "List":
                     {
-                        if (ListProperty(visit, memberAccess, out var expanded)) return expanded;
+                        if (ListProperty(visit, memberAccess, out var expanded))
+                            return expanded;
 
                         break;
                     }
@@ -522,7 +522,7 @@ public class MacroManager(
         return expanded != null;
     }
 
-    private static bool ListProperty(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess, out Node? expanded)
+    private static bool ListProperty(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess, out Expression? expanded)
     {
         expanded = null;
         var self = (Expression)visit(memberAccess.Expression)!;
@@ -531,12 +531,10 @@ public class MacroManager(
         {
             case "Count":
                 expanded = new UnaryOperator("#", self);
-
                 break;
         }
 
         expanded?.MarkExpanded(MacroKind.ListProperty);
-
         return expanded != null;
     }
 
@@ -734,7 +732,7 @@ public class MacroManager(
     private bool HashSetMethod(Func<SyntaxNode, Node?> visit,
                                MemberAccessExpressionSyntax memberAccess,
                                InvocationExpressionSyntax invocation,
-                               out Node? expanded)
+                               out Expression? expanded)
     {
         expanded = null;
         var listExpression = (Expression)visit(memberAccess.Expression)!;
@@ -801,7 +799,7 @@ public class MacroManager(
     private bool ListMethod(Func<SyntaxNode, Node?> visit,
                             MemberAccessExpressionSyntax memberAccess,
                             InvocationExpressionSyntax invocation,
-                            out Node? expanded)
+                            out Expression? expanded)
     {
         expanded = null;
         var listExpression = (Expression)visit(memberAccess.Expression)!;

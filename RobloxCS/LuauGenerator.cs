@@ -1003,12 +1003,14 @@ public sealed class LuauGenerator(
         return new TableInitializer(values, keys);
     }
 
-    public override Node VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
+    public override Expression VisitMemberAccessExpression(MemberAccessExpressionSyntax node)
     {
+        var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
+        if (symbol is IFieldSymbol { HasConstantValue: true } fieldSymbol)
+            return AstUtility.CreateLuauConstant(fieldSymbol.ConstantValue);
+        
         var expression = Visit<Expression>(node.Expression);
-        var original = Visit<Expression>(node.Name);
-        if (original is not SimpleName simpleName)
-            return original; // hot fucking trash
+        var simpleName = Visit<SimpleName>(node.Name);
 
         var name = AstUtility.GetNonGenericName(simpleName);
         var memberAccess = new MemberAccess(expression, name);
