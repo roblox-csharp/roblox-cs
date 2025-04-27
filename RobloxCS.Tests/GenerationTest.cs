@@ -515,6 +515,27 @@ public class GenerationTest : Generation
     }
 
     [Fact]
+    public void Generates_MetatableOnNonStaticMethodsOnly() {
+        var ast = Generate("class Abc { public void Method() {} }");
+        Assert.NotEmpty(ast.Statements);
+        var statement = ((Block)(ast.Statements.Skip(1).First())).Statements.ElementAt(1);
+        Assert.IsType<ScopedBlock>(statement);
+        var classScope = (ScopedBlock)statement;
+        var newFunction = (Function)classScope.Statements.Where(s => s is not NoOp).ElementAt(4);
+        Assert.IsType<Function>(newFunction);
+        Assert.IsType<Parenthesized>(((TypeCast)((Variable)(newFunction.Body!.Statements.First())).Initializer!).Expression);
+
+        ast = Generate("class Abc { public static void Method() {} }");
+        Assert.NotEmpty(ast.Statements);
+        statement = ((Block)(ast.Statements.Skip(1).First())).Statements.ElementAt(1);
+        Assert.IsType<ScopedBlock>(statement);
+        classScope = (ScopedBlock)statement;
+        newFunction = (Function)classScope.Statements.Where(s => s is not NoOp).ElementAt(4);
+        Assert.IsType<Function>(newFunction);
+        Assert.IsType<TableInitializer>(((TypeCast)((Variable)(newFunction.Body!.Statements.First())).Initializer!).Expression);
+    }
+
+    [Fact]
     public void Generates_ObjectCreation()
     {
         var ast = Generate("class Abc<T>; var abc = new Abc<int>();");
