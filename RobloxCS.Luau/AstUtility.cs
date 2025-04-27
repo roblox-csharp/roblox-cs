@@ -33,164 +33,85 @@ public static class AstUtility
             ? new Literal((value - 1).ToString())
             : new BinaryOperator(expression, "-", new Literal("1"));
 
-    /// <summary> Creates type info table for runtime type objects</summary>
-    public static TableInitializer CreateTypeInfo(Type type) => CreateTypeInfo(type, false);
+    public static Expression GetTypeInfoMember(Type type, string name) =>
+        name switch
+        {
+            "Name" => String(type.Name),
+            "AssemblyQualifiedName" => type.AssemblyQualifiedName != null ? String(type.AssemblyQualifiedName) : Nil,
+            "Namespace" => type.Namespace != null ? String(type.Namespace) : Nil,
+            "FullName" => type.FullName != null ? String(type.FullName) : Nil,
+            "Attributes" => new Literal(type.Attributes.ToString()),
+            "GenericParameterAttributes" => new Literal(type.GenericParameterAttributes.ToString()),
+            "MemberType" => new Literal(type.MemberType.ToString()),
+            "MetadataToken" => new Literal(type.MetadataToken.ToString()),
+            "ContainsGenericParameters" => Bool(type.ContainsGenericParameters),
+            "HasElementType" => Bool(type.HasElementType),
+            "IsAbstract" => Bool(type.IsAbstract),
+            "IsArray" => Bool(type.IsArray),
+            "IsAnsiClass" => Bool(type.IsAnsiClass),
+            "IsAutoClass" => Bool(type.IsAutoClass),
+            "IsAutoLayout" => Bool(type.IsAutoLayout),
+            "IsByRef" => Bool(type.IsByRef),
+            "IsByRefLike" => Bool(type.IsByRefLike),
+            "IsClass" => Bool(type.IsClass),
+            "IsContextful" => Bool(type.IsContextful),
+            "IsConstructedGenericType" => Bool(type.IsConstructedGenericType),
+            "IsCOMObject" => Bool(type.IsCOMObject),
+            "IsEnum" => Bool(type.IsEnum),
+            "IsExplicitLayout" => Bool(type.IsExplicitLayout),
+            "IsFunctionPointer" => Bool(type.IsFunctionPointer),
+            "IsGenericParameter" => Bool(type.IsGenericParameter),
+            "IsGenericType" => Bool(type.IsGenericType),
+            "IsGenericMethodParameter" => Bool(type.IsGenericMethodParameter),
+            "IsGenericTypeDefinition" => Bool(type.IsGenericTypeDefinition),
+            "IsGenericTypeParameter" => Bool(type.IsGenericTypeParameter),
+            "IsImport" => Bool(type.IsImport),
+            "IsInterface" => Bool(type.IsInterface),
+            "IsLayoutSequential" => Bool(type.IsLayoutSequential),
+            "IsMarshalByRef" => Bool(type.IsMarshalByRef),
+            "IsNestedAssembly" => Bool(type.IsNestedAssembly),
+            "IsNested" => Bool(type.IsNested),
+            "IsNestedFamily" => Bool(type.IsNestedFamily),
+            "IsNestedPrivate" => Bool(type.IsNestedPrivate),
+            "IsNestedPublic" => Bool(type.IsNestedPublic),
+            "IsNotPublic" => Bool(type.IsNotPublic),
+            "IsNestedFamORAssem" => Bool(type.IsNestedFamORAssem),
+            "IsNestedFamANDAssem" => Bool(type.IsNestedFamANDAssem),
+            "IsPointer" => Bool(type.IsPointer),
+            "IsPrimitive" => Bool(type.IsPrimitive),
+            "IsPublic" => Bool(type.IsPublic),
+            "IsSealed" => Bool(type.IsSealed),
+            "IsSecurityCritical" => Bool(type.IsSecurityCritical),
+            "IsSecurityTransparent" => Bool(type.IsSecurityTransparent),
+            "IsSignatureType" => Bool(type.IsSignatureType),
+            "IsSpecialName" => Bool(type.IsSpecialName),
+            "IsSecuritySafeCritical" => Bool(type.IsSecuritySafeCritical),
+            "IsSZArray" => Bool(type.IsSZArray),
+            "IsTypeDefinition" => Bool(type.IsTypeDefinition),
+            "IsUnicodeClass" => Bool(type.IsUnicodeClass),
+            "IsUnmanagedFunctionPointer" => Bool(type.IsUnmanagedFunctionPointer),
+            "IsVisible" => Bool(type.IsVisible),
+            "IsValueType" => Bool(type.IsValueType),
+            "IsVariableBoundArray" => Bool(type.IsVariableBoundArray),
+            "GetProperties" => GetPropertiesMethod(type)
+        };
 
     /// <summary> Creates type info table for runtime type objects</summary>
-    public static TableInitializer CreateTypeInfo(Type type, bool noAttributes = false, bool noProperties = false)
+    public static TableInitializer CreateTypeInfo(Type type, HashSet<string> memberUses) => CreateTypeInfo(type, memberUses, false);
+
+    /// <summary> Creates type info table for runtime type objects</summary>
+    public static TableInitializer CreateTypeInfo(Type type, HashSet<string> memberUses, bool noAttributes = false, bool noProperties = false)
     {
-        var memberInfo = CreateMemberInfo(type);
-        List<Expression> keys =
-        [
-            new IdentifierName("FullName"),
-            new IdentifierName("Namespace"),
-
-            // new IdentifierName("AssemblyQualifiedName"),
-            new IdentifierName("TypeInitializer"),
-            new IdentifierName("ReflectedType"),
-            new IdentifierName("IsAbstract"),
-
-            // new IdentifierName("IsAnsiClass"),
-            new IdentifierName("IsArray"),
-            new IdentifierName("IsSealed"),
-            new IdentifierName("IsInterface"),
-            new IdentifierName("IsGenericTypeParameter"),
-            new IdentifierName("IsGenericTypeDefinition"),
-            new IdentifierName("IsGenericType"),
-            new IdentifierName("IsGenericMethodParameter"),
-            new IdentifierName("IsConstructedGenericType"),
-            new IdentifierName("IsImport"),
-            new IdentifierName("IsClass"),
-            new IdentifierName("IsByRef"),
-            new IdentifierName("IsByRefLike"),
-
-            // new IdentifierName("IsAutoClass"),
-            // new IdentifierName("IsAutoLayout"),
-            // new IdentifierName("IsCOMObject"),
-            new IdentifierName("IsContextful"),
-            new IdentifierName("IsEnum"),
-
-            // new IdentifierName("IsExplicitLayout"),
-            // new IdentifierName("IsPointer"),
-            // new IdentifierName("IsFunctionPointer"),
-            // new IdentifierName("IsUnmanagedFunctionPointer"),
-            // new IdentifierName("IsLayoutSequential"),
-            // new IdentifierName("IsMarshalByRef"),
-            new IdentifierName("IsNested"),
-
-            // new IdentifierName("IsNestedAssembly"),
-            // new IdentifierName("IsNestedFamily"),
-            // new IdentifierName("IsNestedFamANDAssem"),
-            // new IdentifierName("IsNestedFamORAssem"),
-            new IdentifierName("IsNestedPrivate"),
-            new IdentifierName("IsNestedPublic"),
-            new IdentifierName("IsNotPublic"),
-            new IdentifierName("IsPublic"),
-            new IdentifierName("IsSZArray"),
-
-            // new IdentifierName("IsSecurityCritical"),
-            // new IdentifierName("IsSecuritySafeCritical"),
-            // new IdentifierName("IsSecurityTransparent"),
-            // new IdentifierName("IsSignatureType"),
-            // new IdentifierName("IsSpecialName"),
-            new IdentifierName("IsTypeDefinition"),
-
-            // new IdentifierName("IsUnicodeClass"),
-            new IdentifierName("IsValueType"),
-            new IdentifierName("IsVariableBoundArray"),
-
-            // new IdentifierName("IsVisible"),
-            // new IdentifierName("UnderlyingSystemType"),
-            new IdentifierName("BaseType"),
-            new IdentifierName("DeclaringType"),
-            new IdentifierName("ContainsGenericParameters"),
-            new IdentifierName("GenericTypeArguments"),
-            new IdentifierName("GUID"),
-            new IdentifierName("CustomAttributes"),
-            new IdentifierName("GetProperties")
-        ];
-
-        List<Expression> values =
-        [
-            type.FullName != null ? String(type.FullName) : Nil,
-            type.Namespace != null ? String(type.Namespace) : Nil,
-
-            // type.AssemblyQualifiedName != null ? String(type.AssemblyQualifiedName : Nil,
-            type.TypeInitializer != null ? CreateMethodBase(type.TypeInitializer) : Nil,
-            type.ReflectedType != null ? CreateTypeInfo(type.ReflectedType) : Nil,
-            new Literal(type.IsAbstract.ToString().ToLower()),
-
-            // new Literal(type.IsAnsiClass.ToString().ToLower()),
-            new Literal(type.IsArray.ToString().ToLower()),
-            new Literal(type.IsSealed.ToString().ToLower()),
-            new Literal(type.IsInterface.ToString().ToLower()),
-            new Literal(type.IsGenericTypeParameter.ToString().ToLower()),
-            new Literal(type.IsGenericTypeDefinition.ToString().ToLower()),
-            new Literal(type.IsGenericType.ToString().ToLower()),
-            new Literal(type.IsGenericMethodParameter.ToString().ToLower()),
-            new Literal(type.IsConstructedGenericType.ToString().ToLower()),
-            new Literal(type.IsImport.ToString().ToLower()),
-            new Literal(type.IsClass.ToString().ToLower()),
-            new Literal(type.IsByRef.ToString().ToLower()),
-            new Literal(type.IsByRefLike.ToString().ToLower()),
-
-            // new Literal(type.IsAutoClass.ToString().ToLower()),
-            // new Literal(type.IsAutoLayout.ToString().ToLower()),
-            // new Literal(type.IsCOMObject.ToString().ToLower()),
-            new Literal(type.IsContextful.ToString().ToLower()),
-            new Literal(type.IsEnum.ToString().ToLower()),
-
-            // new Literal(type.IsExplicitLayout.ToString().ToLower()),
-            // new Literal(type.IsPointer.ToString().ToLower()),
-            // new Literal(type.IsFunctionPointer.ToString().ToLower()),
-            // new Literal(type.IsUnmanagedFunctionPointer.ToString().ToLower()),
-            // new Literal(type.IsLayoutSequential.ToString().ToLower()),
-            // new Literal(type.IsMarshalByRef.ToString().ToLower()),
-            new Literal(type.IsNested.ToString().ToLower()),
-
-            // new Literal(type.IsNestedAssembly.ToString().ToLower()),
-            // new Literal(type.IsNestedFamily.ToString().ToLower()),
-            // new Literal(type.IsNestedFamANDAssem.ToString().ToLower()),
-            // new Literal(type.IsNestedFamORAssem.ToString().ToLower()),
-            new Literal(type.IsNestedPrivate.ToString().ToLower()),
-            new Literal(type.IsNestedPublic.ToString().ToLower()),
-            new Literal(type.IsNotPublic.ToString().ToLower()),
-            new Literal(type.IsPublic.ToString().ToLower()),
-            new Literal(type.IsSZArray.ToString().ToLower()),
-
-            // new Literal(type.IsSecurityCritical.ToString().ToLower()),
-            // new Literal(type.IsSecuritySafeCritical.ToString().ToLower()),
-            // new Literal(type.IsSecurityTransparent.ToString().ToLower()),
-            // new Literal(type.IsSignatureType.ToString().ToLower()),
-            // new Literal(type.IsSpecialName.ToString().ToLower()),
-            new Literal(type.IsTypeDefinition.ToString().ToLower()),
-
-            // new Literal(type.IsUnicodeClass.ToString().ToLower()),
-            new Literal(type.IsValueType.ToString().ToLower()),
-            new Literal(type.IsVariableBoundArray.ToString().ToLower()),
-
-            // new Literal(type.IsVisible.ToString().ToLower()),
-            // type != type.UnderlyingSystemType ? CreateTypeInfo(type.UnderlyingSystemType) : Nil,
-            type.BaseType != null ? CreateTypeInfo(type.BaseType) : Nil,
-            type.DeclaringType != null ? CreateTypeInfo(type.DeclaringType) : Nil,
-            new Literal(type.ContainsGenericParameters.ToString().ToLower()),
-            noAttributes
-                ? TableInitializer.Empty
-                : new TableInitializer(type.GenericTypeArguments.Select(CreateTypeInfo).OfType<Expression>().ToList()),
-            new Literal($"\"{type.GUID}\""),
-            new TableInitializer(type.CustomAttributes.Select(CreateCustomAttributeData).ToList<Expression>()),
-            new AnonymousFunction(new ParameterList([new Parameter(new IdentifierName("self"))]),
-                                  null,
-                                  new Block([new Return(noProperties ? TableInitializer.Empty : CreatePropertiesInfo(type.GetProperties()))]))
-        ];
-
-        if (keys.Count != values.Count)
-            throw
-                Logger.CompilerError($"Failed to create runtime type info object: Keys and values have unequal sizes.\n\tKeys: {keys.Count}\n\tValues: {values.Count}");
-
-        return TableInitializer.Union(memberInfo, new TableInitializer(values, keys));
+        var keys = memberUses.Select(name => new IdentifierName(name)).ToList<Expression>();
+        var values = memberUses.Select(name => GetTypeInfoMember(type, name)).ToList();
+        return new TableInitializer(values, keys);
     }
 
+    private static AnonymousFunction GetPropertiesMethod(Type type, bool noProperties = false) =>
+        new(new ParameterList([new Parameter(new IdentifierName("self"))]),
+            null,
+            new Block([new Return(noProperties ? TableInitializer.Empty : CreatePropertiesInfo(type.GetProperties()))]));
+    
     /// <summary>Creates array of property infos for runtime type objects</summary>
     private static TableInitializer CreatePropertiesInfo(PropertyInfo[] properties)
     {
@@ -212,7 +133,9 @@ public static class AstUtility
                                               Bool(property.CanRead),
                                               Bool(property.CanWrite),
                                               Bool(property.IsSpecialName),
-                                              CreateTypeInfo(property.PropertyType, noProperties: true),
+
+                                              // temp
+                                              CreateTypeInfo(property.PropertyType, keys.ConvertAll(k => k.ToString()).ToHashSet()!, noProperties: true),
                                               property.GetMethod != null ? CreateMethodInfo(property.GetMethod, true) : Nil,
                                               property.SetMethod != null ? CreateMethodInfo(property.SetMethod, true) : Nil
                                           ];
@@ -229,7 +152,13 @@ public static class AstUtility
     {
         var methodBase = CreateMethodBase(method);
         List<Expression> keys = [new IdentifierName("ReturnType"), new IdentifierName("ReturnParameter")];
-        List<Expression> values = [CreateTypeInfo(method.ReturnType, noProperties: noProperties), CreateParameterInfo(method.ReturnParameter, noProperties)];
+
+        // temp
+        List<Expression> values =
+        [
+            CreateTypeInfo(method.ReturnType, keys.ConvertAll(k => k.ToString()).ToHashSet()!, noProperties: noProperties),
+            CreateParameterInfo(method.ReturnParameter, noProperties)
+        ];
 
         return TableInitializer.Union(methodBase, new TableInitializer(values, keys));
     }
@@ -266,7 +195,9 @@ public static class AstUtility
             CreateLuauConstant(parameter.DefaultValue),
             CreateLuauConstant(parameter.RawDefaultValue),
             new Literal(parameter.Position.ToString()),
-            CreateTypeInfo(parameter.ParameterType, noProperties: noProperties),
+
+            // temp
+            CreateTypeInfo(parameter.ParameterType, keys.ConvertAll(k => k.ToString()).ToHashSet()!, noProperties: noProperties),
             CreateMemberInfo(parameter.Member)
         ];
 

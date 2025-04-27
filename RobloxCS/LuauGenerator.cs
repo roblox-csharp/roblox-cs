@@ -9,7 +9,6 @@ using Microsoft.CodeAnalysis.Text;
 using RobloxCS.Luau;
 using RobloxCS.Macros;
 using RobloxCS.Shared;
-using Expression = RobloxCS.Luau.Expression;
 
 namespace RobloxCS;
 
@@ -30,7 +29,8 @@ internal class LinqQueryClauseInfo(LinqQueryClauseInfoKind kind, IdentifierName 
 
 public sealed class LuauGenerator(
     FileCompilation file,
-    CSharpCompilation compiler)
+    CSharpCompilation compiler,
+    AnalysisResult analysisResult)
     : BaseGenerator(file, compiler)
 {
     private readonly HashSet<SyntaxKind> _hoistedSyntaxes =
@@ -43,7 +43,6 @@ public sealed class LuauGenerator(
     ];
 
     private CSharpCompilation _compiler = compiler;
-
     private MacroManager _macro = null!; // hack
 
     public AST GetLuauAST() => Visit<AST>(_file.Tree.GetRoot());
@@ -445,13 +444,15 @@ public sealed class LuauGenerator(
         _file.OccupiedIdentifiers.AddIdentifier(nonGenericName.Text);
         _file.OccupiedIdentifiers.Push();
 
-        var shouldGenerateWithMetatable = node.ChildNodes().Any(node => {
-            if (node is MethodDeclarationSyntax method) {
-                if (method.Modifiers.All(m => !m.IsKind(SyntaxKind.StaticKeyword))) return true;
-            }
+        var shouldGenerateWithMetatable = node.ChildNodes()
+                                              .Any(node =>
+                                              {
+                                                  if (node is MethodDeclarationSyntax method)
+                                                      if (method.Modifiers.All(m => !m.IsKind(SyntaxKind.StaticKeyword)))
+                                                          return true;
 
-            return false;
-        });
+                                                  return false;
+                                              });
 
         var members = node.Members
                           .Select(Visit<Statement?>)
@@ -463,6 +464,7 @@ public sealed class LuauGenerator(
         var constructor = explicitConstructor == null
             ? GenerateConstructor(node, ParameterList.Empty)
             : Visit<Function>(explicitConstructor);
+
         var constructorArguments = AstUtility.CreateArgumentList(constructor.ParameterList.Parameters.ConvertAll<Expression>(parameter => parameter.Name));
 
         // TODO: maybe move this to AstUtility, this shit is huge
@@ -500,16 +502,18 @@ public sealed class LuauGenerator(
                          new Block([
                              new Variable(new IdentifierName("self"),
                                           true,
-                                          new TypeCast(shouldGenerateWithMetatable ? new Parenthesized(new TypeCast(new
-                                                                                          Call(new
-                                                                                                   IdentifierName("setmetatable"),
-                                                                                               AstUtility
-                                                                                                   .CreateArgumentList([
-                                                                                                       TableInitializer
-                                                                                                           .Empty,
-                                                                                                       nonGenericName
-                                                                                                   ])),
-                                                                                      AstUtility.AnyType)) : new TableInitializer(),
+                                          new TypeCast(shouldGenerateWithMetatable
+                                                           ? new Parenthesized(new TypeCast(new
+                                                                                                Call(new
+                                                                                                         IdentifierName("setmetatable"),
+                                                                                                     AstUtility
+                                                                                                         .CreateArgumentList([
+                                                                                                             TableInitializer
+                                                                                                                 .Empty,
+                                                                                                             nonGenericName
+                                                                                                         ])),
+                                                                                            AstUtility.AnyType))
+                                                           : new TableInitializer(),
                                                        typeRef)),
                              new Return(new BinaryOperator(new Call(new IdentifierName("constructor"),
                                                                     constructorArguments),
@@ -526,7 +530,8 @@ public sealed class LuauGenerator(
         {
             classMemberStatements.Insert(3, constructor);
         }
-        else {
+        else
+        {
             var index = members.FindIndex(m => m is Function function && function.Name.ToString() == constructor.Name.ToString());
             var member = members[index];
             members.RemoveAt(index);
@@ -749,15 +754,30 @@ public sealed class LuauGenerator(
         return new MultipleVariable(names, true, initializers);
     }
 
-    public override Parenthesized VisitTypeOfExpression(TypeOfExpressionSyntax node)
+    public override Expression VisitTypeOfExpression(TypeOfExpressionSyntax node)
     {
+        var typeTypeSymbol = _semanticModel.GetTypeInfo(node).Type;
         var typeSymbol = _semanticModel.GetTypeInfo(node.Type).Type;
+        if (typeSymbol == null)
+            throw Logger.CodegenError(node, "Unable to resolve type symbol of the type provided to typeof()");
 
-        if (typeSymbol == null) throw Logger.CodegenError(node, "Unable to resolve type symbol of the type provided to typeof()");
+        var wrap = node.Parent is MemberAccessExpressionSyntax or QualifiedNameSyntax;
+        Expression empty = wrap
+            ? new Parenthesized(TableInitializer.Empty)
+            : TableInitializer.Empty;
 
+        Func<KeyValuePair<ITypeSymbol, HashSet<string>>, bool> predicate =
+            pair => SymbolEqualityComparer.Default.Equals(pair.Key, typeTypeSymbol);
+        
+        if (!analysisResult.TypeMemberUses.Any(predicate))
+            return empty;
+
+        var memberUses = analysisResult.TypeMemberUses.First(predicate).Value;
         var type = StandardUtility.GetRuntimeType(_semanticModel, node, typeSymbol);
-
-        return new Parenthesized(AstUtility.CreateTypeInfo(type));
+        var typeInfoTable = AstUtility.CreateTypeInfo(type, memberUses);
+        return wrap
+            ? new Parenthesized(typeInfoTable)
+            : typeInfoTable;
     }
 
     public override TypeCast VisitCastExpression(CastExpressionSyntax node)
@@ -1011,7 +1031,7 @@ public sealed class LuauGenerator(
         var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
         if (symbol is IFieldSymbol { HasConstantValue: true } fieldSymbol)
             return AstUtility.CreateLuauConstant(fieldSymbol.ConstantValue);
-        
+
         var expression = Visit<Expression>(node.Expression);
         var simpleName = Visit<SimpleName>(node.Name);
 

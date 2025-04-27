@@ -21,7 +21,9 @@ public static class TranspilerUtility
 
     public static AST GetLuauAST(FileCompilation file, CSharpCompilation compiler)
     {
-        var generator = new LuauGenerator(file, compiler);
+        var analyzer = new Analyzer(file, compiler);
+        var analysisResult = analyzer.Analyze(file.Tree.GetRoot());
+        var generator = new LuauGenerator(file, compiler, analysisResult);
 
         return generator.GetLuauAST();
     }
@@ -50,11 +52,10 @@ public static class TranspilerUtility
         return file;
     }
 
-    public static FileCompilation GetFileCompilation(SyntaxTree tree, RojoProject? rojoProject, ConfigData config) =>
+    private static FileCompilation GetFileCompilation(SyntaxTree tree, RojoProject? rojoProject, ConfigData config) =>
         new() { Tree = tree, RojoProject = rojoProject, Config = config };
 
     private static SyntaxTree TransformTree(FileCompilation file, HashSet<TransformMethod> transformMethods) =>
-
         // config ??= ConfigReader.UnitTestingConfig;
         transformMethods.Aggregate(file.Tree, (_, transform) => transform(file));
 
