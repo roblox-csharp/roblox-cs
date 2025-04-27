@@ -34,16 +34,14 @@ public static class AstUtility
             : new BinaryOperator(expression, "-", new Literal("1"));
 
     public static Expression GetTypeInfoMember(Type type, string name) =>
-        name switch
+        GetMemberInfoMember(type, name)
+     ?? name switch
         {
-            "Name" => String(type.Name),
             "AssemblyQualifiedName" => type.AssemblyQualifiedName != null ? String(type.AssemblyQualifiedName) : Nil,
             "Namespace" => type.Namespace != null ? String(type.Namespace) : Nil,
             "FullName" => type.FullName != null ? String(type.FullName) : Nil,
             "Attributes" => new Literal(type.Attributes.ToString()),
             "GenericParameterAttributes" => new Literal(type.GenericParameterAttributes.ToString()),
-            "MemberType" => new Literal(type.MemberType.ToString()),
-            "MetadataToken" => new Literal(type.MetadataToken.ToString()),
             "ContainsGenericParameters" => Bool(type.ContainsGenericParameters),
             "HasElementType" => Bool(type.HasElementType),
             "IsAbstract" => Bool(type.IsAbstract),
@@ -93,7 +91,12 @@ public static class AstUtility
             "IsVisible" => Bool(type.IsVisible),
             "IsValueType" => Bool(type.IsValueType),
             "IsVariableBoundArray" => Bool(type.IsVariableBoundArray),
-            "GetProperties" => GetPropertiesMethod(type)
+            "GetProperties" => GetPropertiesMethod(type),
+            "GetArrayRank" => new AnonymousFunction(ParameterList.Empty,
+                                                    new TypeRef("number"),
+                                                    new Block([new Return(new Literal(type.GetArrayRank().ToString()))])),
+
+            _ => throw Logger.CompilerError($"Member '{name}' is not yet supported on the Type class")
         };
 
     /// <summary> Creates type info table for runtime type objects</summary>
@@ -111,7 +114,7 @@ public static class AstUtility
         new(new ParameterList([new Parameter(new IdentifierName("self"))]),
             null,
             new Block([new Return(noProperties ? TableInitializer.Empty : CreatePropertiesInfo(type.GetProperties()))]));
-    
+
     /// <summary>Creates array of property infos for runtime type objects</summary>
     private static TableInitializer CreatePropertiesInfo(PropertyInfo[] properties)
     {
@@ -270,6 +273,18 @@ public static class AstUtility
 
         return TableInitializer.Union(memberInfo, new TableInitializer(values, keys));
     }
+
+    private static Expression? GetMemberInfoMember(MemberInfo member, string name) =>
+        name switch
+        {
+            "Name" => String(member.Name),
+            "MemberType" => new Literal(member.MemberType.ToString()),
+            "MetadataToken" => new Literal(member.MetadataToken.ToString()),
+            "CustomAttributes" => new TableInitializer(member.CustomAttributes.Select(CreateCustomAttributeData).ToList<Expression>()),
+            "IsAbstract" => Bool(member.IsCollectible),
+
+            _ => null
+        };
 
     /// <summary>Creates member info table for runtime type objects</summary>
     private static TableInitializer CreateMemberInfo(MemberInfo member)
