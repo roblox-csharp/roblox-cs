@@ -461,7 +461,7 @@ public sealed class LuauGenerator(
 
         var explicitConstructor = node.Members.OfType<ConstructorDeclarationSyntax>().FirstOrDefault();
         var constructor = explicitConstructor == null
-            ? GenerateConstructor(node, new ParameterList([]))
+            ? GenerateConstructor(node, ParameterList.Empty)
             : Visit<Function>(explicitConstructor);
         var constructorArguments = AstUtility.CreateArgumentList(constructor.ParameterList.Parameters.ConvertAll<Expression>(parameter => parameter.Name));
 
@@ -522,12 +522,15 @@ public sealed class LuauGenerator(
                              : null)
         ];
 
-        if (explicitConstructor == null) classMemberStatements.Insert(0, constructor);
+        if (explicitConstructor == null)
+        {
+            classMemberStatements.Insert(3, constructor);
+        }
         else {
-            var constructorInList = members.First(m => m is Function function && function.Name.ToString() == constructor.Name.ToString());
-            var Index = members.IndexOf(constructorInList);
-            members.RemoveAt(Index);
-            classMemberStatements.Insert(3, constructorInList);
+            var index = members.FindIndex(m => m is Function function && function.Name.ToString() == constructor.Name.ToString());
+            var member = members[index];
+            members.RemoveAt(index);
+            classMemberStatements.Insert(3, member);
         }
 
         classMemberStatements.AddRange(members);
