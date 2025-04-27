@@ -1044,7 +1044,7 @@ public sealed class LuauGenerator(
         var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
         if (symbol is ILocalSymbol { HasConstantValue: true } localSymbol)
             return AstUtility.CreateLuauConstant(localSymbol.ConstantValue);
-        
+
         var identifierText = _file.OccupiedIdentifiers.GetDuplicateText(node.Identifier.Text);
         if (symbol is IMethodSymbol methodSymbol
          && SymbolMetadataManager.Get(methodSymbol.ContainingType) is { MethodOverloads: not null }
@@ -1054,8 +1054,8 @@ public sealed class LuauGenerator(
         var name = new IdentifierName(identifierText);
         var method = FindFirstAncestor<MethodDeclarationSyntax>(node);
         var shouldCallRefFunction = method != null
-                    && node.Parent is not AssignmentExpressionSyntax
-                    && GetRefKindParameters(method.ParameterList).Contains(identifierText);
+                                 && node.Parent is not AssignmentExpressionSyntax
+                                 && GetRefKindParameters(method.ParameterList).Contains(identifierText);
 
         if (shouldCallRefFunction)
             return new Call(name);
@@ -1065,7 +1065,7 @@ public sealed class LuauGenerator(
                                     && symbol is IFieldSymbol or IPropertySymbol or IEventSymbol or IMethodSymbol { MethodKind: MethodKind.Ordinary }
                                     && symbol.ContainingType.Name == classDeclaration.Identifier.Text
                                     && !IsAlreadyQualified(node, node.Parent);
-        
+
         if (!shouldQualifyClassMember)
             return TryMethodWrap(node, name, out var wrapped)
                 ? wrapped
@@ -1556,7 +1556,6 @@ public sealed class LuauGenerator(
                 {
                     stringContents = Regex.Escape(stringContents);
                 }
-
                 else if (fullText.StartsWith("\"\"\"")) // raw strings
                 {
                     var lines = stringContents.Split("\r\n").ToList();
@@ -1569,32 +1568,26 @@ public sealed class LuauGenerator(
                     }
 
                     valueText = $"\"{newStringContents}\"";
-
                     break;
                 }
 
                 valueText = $"\"{stringContents}\"";
-
                 break;
             }
 
             case SyntaxKind.NullLiteralExpression:
                 valueText = "nil";
-
                 break;
 
             case SyntaxKind.DefaultLiteralExpression:
                 var typeSymbol = _semanticModel.GetTypeInfo(node).Type;
-
                 if (typeSymbol == null) break;
 
                 valueText = StandardUtility.GetDefaultValueForType(typeSymbol.Name);
-
                 break;
 
             default:
                 valueText = node.Token.ValueText;
-
                 break;
         }
 
@@ -1603,26 +1596,18 @@ public sealed class LuauGenerator(
 
     private bool TryMethodWrap(ExpressionSyntax node, Expression expression, [MaybeNullWhen(false)] out Expression wrapped)
     {
-        var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
-        switch (symbol)
-        {
-            case IFieldSymbol { HasConstantValue: true } fieldSymbol:
-                wrapped = AstUtility.CreateLuauConstant(fieldSymbol.ConstantValue);
-                return true;
-            case IMethodSymbol methodSymbol
-                when node.Parent is ArgumentSyntax or AssignmentExpressionSyntax { OperatorToken.Text: "+=" or "-=" }:
-            {
-                if (node.Parent is AssignmentExpressionSyntax assignment
-                 && _semanticModel.GetSymbolInfo(assignment.Left).Symbol is not IEventSymbol)
-                    break;
-
-                wrapped = AstUtility.TryWrapNonStaticMethod(methodSymbol, expression, _file.OccupiedIdentifiers)!;
-                return true;
-            }
-        }
-
         wrapped = null;
-        return false;
+        var symbol = _semanticModel.GetSymbolInfo(node).Symbol;
+        if (symbol is not IMethodSymbol methodSymbol
+         || node.Parent is not (ArgumentSyntax or AssignmentExpressionSyntax { OperatorToken.Text: "+=" or "-=" }))
+            return false;
+
+        if (node.Parent is AssignmentExpressionSyntax assignment
+         && _semanticModel.GetSymbolInfo(assignment.Left).Symbol is not IEventSymbol)
+            return false;
+
+        wrapped = AstUtility.TryWrapNonStaticMethod(methodSymbol, expression, _file.OccupiedIdentifiers)!;
+        return true;
     }
 
     private IdentifierName? HandleObjectCreationInitializer(InitializerExpressionSyntax? initializer,
