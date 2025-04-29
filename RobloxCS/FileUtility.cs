@@ -2,6 +2,7 @@
 using System.Text.RegularExpressions;
 using Microsoft.CodeAnalysis;
 using RobloxCS.Shared;
+using Path = System.IO.Path;
 
 namespace RobloxCS;
 
@@ -22,7 +23,10 @@ public static class FileUtility
         if (!File.Exists(runtimeLibAssemblyPath))
         {
             var directoryName = Path.GetDirectoryName(runtimeLibAssemblyPath);
-            var location = directoryName == null ? "(could not find assembly directory)" : FixPathSeparator(directoryName);
+            var location = directoryName == null
+                ? "(could not find assembly directory)"
+                : FixPathSeparator(directoryName);
+            
             Logger.Error($"Failed to find {_runtimeAssemblyName}.dll in {location}");
         }
 

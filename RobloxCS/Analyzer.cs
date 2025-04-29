@@ -40,6 +40,11 @@ public sealed class Analyzer(FileCompilation file, CSharpCompilation compiler) :
                 _result.MemberClassInfo.MemberUses.Add(nameText);
                 break;
             }
+            case { ContainingNamespace: { ContainingNamespace.Name: "System", Name: "Reflection" }, Name: "CustomAttributeData" }:
+            {
+                _result.CustomAttributeDataClassInfo.MemberUses.Add(nameText);
+                break;
+            }
             case { ContainingNamespace.Name: "System", Name: "Type" }:
             {
                 _result.TypeClassInfo.MemberUses.Add(nameText);
