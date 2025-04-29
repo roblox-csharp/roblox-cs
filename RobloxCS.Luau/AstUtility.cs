@@ -57,7 +57,7 @@ public static class AstUtility
 
     private static Expression GetTypeInfoMember(Type type, AnalysisResult analysisResult, string name) =>
         GetMemberInfoMember(type, analysisResult, name)
-        ?? name switch
+     ?? name switch
         {
             "AssemblyQualifiedName" => type.AssemblyQualifiedName != null ? String(type.AssemblyQualifiedName) : Nil,
             "Namespace" => type.Namespace != null ? String(type.Namespace) : Nil,
@@ -66,7 +66,7 @@ public static class AstUtility
             "GenericParameterAttributes" => Number((int)type.GenericParameterAttributes),
             "GenericParameterPosition" => Number(type.GenericParameterPosition),
             "Assembly" => CreateAssemblyInfo(type.Assembly, analysisResult),
-            "Module" => CreateModuleInfo(type.Module, analysisResult),
+            // "DeclaringMethod" => type.DeclaringMethod != null ? CreateMethodBase(type.DeclaringMethod, analysisResult) : Nil,
             "UnderlyingSystemType" => CreateTypeInfo(type.UnderlyingSystemType, analysisResult, noTypes: true),
             "BaseType" => type.BaseType != null ? CreateTypeInfo(type.BaseType, analysisResult, noTypes: true) : Nil,
             "DeclaringType" => type.DeclaringType != null ? CreateTypeInfo(type.DeclaringType, analysisResult, noTypes: true) : Nil,
@@ -129,6 +129,7 @@ public static class AstUtility
             _ => throw Logger.CompilerError($"Member '{name}' is not yet supported on the Type class")
         };
 
+    /// <summary>Creates module info table for runtime type objects</summary>
     private static TableInitializer CreateModuleInfo(Module module, AnalysisResult analysisResult)
     {
         var keys = analysisResult.ModuleClassInfo.MemberUses.Select(name => new IdentifierName(name)).ToList<Expression>();
@@ -204,6 +205,44 @@ public static class AstUtility
 
             _ => throw Logger.CompilerError($"Member '{name}' is not yet supported on the PropertyInfo class")
         };
+    
+    private static TableInitializer CreateMethodBase(MethodBase methodBase, AnalysisResult analysisResult)
+    {
+        var keys = analysisResult.PropertyClassInfo.MemberUses.Select(name => new IdentifierName(name)).ToList<Expression>();
+        var values = analysisResult.PropertyClassInfo.MemberUses.Select(name => GetMethodBaseMember(methodBase, analysisResult, name)).OfType<Expression>().ToList();
+
+        return new TableInitializer(values, keys);
+    }
+
+    private static Expression? GetMethodBaseMember(MethodBase methodBase, AnalysisResult analysisResult, string name) =>
+        GetMemberInfoMember(methodBase, analysisResult, name)
+     ?? name switch
+        {
+            "Attributes" => Number((int)methodBase.Attributes),
+            "CallingConvention" => Number((int)methodBase.CallingConvention),
+            "MethodImplementationFlags" => Number((int)methodBase.MethodImplementationFlags),
+            "ContainsGenericParameters" => Bool(methodBase.ContainsGenericParameters),
+            "IsAbstract" => Bool(methodBase.IsAbstract),
+            "IsAssembly" => Bool(methodBase.IsAssembly),
+            "IsConstructor" => Bool(methodBase.IsConstructor),
+            "IsConstructedGenericMethod" => Bool(methodBase.IsConstructedGenericMethod),
+            "IsFamily" => Bool(methodBase.IsFamily),
+            "IsFamilyAndAssembly" => Bool(methodBase.IsFamilyAndAssembly),
+            "IsFamilyOrAssembly" => Bool(methodBase.IsFamilyOrAssembly),
+            "IsGenericMethod" => Bool(methodBase.IsGenericMethod),
+            "IsGenericMethodDefinition" => Bool(methodBase.IsGenericMethodDefinition),
+            "IsHideBySig" => Bool(methodBase.IsHideBySig),
+            "IsPrivate" => Bool(methodBase.IsPrivate),
+            "IsPublic" => Bool(methodBase.IsPublic),
+            "IsSecurityCritical" => Bool(methodBase.IsSecurityCritical),
+            "IsSecuritySafeCritical" => Bool(methodBase.IsSecuritySafeCritical),
+            "IsSecurityTransparent" => Bool(methodBase.IsSecurityTransparent),
+            "IsSpecialName" => Bool(methodBase.IsSpecialName),
+            "IsStatic" => Bool(methodBase.IsStatic),
+            "IsVirtual" => Bool(methodBase.IsVirtual),
+
+            _ => null
+        };
 
     /// <summary>Creates member info table for runtime type objects</summary>
     private static TableInitializer CreateMemberInfo(MemberInfo member, AnalysisResult analysisResult)
@@ -224,6 +263,7 @@ public static class AstUtility
             "MetadataToken" => Number(member.MetadataToken),
             "CustomAttributes" => new TableInitializer(member.CustomAttributes.Select(attr => CreateCustomAttributeData(attr, analysisResult)).ToList<Expression>()),
             "IsAbstract" => Bool(member.IsCollectible),
+            "Module" => CreateModuleInfo(member.Module, analysisResult),
 
             _ => null
         };
