@@ -1,10 +1,9 @@
 using RobloxCS.Luau;
 using RobloxCS.Macros;
-using RobloxCS.Tests.Base;
 
 namespace RobloxCS.Tests;
 
-public class GenerationTest : Generation
+public class GenerationTest : Base.Generation
 {
     [Fact]
     public void Generates_NonStaticMethodWrap()
