@@ -35,10 +35,19 @@ public static class AstUtility
             : new BinaryOperator(expression, "-", new Literal("1"));
 
     /// <summary> Creates type info table for runtime type objects</summary>
-    public static TableInitializer CreateTypeInfo(Type type, AnalysisResult analysisResult, bool noAttributes = false)
+    public static TableInitializer CreateTypeInfo(Type type,
+                                                  AnalysisResult analysisResult,
+                                                  bool noAttributes = false,
+                                                  bool noTypes = false)
     {
         var memberUses = analysisResult.TypeClassInfo.MemberUses
-                                .Where(name => !noAttributes || name != "CustomAttributes")
+                                .Where(name => name switch
+                                {
+                                    "CustomAttributes" when noAttributes => false,
+                                    "BaseType" or "UnderlyingSystemType" or "DeclaringType" or "ReflectedType" when noTypes => false,
+                                        
+                                    _ => true
+                                })
                                 .ToList();
         
         var keys = memberUses.Select(name => new IdentifierName(name)).ToList<Expression>();
@@ -55,7 +64,13 @@ public static class AstUtility
             "FullName" => type.FullName != null ? String(type.FullName) : Nil,
             "Attributes" => Number((int)type.Attributes),
             "GenericParameterAttributes" => Number((int)type.GenericParameterAttributes),
+            "GenericParameterPosition" => Number(type.GenericParameterPosition),
             "Assembly" => CreateAssemblyInfo(type.Assembly, analysisResult),
+            "Module" => CreateModuleInfo(type.Module, analysisResult),
+            "UnderlyingSystemType" => CreateTypeInfo(type.UnderlyingSystemType, analysisResult, noTypes: true),
+            "BaseType" => type.BaseType != null ? CreateTypeInfo(type.BaseType, analysisResult, noTypes: true) : Nil,
+            "DeclaringType" => type.DeclaringType != null ? CreateTypeInfo(type.DeclaringType, analysisResult, noTypes: true) : Nil,
+            "ReflectedType" => type.ReflectedType != null ? CreateTypeInfo(type.ReflectedType, analysisResult, noTypes: true) : Nil,
             "ContainsGenericParameters" => Bool(type.ContainsGenericParameters),
             "HasElementType" => Bool(type.HasElementType),
             "IsAbstract" => Bool(type.IsAbstract),
@@ -106,20 +121,36 @@ public static class AstUtility
             "IsValueType" => Bool(type.IsValueType),
             "IsVariableBoundArray" => Bool(type.IsVariableBoundArray),
 
-            "GetProperties" => new AnonymousFunction(new ParameterList([new Parameter(new IdentifierName("self"))]),
-                null,
-                new Block([
-                    new Return(new TableInitializer(type.GetProperties()
-                        .Select(p => CreatePropertyInfo(p, analysisResult))
-                        .ToList<Expression>()))
-                ])),
-            "GetArrayRank" => new AnonymousFunction(ParameterList.Empty,
-                new TypeRef("number"),
-                new Block([new Return(Number(type.GetArrayRank()))])),
+            "GetProperties" => WrapExpressionWithMethod(new TableInitializer(type.GetProperties()
+                .Select(p => CreatePropertyInfo(p, analysisResult))
+                .ToList<Expression>())), // TODO: return luau PropertyInfo type
+            "GetArrayRank" => WrapExpressionWithMethod(Number(type.GetArrayRank()), new TypeRef("number")),
 
             _ => throw Logger.CompilerError($"Member '{name}' is not yet supported on the Type class")
         };
 
+    private static TableInitializer CreateModuleInfo(Module module, AnalysisResult analysisResult)
+    {
+        var keys = analysisResult.ModuleClassInfo.MemberUses.Select(name => new IdentifierName(name)).ToList<Expression>();
+        var values = analysisResult.ModuleClassInfo.MemberUses.Select(name => GetModuleInfoMember(module, analysisResult, name)).ToList();
+
+        return new TableInitializer(values, keys);
+    }
+
+    private static Expression GetModuleInfoMember(Module module, AnalysisResult analysisResult, string name) =>
+        name switch
+        {
+            "Name" => String(module.Name),
+            "ScopeName" => String(module.ScopeName),
+            "FullyQualifiedName" => String(module.FullyQualifiedName),
+            "MetadataToken" => Number(module.MetadataToken),
+            "MDStreamVersion" => Number(module.MDStreamVersion),
+            "Assembly" => CreateAssemblyInfo(module.Assembly, analysisResult),
+            "CustomAttributes" => new TableInitializer(module.CustomAttributes.Select(attr => CreateCustomAttributeData(attr, analysisResult)).ToList<Expression>()),
+            
+            _ => throw Logger.CompilerError($"Member '{name}' is not yet supported on the Module class")
+        };
+    
     /// <summary>Creates assembly info table for runtime type objects</summary>
     private static TableInitializer CreateAssemblyInfo(Assembly assembly, AnalysisResult analysisResult)
     {
@@ -141,13 +172,10 @@ public static class AstUtility
             "IsCollectible" => Bool(assembly.IsCollectible),
             "IsDynamic" => Bool(assembly.IsDynamic),
             "IsFullyTrusted" => Bool(assembly.IsFullyTrusted),
-            "GetManifestResourceNames" => new AnonymousFunction(ParameterList.Empty,
-                                                                new TypeRef("string"),
-                                                                new Block([
-                                                                    new Return(new TableInitializer(assembly.GetManifestResourceNames()
-                                                                                                            .Select(String)
-                                                                                                            .ToList<Expression>()))
-                                                                ])),
+            "GetManifestResourceNames" => WrapExpressionWithMethod(new TableInitializer(assembly.GetManifestResourceNames()
+                .Select(String)
+                .ToList<Expression>()),
+                new TypeRef("string")),
 
             _ => throw Logger.CompilerError($"Member '{name}' is not yet supported on the Assembly class")
         };
@@ -166,6 +194,13 @@ public static class AstUtility
      ?? name switch
         {
             "Attributes" => Number((int)property.Attributes),
+            "CanRead" => Bool(property.CanRead),
+            "CanWrite" => Bool(property.CanWrite),
+            "IsSpecialName" => Bool(property.IsSpecialName),
+            "PropertyType" => CreateTypeInfo(property.PropertyType, analysisResult), // noProperties: true
+            // "GetModifiedPropertyType" => WrapExpressionWithMethod(CreateTypeInfo(property.GetModifiedPropertyType(), analysisResult)),
+            // "GetConstantValue" => WrapExpressionWithMethod(CreateLuauConstant(property.GetConstantValue())),
+            // "GetRawConstantValue" => WrapExpressionWithMethod(CreateLuauConstant(property.GetRawConstantValue())),
 
             _ => throw Logger.CompilerError($"Member '{name}' is not yet supported on the PropertyInfo class")
         };
@@ -185,8 +220,8 @@ public static class AstUtility
         name switch
         {
             "Name" => String(member.Name),
-            "MemberType" => new Literal(member.MemberType.ToString()),
-            "MetadataToken" => new Literal(member.MetadataToken.ToString()),
+            "MemberType" => Number((int)member.MemberType),
+            "MetadataToken" => Number(member.MetadataToken),
             "CustomAttributes" => new TableInitializer(member.CustomAttributes.Select(attr => CreateCustomAttributeData(attr, analysisResult)).ToList<Expression>()),
             "IsAbstract" => Bool(member.IsCollectible),
 
@@ -211,6 +246,13 @@ public static class AstUtility
             
             _ => throw Logger.CompilerError($"Member '{name}' is not yet supported on the CustomAttributeData class")
         };
+
+    private static AnonymousFunction WrapExpressionWithMethod(Expression expression, TypeRef? returnType = null) =>
+        new(ParameterList.Empty,
+            returnType,
+            new Block([
+                new Return(expression)
+            ]));
 
     public static Expression CreateLuauConstant(object? value) =>
         value switch

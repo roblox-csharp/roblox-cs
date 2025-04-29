@@ -30,11 +30,6 @@ public sealed class Analyzer(FileCompilation file, CSharpCompilation compiler) :
                 _result.PropertyClassInfo.MemberUses.Add(nameText);
                 break;
             }
-            case { ContainingNamespace: { ContainingNamespace.Name: "System", Name: "Reflection" }, Name: "Assembly" }:
-            {
-                _result.AssemblyClassInfo.MemberUses.Add(nameText);
-                break;
-            }
             case { ContainingNamespace: { ContainingNamespace.Name: "System", Name: "Reflection" }, Name: "MemberInfo" }:
             {
                 _result.MemberClassInfo.MemberUses.Add(nameText);
@@ -43,6 +38,17 @@ public sealed class Analyzer(FileCompilation file, CSharpCompilation compiler) :
             case { ContainingNamespace: { ContainingNamespace.Name: "System", Name: "Reflection" }, Name: "CustomAttributeData" }:
             {
                 _result.CustomAttributeDataClassInfo.MemberUses.Add(nameText);
+                break;
+            }
+            case { ContainingNamespace: { ContainingNamespace.Name: "System", Name: "Reflection" }, Name: "Assembly" }:
+            {
+                _result.AssemblyClassInfo.MemberUses.Add(nameText);
+                break;
+            }
+            case { ContainingNamespace: { ContainingNamespace.Name: "System", Name: "Reflection" }, Name: "Module" }:
+            {
+                
+                _result.ModuleClassInfo.MemberUses.Add(nameText);
                 break;
             }
             case { ContainingNamespace.Name: "System", Name: "Type" }:
