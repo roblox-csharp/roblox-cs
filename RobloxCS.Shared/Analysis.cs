@@ -1,16 +1,20 @@
 namespace RobloxCS.Shared;
 
+public sealed class AnalysisResult
+{
+    public TypeClassInfo TypeClassInfo { get; } = new();
+    public MemberClassInfo MemberClassInfo { get; } = new();
+    public AssemblyClassInfo AssemblyClassInfo { get; } = new();
+    public PropertyClassInfo PropertyClassInfo { get; } = new();
+}
+
 public abstract class BaseClassInfo
 {
     public HashSet<string> MemberUses { get; } = [];
 }
 
-public sealed class TypeClassInfo : BaseClassInfo
-{
-    public AssemblyClassInfo AssemblyClassInfo { get; } = new();
-}
-
-public sealed class AssemblyClassInfo : BaseClassInfo
-{
-    // TODO: method info uses, etc.
-}
+// temporary or something idk
+public sealed class TypeClassInfo : BaseClassInfo;
+public sealed class MemberClassInfo : BaseClassInfo;
+public sealed class AssemblyClassInfo : BaseClassInfo;
+public sealed class PropertyClassInfo : BaseClassInfo;

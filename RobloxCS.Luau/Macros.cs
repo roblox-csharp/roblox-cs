@@ -63,23 +63,20 @@ public class MacroManager(
                     : right;
 
                 var disconnectsInside = right is AnonymousFunction anonymousFunction
-                                     &&anonymousFunction.Body.Descendants.Exists(node => node is Call call
-                                                                                      && call.Callee is MemberAccess memberAccess
-                                                                                      && memberAccess.Expression is IdentifierName exprName
-                                                                                      && memberAccess.Name is IdentifierName name
-                                                                                      && exprName.Text == connectionName.Text
-                                                                                      && name.Text == "Disconnect");
-            
+                                     && anonymousFunction.Body.Descendants.Exists(node => node is Call call
+                                                                                       && call.Callee is MemberAccess memberAccess
+                                                                                       && memberAccess.Expression is IdentifierName exprName
+                                                                                       && memberAccess.Name is IdentifierName name
+                                                                                       && exprName.Text == connectionName.Text
+                                                                                       && name.Text == "Disconnect");
+
                 var body = new Call(new MemberAccess(left, new IdentifierName("Connect"), ':'),
-                                             AstUtility.CreateArgumentList([callback]));
+                                    AstUtility.CreateArgumentList([callback]));
 
                 if (disconnectsInside)
-                    return new Block([
-                        new Variable(connectionName, true),
-                        new Assignment(connectionName, body),
-                        ]);
-                 
-                return new Variable(connectionName, true, body); 
+                    return new Block([new Variable(connectionName, true), new Assignment(connectionName, body)]);
+
+                return new Variable(connectionName, true, body);
             }
             case "-=":
                 return new Call(new MemberAccess(connectionName, new IdentifierName("Disconnect"), ':'),
@@ -143,8 +140,8 @@ public class MacroManager(
     /// <returns>The expanded expression of the macro, or null if no macro was applied</returns>
     public Expression? MemberAccess(Func<SyntaxNode, Node?> visit, MemberAccessExpressionSyntax memberAccess)
     {
-        var expressionType = ModelExtensions.GetTypeInfo(semanticModel, memberAccess.Expression).Type;
-        var expressionSymbol = ModelExtensions.GetSymbolInfo(semanticModel, memberAccess.Expression).Symbol;
+        var expressionType = semanticModel.GetTypeInfo(memberAccess.Expression).Type;
+        var expressionSymbol = semanticModel.GetSymbolInfo(memberAccess.Expression).Symbol;
         {
             if (memberAccess is { Name.Identifier.Text: { } serviceName }
              && expressionType?.Name == "Services"
@@ -221,6 +218,7 @@ public class MacroManager(
 
                         break;
                     }
+                    case "Array":
                     case "Enumerable":
                     case "IEnumerable":
                     case "List":

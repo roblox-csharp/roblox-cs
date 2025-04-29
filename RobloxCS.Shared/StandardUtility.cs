@@ -60,9 +60,12 @@ public static class StandardUtility
 
     public static bool DoesTypeInheritFrom(ITypeSymbol? derived, string typeName)
     {
-        if (derived == null) return false;
+        if (derived == null)
+            return false;
 
-        return derived.Name == typeName || derived.BaseType != null && DoesTypeInheritFrom(derived.BaseType, typeName);
+        return derived.Name == typeName
+            || derived.BaseType != null
+            && DoesTypeInheritFrom(derived.BaseType, typeName);
     }
 
     public static bool DoesTypeInheritFrom(ITypeSymbol derived, ITypeSymbol baseType)

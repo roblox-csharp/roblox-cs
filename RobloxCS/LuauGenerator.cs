@@ -768,12 +768,8 @@ public sealed class LuauGenerator(
 
         Func<KeyValuePair<ITypeSymbol, TypeClassInfo>, bool> predicate = pair => SymbolEqualityComparer.Default.Equals(pair.Key, typeTypeSymbol);
 
-        if (!analysisResult.TypeClassInfos.Any(predicate))
-            return empty;
-
-        var typeClassInfo = analysisResult.TypeClassInfos.First(predicate).Value;
         var type = StandardUtility.GetRuntimeType(_semanticModel, node, typeSymbol);
-        var typeInfoTable = AstUtility.CreateTypeInfo(type, typeClassInfo);
+        var typeInfoTable = AstUtility.CreateTypeInfo(type, analysisResult);
         return wrap
             ? new Parenthesized(typeInfoTable)
             : typeInfoTable;

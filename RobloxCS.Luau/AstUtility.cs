@@ -35,15 +35,17 @@ public static class AstUtility
             : new BinaryOperator(expression, "-", new Literal("1"));
 
     /// <summary> Creates type info table for runtime type objects</summary>
-    public static TableInitializer CreateTypeInfo(Type type, TypeClassInfo typeClassInfo)
+    public static TableInitializer CreateTypeInfo(Type type, AnalysisResult analysisResult)
     {
-        var keys = typeClassInfo.MemberUses.Select(name => new IdentifierName(name)).ToList<Expression>();
-        var values = typeClassInfo.MemberUses.Select(name => GetTypeInfoMember(type, typeClassInfo, name)).ToList();
+        var keys = analysisResult.TypeClassInfo.MemberUses.Select(name => new IdentifierName(name)).ToList<Expression>();
+        var values = analysisResult.TypeClassInfo.MemberUses.Select(name => GetTypeInfoMember(type, analysisResult, name)).ToList();
         return new TableInitializer(values, keys);
     }
 
-    private static Expression GetTypeInfoMember(Type type, TypeClassInfo typeClassInfo, string name) =>
-        GetMemberInfoMember(type, name)
+    private static Expression GetTypeInfoMember(Type type, AnalysisResult analysisResult, string name)
+    {
+        Console.WriteLine(type.GetProperties().Length);
+        return GetMemberInfoMember(type, analysisResult, name)
      ?? name switch
         {
             "AssemblyQualifiedName" => type.AssemblyQualifiedName != null ? String(type.AssemblyQualifiedName) : Nil,
@@ -51,7 +53,7 @@ public static class AstUtility
             "FullName" => type.FullName != null ? String(type.FullName) : Nil,
             "Attributes" => Number((int)type.Attributes),
             "GenericParameterAttributes" => Number((int)type.GenericParameterAttributes),
-            "Assembly" => CreateAssemblyInfo(type.Assembly, typeClassInfo.AssemblyClassInfo),
+            "Assembly" => CreateAssemblyInfo(type.Assembly, analysisResult),
             "ContainsGenericParameters" => Bool(type.ContainsGenericParameters),
             "HasElementType" => Bool(type.HasElementType),
             "IsAbstract" => Bool(type.IsAbstract),
@@ -102,24 +104,31 @@ public static class AstUtility
             "IsValueType" => Bool(type.IsValueType),
             "IsVariableBoundArray" => Bool(type.IsVariableBoundArray),
 
-            // "GetProperties" => GetPropertiesMethod(type),
+            "GetProperties" => new AnonymousFunction(new ParameterList([new Parameter(new IdentifierName("self"))]),
+                                                     null,
+                                                     new Block([
+                                                         new Return(new TableInitializer(type.GetProperties()
+                                                                                             .Select(p => CreatePropertyInfo(p, analysisResult))
+                                                                                             .ToList<Expression>()))
+                                                     ])),
             "GetArrayRank" => new AnonymousFunction(ParameterList.Empty,
                                                     new TypeRef("number"),
-                                                    new Block([new Return(new Literal(type.GetArrayRank().ToString()))])),
+                                                    new Block([new Return(Number(type.GetArrayRank()))])),
 
             _ => throw Logger.CompilerError($"Member '{name}' is not yet supported on the Type class")
         };
+    }
 
     /// <summary>Creates assembly info table for runtime type objects</summary>
-    private static TableInitializer CreateAssemblyInfo(Assembly assembly, AssemblyClassInfo assemblyClassInfo)
+    private static TableInitializer CreateAssemblyInfo(Assembly assembly, AnalysisResult analysisResult)
     {
-        var keys = assemblyClassInfo.MemberUses.Select(name => new IdentifierName(name)).ToList<Expression>();
-        var values = assemblyClassInfo.MemberUses.Select(name => GetAssemblyInfoMember(assembly, assemblyClassInfo, name)).ToList();
+        var keys = analysisResult.AssemblyClassInfo.MemberUses.Select(name => new IdentifierName(name)).ToList<Expression>();
+        var values = analysisResult.AssemblyClassInfo.MemberUses.Select(name => GetAssemblyInfoMember(assembly, analysisResult, name)).ToList();
 
         return new TableInitializer(values, keys);
     }
 
-    private static Expression GetAssemblyInfoMember(Assembly assembly, AssemblyClassInfo assemblyClassInfo, string name) =>
+    private static Expression GetAssemblyInfoMember(Assembly assembly, AnalysisResult analysisResult, string name) =>
         name switch
         {
             "ImageRuntimeVersion" => String(assembly.ImageRuntimeVersion),
@@ -142,32 +151,54 @@ public static class AstUtility
             _ => throw Logger.CompilerError($"Member '{name}' is not yet supported on the Assembly class")
         };
 
-    private static Literal Number<T>(T number)
-        where T : INumber<T> =>
-        new(number.ToString() ?? "0");
+    /// <summary>Creates property info table for runtime type objects</summary>
+    private static TableInitializer CreatePropertyInfo(PropertyInfo property, AnalysisResult analysisResult)
+    {
+        var keys = analysisResult.PropertyClassInfo.MemberUses.Select(name => new IdentifierName(name)).ToList<Expression>();
+        var values = analysisResult.PropertyClassInfo.MemberUses.Select(name => GetPropertyInfoMember(property, analysisResult, name)).ToList();
 
-    // private static AnonymousFunction GetPropertiesMethod(Type type) =>
-    //     new(new ParameterList([new Parameter(new IdentifierName("self"))]),
-    //         null,
-    //         new Block([new Return(CreatePropertiesInfo(type.GetProperties()))]));
+        return new TableInitializer(values, keys);
+    }
 
-    private static Expression? GetMemberInfoMember(MemberInfo member, string name) =>
+    private static Expression GetPropertyInfoMember(PropertyInfo property, AnalysisResult analysisResult, string name) =>
+        GetMemberInfoMember(property, analysisResult, name)
+     ?? name switch
+        {
+            "Attributes" => Number((int)property.Attributes),
+
+            _ => throw Logger.CompilerError($"Member '{name}' is not yet supported on the PropertyInfo class")
+        };
+
+    /// <summary>Creates member info table for runtime type objects</summary>
+    private static TableInitializer CreateMemberInfo(MemberInfo member, AnalysisResult analysisResult)
+    {
+        var keys = analysisResult.MemberClassInfo.MemberUses.Select(name => new IdentifierName(name)).ToList<Expression>();
+        var values = analysisResult.MemberClassInfo.MemberUses.Select(name => GetMemberInfoMember(member, analysisResult, name))
+                                   .OfType<Expression>()
+                                   .ToList();
+
+        return new TableInitializer(values, keys);
+    }
+
+    private static Expression? GetMemberInfoMember(MemberInfo member, AnalysisResult analysisResult, string name) =>
         name switch
         {
             "Name" => String(member.Name),
             "MemberType" => new Literal(member.MemberType.ToString()),
             "MetadataToken" => new Literal(member.MetadataToken.ToString()),
-            "CustomAttributes" => new TableInitializer(member.CustomAttributes.Select(CreateCustomAttributeData).ToList<Expression>()),
+            "CustomAttributes" => new TableInitializer(member.CustomAttributes.Select(attr => CreateCustomAttributeData(attr, analysisResult)).ToList<Expression>()),
             "IsAbstract" => Bool(member.IsCollectible),
 
             _ => null
         };
 
-    private static TableInitializer CreateCustomAttributeData(CustomAttributeData data) =>
+    private static TableInitializer CreateCustomAttributeData(CustomAttributeData data, AnalysisResult analysisResult)
+    {
+        List<Expression> keys = [new IdentifierName("AttributeType")];
+        List<Expression> values = [CreateMemberInfo(data.AttributeType, analysisResult)];
 
-        // List<Expression> keys = [new IdentifierName("AttributeType")];
-        // List<Expression> values = [CreateMemberInfo(data.AttributeType)];
-        TableInitializer.Empty;
+        return new TableInitializer(values, keys);
+    }
 
     public static Expression CreateLuauConstant(object? value) =>
         value switch
@@ -609,4 +640,8 @@ public static class AstUtility
 
     public static Literal String(string text) => new($"\"{text}\"");
     public static Literal Bool(bool value) => value ? True : False;
+
+    private static Literal Number<T>(T number)
+        where T : INumber<T> =>
+        new(number.ToString() ?? "0");
 }
