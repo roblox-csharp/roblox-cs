@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <OutputType>ClassLibrary</OutputType>
+        <OutputType>Library</OutputType>
         <TargetFramework>net9.0</TargetFramework>
         <RootNamespace>RobloxCS</RootNamespace>
         <ImplicitUsings>enable</ImplicitUsings>

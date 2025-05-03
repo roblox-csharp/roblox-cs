@@ -13,13 +13,15 @@ public static class Transpiler
         "CS5001" // more than 2 entry points
     ];
 
-    public static string TranspileDirectory(string directoryPath, ConfigData config)
+    public static void Transpile(string directoryPath, ConfigData? config, bool verbose)
     {
+        config ??= ConfigReader.UnitTestingConfig;
+
         var rojoProject = RojoReader.ReadFromDirectory(directoryPath, config.RojoProjectName);
-        return "";
+        
     }
 
-    public static string TranspileSource(string source, RojoProject? rojoProject, ConfigData? config)
+    private static string TranspileSource(string source, RojoProject? rojoProject, ConfigData? config)
     {
         try
         {

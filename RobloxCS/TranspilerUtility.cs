@@ -30,8 +30,6 @@ public static class TranspilerUtility
 
     public static CSharpCompilation GetCompiler(List<SyntaxTree> trees, ConfigData config)
     {
-        // config ??= ConfigReader.UnitTestingConfig;
-
         var compilationOptions = new CSharpCompilationOptions(OutputKind.ConsoleApplication);
 
         return CSharpCompilation.Create("test", //config.CSharpOptions.AssemblyName,
@@ -42,8 +40,6 @@ public static class TranspilerUtility
 
     public static FileCompilation ParseAndTransformTree(string source, RojoProject? rojoProject, ConfigData config)
     {
-        // config ??= ConfigReader.UnitTestingConfig;
-
         var tree = ParseTree(source);
         var file = GetFileCompilation(tree, rojoProject, config);
         HashSet<TransformMethod> transformers = [BuiltInTransformers.Main()];

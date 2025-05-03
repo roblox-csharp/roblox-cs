@@ -7,7 +7,7 @@ public abstract class Generation
 {
     protected static AST Generate(string source)
     {
-        var config = new ConfigData(); // ConfigReader.UnitTestingConfig;
+        var config = ConfigReader.UnitTestingConfig;
         var file = TranspilerUtility.ParseAndTransformTree(source.Trim(), new RojoProject(), config);
         var compiler = TranspilerUtility.GetCompiler([file.Tree], config);
 

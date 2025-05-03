@@ -94,9 +94,14 @@ public class MainTransformerTest
     {
         var cleanTree = SyntaxFactory.ParseSyntaxTree(source);
         var transform = BuiltInTransformers.Main();
-        var compilation = new FileCompilation { Tree = cleanTree, RojoProject = null, Config = new ConfigData() }; // ConfigReader.UnitTestingConfig
-        var transformedTree = transform(compilation);
+        var compilation = new FileCompilation
+        {
+            Tree = cleanTree,
+            RojoProject = null,
+            Config = ConfigReader.UnitTestingConfig
+        };
 
+        var transformedTree = transform(compilation);
         return transformedTree.GetCompilationUnitRoot();
     }
 }
