@@ -4,6 +4,7 @@ public sealed class ConfigData
 {
     public required string SourceFolder { get; init; }
     public required string OutputFolder { get; init; }
+    public required object[] EntryPointArguments { get; init; } = [];
     public required string RojoProjectName { get; init; } = "default";
 
     public bool IsValid() =>

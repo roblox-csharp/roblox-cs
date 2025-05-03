@@ -544,9 +544,13 @@ public sealed class LuauGenerator(
 
         if (IsEntryPoint(node))
         {
+            var arguments = _file.Config.EntryPointArguments
+                .Select(v => AstUtility.String(v.ToString()!))
+                .ToList<Expression>();
+            
             statements.Add(new NoOp());
             statements.Add(new ExpressionStatement(new Call(new MemberAccess(name, new IdentifierName("Main")),
-                                                            ArgumentList.Empty)));
+                                                            AstUtility.CreateArgumentList([new TableInitializer(arguments)]))));
         }
 
         if (node.Parent is CompilationUnitSyntax)

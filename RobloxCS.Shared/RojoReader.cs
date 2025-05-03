@@ -1,11 +1,9 @@
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using RobloxCS.Shared;
 
-namespace RobloxCS;
+namespace RobloxCS.Shared;
 
-#pragma warning disable CS8618
 public sealed class RojoProject
 {
     [JsonPropertyName("name")] public string Name { get; init; }
@@ -32,14 +30,21 @@ public sealed class RojoProject
 
 public sealed class InstanceDescription
 {
-    [JsonPropertyName("$className")] public string? ClassName { get; set; }
-    [JsonPropertyName("$path")] public string? Path { get; set; }
-    [JsonPropertyName("$properties")] public Dictionary<string, object>? Properties { get; set; }
+    [JsonPropertyName("$className")]
+    public string? ClassName { get; init; }
+    
+    [JsonPropertyName("$path")]
+    public string? Path { get; init; }
+    
+    [JsonPropertyName("$properties")]
+    public Dictionary<string, object>? Properties { get; init; }
+    
     [JsonPropertyName("$ignoreUnknownInstances")]
-    public bool IgnoreUnknownInstances { get; set; } = true;
-    public Dictionary<string, InstanceDescription> Instances { get; set; } = [];
+    public bool IgnoreUnknownInstances { get; init; } = true;
+    public Dictionary<string, InstanceDescription> Instances { get; init; } = [];
 
-    [JsonExtensionData] public IDictionary<string, JsonElement> AdditionalData { get; set; } = new Dictionary<string, JsonElement>();
+    [JsonExtensionData]
+    public IDictionary<string, JsonElement> AdditionalData { get; init; } = new Dictionary<string, JsonElement>();
 
     public void OnDeserialized()
     {
@@ -51,7 +56,6 @@ public sealed class InstanceDescription
         }
     }
 }
-#pragma warning restore CS8618
 
 public static class RojoReader
 {

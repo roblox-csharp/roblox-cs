@@ -9,7 +9,8 @@ public static class ConfigReader
     {
         SourceFolder = "test-src",
         OutputFolder = "test-dist",
-        RojoProjectName = "UNIT_TESTING"
+        RojoProjectName = "UNIT_TESTING",
+        EntryPointArguments = []
     };
 
     private const string _fileName = "roblox-cs.yml";
