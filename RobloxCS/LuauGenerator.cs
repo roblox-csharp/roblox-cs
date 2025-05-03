@@ -1056,9 +1056,7 @@ public sealed class LuauGenerator(
             ? AstUtility.AddOne(index)
             : index;
 
-        var elementAccess = new ElementAccess(expression, index);
-
-        return AstUtility.DiscardVariableIfExpressionStatement(node, elementAccess, node.Parent);
+        return new ElementAccess(expression, index);
     }
 
     public override QualifiedName VisitQualifiedName(QualifiedNameSyntax node)

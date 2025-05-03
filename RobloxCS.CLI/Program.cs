@@ -1,4 +1,3 @@
-using System.Reflection;
 using System.Xml.Linq;
 using CommandLine;
 using RobloxCS;
@@ -19,21 +18,21 @@ static void HandleOptions(Options opts)
         Console.WriteLine(version);
         return;
     }
+
+    if (opts.SingleFile != null)
+    {
+        var transpiledLuau = Transpiler.TranspileSource(File.ReadAllText(opts.SingleFile),
+                                                              new RojoProject(),
+                                                              ConfigReader.UnitTestingConfig);
+        
+        Console.WriteLine(transpiledLuau);
+        return;
+    }
     
-    if (!File.Exists(opts.ProjectDirectory))
-    {
-        Console.WriteLine($"fatal: project directory does not exist at '{opts.ProjectDirectory}'");
-        Environment.Exit(1);
-    }
-
-    var configPath = Path.Join(opts.ProjectDirectory, "roblox-cs.yml");
-    if (!File.Exists(configPath))
-    {
-        Console.WriteLine("fatal: roblox-cs.yml does not exist in your project directory");
-        Environment.Exit(1);
-    }
-
-    var config = ConfigReader.Read(configPath);
+    if (!Directory.Exists(opts.ProjectDirectory))
+        throw Logger.Error($"Project directory does not exist at '{opts.ProjectDirectory}'");
+    
+    var config = ConfigReader.Read(opts.ProjectDirectory);
     Transpiler.Transpile(opts.ProjectDirectory, config, opts.Verbose);
 }
 
@@ -48,6 +47,11 @@ internal class Options
             Required = false,
             HelpText = "Verbosely outputs transpilation process.")]
     public required bool Verbose { get; init; }
+    
+    [Option('f', "single-file",
+        Required = false,
+        HelpText = "Transpiles a single file and spits the emitted Luau out into the console.")]
+    public required string? SingleFile { get; init; }
 
     [Option('p', "project",
             Required = false,

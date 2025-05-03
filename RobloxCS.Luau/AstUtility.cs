@@ -484,14 +484,6 @@ public static class AstUtility
         return new QualifiedName(left, memberAccess.Name);
     }
 
-    /// <summary>
-    ///     Creates a discard variable if <see cref="valueParent" /> is an <see cref="ExpressionStatementSyntax" />
-    /// </summary>
-    public static Node DiscardVariableIfExpressionStatement(SyntaxNode node, Node value, SyntaxNode? valueParent) =>
-        valueParent?.FirstAncestorOrSelf<ExpressionStatementSyntax>() != null
-            ? DiscardVariable(node, (Expression)value)
-            : value;
-
     /// <code>local _ = discardedValue</code>
     public static Variable DiscardVariable(SyntaxNode node, Expression value) => new(DiscardName, true, value);
 

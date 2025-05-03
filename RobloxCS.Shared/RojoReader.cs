@@ -55,15 +55,6 @@ public sealed class InstanceDescription
 
 public static class RojoReader
 {
-    private static readonly List<string> _services =
-    [
-        "ReplicatedStorage", "ReplicatedFirst", "ServerStorage", "ServerScriptService", "StarterPlayer", "StarterPlayerScripts"
-    ]; // things that will be converted into game:GetService("XXX")
-    private static readonly Dictionary<string, string> _instanceNameMap = new()
-    {
-        { "StarterPlayer", "game:GetService(\"Players\").LocalPlayer" }, { "StarterPlayerScripts", "PlayerScripts" }
-    };
-
     public static RojoProject Read(string projectPath)
     {
         var jsonContent = "";
@@ -112,7 +103,8 @@ public static class RojoReader
     }
 
     private static string? FindProjectPath(string directoryPath, string projectName) =>
-        Directory.GetFiles(directoryPath).FirstOrDefault(file => Path.GetFileName(file) == $"{projectName}.project.json");
+        Directory.GetFiles(directoryPath)
+                 .FirstOrDefault(file => Path.GetFileName(file) == $"{projectName}.project.json");
 
     private static string? TraverseInstanceTree(InstanceDescription instance, string filePath)
     {
@@ -123,15 +115,12 @@ public static class RojoReader
             return Path.ChangeExtension(remainingPath, null);
         }
 
-        foreach (var childInstance in instance.Instances)
+        foreach (var (leftName, value) in instance.Instances)
         {
-            var result = TraverseInstanceTree(childInstance.Value, filePath);
-            var leftName = childInstance.Key;
-            if (_instanceNameMap.TryGetValue(leftName, out var mappedName))
-                leftName = mappedName;
+            var result = TraverseInstanceTree(value, filePath);
+            if (result == null) continue;
 
-            if (result != null)
-                return $"{leftName}/{result}";
+            return $"{leftName}/{result}";
         }
 
         return null;
@@ -141,12 +130,12 @@ public static class RojoReader
     {
         var segments = path.Split('/');
         var formattedPath = new StringBuilder();
+        
         foreach (var segment in segments)
         {
-            var isServiceIdentifier = _services.Contains(segment);
             if (segment == segments.First())
             {
-                formattedPath.Append(isServiceIdentifier ? $"game:GetService(\"{segment}\")" : segment);
+                formattedPath.Append(segment);
             }
             else
             {
@@ -166,5 +155,6 @@ public static class RojoReader
             UpdateChildInstances(childInstance);
     }
 
-    private static void FailToRead(string configPath, string message) => throw Logger.Error($"Failed to read {configPath}!\n{message}");
+    private static void FailToRead(string configPath, string message) =>
+        throw Logger.Error($"Failed to read {configPath}!\nReason: {message}");
 }
