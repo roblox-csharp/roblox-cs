@@ -6,7 +6,7 @@
         <RootNamespace>RobloxCS</RootNamespace>
         <ImplicitUsings>enable</ImplicitUsings>
         <Nullable>enable</Nullable>
-        <Version>2.0.0-pre9</Version>
+        <Version>2.0.0-pre10</Version>
     </PropertyGroup>
 
     <ItemGroup>
