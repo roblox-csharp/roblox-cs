@@ -445,14 +445,9 @@ public sealed class LuauGenerator(
         _file.OccupiedIdentifiers.Push();
 
         var shouldGenerateWithMetatable = node.ChildNodes()
-                                              .Any(node =>
-                                              {
-                                                  if (node is MethodDeclarationSyntax method)
-                                                      if (method.Modifiers.All(m => !m.IsKind(SyntaxKind.StaticKeyword)))
-                                                          return true;
-
-                                                  return false;
-                                              });
+                                              .Any(child =>
+                                                  child is MethodDeclarationSyntax method
+                                                  && method.Modifiers.All(m => !m.IsKind(SyntaxKind.StaticKeyword)));
 
         var members = node.Members
                           .Select(Visit<Statement?>)
@@ -547,7 +542,15 @@ public sealed class LuauGenerator(
             new TypeAlias(name, new TypeOfCall(nonGenericName))
         ];
 
-        if (node.Parent is CompilationUnitSyntax) statements.Add(new NoOp()); // for the newline
+        if (IsEntryPoint(node))
+        {
+            statements.Add(new NoOp());
+            statements.Add(new ExpressionStatement(new Call(new MemberAccess(name, new IdentifierName("Main")),
+                                                            ArgumentList.Empty)));
+        }
+
+        if (node.Parent is CompilationUnitSyntax)
+            statements.Add(new NoOp()); // for the newline
 
         _file.OccupiedIdentifiers.Pop();
         return new Block(statements);
@@ -1620,6 +1623,43 @@ public sealed class LuauGenerator(
 
         return new Literal(valueText);
     }
+    
+    private bool IsEntryPoint(ClassDeclarationSyntax @class) =>
+        @class.Members
+            .OfType<MethodDeclarationSyntax>()
+            .Where(m => m.Identifier.Text == "Main" && m.Modifiers.Any(SyntaxKind.StaticKeyword))
+            .Any(m =>
+            {
+                var returnType = _semanticModel.GetTypeInfo(m.ReturnType).ConvertedType;
+                if (returnType == null) return false;
+    
+                var isValidReturn =
+                    returnType.SpecialType == SpecialType.System_Void
+                 || returnType.SpecialType == SpecialType.System_Int32
+                 || returnType.ToString() == "System.Threading.Tasks.Task"
+                 || returnType.ToString() == "System.Threading.Tasks.Task<int>";
+    
+                if (!isValidReturn)
+                    return false;
+    
+                if (m.Modifiers.Any(SyntaxKind.AsyncKeyword) 
+                 && returnType.SpecialType == SpecialType.System_Void)
+                    return false;
+    
+                var parameters = m.ParameterList.Parameters;
+                if (parameters.Count == 0) return true;
+    
+                if (parameters.Count == 1)
+                {
+                    var type = parameters[0].Type != null
+                        ? _semanticModel.GetTypeInfo(parameters[0].Type!).Type as IArrayTypeSymbol
+                        : null;
+                    
+                    return type?.ElementType.SpecialType == SpecialType.System_String;
+                }
+    
+                return false;
+            });
 
     private bool TryMethodWrap(ExpressionSyntax node, Expression expression, [MaybeNullWhen(false)] out Expression wrapped)
     {
@@ -1872,13 +1912,15 @@ public sealed class LuauGenerator(
                                       .OfType<IMethodSymbol>()
                                       .Any(s => !SymbolEqualityComparer.Default.Equals(s, symbol));
 
-        if (!hasOtherOverloads) return _file.OccupiedIdentifiers.AddIdentifier(symbol.Name);
+        if (!hasOtherOverloads)
+            return _file.OccupiedIdentifiers.AddIdentifier(symbol.Name);
 
         var symbolMetadata = SymbolMetadataManager.Get(symbol.ContainingType);
         symbolMetadata.MethodOverloads ??= [];
 
         Dictionary<IMethodSymbol, int> methodOverloads = [];
-        if (!symbolMetadata.MethodOverloads.TryAdd(symbol.Name, methodOverloads)) methodOverloads = symbolMetadata.MethodOverloads[symbol.Name];
+        if (!symbolMetadata.MethodOverloads.TryAdd(symbol.Name, methodOverloads))
+            methodOverloads = symbolMetadata.MethodOverloads[symbol.Name];
 
         var lastCount = methodOverloads.Values.Order().LastOrDefault(0);
         var count = lastCount + 1;
