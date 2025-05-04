@@ -40,7 +40,7 @@ public static class FileUtility
 
     private static HashSet<PortableExecutableReference> GetCoreLibReferences()
     {
-        var coreLib = typeof(object).GetTypeInfo().Assembly.Location;
+        var coreLib = typeof(object).Assembly.Location;
         HashSet<string> coreDlls = ["System.Runtime.dll", "System.Core.dll", "System.Collections.dll"];
         HashSet<PortableExecutableReference> references = [MetadataReference.CreateFromFile(coreLib)];
 

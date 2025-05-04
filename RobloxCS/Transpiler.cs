@@ -25,7 +25,7 @@ public static class Transpiler
         {
             var outputPath = sourcePath.Replace(".cs", ".luau").Replace(sourceDirectory, outputDirectory);
             if (verbose)
-                Console.WriteLine($"Transpiling '{Path.GetRelativePath(directoryPath, sourcePath)}' into '{Path.GetRelativePath(directoryPath, outputPath)}'...");
+                Logger.Info($"Transpiling '{Path.GetRelativePath(directoryPath, sourcePath)}' into '{Path.GetRelativePath(directoryPath, outputPath)}'...");
             
             var directory = Path.GetDirectoryName(outputPath);
             if (!string.IsNullOrEmpty(directory))
@@ -46,7 +46,7 @@ public static class Transpiler
             var trees = files.ConvertAll(file => file.Compilation.Tree);
             var compiler = TranspilerUtility.GetCompiler(trees, config);
             var diagnostics = compiler.GetDiagnostics()
-                .Where(diagnostic => !_ignoredDiagnostics.Contains(diagnostic.Id));
+                            .Where(diagnostic => !_ignoredDiagnostics.Contains(diagnostic.Id));
             
             foreach (var diagnostic in diagnostics)
                 Logger.HandleDiagnostic(diagnostic);
