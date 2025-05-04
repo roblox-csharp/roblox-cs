@@ -38,16 +38,6 @@ public static class FileUtility
         ];
     }
 
-    public static string? GetCsprojField(string fieldName)
-    {
-        var exeDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
-        var csprojPath = Path.GetFullPath(Path.Combine(exeDirectory, "..", "..", "..", "..", "RobloxCS", "RobloxCS.csproj"));
-        
-        return XDocument.Load(csprojPath)
-                        .Root?.Descendants(fieldName)
-                        .FirstOrDefault()?.Value;
-    }
-
     private static HashSet<PortableExecutableReference> GetCoreLibReferences()
     {
         var coreLib = typeof(object).GetTypeInfo().Assembly.Location;

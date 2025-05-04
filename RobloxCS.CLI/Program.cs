@@ -1,3 +1,4 @@
+using System.Reflection;
 using System.Xml.Linq;
 using CommandLine;
 using RobloxCS;
@@ -11,7 +12,9 @@ static void HandleOptions(Options opts)
 {
     if (opts.Version)
     {
-        Console.WriteLine(FileUtility.GetCsprojField("Version"));
+        var assembly = typeof(Transpiler).Assembly;
+        var informationalVersionAttribute = assembly.GetCustomAttribute<AssemblyInformationalVersionAttribute>();
+        Console.WriteLine(informationalVersionAttribute?.InformationalVersion.Split('+').First());
         return;
     }
 

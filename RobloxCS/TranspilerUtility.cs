@@ -34,9 +34,8 @@ public static class TranspilerUtility
     public static CSharpCompilation GetCompiler(IEnumerable<SyntaxTree> trees, ConfigData config)
     {
         var compilationOptions = new CSharpCompilationOptions(OutputKind.ConsoleApplication);
-        var assemblyName = FileUtility.GetCsprojField("AssemblyName");
         
-        return CSharpCompilation.Create(assemblyName ?? "RobloxGame",
+        return CSharpCompilation.Create("RobloxGame", // probably temporary until i set up msbuild (hell)
                                         trees,
                                         FileUtility.GetCompilationReferences(),
                                         compilationOptions);
