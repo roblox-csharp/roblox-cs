@@ -11,17 +11,13 @@ static void HandleOptions(Options opts)
 {
     if (opts.Version)
     {
-        var version = XDocument.Load("RobloxCS/RobloxCS.csproj")
-            .Root?.Descendants("Version")
-            .FirstOrDefault()?.Value;
-        
-        Console.WriteLine(version);
+        Console.WriteLine(FileUtility.GetCsprojField("Version"));
         return;
     }
 
     if (opts.SingleFile != null)
     {
-        var transpiledLuau = Transpiler.TranspileSource(File.ReadAllText(opts.SingleFile),
+        var transpiledLuau = Transpiler.TranspileSources([File.ReadAllText(opts.SingleFile)],
                                                               new RojoProject(),
                                                               ConfigReader.UnitTestingConfig);
         

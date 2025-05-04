@@ -1,9 +1,12 @@
+using System.Reflection;
+using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using RobloxCS.Luau;
 using RobloxCS.Shared;
 using RobloxCS.Transformers;
+using Path = System.IO.Path;
 
 namespace RobloxCS;
 
@@ -28,11 +31,12 @@ public static class TranspilerUtility
         return generator.GetLuauAST();
     }
 
-    public static CSharpCompilation GetCompiler(List<SyntaxTree> trees, ConfigData config)
+    public static CSharpCompilation GetCompiler(IEnumerable<SyntaxTree> trees, ConfigData config)
     {
         var compilationOptions = new CSharpCompilationOptions(OutputKind.ConsoleApplication);
-
-        return CSharpCompilation.Create("test", //config.CSharpOptions.AssemblyName,
+        var assemblyName = FileUtility.GetCsprojField("AssemblyName");
+        
+        return CSharpCompilation.Create(assemblyName ?? "RobloxGame",
                                         trees,
                                         FileUtility.GetCompilationReferences(),
                                         compilationOptions);

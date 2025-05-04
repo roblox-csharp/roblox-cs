@@ -20,38 +20,43 @@ public static class Transpiler
                                                         "*.cs",
                                                         SearchOption.AllDirectories);
 
-        foreach (var sourcePath in sourceFilePaths)
+        // this is prettyyy ass
+        foreach (var (sourcePath, output) in TranspileSources(sourceFilePaths, rojoProject, config))
         {
             var outputPath = sourcePath.Replace(".cs", ".luau").Replace(sourceDirectory, outputDirectory);
             if (verbose)
                 Console.WriteLine($"Transpiling '{Path.GetRelativePath(directoryPath, sourcePath)}' into '{Path.GetRelativePath(directoryPath, outputPath)}'...");
             
-            // TODO: collect source files & create one single CSharpCompilation instead of one per file
-            var csharpSource = File.ReadAllText(sourcePath);
-            var transpiledLuau = TranspileSource(csharpSource, rojoProject, config);
             var directory = Path.GetDirectoryName(outputPath);
             if (!string.IsNullOrEmpty(directory))
                 Directory.CreateDirectory(directory);
             
-            File.WriteAllText(outputPath, transpiledLuau);
+            File.WriteAllText(outputPath, output);
         }
     }
-
-    public static string TranspileSource(string source, RojoProject rojoProject, ConfigData config)
+    
+    public static List<(string Path, string Output)> TranspileSources(IEnumerable<string> sourceFilePaths, RojoProject rojoProject, ConfigData config)
     {
         try
         {
-            var file = TranspilerUtility.ParseAndTransformTree(source, rojoProject, config);
-            var compiler = TranspilerUtility.GetCompiler([file.Tree], config);
-            foreach (var diagnostic in compiler.GetDiagnostics()
-                                               .Where(diagnostic => !_ignoredDiagnostics.Contains(diagnostic.Id)))
+            var files = sourceFilePaths
+                .Select(path => (Path: path, Contents: File.ReadAllText(path)))
+                .Select(source => (source.Path, Compilation: TranspilerUtility.ParseAndTransformTree(source.Contents, rojoProject, config)))
+                .ToList();
+            
+            var trees = files.ConvertAll(file => file.Compilation.Tree);
+            var compiler = TranspilerUtility.GetCompiler(trees, config);
+            var diagnostics = compiler.GetDiagnostics()
+                .Where(diagnostic => !_ignoredDiagnostics.Contains(diagnostic.Id));
+            
+            foreach (var diagnostic in diagnostics)
                 Logger.HandleDiagnostic(diagnostic);
 
-            return TranspilerUtility.GenerateLuau(file, compiler);
+            return files.ConvertAll(file => (file.Path, TranspilerUtility.GenerateLuau(file.Compilation, compiler)));
         }
         catch (CleanExitException)
         {
-            return "";
+            return [];
         }
     }
 }

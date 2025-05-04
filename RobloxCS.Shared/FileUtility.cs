@@ -1,5 +1,6 @@
 ﻿using System.Reflection;
 using System.Text.RegularExpressions;
+using System.Xml.Linq;
 using Microsoft.CodeAnalysis;
 using RobloxCS.Shared;
 using Path = System.IO.Path;
@@ -29,12 +30,22 @@ public static class FileUtility
             
             Logger.Error($"Failed to find {_runtimeAssemblyName}.dll in {location}");
         }
+        
+        return
+        [
+            MetadataReference.CreateFromFile(runtimeLibAssemblyPath),
+            ..GetCoreLibReferences()
+        ];
+    }
 
-        List<PortableExecutableReference> references = [MetadataReference.CreateFromFile(runtimeLibAssemblyPath)];
-
-        references.AddRange(GetCoreLibReferences());
-
-        return references;
+    public static string? GetCsprojField(string fieldName)
+    {
+        var exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+        var csprojPath = Path.GetFullPath(Path.Combine(exeDir, "..", "..", "..", "..", "RobloxCS", "RobloxCS.csproj"));
+        
+        return XDocument.Load(csprojPath)
+                        .Root?.Descendants(fieldName)
+                        .FirstOrDefault()?.Value;
     }
 
     private static HashSet<PortableExecutableReference> GetCoreLibReferences()
