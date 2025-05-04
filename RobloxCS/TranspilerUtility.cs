@@ -42,9 +42,10 @@ public static class TranspilerUtility
                                         compilationOptions);
     }
 
-    public static FileCompilation ParseAndTransformTree(string source, RojoProject? rojoProject, ConfigData config)
+    // didn't change `source` to `path` cuz this is used in tests. this needs a big refactor
+    public static FileCompilation ParseAndTransformTree(string source, RojoProject? rojoProject, ConfigData config, string path = "TestFile.cs")
     {
-        var tree = ParseTree(source);
+        var tree = ParseTree(source, path);
         var file = GetFileCompilation(tree, rojoProject, config);
         HashSet<TransformMethod> transformers = [BuiltInTransformers.Main()];
 
@@ -59,7 +60,7 @@ public static class TranspilerUtility
         // config ??= ConfigReader.UnitTestingConfig;
         transformMethods.Aggregate(file.Tree, (_, transform) => transform(file));
 
-    private static SyntaxTree ParseTree(string source, string sourceFile = "TestFile.cs")
+    private static SyntaxTree ParseTree(string source, string sourceFile)
     {
         var cleanTree = CSharpSyntaxTree.ParseText(source);
         var compilationUnit = (CompilationUnitSyntax)cleanTree.GetRoot();

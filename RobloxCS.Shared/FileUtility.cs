@@ -40,8 +40,8 @@ public static class FileUtility
 
     public static string? GetCsprojField(string fieldName)
     {
-        var exeDir = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
-        var csprojPath = Path.GetFullPath(Path.Combine(exeDir, "..", "..", "..", "..", "RobloxCS", "RobloxCS.csproj"));
+        var exeDirectory = Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)!;
+        var csprojPath = Path.GetFullPath(Path.Combine(exeDirectory, "..", "..", "..", "..", "RobloxCS", "RobloxCS.csproj"));
         
         return XDocument.Load(csprojPath)
                         .Root?.Descendants(fieldName)

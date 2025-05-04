@@ -40,8 +40,7 @@ public static class Transpiler
         try
         {
             var files = sourceFilePaths
-                .Select(path => (Path: path, Contents: File.ReadAllText(path)))
-                .Select(source => (source.Path, Compilation: TranspilerUtility.ParseAndTransformTree(source.Contents, rojoProject, config)))
+                .Select(path => (Path: path, Compilation: TranspilerUtility.ParseAndTransformTree(File.ReadAllText(path), rojoProject, config, path)))
                 .ToList();
             
             var trees = files.ConvertAll(file => file.Compilation.Tree);
