@@ -32,10 +32,10 @@ public sealed class MainTransformer(FileCompilation file)
 
     public override SyntaxNode? VisitIdentifierName(IdentifierNameSyntax node)
     {
-        if (node.Identifier.Text is not ("Enum" or "Buffer")) return base.VisitIdentifierName(node);
+        if (node.Identifier.Text is not ("Enum" or "Buffer"))
+            return base.VisitIdentifierName(node);
 
         var parent = node.Parent;
-
         if (parent is QualifiedNameSyntax { Left: IdentifierNameSyntax { Identifier.Text: "Roblox" } }) return node;
 
         // replace with a qualified name: Roblox.Enum or Roblox.Buffer
@@ -142,7 +142,8 @@ public sealed class MainTransformer(FileCompilation file)
     // Return an IsPatternExpression if the binary operator is `is`
     public override SyntaxNode? VisitBinaryExpression(BinaryExpressionSyntax node)
     {
-        if (node.OperatorToken.Text != "is") return base.VisitBinaryExpression(node);
+        if (node.OperatorToken.Text != "is")
+            return base.VisitBinaryExpression(node);
 
         var pattern = SyntaxFactory.TypePattern(SyntaxFactory.ParseTypeName(((IdentifierNameSyntax)node.Right).Identifier.Text));
 

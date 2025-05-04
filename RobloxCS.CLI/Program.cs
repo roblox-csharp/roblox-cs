@@ -17,7 +17,7 @@ static void HandleOptions(Options opts)
 
     if (opts.SingleFile != null)
     {
-        var transpiledLuau = Transpiler.TranspileSources([File.ReadAllText(opts.SingleFile)],
+        var transpiledLuau = Transpiler.TranspileSources([opts.SingleFile],
                                                               new RojoProject(),
                                                               ConfigReader.UnitTestingConfig);
         
