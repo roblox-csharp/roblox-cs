@@ -24,7 +24,7 @@ static void HandleOptions(Options opts)
                                                               new RojoProject(),
                                                               ConfigReader.UnitTestingConfig);
         
-        Console.WriteLine(transpiledLuau);
+        Console.WriteLine(transpiledLuau.Output);
         return;
     }
     
