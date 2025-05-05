@@ -20,17 +20,13 @@ source code.
 ### Examples
 
 #### Hello, world!
-**Note:** In the future this example will automatically call `Main()`.
 
 ```cs
-void Main() => print("Hello, roblox-cs!");
-```
+print("Hello, roblox-cs!");```
 ```luau
 -- Compiled with roblox-cs v2.0.0
 
-local function Main(): ()
-  print("Hello, roblox-cs!")
-end
+print("Hello, roblox-cs!")
 return nil
 ```
 
