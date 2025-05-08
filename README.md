@@ -22,7 +22,8 @@ source code.
 #### Hello, world!
 
 ```cs
-print("Hello, roblox-cs!");```
+print("Hello, roblox-cs!");
+```
 ```luau
 -- Compiled with roblox-cs v2.0.0
 
